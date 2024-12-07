@@ -1,0 +1,68 @@
+package templates
+
+import "strconv"
+
+templ Index() {
+	<!DOCTYPE html>
+	<html data-theme="dim" lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<script src="https://cdn.tailwindcss.com"></script>
+			<link
+				href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css"
+				rel="stylesheet"
+				type="text/css"
+			/>
+			<script src="https://cdn.tailwindcss.com"></script>
+			<script src="https://unpkg.com/htmx.org@2.0.3"></script>
+			<script src="https://unpkg.com/htmx-ext-ws@2.0.1/ws.js"></script>
+			<title>Render Box Monitor</title>
+		</head>
+		<body class="space-y-5">
+			@Header()
+			<div class="px-5">
+				@Info("December", "2024")
+				<div class="grid grid-cols-7">
+					@WeekdayHeader("Monday")
+					@WeekdayHeader("Tuesday")
+					@WeekdayHeader("Wednesday")
+					@WeekdayHeader("Thursday")
+					@WeekdayHeader("Friday")
+					@WeekdayHeader("Saturday")
+					@WeekdayHeader("Sunday")
+					for i:= range 30 {
+						@Day(i)
+					}
+				</div>
+			</div>
+		</body>
+	</html>
+}
+
+templ Header() {
+	<div class="navbar bg-base-300">
+		<a class="btn btn-ghost text-xl">Apic Calendar</a>
+	</div>
+}
+
+templ Info(month string, year string) {
+	<div class="flex space-x-5 pb-5">
+		<div class="text-2xl">{ month }</div>
+		<div class="text-2xl">{ year }</div>
+	</div>
+}
+
+templ WeekdayHeader(name string) {
+	<div class="bg-base-300 p-2 text-center text-lg">{ name }</div>
+}
+
+templ Day(dayNum int) {
+	<div class="card bg-gray-500 text-primary-content shadow-lg m-1">
+		<div class="card-body">
+			<div class="card-actions justify-end">
+				<div class="align-bottom">{ strconv.Itoa(dayNum) }</div>
+			</div>
+		</div>
+	</div>
+}

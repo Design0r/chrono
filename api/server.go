@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -10,17 +11,19 @@ import (
 )
 
 type Server struct {
-	router *echo.Echo
+	Router *echo.Echo
+	Db     *sql.DB
 }
 
-func NewServer(router *echo.Echo) *Server {
+func NewServer(router *echo.Echo, db *sql.DB) *Server {
 	return &Server{
-		router: router,
+		Router: router,
+		Db:     db,
 	}
 }
 
 func (self *Server) InitMiddleware() {
-	self.router.Use(middleware.Logger())
+	self.Router.Use(middleware.Logger())
 	// self.router.Use(
 	// 	middleware.CORSWithConfig(
 	// 		middleware.CORSConfig{
@@ -33,14 +36,15 @@ func (self *Server) InitMiddleware() {
 	// )
 
 	staticHandler := echo.WrapHandler(http.FileServer(http.FS(assets.StaticFS)))
-	self.router.GET("/static/*", staticHandler)
-	self.router.Use(middleware.Recover())
+	self.Router.GET("/static/*", staticHandler)
+	self.Router.Use(middleware.Recover())
 }
 
 func (self *Server) InitRoutes(group *echo.Group) {
-	group.GET("", HandleIndex)
+	InitIndexRoutes(group, self.Db)
+	InitEventRoutes(group, self.Db)
 }
 
 func (self *Server) Start(address string) error {
-	return self.router.Start(address)
+	return self.Router.Start(address)
 }

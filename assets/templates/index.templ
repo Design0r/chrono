@@ -1,8 +1,10 @@
 package templates
 
 import "strconv"
+import "fmt"
+import "calendar/db/repo"
 
-templ Index() {
+templ Index(events map[int][]repo.Event) {
 	<!DOCTYPE html>
 	<html data-theme="dim" lang="en">
 		<head>
@@ -17,7 +19,7 @@ templ Index() {
 			<script src="https://cdn.tailwindcss.com"></script>
 			<script src="https://unpkg.com/htmx.org@2.0.3"></script>
 			<script src="https://unpkg.com/htmx-ext-ws@2.0.1/ws.js"></script>
-			<title>Render Box Monitor</title>
+			<title>Apic Calendar</title>
 		</head>
 		<body class="space-y-5">
 			@Header()
@@ -32,7 +34,7 @@ templ Index() {
 					@WeekdayHeader("Saturday")
 					@WeekdayHeader("Sunday")
 					for i:= range 30 {
-						@Day(i)
+						@Day(2024, 12, i+1, events)
 					}
 				</div>
 			</div>
@@ -57,12 +59,26 @@ templ WeekdayHeader(name string) {
 	<div class="bg-base-300 p-2 text-center text-lg">{ name }</div>
 }
 
-templ Day(dayNum int) {
-	<div class="card bg-gray-500 text-primary-content shadow-lg m-1">
-		<div class="card-body">
+templ Day(year int, month int, dayNum int, events map[int][]repo.Event) {
+	{{ url := fmt.Sprintf("/%d/%d/%d", year, month, dayNum) }}
+	{{ day := strconv.Itoa(dayNum) }}
+	<div
+		id={ day }
+		hx-post={ url }
+		hx-swap="outerHTML"
+		class="bg-base-200 rounded m-2 p-0"
+	>
+		<div class="card-body p-2">
+			for _, event := range events[dayNum] {
+				@Event(event)
+			}
 			<div class="card-actions justify-end">
-				<div class="align-bottom">{ strconv.Itoa(dayNum) }</div>
+				<div class="align-bottom">{ day }</div>
 			</div>
 		</div>
 	</div>
+}
+
+templ Event(event repo.Event) {
+	<div class="bg-blue-500 text-center">Event ID: { strconv.Itoa(int(event.ID)) }</div>
 }

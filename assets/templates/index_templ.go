@@ -123,7 +123,7 @@ func Calendar(month schemas.Month, events map[int][]repo.Event) templ.Component 
 			}
 		}
 		for _, day := range month.Days {
-			templ_7745c5c3_Err = Day(2024, 12, day, events).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Day(month.Year, month.Number, day, events).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -28,7 +28,7 @@ func MonthCalendarHandler(c echo.Context, db *sql.DB) error {
 	}
 
 	month := service.GetDaysOfMonth(time.Month(date.Month), date.Year)
-	d := time.Date(date.Year, time.Month(date.Month), 0, 0, 0, 0, 0, time.Now().Local().Location())
+	d := time.Date(date.Year, time.Month(date.Month), 1, 1, 1, 1, 1, time.Now().Local().Location())
 	event, err := service.GetEventsForMonth(db, d)
 	if err != nil {
 		return err

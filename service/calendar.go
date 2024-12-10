@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"time"
 
 	"calendar/schemas"
@@ -48,7 +47,6 @@ func GetDaysOfMonth(month time.Month, year int) schemas.Month {
 	for i := 0; i < numDays; i++ {
 		date := time.Date(year, month, i+1, 0, 0, 0, 0, time.Now().Local().Location())
 		day := schemas.Day{Number: i + 1, Name: weekdays[date.Weekday()], Date: date}
-		fmt.Println(day)
 		days[i] = day
 	}
 
@@ -62,7 +60,6 @@ func GetDaysOfMonth(month time.Month, year int) schemas.Month {
 }
 
 func getMonthOffset(weekday time.Weekday) int {
-	fmt.Println(int(weekday) % 7)
 	return int(weekday) % 7
 }
 

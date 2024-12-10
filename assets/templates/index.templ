@@ -45,7 +45,7 @@ templ Calendar(month schemas.Month, events map[int][]repo.Event) {
 				<div></div>
 			}
 			for _, day := range month.Days {
-				@Day(2024, 12, day, events)
+				@Day(month.Year, month.Number, day, events)
 			}
 		</div>
 	</div>
@@ -101,18 +101,18 @@ templ Day(year int, month int, day schemas.Day, events map[int][]repo.Event) {
 	<div
 		id={ strDay }
 		if day.Name == "Saturday" || day.Name == "Sunday" {
-			class="bg-base-300 rounded m-2 p-0"
+			class="bg-base-300 rounded m-2 p-0 flex min-h-24"
 		} else {
-			class="bg-base-200 rounded m-2 p-0"
+			class="bg-neutral-content text-neutral rounded m-2 p-0 flex min-h-24"
 		}
 	>
-		<div class="card-actions justify-end p-2 text-2xl">
+		<div class="card-actions justify-end p-2 text-2xl ">
 			<div class="align-bottom">{ strDay }</div>
 		</div>
 		<div
 			hx-post={ url }
 			hx-swap="beforeend"
-			class="card-body p-2 h-full"
+			class="card-body p-2 h-full bg-neutral rounded"
 		>
 			for _, event := range events[day.Number] {
 				@Event(event)

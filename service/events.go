@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
@@ -64,11 +65,13 @@ func GetEventsForMonth(db *sql.DB, date time.Time) (map[int][]repo.Event, error)
 		log.Printf("Failed getting events: %v", err)
 		return map[int][]repo.Event{}, err
 	}
+	fmt.Println(events)
 
 	eventMap := map[int][]repo.Event{}
 	for _, event := range events {
 		eventMap[event.ScheduledAt.Day()] = append(eventMap[event.ScheduledAt.Day()], event)
 	}
+	// fmt.Println(eventMap)
 
 	return eventMap, nil
 }

@@ -2,22 +2,22 @@ package repo
 
 import (
 	"context"
-	"fmt"
 	"time"
 )
 
 const getEventsForMonth = `-- name: GetEventsForMonth :many
 SELECT id, scheduled_at, created_at, edited_at
 FROM events
-WHERE strftime('%Y-%m', scheduled_at) = ?
+WHERE scheduled_at >= ? AND scheduled_at < ?
 `
 
 func (q *Queries) CustomGetEventsForMonth(
 	ctx context.Context,
 	scheduledAt time.Time,
 ) ([]Event, error) {
-	strtime := fmt.Sprintf("%v-%v", scheduledAt.Year(), int(scheduledAt.Month()))
-	rows, err := q.db.QueryContext(ctx, getEventsForMonth, strtime)
+	startOfMonth := time.Date(scheduledAt.Year(), scheduledAt.Month(), 1, 0, 0, 0, 0, time.UTC)
+	startOfNextMonth := startOfMonth.AddDate(0, 1, 0)
+	rows, err := q.db.QueryContext(ctx, getEventsForMonth, startOfMonth, startOfNextMonth)
 	if err != nil {
 		return nil, err
 	}

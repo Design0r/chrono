@@ -101,18 +101,18 @@ templ Day(year int, month int, day schemas.Day, events map[int][]repo.Event) {
 	<div
 		id={ strDay }
 		if day.Name == "Saturday" || day.Name == "Sunday" {
-			class="bg-base-300 rounded m-2 p-0 flex min-h-24"
+			class="bg-base-300 rounded m-2 p-0 flex min-h-24 shadow-xl"
 		} else {
-			class="bg-neutral-content text-neutral rounded m-2 p-0 flex min-h-24"
+			class="bg-neutral-content text-neutral rounded m-2 p-0 flex min-h-24 shadow-xl"
 		}
 	>
 		<div class="card-actions justify-end p-2 text-2xl ">
-			<div class="align-bottom">{ strDay }</div>
+			<div class="align-bottom min-w-6">{ strDay }</div>
 		</div>
 		<div
 			hx-post={ url }
 			hx-swap="beforeend"
-			class="card-body p-2 h-full bg-neutral rounded"
+			class="card-body p-2 h-full bg-neutral rounded-r"
 		>
 			for _, event := range events[day.Number] {
 				@Event(event)

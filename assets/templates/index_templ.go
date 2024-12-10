@@ -378,7 +378,7 @@ func Day(year int, month int, day schemas.Day, events map[int][]repo.Event) temp
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(strDay)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/index.templ`, Line: 110, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/index.templ`, Line: 110, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {

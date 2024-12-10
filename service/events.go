@@ -10,7 +10,7 @@ import (
 	"calendar/schemas"
 )
 
-func CreateEvent(db *sql.DB, data schemas.Date) (repo.Event, error) {
+func CreateEvent(db *sql.DB, data schemas.YMDDate) (repo.Event, error) {
 	r := repo.New(db)
 
 	date := time.Date(
@@ -33,7 +33,7 @@ func CreateEvent(db *sql.DB, data schemas.Date) (repo.Event, error) {
 	return event, nil
 }
 
-func GetEventsForDay(db *sql.DB, data schemas.Date) ([]repo.Event, error) {
+func GetEventsForDay(db *sql.DB, data schemas.YMDDate) ([]repo.Event, error) {
 	r := repo.New(db)
 
 	date := time.Date(

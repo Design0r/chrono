@@ -20,7 +20,7 @@ func InitEventRoutes(group *echo.Group, db *sql.DB) {
 }
 
 func CreateEventHandler(c echo.Context, db *sql.DB) error {
-	var date schemas.Date
+	var date schemas.YMDDate
 	if err := c.Bind(&date); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter")
 	}

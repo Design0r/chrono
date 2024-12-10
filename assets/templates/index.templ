@@ -3,8 +3,10 @@ package templates
 import "strconv"
 import "fmt"
 import "calendar/db/repo"
+import "calendar/schemas"
+import "strings"
 
-templ Index(events map[int][]repo.Event) {
+templ Index(month schemas.Month, events map[int][]repo.Event) {
 	<!DOCTYPE html>
 	<html data-theme="dim" lang="en">
 		<head>
@@ -23,23 +25,30 @@ templ Index(events map[int][]repo.Event) {
 		</head>
 		<body class="space-y-5">
 			@Header()
-			<div class="px-5">
-				@Info("December", "2024")
-				<div class="grid grid-cols-7">
-					@WeekdayHeader("Monday")
-					@WeekdayHeader("Tuesday")
-					@WeekdayHeader("Wednesday")
-					@WeekdayHeader("Thursday")
-					@WeekdayHeader("Friday")
-					@WeekdayHeader("Saturday")
-					@WeekdayHeader("Sunday")
-					for i:= range 30 {
-						@Day(2024, 12, i+1, events)
-					}
-				</div>
-			</div>
+			@Calendar(month, events)
 		</body>
 	</html>
+}
+
+templ Calendar(month schemas.Month, events map[int][]repo.Event) {
+	<div class="px-5">
+		@Info(month)
+		<div class="grid grid-cols-7">
+			@WeekdayHeader("Monday")
+			@WeekdayHeader("Tuesday")
+			@WeekdayHeader("Wednesday")
+			@WeekdayHeader("Thursday")
+			@WeekdayHeader("Friday")
+			@WeekdayHeader("Saturday")
+			@WeekdayHeader("Sunday")
+			for range month.Offset {
+				<div></div>
+			}
+			for _, day := range month.Days {
+				@Day(2024, 12, day, events)
+			}
+		</div>
+	</div>
 }
 
 templ Header() {
@@ -48,10 +57,37 @@ templ Header() {
 	</div>
 }
 
-templ Info(month string, year string) {
+templ Info(month schemas.Month) {
+	{{ strYear := strconv.Itoa(month.Year) }}
+	{{ prevStrYear := strconv.Itoa(month.Year - 1) }}
+	{{ nextStrYear := strconv.Itoa(month.Year + 1) }}
+	{{
+	prevMNum := month.Number - 1
+	nextMNum := month.Number + 1
+	if prevMNum <= 0 {
+		prevMNum = 12
+	}
+	if nextMNum > 12 {
+		nextMNum = nextMNum % 12
+		if nextMNum == 0 {
+			nextMNum = 1
+		}
+	}
+	prevStrMonth := strconv.Itoa(prevMNum)
+	nextStrMonth := strconv.Itoa(nextMNum)
+	}}
+	{{ strMonth := strconv.Itoa((month.Number)) }}
+	{{ urlPrevMonth := strings.Join([]string{"/", strYear, "/", prevStrMonth}, "") }}
+	{{ urlNextMonth := strings.Join([]string{"/", strYear, "/", nextStrMonth}, "") }}
+	{{ urlPrevYear := strings.Join([]string{"/", prevStrYear, "/", strMonth}, "") }}
+	{{ urlNextYear := strings.Join([]string{"/", nextStrYear, "/", strMonth}, "") }}
 	<div class="flex space-x-5 pb-5">
-		<div class="text-2xl">{ month }</div>
-		<div class="text-2xl">{ year }</div>
+		<a href={ templ.SafeURL(urlPrevMonth) }>&lt-</a>
+		<div class="text-2xl">{ month.Name }</div>
+		<a href={ templ.SafeURL(urlNextMonth) }>-&gt</a>
+		<a href={ templ.SafeURL(urlPrevYear) }>&lt-</a>
+		<div class="text-2xl">{ strYear }</div>
+		<a href={ templ.SafeURL(urlNextYear) }>-&gt</a>
 	</div>
 }
 
@@ -59,26 +95,32 @@ templ WeekdayHeader(name string) {
 	<div class="bg-base-300 p-2 text-center text-lg">{ name }</div>
 }
 
-templ Day(year int, month int, dayNum int, events map[int][]repo.Event) {
-	{{ url := fmt.Sprintf("/%d/%d/%d", year, month, dayNum) }}
-	{{ day := strconv.Itoa(dayNum) }}
+templ Day(year int, month int, day schemas.Day, events map[int][]repo.Event) {
+	{{ url := fmt.Sprintf("/%d/%d/%d", year, month, day.Number) }}
+	{{ strDay := strconv.Itoa(day.Number) }}
 	<div
-		id={ day }
-		hx-post={ url }
-		hx-swap="outerHTML"
-		class="bg-base-200 rounded m-2 p-0"
+		id={ strDay }
+		if day.Name == "Saturday" || day.Name == "Sunday" {
+			class="bg-base-300 rounded m-2 p-0"
+		} else {
+			class="bg-base-200 rounded m-2 p-0"
+		}
 	>
-		<div class="card-body p-2">
-			for _, event := range events[dayNum] {
+		<div class="card-actions justify-end p-2 text-2xl">
+			<div class="align-bottom">{ strDay }</div>
+		</div>
+		<div
+			hx-post={ url }
+			hx-swap="beforeend"
+			class="card-body p-2 h-full"
+		>
+			for _, event := range events[day.Number] {
 				@Event(event)
 			}
-			<div class="card-actions justify-end">
-				<div class="align-bottom">{ day }</div>
-			</div>
 		</div>
 	</div>
 }
 
 templ Event(event repo.Event) {
-	<div class="bg-blue-500 text-center">Event ID: { strconv.Itoa(int(event.ID)) }</div>
+	<div class="bg-blue-500 text-center rounded">Event ID: { strconv.Itoa(int(event.ID)) }</div>
 }

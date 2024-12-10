@@ -1,6 +1,11 @@
 package service
 
-import "time"
+import (
+	"fmt"
+	"time"
+
+	"calendar/schemas"
+)
 
 var monthDays map[time.Month]int = map[time.Month]int{
 	time.January:   31,
@@ -17,6 +22,16 @@ var monthDays map[time.Month]int = map[time.Month]int{
 	time.December:  31,
 }
 
+var weekdays map[time.Weekday]string = map[time.Weekday]string{
+	time.Monday:    "Monday",
+	time.Tuesday:   "Tuesday",
+	time.Wednesday: "Wednesday",
+	time.Thursday:  "Thursday",
+	time.Friday:    "Friday",
+	time.Saturday:  "Saturday",
+	time.Sunday:    "Sunday",
+}
+
 func GetNumDaysOfMonth(month time.Month, year int) int {
 	if month == time.February {
 		if IsLeapYear(year) {
@@ -27,15 +42,28 @@ func GetNumDaysOfMonth(month time.Month, year int) int {
 	return monthDays[month]
 }
 
-func GetDaysOfMonth(month time.Month, year int) []time.Time {
+func GetDaysOfMonth(month time.Month, year int) schemas.Month {
 	numDays := GetNumDaysOfMonth(month, year)
-	days := make([]time.Time, numDays)
-	for i := 0; i <= numDays; i++ {
-		day := time.Date(year, month, 0, 0, 0, 0, 0, time.Now().Local().Location())
+	days := make([]schemas.Day, numDays)
+	for i := 0; i < numDays; i++ {
+		date := time.Date(year, month, i+1, 0, 0, 0, 0, time.Now().Local().Location())
+		day := schemas.Day{Number: i + 1, Name: weekdays[date.Weekday()], Date: date}
+		fmt.Println(day)
 		days[i] = day
 	}
 
-	return days
+	return schemas.Month{
+		Name:   days[0].Date.Month().String(),
+		Days:   days,
+		Offset: getMonthOffset(days[0].Date.Weekday() + 6), // Weekday 0 = Sunday
+		Year:   year,
+		Number: int(month),
+	}
+}
+
+func getMonthOffset(weekday time.Weekday) int {
+	fmt.Println(int(weekday) % 7)
+	return int(weekday) % 7
 }
 
 func IsLeapYear(year int) bool {

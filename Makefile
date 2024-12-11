@@ -28,10 +28,14 @@ down:
 
 
 live/templ:
-	templ generate --watch --proxy="http://localhost:8080"  --open-browser=true -v
+	templ generate --watch --proxy="http://localhost:8080"  --open-browser=true
 
 live/server:
 	air
 
+live/tailwind:
+	npm install 
+	npx --yes tailwindcss -i ./assets/static/css/input.css -o ./assets/static/css/output.css --minify --watch
+
 dev: 
-	make -j2 live/templ live/server 
+	make -j3 live/templ live/server live/tailwind

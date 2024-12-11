@@ -2,6 +2,8 @@ package api
 
 import (
 	"database/sql"
+	"fmt"
+	"io/fs"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -24,18 +26,23 @@ func NewServer(router *echo.Echo, db *sql.DB) *Server {
 
 func (self *Server) InitMiddleware() {
 	self.Router.Use(middleware.Logger())
-	// self.router.Use(
-	// 	middleware.CORSWithConfig(
-	// 		middleware.CORSConfig{
-	// 			AllowOrigins:     []string{"http://localhost:5173"},
-	// 			AllowMethods:     []string{"*"},
-	// 			AllowHeaders:     []string{"*"},
-	// 			AllowCredentials: true,
-	// 		},
-	// 	),
-	// )
+	self.Router.Use(
+		middleware.CORSWithConfig(
+			middleware.CORSConfig{
+				AllowOrigins:     []string{"*"},
+				AllowMethods:     []string{"*"},
+				AllowHeaders:     []string{"*"},
+				AllowCredentials: true,
+			},
+		),
+	)
 
-	staticHandler := echo.WrapHandler(http.FileServer(http.FS(assets.StaticFS)))
+	staticHandler := echo.WrapHandler(
+		http.StripPrefix(
+			"/",
+			http.FileServer(http.FS(assets.StaticFS)),
+		),
+	)
 	self.Router.GET("/static/*", staticHandler)
 	self.Router.Use(middleware.Recover())
 }

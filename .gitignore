@@ -3,3 +3,4 @@
 *.db
 tmp
 *.txt
+node_modules

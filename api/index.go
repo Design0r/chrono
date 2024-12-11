@@ -1,9 +1,12 @@
 package api
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/labstack/echo/v4"
+
+	"calendar/assets/templates"
 )
 
 func InitIndexRoutes(group *echo.Group, db *sql.DB) {
@@ -11,6 +14,6 @@ func InitIndexRoutes(group *echo.Group, db *sql.DB) {
 }
 
 func HandleIndex(c echo.Context, db *sql.DB) error {
-	// templates.Index(events).Render(context.Background(), c.Response().Writer)
+	templates.Home().Render(context.Background(), c.Response().Writer)
 	return nil
 }

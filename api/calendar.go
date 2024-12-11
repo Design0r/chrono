@@ -35,7 +35,7 @@ func MonthCalendarHandler(c echo.Context, db *sql.DB) error {
 	}
 	fmt.Println(month.Offset)
 
-	templates.Index(month, event).
+	templates.Calendar(month, event).
 		Render(context.Background(), c.Response().Writer)
 	return nil
 }

@@ -14,3 +14,20 @@ type Event struct {
 	CreatedAt   time.Time `json:"created_at"`
 	EditedAt    time.Time `json:"edited_at"`
 }
+
+type Session struct {
+	ID         string    `json:"id"`
+	ValidUntil time.Time `json:"valid_until"`
+	CreatedAt  time.Time `json:"created_at"`
+	EditedAt   time.Time `json:"edited_at"`
+	UserID     int64     `json:"user_id"`
+}
+
+type User struct {
+	ID        int64     `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"created_at"`
+	EditedAt  time.Time `json:"edited_at"`
+}

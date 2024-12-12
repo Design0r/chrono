@@ -1,4 +1,4 @@
-package api
+package views
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"calendar/assets/templates"
+	"calendar/middleware"
 	"calendar/schemas"
 	"calendar/service"
 )
@@ -18,6 +19,7 @@ func InitCalendarRoutes(group *echo.Group, db *sql.DB) {
 	group.GET(
 		"/:year/:month",
 		func(c echo.Context) error { return MonthCalendarHandler(c, db) },
+		middleware.SessionMiddleware(db),
 	)
 }
 

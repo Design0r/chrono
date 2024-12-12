@@ -4,7 +4,6 @@ import "strconv"
 import "fmt"
 import "calendar/db/repo"
 import "calendar/schemas"
-import "strings"
 import "time"
 
 templ Index() {
@@ -27,6 +26,97 @@ templ Index() {
 templ Home() {
 	@Index() {
 		<div>Home</div>
+	}
+}
+
+templ Login() {
+	@Index() {
+		<div class="flex my-10">
+			<div class="align-middle flex m-auto">
+				<div>
+					<h1 class="font-bold text-xl">Log in</h1>
+					<br/>
+					<form class="w-max" method="post">
+						<div>
+							<label for="email">Email</label>
+							<br/>
+							<input
+								class="input w-full input-bordered"
+								type="email"
+								required
+							/>
+							<br/>
+							<br/>
+						</div>
+						<div>
+							<label for="password">Password</label>
+							<br/>
+							<input
+								class="input w-full input-bordered"
+								type="password"
+							/>
+							<br/>
+							<br/>
+						</div>
+						<button
+							class="btn btn-primary"
+							type="submit"
+						>Log in</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ Signup() {
+	@Index() {
+		<div class="flex my-10">
+			<div class="align-middle flex m-auto">
+				<div>
+					<h1 class="font-bold text-xl">Sign up</h1>
+					<br/>
+					<form class="w-max" method="post">
+						<div>
+							<label for="name">Name</label>
+							<br/>
+							<input
+								class="input w-full input-bordered"
+								type="text"
+								required
+							/>
+							<br/>
+							<br/>
+						</div>
+						<div>
+							<label for="email">Email</label>
+							<br/>
+							<input
+								class="input w-full input-bordered"
+								type="email"
+								required
+							/>
+							<br/>
+							<br/>
+						</div>
+						<div>
+							<label for="password">Password</label>
+							<br/>
+							<input
+								class="input w-full input-bordered"
+								type="password"
+							/>
+							<br/>
+							<br/>
+						</div>
+						<button
+							class="btn btn-primary"
+							type="submit"
+						>Sign up</button>
+					</form>
+				</div>
+			</div>
+		</div>
 	}
 }
 
@@ -58,11 +148,20 @@ templ Header() {
 	now := time.Now()
 	month := strconv.Itoa(int(now.Month()))
 	year := strconv.Itoa(now.Year())
-	url := strings.Join([]string{"/", year, "/", month}, "")
+	url := fmt.Sprintf("/%v/%v", year, month)
 	}}
-	<div class="navbar bg-base-300">
-		<a href="/" class="btn btn-ghost text-xl">Apic Chrono</a>
-		<a href={ templ.URL(url) } class="btn btn-ghost">Calendar</a>
+	<div class="navbar flex justify-between bg-base-300">
+		<div>
+			<a href="/" class="btn btn-ghost text-xl">Apic Chrono</a>
+			<a href={ templ.URL(url) } class="btn btn-ghost">Calendar</a>
+		</div>
+		<div class="justify-end">
+			<a href="/login" class="btn btn-ghost">Login</a>
+			<a href="/signup" class="btn btn-ghost">Signup</a>
+			<form action="/logout" method="post">
+				<button type="submit" class="btn btn-ghost">Logout</button>
+			</form>
+		</div>
 	</div>
 }
 
@@ -124,7 +223,7 @@ templ Day(year int, month int, day schemas.Day, events map[int][]repo.Event) {
 			<div class="align-bottom min-w-8">{ strDay }</div>
 		</div>
 		<div
-			hx-post={ templ.URL(url) }
+			hx-post={ url }
 			hx-swap="beforeend"
 			class="card-body p-2 h-full bg-neutral rounded-r"
 		>

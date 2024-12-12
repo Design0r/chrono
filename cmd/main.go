@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	_ "github.com/mattn/go-sqlite3"
 
-	"calendar/api"
+	"calendar/views"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 	e := echo.New()
 	apiV1 := e.Group("")
 
-	server := api.NewServer(e, db)
+	server := views.NewServer(e, db)
 	server.InitMiddleware()
 	server.InitRoutes(apiV1)
 

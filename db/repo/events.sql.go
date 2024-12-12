@@ -28,6 +28,16 @@ func (q *Queries) CreateEvent(ctx context.Context, scheduledAt time.Time) (Event
 	return i, err
 }
 
+const deleteEvent = `-- name: DeleteEvent :exec
+DELETE from events
+WHERE id = ?
+`
+
+func (q *Queries) DeleteEvent(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteEvent, id)
+	return err
+}
+
 const getEventsForDay = `-- name: GetEventsForDay :many
 SELECT id, scheduled_at, created_at, edited_at FROM events 
 WHERE Date(scheduled_at) = ?

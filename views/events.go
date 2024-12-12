@@ -1,4 +1,4 @@
-package api
+package views
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"calendar/assets/templates"
+	"calendar/middleware"
 	"calendar/schemas"
 	"calendar/service"
 )
@@ -16,6 +17,7 @@ func InitEventRoutes(group *echo.Group, db *sql.DB) {
 	group.POST(
 		"/:year/:month/:day",
 		func(c echo.Context) error { return CreateEventHandler(c, db) },
+		middleware.SessionMiddleware(db),
 	)
 }
 

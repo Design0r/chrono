@@ -1,4 +1,4 @@
-package api
+package views
 
 import (
 	"database/sql"
@@ -49,6 +49,7 @@ func (self *Server) InitRoutes(group *echo.Group) {
 	InitIndexRoutes(group, self.Db)
 	InitEventRoutes(group, self.Db)
 	InitCalendarRoutes(group, self.Db)
+	InitLoginRoutes(group, self.Db)
 }
 
 func (self *Server) Start(address string) error {

@@ -7,6 +7,6 @@ RETURNING *;
 SELECT * FROM events 
 WHERE Date(scheduled_at) = ?;
 
--- name: GetEventsForMonth :many
--- SELECT * FROM events
--- WHERE strftime('%Y-%m', scheduled_at) = ?;
+-- name: DeleteEvent :exec 
+DELETE from events
+WHERE id = ?;

@@ -54,3 +54,18 @@ func DeleteSession(db *sql.DB, id uuid.UUID) error {
 
 	return nil
 }
+
+func IsValidSession(db *sql.DB, id uuid.UUID) bool {
+	r := repo.New(db)
+
+	_, err := r.GetValidSession(
+		context.Background(),
+		repo.GetValidSessionParams{ID: id.String(), ValidUntil: time.Now()},
+	)
+	if err != nil {
+		log.Printf("Failed getting valid session: %v", err)
+		return false
+	}
+
+	return true
+}

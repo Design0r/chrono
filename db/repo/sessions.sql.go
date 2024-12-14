@@ -82,3 +82,27 @@ func (q *Queries) GetUserFromSession(ctx context.Context, id string) (User, erro
 	)
 	return i, err
 }
+
+const getValidSession = `-- name: GetValidSession :one
+SELECT id, valid_until, created_at, edited_at, user_id FROM sessions
+WHERE id = ?
+AND valid_until >= ?
+`
+
+type GetValidSessionParams struct {
+	ID         string    `json:"id"`
+	ValidUntil time.Time `json:"valid_until"`
+}
+
+func (q *Queries) GetValidSession(ctx context.Context, arg GetValidSessionParams) (Session, error) {
+	row := q.db.QueryRowContext(ctx, getValidSession, arg.ID, arg.ValidUntil)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.ValidUntil,
+		&i.CreatedAt,
+		&i.EditedAt,
+		&i.UserID,
+	)
+	return i, err
+}

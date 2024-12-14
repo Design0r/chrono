@@ -17,6 +17,11 @@ type Month struct {
 type Day struct {
 	Number int
 	Name   string
-	Events []repo.Event
+	Events []Event
 	Date   time.Time
+}
+
+type Event struct {
+	Username string
+	repo.Event
 }

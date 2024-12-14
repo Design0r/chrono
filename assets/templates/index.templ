@@ -2,9 +2,9 @@ package templates
 
 import "strconv"
 import "fmt"
-import "calendar/db/repo"
 import "calendar/schemas"
 import "time"
+import "calendar/service"
 
 templ Index() {
 	<!DOCTYPE html>
@@ -127,7 +127,7 @@ templ Signup() {
 	}
 }
 
-templ Calendar(month schemas.Month, events map[int][]repo.Event) {
+templ Calendar(month schemas.Month) {
 	@Index() {
 		<div class="px-5">
 			@Info(month)
@@ -143,7 +143,7 @@ templ Calendar(month schemas.Month, events map[int][]repo.Event) {
 					<div></div>
 				}
 				for _, day := range month.Days {
-					@Day(month.Year, month.Number, day, events)
+					@Day(month.Year, month.Number, day)
 				}
 			</div>
 		</div>
@@ -215,7 +215,7 @@ templ WeekdayHeader(name string) {
 	<div class="bg-base-300 p-2 text-center text-lg">{ name }</div>
 }
 
-templ Day(year int, month int, day schemas.Day, events map[int][]repo.Event) {
+templ Day(year int, month int, day schemas.Day) {
 	{{ url := fmt.Sprintf("/%d/%d/%d", year, month, day.Number) }}
 	{{ strDay := strconv.Itoa(day.Number) }}
 	<div
@@ -234,13 +234,20 @@ templ Day(year int, month int, day schemas.Day, events map[int][]repo.Event) {
 			hx-swap="beforeend"
 			class="card-body p-2 h-full bg-neutral rounded-r"
 		>
-			for _, event := range events[day.Number] {
+			for _, event := range day.Events {
 				@Event(event)
 			}
 		</div>
 	</div>
 }
 
-templ Event(event repo.Event) {
-	<div class="bg-blue-500 text-center rounded">Event ID: { strconv.Itoa(int(event.ID)) }</div>
+templ Event(event schemas.Event) {
+	{{ bgColor := service.GenerateHSL(int(event.UserID)) }}
+	<div
+		{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
+		class="bg-blue-500 text-center rounded"
+	>
+		<div>Event ID: { strconv.Itoa(int(event.ID)) }</div>
+		<div>User: { event.Username }</div>
+	</div>
 }

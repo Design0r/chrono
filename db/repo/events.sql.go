@@ -11,19 +11,25 @@ import (
 )
 
 const createEvent = `-- name: CreateEvent :one
-INSERT INTO events (scheduled_at)
-VALUES (?)
-RETURNING id, scheduled_at, created_at, edited_at
+INSERT INTO events (user_id, scheduled_at)
+VALUES (?, ?)
+RETURNING id, scheduled_at, created_at, edited_at, user_id
 `
 
-func (q *Queries) CreateEvent(ctx context.Context, scheduledAt time.Time) (Event, error) {
-	row := q.db.QueryRowContext(ctx, createEvent, scheduledAt)
+type CreateEventParams struct {
+	UserID      int64     `json:"user_id"`
+	ScheduledAt time.Time `json:"scheduled_at"`
+}
+
+func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error) {
+	row := q.db.QueryRowContext(ctx, createEvent, arg.UserID, arg.ScheduledAt)
 	var i Event
 	err := row.Scan(
 		&i.ID,
 		&i.ScheduledAt,
 		&i.CreatedAt,
 		&i.EditedAt,
+		&i.UserID,
 	)
 	return i, err
 }
@@ -39,7 +45,7 @@ func (q *Queries) DeleteEvent(ctx context.Context, id int64) error {
 }
 
 const getEventsForDay = `-- name: GetEventsForDay :many
-SELECT id, scheduled_at, created_at, edited_at FROM events 
+SELECT id, scheduled_at, created_at, edited_at, user_id FROM events 
 WHERE Date(scheduled_at) = ?
 `
 
@@ -57,6 +63,68 @@ func (q *Queries) GetEventsForDay(ctx context.Context, scheduledAt time.Time) ([
 			&i.ScheduledAt,
 			&i.CreatedAt,
 			&i.EditedAt,
+			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEventsForMonth = `-- name: GetEventsForMonth :many
+SELECT e.id, scheduled_at, e.created_at, e.edited_at, user_id, u.id, username, email, password, u.created_at, u.edited_at
+FROM events e
+JOIN users u ON e.user_id = u.id
+WHERE scheduled_at >= ? AND scheduled_at < ?
+`
+
+type GetEventsForMonthParams struct {
+	ScheduledAt   time.Time `json:"scheduled_at"`
+	ScheduledAt_2 time.Time `json:"scheduled_at_2"`
+}
+
+type GetEventsForMonthRow struct {
+	ID          int64     `json:"id"`
+	ScheduledAt time.Time `json:"scheduled_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	EditedAt    time.Time `json:"edited_at"`
+	UserID      int64     `json:"user_id"`
+	ID_2        int64     `json:"id_2"`
+	Username    string    `json:"username"`
+	Email       string    `json:"email"`
+	Password    string    `json:"password"`
+	CreatedAt_2 time.Time `json:"created_at_2"`
+	EditedAt_2  time.Time `json:"edited_at_2"`
+}
+
+func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthParams) ([]GetEventsForMonthRow, error) {
+	rows, err := q.db.QueryContext(ctx, getEventsForMonth, arg.ScheduledAt, arg.ScheduledAt_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetEventsForMonthRow
+	for rows.Next() {
+		var i GetEventsForMonthRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ScheduledAt,
+			&i.CreatedAt,
+			&i.EditedAt,
+			&i.UserID,
+			&i.ID_2,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.CreatedAt_2,
+			&i.EditedAt_2,
 		); err != nil {
 			return nil, err
 		}

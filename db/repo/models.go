@@ -13,6 +13,7 @@ type Event struct {
 	ScheduledAt time.Time `json:"scheduled_at"`
 	CreatedAt   time.Time `json:"created_at"`
 	EditedAt    time.Time `json:"edited_at"`
+	UserID      int64     `json:"user_id"`
 }
 
 type Session struct {

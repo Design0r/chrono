@@ -30,14 +30,14 @@ func MonthCalendarHandler(c echo.Context, db *sql.DB) error {
 	}
 
 	month := service.GetDaysOfMonth(time.Month(date.Month), date.Year)
-	d := time.Date(date.Year, time.Month(date.Month), 1, 1, 1, 1, 1, time.Now().Local().Location())
-	event, err := service.GetEventsForMonth(db, d)
+	err := service.GetEventsForMonth(db, &month)
 	if err != nil {
 		return err
 	}
-	fmt.Println(month.Offset)
 
-	templates.Calendar(month, event).
+	fmt.Println(month)
+
+	templates.Calendar(month).
 		Render(context.Background(), c.Response().Writer)
 	return nil
 }

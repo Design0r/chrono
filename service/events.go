@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"time"
 
@@ -11,7 +10,7 @@ import (
 	"calendar/schemas"
 )
 
-func CreateEvent(db *sql.DB, data schemas.YMDDate) (repo.Event, error) {
+func CreateEvent(db *sql.DB, data schemas.YMDDate, id int64) (repo.Event, error) {
 	r := repo.New(db)
 
 	date := time.Date(
@@ -25,7 +24,10 @@ func CreateEvent(db *sql.DB, data schemas.YMDDate) (repo.Event, error) {
 		time.Now().Local().Location(),
 	)
 
-	event, err := r.CreateEvent(context.Background(), date)
+	event, err := r.CreateEvent(
+		context.Background(),
+		repo.CreateEventParams{UserID: id, ScheduledAt: date},
+	)
 	if err != nil {
 		log.Printf("Failed creating event: %v", err)
 		return repo.Event{}, err
@@ -57,21 +59,45 @@ func GetEventsForDay(db *sql.DB, data schemas.YMDDate) ([]repo.Event, error) {
 	return events, nil
 }
 
-func GetEventsForMonth(db *sql.DB, date time.Time) (map[int][]repo.Event, error) {
+func GetEventsForMonth(
+	db *sql.DB,
+	month *schemas.Month,
+) error {
+	date := time.Date(
+		month.Year,
+		time.Month(month.Number),
+		1,
+		0,
+		0,
+		0,
+		0,
+		time.Now().Local().Location(),
+	)
 	r := repo.New(db)
 
-	events, err := r.CustomGetEventsForMonth(context.Background(), date)
+	events, err := r.GetEventsForMonth(
+		context.Background(),
+		repo.GetEventsForMonthParams{ScheduledAt: date, ScheduledAt_2: date.AddDate(0, 1, 0)},
+	)
 	if err != nil {
 		log.Printf("Failed getting events: %v", err)
-		return map[int][]repo.Event{}, err
+		return err
 	}
-	fmt.Println(events)
 
-	eventMap := map[int][]repo.Event{}
 	for _, event := range events {
-		eventMap[event.ScheduledAt.Day()] = append(eventMap[event.ScheduledAt.Day()], event)
+		idx := event.ScheduledAt.Day() - 1
+		newEvent := schemas.Event{
+			Username: event.Username,
+			Event: repo.Event{
+				ID:          event.ID,
+				ScheduledAt: event.ScheduledAt,
+				CreatedAt:   event.CreatedAt,
+				EditedAt:    event.EditedAt,
+				UserID:      event.UserID,
+			},
+		}
+		month.Days[idx].Events = append(month.Days[idx].Events, newEvent)
 	}
-	// fmt.Println(eventMap)
 
-	return eventMap, nil
+	return nil
 }

@@ -23,8 +23,8 @@ func SessionMiddleware(db *sql.DB) MiddlewareFunc {
 			if err != nil {
 				return c.Redirect(http.StatusFound, "/login")
 			}
-			_, err = service.GetUserFromSession(db, id)
-			if err != nil {
+			ok := service.IsValidSession(db, id)
+			if !ok {
 				return c.Redirect(http.StatusFound, "/login")
 			}
 

@@ -35,7 +35,11 @@ templ WeekdayHeader(name string) {
 
 templ Day(year int, month int, day schemas.Day) {
 	{{ url := fmt.Sprintf("/%d/%d/%d", year, month, day.Number) }}
-	{{ strDay := strconv.Itoa(day.Number) }}
+	{{strDay := strconv.Itoa(day.Number)
+
+dayId := fmt.Sprintf("day-%v", strDay)
+dayTarget := fmt.Sprintf("#%v", dayId)
+	}}
 	<div
 		if day.Name == "Saturday" || day.Name == "Sunday" {
 			class="bg-base-300 rounded m-2 p-0 flex min-h-24 shadow-xl"
@@ -47,25 +51,39 @@ templ Day(year int, month int, day schemas.Day) {
 			<div class="align-bottom min-w-8">{ strDay }</div>
 		</div>
 		<div
-			id={ fmt.Sprintf("day-%v", strDay) }
-			hx-post={ url }
-			hx-vals="js:{name: getEventName()}"
-			hx-swap="beforeend"
 			class="card-body p-2 h-full bg-neutral rounded-r"
 		>
-			for _, event := range day.Events {
-				@Event(event)
-			}
+			<div
+				class="card-body px-0 pb-2 pt-0 h-full bg-neutral rounded-r"
+				id={ dayId }
+			>
+				for _, event := range day.Events {
+					@Event(event)
+				}
+			</div>
+			<button
+				hx-post={ url }
+				hx-vals="js:{name: getEventName()}"
+				hx-target={ dayTarget }
+				hx-swap="beforeend"
+				class="btn hover:border-base-content rounded text-base-content text-center border border-dashed icon-outlined w-full text-2xl"
+			>add_circle</button>
 		</div>
 	</div>
 }
 
 templ Event(event schemas.Event) {
-	{{ bgColor := service.GenerateHSL(int(event.UserID)) }}
+	{{
+	bgColor := service.GenerateHSL(int(event.UserID))
+	eventId := fmt.Sprintf("event-%v", event.ID)
+	deleteUrl := fmt.Sprintf("#%v", eventId)
+	}}
 	<div
+		id={ eventId }
 		{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
-		class="bg-blue-500 text-center rounded"
+		class="bg-blue-500 text-center relative rounded"
 	>
+		<button hx-swap="delete" hx-target={ deleteUrl } hx-delete={ fmt.Sprintf("/events/%v", event.ID) } class="btn btn-ghost rounded text-xl p-0 icon-outlined absolute right-0">close</button>
 		<div>{ strings.Title(event.Name) }</div>
 		<div>{ event.Username }</div>
 	</div>

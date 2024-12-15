@@ -36,6 +36,18 @@ func CreateEvent(db *sql.DB, data schemas.YMDDate, userId int64, name string) (r
 	return event, nil
 }
 
+func DeleteEvent(db *sql.DB, eventId int) error {
+	r := repo.New(db)
+
+	err := r.DeleteEvent(context.Background(), int64(eventId))
+	if err != nil {
+		log.Printf("Failed creating event: %v", err)
+		return err
+	}
+
+	return nil
+}
+
 func GetEventsForDay(db *sql.DB, data schemas.YMDDate) ([]repo.Event, error) {
 	r := repo.New(db)
 

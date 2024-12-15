@@ -4,7 +4,7 @@ import "strconv"
 import "fmt"
 import "time"
 
-templ Index() {
+templ Index(loggedIn bool) {
 	<!DOCTYPE html>
 	<html data-theme="dim" lang="en">
 		<head>
@@ -14,131 +14,20 @@ templ Index() {
 			<script src="/static/js/htmx-min.js"></script>
 			<title>Apic Calendar</title>
 		</head>
-		<body class="space-y-5">
-			@Header()
+		<body>
+			@Header(loggedIn)
 			{ children... }
 		</body>
 	</html>
 }
 
 templ Home() {
-	@Index() {
+	@Index(true) {
 		<div>Home</div>
 	}
 }
 
-templ Login() {
-	@Index() {
-		<div class="flex my-10">
-			<div class="align-middle flex m-auto">
-				<div>
-					<h1 class="font-bold text-xl">Log in</h1>
-					<br/>
-					<form class="w-max" method="post">
-						<div>
-							<label for="email">Email</label>
-							<br/>
-							<input
-								class="input w-full input-bordered"
-								type="email"
-								name="email"
-								required
-							/>
-							<br/>
-							<br/>
-						</div>
-						<div>
-							<label for="password">Password</label>
-							<br/>
-							<input
-								class="input w-full input-bordered"
-								type="password"
-								name="password"
-								required
-							/>
-							<br/>
-							<br/>
-						</div>
-						<button
-							class="btn btn-primary"
-							type="submit"
-						>Log in</button>
-					</form>
-				</div>
-			</div>
-		</div>
-	}
-}
-
-templ Signup() {
-	@Index() {
-		<div class="flex my-10">
-			<div class="align-middle flex m-auto">
-				<div>
-					<h1 class="font-bold text-xl">Sign up</h1>
-					<br/>
-					<form class="w-max" method="post">
-						<div>
-							<label for="name">Name</label>
-							<br/>
-							<input
-								class="input w-full input-bordered"
-								type="text"
-								name="name"
-								required
-							/>
-							<br/>
-							<br/>
-						</div>
-						<div>
-							<label for="email">Email</label>
-							<br/>
-							<input
-								class="input w-full input-bordered"
-								type="email"
-								name="email"
-								required
-							/>
-							<br/>
-							<br/>
-						</div>
-						<div>
-							<label for="password">Password</label>
-							<br/>
-							<input
-								class="input w-full input-bordered"
-								type="password"
-								name="password"
-								required
-							/>
-							<br/>
-							<br/>
-						</div>
-						<div>
-							<label for="vacation">Urlaubstage</label>
-							<br/>
-							<input
-								class="input w-full input-bordered"
-								type="number"
-								name="vacation"
-								value="30"
-								required
-							/>
-							<br/>
-							<br/>
-						</div>
-						<button
-							class="btn btn-primary"
-							type="submit"
-						>Sign up</button>
-					</form>
-				</div>
-			</div>
-		</div>
-	}
-}
-
-templ Header() {
+templ Header(loggedIn bool) {
 	{{
 	now := time.Now()
 	month := strconv.Itoa(int(now.Month()))
@@ -151,11 +40,14 @@ templ Header() {
 			<a href={ templ.URL(url) } class="btn btn-ghost">Calendar</a>
 		</div>
 		<div class="justify-end">
-			<a href="/login" class="btn btn-ghost">Login</a>
-			<a href="/signup" class="btn btn-ghost">Signup</a>
-			<form action="/logout" method="post">
-				<button type="submit" class="btn btn-ghost">Logout</button>
-			</form>
+			if loggedIn {
+				<form action="/logout" method="post">
+					<button type="submit" class="btn btn-ghost">Logout</button>
+				</form>
+			} else {
+				<a href="/login" class="btn btn-ghost">Login</a>
+				<a href="/signup" class="btn btn-ghost">Signup</a>
+			}
 		</div>
 	</div>
 }

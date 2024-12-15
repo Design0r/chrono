@@ -3,12 +3,10 @@ package templates
 import "strconv"
 import "fmt"
 import "calendar/schemas"
-import "calendar/service"
-import "strings"
 import "calendar/db/repo"
 
 templ Calendar(user repo.User, month schemas.Month, vacationUsed int) {
-	@Index() {
+	@Index(true) {
 		<div class="px-5">
 			@Info(month, user, vacationUsed)
 			<div class="grid grid-cols-7">
@@ -67,33 +65,9 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 				hx-vals="js:{name: getEventName()}"
 				hx-target={ dayTarget }
 				hx-swap="beforeend"
-				class="btn hover:border-base-content rounded text-base-content text-center border border-dashed icon-outlined w-full text-2xl"
+				class="btn  hover:border-base-content bg-neutral rounded hover:text-base-content text-base-100 text-center hover:border border-dashed icon-outlined w-full text-2xl"
 			>add_circle</button>
 		</div>
-	</div>
-}
-
-templ Event(event schemas.Event, user repo.User) {
-	{{
-	bgColor := service.GenerateHSL(int(event.UserID))
-	eventId := fmt.Sprintf("event-%v", event.ID)
-	deleteUrl := fmt.Sprintf("#%v", eventId)
-	}}
-	<div
-		id={ eventId }
-		{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
-		class="bg-blue-500 text-center relative rounded text-base-content"
-	>
-		if event.UserID == user.ID {
-			<button
-				hx-swap="delete"
-				hx-target={ deleteUrl }
-				hx-delete={ fmt.Sprintf("/events/%v", event.ID) }
-				class="btn btn-ghost rounded text-xl p-0 icon-outlined absolute right-0"
-			>close</button>
-		}
-		<div>{ strings.Title(event.Name) }</div>
-		<div>{ event.Username }</div>
 	</div>
 }
 
@@ -122,11 +96,11 @@ templ Info(month schemas.Month, user repo.User, vacationUsed int) {
 	urlPrevYear := fmt.Sprintf("/%v/%v", prevStrYear, strMonth)
 	urlNextYear := fmt.Sprintf("/%v/%v", nextStrYear, strMonth)
 	}}
-	<div class="flex items-center align-middle">
-		<div class="flex space-x-5 pb-5 ">
+	<div class="flex p-3 justify-between items-center space-x-2 ">
+		<div class="flex space-x-5">
 			<div class="flex w-30">
 				<a href={ templ.URL(urlPrevMonth) } class="text-2xl icon-outlined">arrow_back</a>
-				<div class="text-2xl text-center w-40">{ month.Name }</div>
+				<div class="text-2xl text-center w-40 h-1">{ month.Name }</div>
 				<a href={ templ.URL(urlNextMonth) } class="text-2xl icon-outlined">arrow_forward</a>
 			</div>
 			<div class="flex">
@@ -144,25 +118,20 @@ templ Info(month schemas.Month, user repo.User, vacationUsed int) {
 		@VacationCounter(user, vacationUsed)
 	</div>
 	<script>
-  function getEventName(){
-    return document.getElementById("eventName").value
-  }
+    function getEventName(){
+      return document.getElementById("eventName").value
+    }
   </script>
-}
-
-templ CreateEventUpdate(event schemas.Event, user repo.User, vacationUsed int) {
-	@Event(event, user)
-	@VacationCounter(user, vacationUsed)
 }
 
 templ VacationCounter(user repo.User, vacationUsed int) {
 	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
-	<div id="vacation-counter" hx-swap-oob="true">
+	<div id="vacation-counter" hx-swap-oob="true" class="text-xl ">
 		<h2>Vacation Days:</h2>
 		<div class="flex space-x-2">
-			<div>Overall: { strNum }</div>
-			<div>Used: { strconv.Itoa(vacationUsed) }</div>
-			<div>Remaining: { fmt.Sprintf("%v", int(user.VacationDays) - vacationUsed) }</div>
+			<div class="text-info">Overall: { strNum }</div>
+			<div class="text-warning">Used: { strconv.Itoa(vacationUsed) }</div>
+			<div class="text-success">Remaining: { fmt.Sprintf("%v", int(user.VacationDays) - vacationUsed) }</div>
 		</div>
 	</div>
 }

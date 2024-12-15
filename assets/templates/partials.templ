@@ -1,0 +1,38 @@
+package templates
+
+import (
+	"calendar/schemas"
+	"calendar/db/repo"
+	"calendar/service"
+	"fmt"
+	"strings"
+)
+
+templ Event(event schemas.Event, user repo.User) {
+	{{
+	bgColor := service.GenerateHSL(int(event.UserID))
+	eventId := fmt.Sprintf("event-%v", event.ID)
+	deleteUrl := fmt.Sprintf("#%v", eventId)
+	}}
+	<div
+		id={ eventId }
+		{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
+		class="bg-blue-500 text-center relative rounded text-base-content"
+	>
+		if event.UserID == user.ID {
+			<button
+				hx-swap="delete"
+				hx-target={ deleteUrl }
+				hx-delete={ fmt.Sprintf("/events/%v", event.ID) }
+				class="btn btn-ghost rounded text-xl p-0 icon-outlined absolute right-0"
+			>close</button>
+		}
+		<div>{ strings.Title(event.Name) }</div>
+		<div>{ event.Username }</div>
+	</div>
+}
+
+templ CreateEventUpdate(event schemas.Event, user repo.User, vacationUsed int) {
+	@Event(event, user)
+	@VacationCounter(user, vacationUsed)
+}

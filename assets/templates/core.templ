@@ -2,9 +2,7 @@ package templates
 
 import "strconv"
 import "fmt"
-import "calendar/schemas"
 import "time"
-import "calendar/service"
 
 templ Index() {
 	<!DOCTYPE html>
@@ -127,29 +125,6 @@ templ Signup() {
 	}
 }
 
-templ Calendar(month schemas.Month) {
-	@Index() {
-		<div class="px-5">
-			@Info(month)
-			<div class="grid grid-cols-7">
-				@WeekdayHeader("Monday")
-				@WeekdayHeader("Tuesday")
-				@WeekdayHeader("Wednesday")
-				@WeekdayHeader("Thursday")
-				@WeekdayHeader("Friday")
-				@WeekdayHeader("Saturday")
-				@WeekdayHeader("Sunday")
-				for range month.Offset {
-					<div></div>
-				}
-				for _, day := range month.Days {
-					@Day(month.Year, month.Number, day)
-				}
-			</div>
-		</div>
-	}
-}
-
 templ Header() {
 	{{
 	now := time.Now()
@@ -169,85 +144,5 @@ templ Header() {
 				<button type="submit" class="btn btn-ghost">Logout</button>
 			</form>
 		</div>
-	</div>
-}
-
-templ Info(month schemas.Month) {
-	{{
-	strYear := strconv.Itoa(month.Year)
-	prevStrYear := strconv.Itoa(month.Year - 1)
-	nextStrYear := strconv.Itoa(month.Year + 1)
-	prevMNum := month.Number - 1
-	nextMNum := month.Number + 1
-	if prevMNum <= 0 {
-		prevMNum = 12
-	}
-	if nextMNum > 12 {
-		nextMNum = nextMNum % 12
-		if nextMNum == 0 {
-			nextMNum = 1
-		}
-	}
-	prevStrMonth := strconv.Itoa(prevMNum)
-	nextStrMonth := strconv.Itoa(nextMNum)
-
-	strMonth := strconv.Itoa((month.Number))
-	urlPrevMonth := fmt.Sprintf("/%v/%v", strYear, prevStrMonth)
-	urlNextMonth := fmt.Sprintf("/%v/%v", strYear, nextStrMonth)
-	urlPrevYear := fmt.Sprintf("/%v/%v", prevStrYear, strMonth)
-	urlNextYear := fmt.Sprintf("/%v/%v", nextStrYear, strMonth)
-	}}
-	<div class="flex space-x-5 pb-5 ">
-		<div class="flex w-30">
-			<a href={ templ.URL(urlPrevMonth) } class="text-2xl icon-outlined">arrow_back</a>
-			<div class="text-2xl text-center w-40">{ month.Name }</div>
-			<a href={ templ.URL(urlNextMonth) } class="text-2xl icon-outlined">arrow_forward</a>
-		</div>
-		<div class="flex">
-			<a href={ templ.URL(urlPrevYear) } class="text-2xl icon-outlined">arrow_back</a>
-			<div class="text-2xl w-20 text-center">{ strYear }</div>
-			<a href={ templ.URL(urlNextYear) } class="text-2xl icon-outlined">arrow_forward</a>
-		</div>
-	</div>
-}
-
-templ WeekdayHeader(name string) {
-	<div class="bg-base-300 p-2 text-center text-lg">{ name }</div>
-}
-
-templ Day(year int, month int, day schemas.Day) {
-	{{ url := fmt.Sprintf("/%d/%d/%d", year, month, day.Number) }}
-	{{ strDay := strconv.Itoa(day.Number) }}
-	<div
-		id={ strDay }
-		if day.Name == "Saturday" || day.Name == "Sunday" {
-			class="bg-base-300 rounded m-2 p-0 flex min-h-24 shadow-xl"
-		} else {
-			class="bg-neutral-content text-neutral rounded m-2 p-0 flex min-h-24 shadow-xl"
-		}
-	>
-		<div class="card-actions justify-end p-2 text-2xl ">
-			<div class="align-bottom min-w-8">{ strDay }</div>
-		</div>
-		<div
-			hx-post={ url }
-			hx-swap="beforeend"
-			class="card-body p-2 h-full bg-neutral rounded-r"
-		>
-			for _, event := range day.Events {
-				@Event(event)
-			}
-		</div>
-	</div>
-}
-
-templ Event(event schemas.Event) {
-	{{ bgColor := service.GenerateHSL(int(event.UserID)) }}
-	<div
-		{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
-		class="bg-blue-500 text-center rounded"
-	>
-		<div>Event ID: { strconv.Itoa(int(event.ID)) }</div>
-		<div>User: { event.Username }</div>
 	</div>
 }

@@ -32,7 +32,7 @@ func CreateEventHandler(c echo.Context, db *sql.DB) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Current user not found")
 	}
 
-	event, err := service.CreateEvent(db, date, currUser.ID)
+	event, err := service.CreateEvent(db, date, currUser.ID, "Default")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "")
 	}

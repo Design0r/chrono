@@ -1,6 +1,6 @@
 -- name: CreateEvent :one
-INSERT INTO events (user_id, scheduled_at)
-VALUES (?, ?)
+INSERT INTO events (name, user_id, scheduled_at)
+VALUES (?, ?, ?)
 RETURNING *;
 
 -- name: GetEventsForDay :many

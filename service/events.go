@@ -10,7 +10,7 @@ import (
 	"calendar/schemas"
 )
 
-func CreateEvent(db *sql.DB, data schemas.YMDDate, id int64) (repo.Event, error) {
+func CreateEvent(db *sql.DB, data schemas.YMDDate, userId int64, name string) (repo.Event, error) {
 	r := repo.New(db)
 
 	date := time.Date(
@@ -26,7 +26,7 @@ func CreateEvent(db *sql.DB, data schemas.YMDDate, id int64) (repo.Event, error)
 
 	event, err := r.CreateEvent(
 		context.Background(),
-		repo.CreateEventParams{UserID: id, ScheduledAt: date},
+		repo.CreateEventParams{Name: name, UserID: userId, ScheduledAt: date},
 	)
 	if err != nil {
 		log.Printf("Failed creating event: %v", err)
@@ -89,6 +89,7 @@ func GetEventsForMonth(
 		newEvent := schemas.Event{
 			Username: event.Username,
 			Event: repo.Event{
+				Name:        event.Name,
 				ID:          event.ID,
 				ScheduledAt: event.ScheduledAt,
 				CreatedAt:   event.CreatedAt,

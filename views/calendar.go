@@ -3,7 +3,6 @@ package views
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -28,14 +27,13 @@ func MonthCalendarHandler(c echo.Context, db *sql.DB) error {
 	if err := c.Bind(&date); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter")
 	}
+	service.UpdateHolidays(db, date.Year)
 
 	month := service.GetDaysOfMonth(time.Month(date.Month), date.Year)
 	err := service.GetEventsForMonth(db, &month)
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(month)
 
 	templates.Calendar(month).
 		Render(context.Background(), c.Response().Writer)

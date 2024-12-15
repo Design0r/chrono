@@ -11,22 +11,24 @@ import (
 )
 
 const createEvent = `-- name: CreateEvent :one
-INSERT INTO events (user_id, scheduled_at)
-VALUES (?, ?)
-RETURNING id, scheduled_at, created_at, edited_at, user_id
+INSERT INTO events (name, user_id, scheduled_at)
+VALUES (?, ?, ?)
+RETURNING id, scheduled_at, name, created_at, edited_at, user_id
 `
 
 type CreateEventParams struct {
+	Name        string    `json:"name"`
 	UserID      int64     `json:"user_id"`
 	ScheduledAt time.Time `json:"scheduled_at"`
 }
 
 func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error) {
-	row := q.db.QueryRowContext(ctx, createEvent, arg.UserID, arg.ScheduledAt)
+	row := q.db.QueryRowContext(ctx, createEvent, arg.Name, arg.UserID, arg.ScheduledAt)
 	var i Event
 	err := row.Scan(
 		&i.ID,
 		&i.ScheduledAt,
+		&i.Name,
 		&i.CreatedAt,
 		&i.EditedAt,
 		&i.UserID,
@@ -45,7 +47,7 @@ func (q *Queries) DeleteEvent(ctx context.Context, id int64) error {
 }
 
 const getEventsForDay = `-- name: GetEventsForDay :many
-SELECT id, scheduled_at, created_at, edited_at, user_id FROM events 
+SELECT id, scheduled_at, name, created_at, edited_at, user_id FROM events 
 WHERE Date(scheduled_at) = ?
 `
 
@@ -61,6 +63,7 @@ func (q *Queries) GetEventsForDay(ctx context.Context, scheduledAt time.Time) ([
 		if err := rows.Scan(
 			&i.ID,
 			&i.ScheduledAt,
+			&i.Name,
 			&i.CreatedAt,
 			&i.EditedAt,
 			&i.UserID,
@@ -79,7 +82,7 @@ func (q *Queries) GetEventsForDay(ctx context.Context, scheduledAt time.Time) ([
 }
 
 const getEventsForMonth = `-- name: GetEventsForMonth :many
-SELECT e.id, scheduled_at, e.created_at, e.edited_at, user_id, u.id, username, email, password, u.created_at, u.edited_at
+SELECT e.id, scheduled_at, name, e.created_at, e.edited_at, user_id, u.id, username, email, password, u.created_at, u.edited_at
 FROM events e
 JOIN users u ON e.user_id = u.id
 WHERE scheduled_at >= ? AND scheduled_at < ?
@@ -93,6 +96,7 @@ type GetEventsForMonthParams struct {
 type GetEventsForMonthRow struct {
 	ID          int64     `json:"id"`
 	ScheduledAt time.Time `json:"scheduled_at"`
+	Name        string    `json:"name"`
 	CreatedAt   time.Time `json:"created_at"`
 	EditedAt    time.Time `json:"edited_at"`
 	UserID      int64     `json:"user_id"`
@@ -116,6 +120,7 @@ func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthPa
 		if err := rows.Scan(
 			&i.ID,
 			&i.ScheduledAt,
+			&i.Name,
 			&i.CreatedAt,
 			&i.EditedAt,
 			&i.UserID,

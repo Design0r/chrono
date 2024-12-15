@@ -8,9 +8,16 @@ import (
 	"time"
 )
 
+type ApiCache struct {
+	ID        int64     `json:"id"`
+	Year      int64     `json:"year"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Event struct {
 	ID          int64     `json:"id"`
 	ScheduledAt time.Time `json:"scheduled_at"`
+	Name        string    `json:"name"`
 	CreatedAt   time.Time `json:"created_at"`
 	EditedAt    time.Time `json:"edited_at"`
 	UserID      int64     `json:"user_id"`

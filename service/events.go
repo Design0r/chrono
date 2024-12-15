@@ -10,7 +10,12 @@ import (
 	"calendar/schemas"
 )
 
-func CreateEvent(db *sql.DB, data schemas.YMDDate, userId int64, name string) (repo.Event, error) {
+func CreateEvent(
+	db *sql.DB,
+	data schemas.YMDDate,
+	user repo.User,
+	name string,
+) (repo.Event, error) {
 	r := repo.New(db)
 
 	date := time.Date(
@@ -26,26 +31,25 @@ func CreateEvent(db *sql.DB, data schemas.YMDDate, userId int64, name string) (r
 
 	event, err := r.CreateEvent(
 		context.Background(),
-		repo.CreateEventParams{Name: name, UserID: userId, ScheduledAt: date},
+		repo.CreateEventParams{Name: name, UserID: user.ID, ScheduledAt: date},
 	)
+	if err != nil {
+		log.Printf("Failed creating event: %v", err)
+		return repo.Event{}, err
+	}
+	return event, nil
+}
+
+func DeleteEvent(db *sql.DB, eventId int) (repo.Event, error) {
+	r := repo.New(db)
+
+	event, err := r.DeleteEvent(context.Background(), int64(eventId))
 	if err != nil {
 		log.Printf("Failed creating event: %v", err)
 		return repo.Event{}, err
 	}
 
 	return event, nil
-}
-
-func DeleteEvent(db *sql.DB, eventId int) error {
-	r := repo.New(db)
-
-	err := r.DeleteEvent(context.Background(), int64(eventId))
-	if err != nil {
-		log.Printf("Failed creating event: %v", err)
-		return err
-	}
-
-	return nil
 }
 
 func GetEventsForDay(db *sql.DB, data schemas.YMDDate) ([]repo.Event, error) {
@@ -98,8 +102,12 @@ func GetEventsForMonth(
 
 	for _, event := range events {
 		idx := event.ScheduledAt.Day() - 1
+		user, err := GetUserById(db, event.UserID)
+		if err != nil {
+			continue
+		}
 		newEvent := schemas.Event{
-			Username: event.Username,
+			Username: user.Username,
 			Event: repo.Event{
 				Name:        event.Name,
 				ID:          event.ID,
@@ -113,4 +121,24 @@ func GetEventsForMonth(
 	}
 
 	return nil
+}
+
+func GetVacationCountForUserYear(db *sql.DB, userId int, year int) (int, error) {
+	r := repo.New(db)
+	yearStart := time.Date(year, 1, 1, 0, 0, 0, 0, time.Now().Location())
+	yearEnd := yearStart.AddDate(1, 0, 0)
+
+	count, err := r.GetVacationCountForUser(
+		context.Background(),
+		repo.GetVacationCountForUserParams{
+			UserID:        int64(userId),
+			ScheduledAt:   yearStart,
+			ScheduledAt_2: yearEnd,
+		},
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(count), nil
 }

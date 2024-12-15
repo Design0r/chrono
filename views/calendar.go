@@ -23,6 +23,7 @@ func InitCalendarRoutes(group *echo.Group, db *sql.DB) {
 }
 
 func MonthCalendarHandler(c echo.Context, db *sql.DB) error {
+	user, err := service.GetCurrentUser(db, c)
 	var date schemas.YMDate
 	if err := c.Bind(&date); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter")
@@ -30,12 +31,16 @@ func MonthCalendarHandler(c echo.Context, db *sql.DB) error {
 	service.UpdateHolidays(db, date.Year)
 
 	month := service.GetDaysOfMonth(time.Month(date.Month), date.Year)
-	err := service.GetEventsForMonth(db, &month)
+	err = service.GetEventsForMonth(db, &month)
 	if err != nil {
 		return err
 	}
+	vacationUsed, err := service.GetVacationCountForUserYear(db, int(user.ID), date.Year)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "")
+	}
 
-	templates.Calendar(month).
+	templates.Calendar(user, month, vacationUsed).
 		Render(context.Background(), c.Response().Writer)
 	return nil
 }

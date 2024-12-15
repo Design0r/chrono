@@ -91,9 +91,10 @@ func HandleSignup(c echo.Context, db *sql.DB) error {
 	user, err := service.CreateUser(
 		db,
 		repo.CreateUserParams{
-			Username: createUser.Name,
-			Email:    createUser.Email,
-			Password: hashedPw,
+			Username:     createUser.Name,
+			Email:        createUser.Email,
+			VacationDays: int64(createUser.Vacation),
+			Password:     hashedPw,
 		},
 	)
 	if err != nil {

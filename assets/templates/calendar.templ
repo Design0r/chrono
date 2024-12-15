@@ -5,11 +5,12 @@ import "fmt"
 import "calendar/schemas"
 import "calendar/service"
 import "strings"
+import "calendar/db/repo"
 
-templ Calendar(month schemas.Month) {
+templ Calendar(user repo.User, month schemas.Month, vacationUsed int) {
 	@Index() {
 		<div class="px-5">
-			@Info(month)
+			@Info(month, user, vacationUsed)
 			<div class="grid grid-cols-7">
 				@WeekdayHeader("Monday")
 				@WeekdayHeader("Tuesday")
@@ -22,7 +23,7 @@ templ Calendar(month schemas.Month) {
 					<div></div>
 				}
 				for _, day := range month.Days {
-					@Day(month.Year, month.Number, day)
+					@Day(month.Year, month.Number, day, user)
 				}
 			</div>
 		</div>
@@ -33,18 +34,18 @@ templ WeekdayHeader(name string) {
 	<div class="bg-base-300 p-2 text-center text-lg">{ name }</div>
 }
 
-templ Day(year int, month int, day schemas.Day) {
-	{{ url := fmt.Sprintf("/%d/%d/%d", year, month, day.Number) }}
-	{{strDay := strconv.Itoa(day.Number)
-
-dayId := fmt.Sprintf("day-%v", strDay)
-dayTarget := fmt.Sprintf("#%v", dayId)
+templ Day(year int, month int, day schemas.Day, user repo.User) {
+	{{
+	url := fmt.Sprintf("/%d/%d/%d", year, month, day.Number)
+	strDay := strconv.Itoa(day.Number)
+	dayId := fmt.Sprintf("day-%v", strDay)
+	dayTarget := fmt.Sprintf("#%v", dayId)
 	}}
 	<div
 		if day.Name == "Saturday" || day.Name == "Sunday" {
-			class="bg-base-300 rounded m-2 p-0 flex min-h-24 shadow-xl"
-		} else {
 			class="bg-neutral-content text-neutral rounded m-2 p-0 flex min-h-24 shadow-xl"
+		} else {
+			class="bg-base-300 rounded m-2 p-0 flex min-h-24 shadow-xl"
 		}
 	>
 		<div class="card-actions justify-end p-2 text-2xl ">
@@ -58,7 +59,7 @@ dayTarget := fmt.Sprintf("#%v", dayId)
 				id={ dayId }
 			>
 				for _, event := range day.Events {
-					@Event(event)
+					@Event(event, user)
 				}
 			</div>
 			<button
@@ -72,7 +73,7 @@ dayTarget := fmt.Sprintf("#%v", dayId)
 	</div>
 }
 
-templ Event(event schemas.Event) {
+templ Event(event schemas.Event, user repo.User) {
 	{{
 	bgColor := service.GenerateHSL(int(event.UserID))
 	eventId := fmt.Sprintf("event-%v", event.ID)
@@ -81,15 +82,22 @@ templ Event(event schemas.Event) {
 	<div
 		id={ eventId }
 		{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
-		class="bg-blue-500 text-center relative rounded"
+		class="bg-blue-500 text-center relative rounded text-base-content"
 	>
-		<button hx-swap="delete" hx-target={ deleteUrl } hx-delete={ fmt.Sprintf("/events/%v", event.ID) } class="btn btn-ghost rounded text-xl p-0 icon-outlined absolute right-0">close</button>
+		if event.UserID == user.ID {
+			<button
+				hx-swap="delete"
+				hx-target={ deleteUrl }
+				hx-delete={ fmt.Sprintf("/events/%v", event.ID) }
+				class="btn btn-ghost rounded text-xl p-0 icon-outlined absolute right-0"
+			>close</button>
+		}
 		<div>{ strings.Title(event.Name) }</div>
 		<div>{ event.Username }</div>
 	</div>
 }
 
-templ Info(month schemas.Month) {
+templ Info(month schemas.Month, user repo.User, vacationUsed int) {
 	{{
 	strYear := strconv.Itoa(month.Year)
 	prevStrYear := strconv.Itoa(month.Year - 1)
@@ -133,10 +141,28 @@ templ Info(month schemas.Month) {
 			<option value="krank">Krank</option>
 			<option value="home office">Home Office</option>
 		</select>
+		@VacationCounter(user, vacationUsed)
 	</div>
 	<script>
   function getEventName(){
     return document.getElementById("eventName").value
   }
   </script>
+}
+
+templ CreateEventUpdate(event schemas.Event, user repo.User, vacationUsed int) {
+	@Event(event, user)
+	@VacationCounter(user, vacationUsed)
+}
+
+templ VacationCounter(user repo.User, vacationUsed int) {
+	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
+	<div id="vacation-counter" hx-swap-oob="true">
+		<h2>Vacation Days:</h2>
+		<div class="flex space-x-2">
+			<div>Overall: { strNum }</div>
+			<div>Used: { strconv.Itoa(vacationUsed) }</div>
+			<div>Remaining: { fmt.Sprintf("%v", int(user.VacationDays) - vacationUsed) }</div>
+		</div>
+	</div>
 }

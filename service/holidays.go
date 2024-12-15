@@ -20,6 +20,10 @@ func UpdateHolidays(db *sql.DB, year int) error {
 	if HolidayCacheExists(db, year) {
 		return nil
 	}
+	bot, err := GetUserByName(db, "APIBot")
+	if err != nil {
+		return err
+	}
 
 	holidays, err := FetchHolidays(db, year)
 	if err != nil {
@@ -35,7 +39,7 @@ func UpdateHolidays(db *sql.DB, year int) error {
 		_, err = CreateEvent(
 			db,
 			schemas.YMDDate{Year: date.Year(), Month: int(date.Month()), Day: date.Day()},
-			int64(1),
+			bot,
 			name,
 		)
 	}

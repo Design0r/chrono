@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"calendar/assets"
+	"calendar/service"
 )
 
 type Server struct {
@@ -46,6 +47,8 @@ func (self *Server) InitMiddleware() {
 }
 
 func (self *Server) InitRoutes(group *echo.Group) {
+	service.InitAPIBot(self.Db)
+
 	InitIndexRoutes(group, self.Db)
 	InitEventRoutes(group, self.Db)
 	InitCalendarRoutes(group, self.Db)

@@ -10,25 +10,35 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (username, email, password)
-VALUES (?, ?, ?)
-RETURNING id, username, email, password, created_at, edited_at
+INSERT INTO users (username, vacation_days, email, password, is_superuser)
+VALUES (?, ?, ?, ?, ?)
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at
 `
 
 type CreateUserParams struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Username     string `json:"username"`
+	VacationDays int64  `json:"vacation_days"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	IsSuperuser  bool   `json:"is_superuser"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.Email, arg.Password)
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.Username,
+		arg.VacationDays,
+		arg.Email,
+		arg.Password,
+		arg.IsSuperuser,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
 		&i.Email,
 		&i.Password,
+		&i.VacationDays,
+		&i.IsSuperuser,
 		&i.CreatedAt,
 		&i.EditedAt,
 	)
@@ -46,7 +56,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, username, email, password, created_at, edited_at FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at FROM users
 WHERE email = ?
 `
 
@@ -58,6 +68,8 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Username,
 		&i.Email,
 		&i.Password,
+		&i.VacationDays,
+		&i.IsSuperuser,
 		&i.CreatedAt,
 		&i.EditedAt,
 	)
@@ -65,7 +77,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, username, email, password, created_at, edited_at FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at FROM users
 WHERE id = ?
 `
 
@@ -77,6 +89,57 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 		&i.Username,
 		&i.Email,
 		&i.Password,
+		&i.VacationDays,
+		&i.IsSuperuser,
+		&i.CreatedAt,
+		&i.EditedAt,
+	)
+	return i, err
+}
+
+const getUserByName = `-- name: GetUserByName :one
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at FROM users
+WHERE username = ?
+`
+
+func (q *Queries) GetUserByName(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByName, username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.VacationDays,
+		&i.IsSuperuser,
+		&i.CreatedAt,
+		&i.EditedAt,
+	)
+	return i, err
+}
+
+const updateVacationDays = `-- name: UpdateVacationDays :one
+UPDATE users
+SET vacation_days = ?
+WHERE id = ?
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at
+`
+
+type UpdateVacationDaysParams struct {
+	VacationDays int64 `json:"vacation_days"`
+	ID           int64 `json:"id"`
+}
+
+func (q *Queries) UpdateVacationDays(ctx context.Context, arg UpdateVacationDaysParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateVacationDays, arg.VacationDays, arg.ID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.VacationDays,
+		&i.IsSuperuser,
 		&i.CreatedAt,
 		&i.EditedAt,
 	)

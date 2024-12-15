@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
+    vacation_days INTEGER NOT NULL,
+    is_superuser BOOLEAN NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     edited_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

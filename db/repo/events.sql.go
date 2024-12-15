@@ -36,14 +36,24 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event
 	return i, err
 }
 
-const deleteEvent = `-- name: DeleteEvent :exec
+const deleteEvent = `-- name: DeleteEvent :one
 DELETE from events
 WHERE id = ?
+RETURNING id, scheduled_at, name, created_at, edited_at, user_id
 `
 
-func (q *Queries) DeleteEvent(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteEvent, id)
-	return err
+func (q *Queries) DeleteEvent(ctx context.Context, id int64) (Event, error) {
+	row := q.db.QueryRowContext(ctx, deleteEvent, id)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.ScheduledAt,
+		&i.Name,
+		&i.CreatedAt,
+		&i.EditedAt,
+		&i.UserID,
+	)
+	return i, err
 }
 
 const getEventsForDay = `-- name: GetEventsForDay :many
@@ -82,7 +92,7 @@ func (q *Queries) GetEventsForDay(ctx context.Context, scheduledAt time.Time) ([
 }
 
 const getEventsForMonth = `-- name: GetEventsForMonth :many
-SELECT e.id, scheduled_at, name, e.created_at, e.edited_at, user_id, u.id, username, email, password, u.created_at, u.edited_at
+SELECT e.id, scheduled_at, name, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at
 FROM events e
 JOIN users u ON e.user_id = u.id
 WHERE scheduled_at >= ? AND scheduled_at < ?
@@ -94,18 +104,20 @@ type GetEventsForMonthParams struct {
 }
 
 type GetEventsForMonthRow struct {
-	ID          int64     `json:"id"`
-	ScheduledAt time.Time `json:"scheduled_at"`
-	Name        string    `json:"name"`
-	CreatedAt   time.Time `json:"created_at"`
-	EditedAt    time.Time `json:"edited_at"`
-	UserID      int64     `json:"user_id"`
-	ID_2        int64     `json:"id_2"`
-	Username    string    `json:"username"`
-	Email       string    `json:"email"`
-	Password    string    `json:"password"`
-	CreatedAt_2 time.Time `json:"created_at_2"`
-	EditedAt_2  time.Time `json:"edited_at_2"`
+	ID           int64     `json:"id"`
+	ScheduledAt  time.Time `json:"scheduled_at"`
+	Name         string    `json:"name"`
+	CreatedAt    time.Time `json:"created_at"`
+	EditedAt     time.Time `json:"edited_at"`
+	UserID       int64     `json:"user_id"`
+	ID_2         int64     `json:"id_2"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	Password     string    `json:"password"`
+	VacationDays int64     `json:"vacation_days"`
+	IsSuperuser  bool      `json:"is_superuser"`
+	CreatedAt_2  time.Time `json:"created_at_2"`
+	EditedAt_2   time.Time `json:"edited_at_2"`
 }
 
 func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthParams) ([]GetEventsForMonthRow, error) {
@@ -128,6 +140,8 @@ func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthPa
 			&i.Username,
 			&i.Email,
 			&i.Password,
+			&i.VacationDays,
+			&i.IsSuperuser,
 			&i.CreatedAt_2,
 			&i.EditedAt_2,
 		); err != nil {
@@ -142,4 +156,25 @@ func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthPa
 		return nil, err
 	}
 	return items, nil
+}
+
+const getVacationCountForUser = `-- name: GetVacationCountForUser :one
+SELECT Count(*) from events
+WHERE user_id = ?
+AND scheduled_at >= ?
+AND scheduled_at < ?
+AND name = "urlaub"
+`
+
+type GetVacationCountForUserParams struct {
+	UserID        int64     `json:"user_id"`
+	ScheduledAt   time.Time `json:"scheduled_at"`
+	ScheduledAt_2 time.Time `json:"scheduled_at_2"`
+}
+
+func (q *Queries) GetVacationCountForUser(ctx context.Context, arg GetVacationCountForUserParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getVacationCountForUser, arg.UserID, arg.ScheduledAt, arg.ScheduledAt_2)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }

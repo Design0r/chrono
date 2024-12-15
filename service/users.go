@@ -36,6 +36,18 @@ func GetUserById(db *sql.DB, id int64) (repo.User, error) {
 	return user, nil
 }
 
+func GetUserByName(db *sql.DB, name string) (repo.User, error) {
+	r := repo.New(db)
+
+	user, err := r.GetUserByName(context.Background(), name)
+	if err != nil {
+		log.Printf("Failed getting user: %v", err)
+		return repo.User{}, err
+	}
+
+	return user, nil
+}
+
 func GetUserByEmail(db *sql.DB, email string) (repo.User, error) {
 	r := repo.New(db)
 

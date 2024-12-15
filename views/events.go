@@ -35,16 +35,23 @@ func CreateEventHandler(c echo.Context, db *sql.DB) error {
 	eventName := c.FormValue("name")
 
 	currUser, err := service.GetCurrentUser(db, c)
-	if err := c.Bind(&date); err != nil {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Current user not found")
 	}
 
-	event, err := service.CreateEvent(db, date, currUser.ID, eventName)
+	event, err := service.CreateEvent(db, date, currUser, eventName)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "")
 	}
 
-	templates.Event(schemas.Event{Username: currUser.Username, Event: event}).
+	e := schemas.Event{Username: currUser.Username, Event: event}
+
+	vacationUsed, err := service.GetVacationCountForUserYear(db, int(currUser.ID), date.Year)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "")
+	}
+
+	templates.CreateEventUpdate(e, currUser, vacationUsed).
 		Render(context.Background(), c.Response().Writer)
 	return nil
 }
@@ -55,10 +62,28 @@ func DeleteEventHandler(c echo.Context, db *sql.DB) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid event id")
 	}
+	currUser, err := service.GetCurrentUser(db, c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Current user not found")
+	}
 
-	err = service.DeleteEvent(db, eventId)
+	deletedEvent, err := service.DeleteEvent(db, eventId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Invalid event id")
 	}
+
+	e := schemas.Event{Username: currUser.Username, Event: deletedEvent}
+
+	vacationUsed, err := service.GetVacationCountForUserYear(
+		db,
+		int(currUser.ID),
+		deletedEvent.ScheduledAt.Year(),
+	)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "")
+	}
+
+	templates.CreateEventUpdate(e, currUser, vacationUsed).
+		Render(context.Background(), c.Response().Writer)
 	return nil
 }

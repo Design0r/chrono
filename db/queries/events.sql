@@ -7,12 +7,20 @@ RETURNING *;
 SELECT * FROM events 
 WHERE Date(scheduled_at) = ?;
 
--- name: DeleteEvent :exec 
+-- name: DeleteEvent :one
 DELETE from events
-WHERE id = ?;
+WHERE id = ?
+RETURNING *;
 
 -- name: GetEventsForMonth :many
 SELECT *
 FROM events e
 JOIN users u ON e.user_id = u.id
-WHERE scheduled_at >= ? AND scheduled_at < ?
+WHERE scheduled_at >= ? AND scheduled_at < ?;
+
+-- name: GetVacationCountForUser :one 
+SELECT Count(*) from events
+WHERE user_id = ?
+AND scheduled_at >= ?
+AND scheduled_at < ?
+AND name = "urlaub";

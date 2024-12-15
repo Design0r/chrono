@@ -41,7 +41,7 @@ func Login() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex my-10\"><div class=\"align-middle flex m-auto\"><div><h1 class=\"font-bold text-xl\">Log in</h1><br><form class=\"w-max\" method=\"post\"><div><label for=\"email\">Email</label><br><input class=\"input w-full input-bordered\" type=\"email\" name=\"email\" required><br><br></div><div><label for=\"password\">Password</label><br><input class=\"input w-full input-bordered\" type=\"password\" name=\"password\" required><br><br></div><button class=\"btn btn-primary\" type=\"submit\">Log in</button></form></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -88,7 +88,7 @@ func Signup() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex my-10\"><div class=\"align-middle flex m-auto\"><div><h1 class=\"font-bold text-xl\">Sign up</h1><br><form class=\"w-max\" method=\"post\"><div><label for=\"name\">Name</label><br><input class=\"input w-full input-bordered\" type=\"text\" name=\"name\" required><br><br></div><div><label for=\"email\">Email</label><br><input class=\"input w-full input-bordered\" type=\"email\" name=\"email\" required><br><br></div><div><label for=\"password\">Password</label><br><input class=\"input w-full input-bordered\" type=\"password\" name=\"password\" required><br><br></div><div><label for=\"vacation\">Urlaubstage</label><br><input class=\"input w-full input-bordered\" type=\"number\" name=\"vacation\" value=\"30\" required><br><br></div><button class=\"btn btn-primary\" type=\"submit\">Sign up</button></form></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

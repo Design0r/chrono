@@ -26,13 +26,14 @@ func CreateEventHandler(c echo.Context, db *sql.DB) error {
 	if err := c.Bind(&date); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter")
 	}
+	eventName := c.FormValue("name")
 
 	currUser, err := service.GetCurrentUser(db, c)
 	if err := c.Bind(&date); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Current user not found")
 	}
 
-	event, err := service.CreateEvent(db, date, currUser.ID, "Default")
+	event, err := service.CreateEvent(db, date, currUser.ID, eventName)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "")
 	}

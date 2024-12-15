@@ -46,7 +46,6 @@ func UpdateHolidays(db *sql.DB, year int) error {
 }
 
 func FetchHolidays(db *sql.DB, year int) (Holidays, error) {
-	fmt.Println("FETCHINGGGG")
 	holidays := Holidays{}
 	resp, err := http.Get(fmt.Sprintf("https://feiertage-api.de/api/?jahr=%v&nur_land=BW", year))
 	if err != nil {

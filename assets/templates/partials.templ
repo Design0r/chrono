@@ -36,3 +36,21 @@ templ CreateEventUpdate(event schemas.Event, user repo.User, vacationUsed int) {
 	@Event(event, user)
 	@VacationCounter(user, vacationUsed)
 }
+
+templ Message(message string, mtype string) {
+	<div hx-swap-oob="beforeend:#message-banner">
+		<div
+			if mtype == "success" {
+				class="bg-success rounded-xl p-4 text-xl text-neutral"
+			}
+			else
+			if mtype == "info" {
+				class="bg-info rounded-xl p-4 text-xl text-neutral"
+			}
+			else
+			if mtype == "error" {
+				class="bg-error rounded-xl p-4 text-xl text-neutral"
+			}
+		>{ message }</div>
+	</div>
+}

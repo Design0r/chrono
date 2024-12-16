@@ -12,6 +12,7 @@ import (
 	"calendar/db/repo"
 	"calendar/schemas"
 	"calendar/service"
+	"calendar/utils"
 )
 
 func InitLoginRoutes(group *echo.Group, db *sql.DB) {
@@ -36,19 +37,19 @@ func HandleSignupForm(c echo.Context, db *sql.DB) error {
 func HandleLogin(c echo.Context, db *sql.DB) error {
 	var loginUser schemas.Login
 	if err := c.Bind(&loginUser); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter")
+		utils.ErrorMessage("Invalid inputs.", c)
+		return err
 	}
-	user, err := service.GetUserByEmail(
-		db,
-		loginUser.Email,
-	)
+	user, err := service.GetUserByEmail(db, loginUser.Email)
 	if err != nil {
+		utils.ErrorMessage("Email or password incorrect.", c)
 		return err
 	}
 
 	ok := service.CheckPassword(user.Password, loginUser.Password)
 	if !ok {
-		return echo.NewHTTPError(http.StatusNotFound, "Email or Password incorrect")
+		utils.ErrorMessage("Email or password incorrect.", c)
+		return nil
 	}
 
 	session, err := service.CreateSession(db, user.ID)
@@ -59,7 +60,7 @@ func HandleLogin(c echo.Context, db *sql.DB) error {
 	sessionCookie := service.CreateSessionCookie(session)
 	c.SetCookie(sessionCookie)
 
-	templates.Home().Render(context.Background(), c.Response().Writer)
+	utils.HxRedirect("/", c)
 	return nil
 }
 
@@ -82,10 +83,19 @@ func HandleLogout(c echo.Context, db *sql.DB) error {
 func HandleSignup(c echo.Context, db *sql.DB) error {
 	var createUser schemas.CreateUser
 	if err := c.Bind(&createUser); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter")
+		utils.ErrorMessage("Invalid inputs.", c)
+		return err
 	}
+
+	_, err := service.GetUserByEmail(db, createUser.Email)
+	if err == nil {
+		utils.ErrorMessage("User with email already exists.", c)
+		return err
+	}
+
 	hashedPw, err := service.HashPassword(createUser.Password)
 	if err != nil {
+		utils.ErrorMessage("Internal error.", c)
 		return err
 	}
 	user, err := service.CreateUser(
@@ -98,6 +108,7 @@ func HandleSignup(c echo.Context, db *sql.DB) error {
 		},
 	)
 	if err != nil {
+		utils.ErrorMessage("Failed to create user.", c)
 		return err
 	}
 
@@ -108,5 +119,7 @@ func HandleSignup(c echo.Context, db *sql.DB) error {
 
 	sessionCookie := service.CreateSessionCookie(session)
 	c.SetCookie(sessionCookie)
-	return c.Redirect(http.StatusFound, "/")
+
+	utils.HxRedirect("/", c)
+	return nil
 }

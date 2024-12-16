@@ -379,7 +379,7 @@ func Info(month schemas.Month, user repo.User, vacationUsed int) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><script>\r\n    function getEventName(){\r\n      return document.getElementById(\"eventName\").value\r\n    }\r\n  </script>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><script>\n    function getEventName(){\n      return document.getElementById(\"eventName\").value\n    }\n  </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

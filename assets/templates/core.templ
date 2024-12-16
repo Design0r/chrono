@@ -17,6 +17,21 @@ templ Index(loggedIn bool) {
 		<body>
 			@Header(loggedIn)
 			{ children... }
+			<div id="message-banner" class="fixed left-3 bottom-3 space-y-2"></div>
+			<script>
+        function removeMessageBanners() {
+          const banner = document.getElementById("message-banner");
+          const elements = banner.childNodes;
+          elements.forEach((e) => {
+            setTimeout(() => {
+              e.remove();
+            }, 3000);
+          });
+        }
+
+        document.addEventListener("DOMContentLoaded", removeMessageBanners);
+        document.addEventListener("htmx:afterOnLoad", removeMessageBanners);
+      </script>
 		</body>
 	</html>
 }

@@ -25,16 +25,6 @@ func NewServer(router *echo.Echo, db *sql.DB) *Server {
 
 func (self *Server) InitMiddleware() {
 	self.Router.Use(middleware.Logger())
-	self.Router.Use(
-		middleware.CORSWithConfig(
-			middleware.CORSConfig{
-				AllowOrigins:     []string{"*"},
-				AllowMethods:     []string{"*"},
-				AllowHeaders:     []string{"*"},
-				AllowCredentials: true,
-			},
-		),
-	)
 
 	staticHandler := echo.WrapHandler(
 		http.StripPrefix(
@@ -44,6 +34,7 @@ func (self *Server) InitMiddleware() {
 	)
 	self.Router.GET("/static/*", staticHandler)
 	self.Router.Use(middleware.Recover())
+	self.Router.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
 }
 
 func (self *Server) InitRoutes(group *echo.Group) {

@@ -1,7 +1,7 @@
 %:
 	@:
 
-.PHONY: server client
+.PHONY: build 
 
 ifneq (,$(wildcard ./.env))
     include .env
@@ -39,3 +39,9 @@ live/tailwind:
 
 dev: 
 	make -j3 live/templ live/server live/tailwind
+
+build:
+	@npm install 
+	@npx --yes tailwindcss -i ./assets/static/css/input.css -o ./assets/static/css/output.css --minify
+	@templ generate
+	@go build -o ./build/ApicCalendar.exe ./cmd/main.go

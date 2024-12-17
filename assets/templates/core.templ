@@ -14,7 +14,7 @@ templ Index(loggedIn bool) {
 			<script src="/static/js/htmx-min.js"></script>
 			<title>Apic Calendar</title>
 		</head>
-		<body>
+		<body class="h-screen flex flex-col">
 			@Header(loggedIn)
 			{ children... }
 			<div id="message-banner" class="fixed left-3 bottom-3 space-y-2"></div>
@@ -34,12 +34,6 @@ templ Index(loggedIn bool) {
       </script>
 		</body>
 	</html>
-}
-
-templ Home() {
-	@Index(true) {
-		<div>Home</div>
-	}
 }
 
 templ Header(loggedIn bool) {

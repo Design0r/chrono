@@ -25,3 +25,12 @@ type Event struct {
 	Username string
 	repo.Event
 }
+
+type YearProgress struct {
+	NumDays           int
+	NumWorkDays       int
+	NumDaysPassed     int
+	DaysPassedPercent float32
+	NumHolidays       int
+	NumWastedHolidays int
+}

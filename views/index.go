@@ -8,6 +8,8 @@ import (
 
 	"calendar/assets/templates"
 	"calendar/middleware"
+	"calendar/schemas"
+	"calendar/service"
 )
 
 func InitIndexRoutes(group *echo.Group, db *sql.DB) {
@@ -19,6 +21,23 @@ func InitIndexRoutes(group *echo.Group, db *sql.DB) {
 }
 
 func HandleIndex(c echo.Context, db *sql.DB) error {
-	templates.Home().Render(context.Background(), c.Response().Writer)
+	currUser, err := service.GetCurrentUser(db, c)
+	if err != nil {
+		return err
+	}
+	vacDays, err := service.GetVacationCountForUserYear(db, int(currUser.ID), service.CurrentYear())
+	if err != nil {
+		return err
+	}
+
+	currYear := service.CurrentYear()
+	stats := schemas.YearProgress{
+		NumDays:           service.NumDaysInYear(currYear),
+		NumWorkDays:       service.NumWorkDays(currYear),
+		NumDaysPassed:     service.YearProgress(currYear),
+		DaysPassedPercent: service.YearProgressPercent(currYear),
+	}
+
+	templates.Home(currUser, vacDays, stats).Render(context.Background(), c.Response().Writer)
 	return nil
 }

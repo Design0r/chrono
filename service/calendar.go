@@ -71,3 +71,35 @@ func IsLeapYear(year int) bool {
 func CurrentYear() int {
 	return time.Now().Year()
 }
+
+func NumDaysInYear(year int) int {
+	if IsLeapYear(year) {
+		return 366
+	}
+	return 365
+}
+
+func YearProgressPercent(year int) float32 {
+	now := time.Now().YearDay()
+	days := NumDaysInYear(year)
+
+	return (float32(now) / float32(days)) * float32(100)
+}
+
+func YearProgress(year int) int {
+	now := time.Now().YearDay()
+
+	return now
+}
+
+func NumWorkDays(year int) int {
+	counter := 0
+	start := time.Date(year, 1, 1, 0, 0, 0, 0, time.Now().Location())
+	for i := 0; i < NumDaysInYear(year); i++ {
+		if start.Weekday() == time.Saturday || start.Weekday() == time.Sunday {
+			counter++
+		}
+	}
+
+	return counter
+}

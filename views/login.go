@@ -3,16 +3,15 @@ package views
 import (
 	"context"
 	"database/sql"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
 	"calendar/assets/templates"
 	"calendar/db/repo"
+	"calendar/htmx"
 	"calendar/schemas"
 	"calendar/service"
-	"calendar/utils"
 )
 
 func InitLoginRoutes(group *echo.Group, db *sql.DB) {
@@ -37,30 +36,31 @@ func HandleSignupForm(c echo.Context, db *sql.DB) error {
 func HandleLogin(c echo.Context, db *sql.DB) error {
 	var loginUser schemas.Login
 	if err := c.Bind(&loginUser); err != nil {
-		utils.ErrorMessage("Invalid inputs.", c)
+		htmx.ErrorMessage("Invalid inputs.", c)
 		return err
 	}
 	user, err := service.GetUserByEmail(db, loginUser.Email)
 	if err != nil {
-		utils.ErrorMessage("Email or password incorrect.", c)
+		htmx.ErrorMessage("Email or password incorrect.", c)
 		return err
 	}
 
 	ok := service.CheckPassword(user.Password, loginUser.Password)
 	if !ok {
-		utils.ErrorMessage("Email or password incorrect.", c)
+		htmx.ErrorMessage("Email or password incorrect.", c)
 		return nil
 	}
 
 	session, err := service.CreateSession(db, user.ID)
 	if err != nil {
+		htmx.ErrorMessage("Internal error.", c)
 		return err
 	}
 
 	sessionCookie := service.CreateSessionCookie(session)
 	c.SetCookie(sessionCookie)
 
-	utils.HxRedirect("/", c)
+	htmx.HxRedirect("/", c)
 	return nil
 }
 
@@ -72,30 +72,32 @@ func HandleLogout(c echo.Context, db *sql.DB) error {
 
 	sessionId, err := uuid.Parse(cookie.Value)
 	if err != nil {
+		htmx.ErrorMessage("Internal error.", c)
 		return err
 	}
 	service.DeleteSession(db, sessionId)
 
 	c.SetCookie(service.DeleteSessionCookie())
-	return c.Redirect(http.StatusFound, "/login")
+	htmx.HxRedirect("/login", c)
+	return nil
 }
 
 func HandleSignup(c echo.Context, db *sql.DB) error {
 	var createUser schemas.CreateUser
 	if err := c.Bind(&createUser); err != nil {
-		utils.ErrorMessage("Invalid inputs.", c)
+		htmx.ErrorMessage("Invalid inputs.", c)
 		return err
 	}
 
 	_, err := service.GetUserByEmail(db, createUser.Email)
 	if err == nil {
-		utils.ErrorMessage("User with email already exists.", c)
+		htmx.ErrorMessage("User with email already exists.", c)
 		return err
 	}
 
 	hashedPw, err := service.HashPassword(createUser.Password)
 	if err != nil {
-		utils.ErrorMessage("Internal error.", c)
+		htmx.ErrorMessage("Internal error.", c)
 		return err
 	}
 	user, err := service.CreateUser(
@@ -108,18 +110,19 @@ func HandleSignup(c echo.Context, db *sql.DB) error {
 		},
 	)
 	if err != nil {
-		utils.ErrorMessage("Failed to create user.", c)
+		htmx.ErrorMessage("Failed to create user.", c)
 		return err
 	}
 
 	session, err := service.CreateSession(db, user.ID)
 	if err != nil {
+		htmx.ErrorMessage("Internal error.", c)
 		return err
 	}
 
 	sessionCookie := service.CreateSessionCookie(session)
 	c.SetCookie(sessionCookie)
 
-	utils.HxRedirect("/", c)
+	htmx.HxRedirect("/", c)
 	return nil
 }

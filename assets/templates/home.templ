@@ -1,8 +1,10 @@
 package templates
 
-import "calendar/db/repo"
-import "calendar/schemas"
-import "fmt"
+import (
+	"calendar/db/repo"
+	"calendar/schemas"
+	"fmt"
+)
 
 templ Home(user repo.User, vacationUsed int, progress schemas.YearProgress) {
 	@Index(true) {
@@ -22,9 +24,9 @@ templ Home(user repo.User, vacationUsed int, progress schemas.YearProgress) {
 						<div class="stat-desc">{ fmt.Sprintf("You have used %v vacation days", vacationUsed) }</div>
 					</div>
 					<div class="stat">
-						<div class="stat-value">{ fmt.Sprintf("%v Days", int(user.VacationDays)-vacationUsed) }</div>
 						<div class="stat-title">Remaining</div>
-						<div class="stat-desc text-secondary">{ fmt.Sprintf("%.2f%% remaining", float32(100)-progress.DaysPassedPercent) }</div>
+						<div class="stat-value">{ fmt.Sprintf("%v Days", int(user.VacationDays)-vacationUsed) }</div>
+						<div class="stat-desc text-secondary">{ fmt.Sprintf("%.2f%% remaining", (float32(vacationUsed) / float32(user.VacationDays)) * float32(100)) }</div>
 					</div>
 				</div>
 			}
@@ -46,8 +48,8 @@ templ Home(user repo.User, vacationUsed int, progress schemas.YearProgress) {
 						<div class="stat-desc">{ fmt.Sprintf("We are %v days into the year", progress.NumDaysPassed) }</div>
 					</div>
 					<div class="stat">
-						<div class="stat-value">{ fmt.Sprintf("%.2f%%", progress.DaysPassedPercent) }</div>
 						<div class="stat-title">Completed</div>
+						<div class="stat-value">{ fmt.Sprintf("%.2f%%", progress.DaysPassedPercent) }</div>
 						<div class="stat-desc text-secondary">{ fmt.Sprintf("%.2f%% remaining", float32(100)-progress.DaysPassedPercent) }</div>
 					</div>
 				</div>

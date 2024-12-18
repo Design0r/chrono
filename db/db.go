@@ -16,6 +16,23 @@ func NewDB(name string) *sql.DB {
 		return nil
 	}
 
+	pragmas := []string{
+		"PRAGMA foreign_keys=ON;",
+		"PRAGMA journal_mode=WAL;",
+		"PRAGMA synchronous=NORMAL;",
+		"PRAGMA busy_timeout=5000;",
+		"PRAGMA temp_store=MEMORY;",
+		"PRAGMA mmap_size=134217728;",
+		"PRAGMA journal_size_limit=67108864;",
+		"PRAGMA cache_size=2000;",
+	}
+
+	for _, p := range pragmas {
+		if _, err := db.Exec(p); err != nil {
+			log.Printf("Failed to execute PRAGMA statement '%s': %v", p, err)
+		}
+	}
+
 	RunMigrations(db)
 
 	return db

@@ -45,7 +45,7 @@ func Index(loggedIn bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"message-banner\" class=\"fixed left-3 bottom-3 space-y-2\"></div><script>\n        function removeMessageBanners() {\n          const banner = document.getElementById(\"message-banner\");\n          const elements = banner.childNodes;\n          elements.forEach((e) => {\n            setTimeout(() => {\n              e.remove();\n            }, 3000);\n          });\n        }\n\n        document.addEventListener(\"DOMContentLoaded\", removeMessageBanners);\n        document.addEventListener(\"htmx:afterOnLoad\", removeMessageBanners);\n      </script></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"message-banner\" class=\"fixed left-3 bottom-3 space-y-2\"></div><script>\r\n        function removeMessageBanners() {\r\n          const banner = document.getElementById(\"message-banner\");\r\n          const elements = banner.childNodes;\r\n          elements.forEach((e) => {\r\n            setTimeout(() => {\r\n              e.remove();\r\n            }, 3000);\r\n          });\r\n        }\r\n\r\n        document.addEventListener(\"DOMContentLoaded\", removeMessageBanners);\r\n        document.addEventListener(\"htmx:afterOnLoad\", removeMessageBanners);\r\n      </script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

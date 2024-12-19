@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
 	"calendar/service"
@@ -19,11 +18,7 @@ func SessionMiddleware(db *sql.DB) MiddlewareFunc {
 			if err != nil {
 				return c.Redirect(http.StatusFound, "/login")
 			}
-			id, err := uuid.Parse(cookie.Value)
-			if err != nil {
-				return c.Redirect(http.StatusFound, "/login")
-			}
-			ok := service.IsValidSession(db, id)
+			ok := service.IsValidSession(db, cookie.Value)
 			if !ok {
 				return c.Redirect(http.StatusFound, "/login")
 			}

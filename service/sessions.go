@@ -6,22 +6,16 @@ import (
 	"log"
 	"time"
 
-	"github.com/google/uuid"
-
 	"calendar/db/repo"
 )
 
 func CreateSession(db *sql.DB, userId int64) (repo.Session, error) {
 	r := repo.New(db)
 
-	uuid, err := uuid.NewRandom()
-	if err != nil {
-		log.Printf("Failed creating uuid: %v", err)
-		return repo.Session{}, err
-	}
+	secRand := SecureRandom(64)
 
 	date := time.Now().Add(time.Hour * 24 * 7) // 1 week
-	data := repo.CreateSessionParams{ID: uuid.String(), ValidUntil: date, UserID: userId}
+	data := repo.CreateSessionParams{ID: secRand, ValidUntil: date, UserID: userId}
 	session, err := r.CreateSession(context.Background(), data)
 	if err != nil {
 		log.Printf("Failed creating Session: %v", err)
@@ -31,10 +25,10 @@ func CreateSession(db *sql.DB, userId int64) (repo.Session, error) {
 	return session, nil
 }
 
-func GetUserFromSession(db *sql.DB, id uuid.UUID) (repo.User, error) {
+func GetUserFromSession(db *sql.DB, id string) (repo.User, error) {
 	r := repo.New(db)
 
-	user, err := r.GetUserFromSession(context.Background(), id.String())
+	user, err := r.GetUserFromSession(context.Background(), id)
 	if err != nil {
 		log.Printf("Failed getting session: %v", err)
 		return repo.User{}, err
@@ -43,10 +37,10 @@ func GetUserFromSession(db *sql.DB, id uuid.UUID) (repo.User, error) {
 	return user, nil
 }
 
-func DeleteSession(db *sql.DB, id uuid.UUID) error {
+func DeleteSession(db *sql.DB, id string) error {
 	r := repo.New(db)
 
-	err := r.DeleteSession(context.Background(), id.String())
+	err := r.DeleteSession(context.Background(), id)
 	if err != nil {
 		log.Printf("Failed deleting session: %v", err)
 		return err
@@ -55,12 +49,12 @@ func DeleteSession(db *sql.DB, id uuid.UUID) error {
 	return nil
 }
 
-func IsValidSession(db *sql.DB, id uuid.UUID) bool {
+func IsValidSession(db *sql.DB, id string) bool {
 	r := repo.New(db)
 
 	_, err := r.GetValidSession(
 		context.Background(),
-		repo.GetValidSessionParams{ID: id.String(), ValidUntil: time.Now()},
+		repo.GetValidSessionParams{ID: id, ValidUntil: time.Now()},
 	)
 	if err != nil {
 		log.Printf("Failed getting valid session: %v", err)

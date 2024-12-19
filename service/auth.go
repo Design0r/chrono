@@ -1,8 +1,11 @@
 package service
 
 import (
+	"encoding/base64"
 	"net/http"
 	"time"
+
+	"crypto/rand"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -45,4 +48,13 @@ func DeleteSessionCookie() *http.Cookie {
 	cookie.MaxAge = -1
 
 	return &cookie
+}
+
+func SecureRandom(length int) string {
+	randomBytes := make([]byte, length)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		panic(err)
+	}
+	return base64.URLEncoding.EncodeToString(randomBytes)
 }

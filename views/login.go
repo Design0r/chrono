@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
 	"calendar/assets/templates"
@@ -65,17 +64,12 @@ func HandleLogin(c echo.Context, db *sql.DB) error {
 }
 
 func HandleLogout(c echo.Context, db *sql.DB) error {
-	cookie, err := c.Cookie("session")
+	session, err := c.Cookie("session")
 	if err != nil {
 		return err
 	}
 
-	sessionId, err := uuid.Parse(cookie.Value)
-	if err != nil {
-		htmx.ErrorMessage("Internal error.", c)
-		return err
-	}
-	service.DeleteSession(db, sessionId)
+	service.DeleteSession(db, session.Value)
 
 	c.SetCookie(service.DeleteSessionCookie())
 	htmx.HxRedirect("/login", c)

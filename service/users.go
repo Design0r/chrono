@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
 	"calendar/db/repo"
@@ -77,11 +76,7 @@ func GetCurrentUser(db *sql.DB, c echo.Context) (repo.User, error) {
 	if err != nil {
 		return repo.User{}, err
 	}
-	id, err := uuid.Parse(session.Value)
-	if err != nil {
-		return repo.User{}, err
-	}
-	return GetUserFromSession(db, id)
+	return GetUserFromSession(db, session.Value)
 }
 
 func HashCode(s string) int {

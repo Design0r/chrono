@@ -6,8 +6,8 @@ import (
 	"fmt"
 )
 
-templ Home(user repo.User, vacationUsed int, progress schemas.YearProgress) {
-	@Index(true) {
+templ Home(user repo.User, vacationUsed int, progress schemas.YearProgress, notifications []repo.Notification) {
+	@Index(true, notifications) {
 		<div class="flex flex-col container mx-auto justify-center align-middle gap-10 p-4">
 			@Card("Vacation") {
 				<div class="stats shadow">

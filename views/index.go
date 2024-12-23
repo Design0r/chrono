@@ -38,6 +38,12 @@ func HandleIndex(c echo.Context, db *sql.DB) error {
 		DaysPassedPercent: service.YearProgressPercent(currYear),
 	}
 
-	templates.Home(currUser, vacDays, stats).Render(context.Background(), c.Response().Writer)
+	notifications, err := service.GetUserNotifications(db, currUser.ID)
+	if err != nil {
+		return err
+	}
+
+	templates.Home(currUser, vacDays, stats, notifications).
+		Render(context.Background(), c.Response().Writer)
 	return nil
 }

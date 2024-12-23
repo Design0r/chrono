@@ -20,7 +20,7 @@ func UpdateHolidays(db *sql.DB, year int) error {
 	if HolidayCacheExists(db, year) {
 		return nil
 	}
-	bot, err := GetUserByName(db, "APIBot")
+	bot, err := GetUserByName(db, "Chrono Bot")
 	if err != nil {
 		return err
 	}

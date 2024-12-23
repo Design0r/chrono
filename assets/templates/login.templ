@@ -1,7 +1,9 @@
 package templates
 
+import "calendar/db/repo"
+
 templ Login() {
-	@Index(false) {
+	@Index(false, []repo.Notification{}) {
 		<div class="flex my-10">
 			<div class="align-middle flex m-auto">
 				<div>
@@ -44,7 +46,7 @@ templ Login() {
 }
 
 templ Signup() {
-	@Index(false) {
+	@Index(false, []repo.Notification{}) {
 		<div class="flex my-10">
 			<div class="align-middle flex m-auto">
 				<div>

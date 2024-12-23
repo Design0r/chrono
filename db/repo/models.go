@@ -18,9 +18,28 @@ type Event struct {
 	ID          int64     `json:"id"`
 	ScheduledAt time.Time `json:"scheduled_at"`
 	Name        string    `json:"name"`
+	State       string    `json:"state"`
 	CreatedAt   time.Time `json:"created_at"`
 	EditedAt    time.Time `json:"edited_at"`
 	UserID      int64     `json:"user_id"`
+}
+
+type Notification struct {
+	ID        int64      `json:"id"`
+	Message   string     `json:"message"`
+	CreatedAt time.Time  `json:"created_at"`
+	ViewedAt  *time.Time `json:"viewed_at"`
+	UserID    int64      `json:"user_id"`
+}
+
+type Request struct {
+	ID        int64     `json:"id"`
+	Message   *string   `json:"message"`
+	State     string    `json:"state"`
+	CreatedAt time.Time `json:"created_at"`
+	EditedAt  time.Time `json:"edited_at"`
+	UserID    int64     `json:"user_id"`
+	EventID   int64     `json:"event_id"`
 }
 
 type Session struct {

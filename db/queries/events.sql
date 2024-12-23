@@ -1,6 +1,6 @@
 -- name: CreateEvent :one
-INSERT INTO events (name, user_id, scheduled_at)
-VALUES (?, ?, ?)
+INSERT INTO events (name, user_id, scheduled_at, state)
+VALUES (?, ?, ?, ?)
 RETURNING *;
 
 -- name: GetEventsForDay :many
@@ -12,11 +12,23 @@ DELETE from events
 WHERE id = ?
 RETURNING *;
 
+-- name: GetUserPendingEvents :many
+SELECT * FROM events
+WHERE user_id = ?
+AND state = "pending";
+
 -- name: GetEventsForMonth :many
 SELECT *
 FROM events e
 JOIN users u ON e.user_id = u.id
 WHERE scheduled_at >= ? AND scheduled_at < ?;
+
+-- name: GetAcceptedEventsForMonth :many
+SELECT *
+FROM events e
+JOIN users u ON e.user_id = u.id
+WHERE scheduled_at >= ? AND scheduled_at < ?
+AND state = "accepted";
 
 -- name: GetVacationCountForUser :one 
 SELECT Count(*) from events

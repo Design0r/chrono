@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	db := db.NewDB("calendar.db")
+	db := db.NewDB("chrono.db")
 	defer db.Close()
 
 	e := echo.New()

@@ -16,8 +16,10 @@ templ Event(event schemas.Event, user repo.User) {
 	}}
 	<div
 		id={ eventId }
-		{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
-		class="bg-blue-500 text-center relative rounded text-base-content"
+		if event.State != "pending" {
+			{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
+		}
+		class="bg-gray-500 text-center relative rounded text-base-content"
 	>
 		if event.UserID == user.ID {
 			<button

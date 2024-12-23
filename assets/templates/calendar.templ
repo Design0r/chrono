@@ -6,7 +6,7 @@ import "calendar/schemas"
 import "calendar/db/repo"
 
 templ Calendar(user repo.User, month schemas.Month, vacationUsed int) {
-	@Index(true) {
+	@Index(true, []repo.Notification{}) {
 		<div class="px-5">
 			@Info(month, user, vacationUsed)
 			<div class="grid grid-cols-7">

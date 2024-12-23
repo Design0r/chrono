@@ -3,8 +3,9 @@ package templates
 import "strconv"
 import "fmt"
 import "time"
+import "calendar/db/repo"
 
-templ Index(loggedIn bool) {
+templ Index(loggedIn bool, notifications []repo.Notification) {
 	<!DOCTYPE html>
 	<html data-theme="dim" lang="en">
 		<head>
@@ -12,10 +13,10 @@ templ Index(loggedIn bool) {
 			<link rel="stylesheet" href="/static/css/output.css"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<script src="/static/js/htmx-min.js"></script>
-			<title>Apic Calendar</title>
+			<title>Chrono</title>
 		</head>
 		<body class="h-screen flex flex-col">
-			@Header(loggedIn)
+			@Header(loggedIn, notifications)
 			{ children... }
 			<div id="message-banner" class="fixed left-3 bottom-3 space-y-2"></div>
 			<script>
@@ -36,7 +37,23 @@ templ Index(loggedIn bool) {
 	</html>
 }
 
-templ Header(loggedIn bool) {
+templ Notifications(notifications []repo.Notification) {
+	<div class="indicator">
+		if len(notifications) > 0 {
+			<span class="indicator-item align-items-start badge badge-primary">{ fmt.Sprintf("%v", len(notifications)) }</span>
+		}
+		<div class="dropdown dropdown-end">
+			<div tabindex="0" role="button" class="btn btn-ghost text-xl icon-outlined">notifications</div>
+			<ul tabindex="0" class="dropdown-content menu bg-base-200 rounded-box z-[1] w-52 p-2 shadow">
+				for _, n := range notifications {
+					<li><a>{ n.Message }</a></li>
+				}
+			</ul>
+		</div>
+	</div>
+}
+
+templ Header(loggedIn bool, notifications []repo.Notification) {
 	{{
 	now := time.Now()
 	month := strconv.Itoa(int(now.Month()))
@@ -45,11 +62,12 @@ templ Header(loggedIn bool) {
 	}}
 	<div class="navbar flex justify-between bg-base-300">
 		<div>
-			<a href="/" class="btn btn-ghost text-xl">Apic Chrono</a>
+			<a href="/" class="btn btn-ghost text-xl">Chrono</a>
 			<a href={ templ.URL(url) } class="btn btn-ghost">Calendar</a>
 		</div>
 		<div class="justify-end">
 			if loggedIn {
+				@Notifications(notifications)
 				<form action="/logout" method="post">
 					<button type="submit" class="btn btn-ghost">Logout</button>
 				</form>

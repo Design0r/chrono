@@ -21,10 +21,10 @@ migrate:
 	@goose -dir=${migrationDir} create ${args}
 
 up:
-	@goose -dir=${migrationDir} sqlite calendar.db up
+	@goose -dir=${migrationDir} sqlite chrono.db up
 
 down:
-	@goose -dir=${migrationDir} sqlite calendar.db down
+	@goose -dir=${migrationDir} sqlite chrono.db down
 
 
 live/templ:
@@ -44,4 +44,4 @@ build:
 	@npm install 
 	@npx --yes tailwindcss -i ./assets/static/css/input.css -o ./assets/static/css/output.css --minify
 	@templ generate
-	@go build -o ./build/ApicCalendar.exe ./cmd/main.go
+	@go build -o ./build/Chrono.exe ./cmd/main.go

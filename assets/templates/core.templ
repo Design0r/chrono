@@ -5,7 +5,7 @@ import "fmt"
 import "time"
 import "calendar/db/repo"
 
-templ Index(loggedIn bool, notifications []repo.Notification) {
+templ Index(user *repo.User, notifications []repo.Notification) {
 	<!DOCTYPE html>
 	<html data-theme="dim" lang="en">
 		<head>
@@ -16,7 +16,7 @@ templ Index(loggedIn bool, notifications []repo.Notification) {
 			<title>Chrono</title>
 		</head>
 		<body class="h-screen flex flex-col">
-			@Header(loggedIn, notifications)
+			@Header(user, notifications)
 			{ children... }
 			<div id="message-banner" class="fixed left-3 bottom-3 space-y-2"></div>
 			<script>
@@ -37,6 +37,22 @@ templ Index(loggedIn bool, notifications []repo.Notification) {
 	</html>
 }
 
+templ Static() {
+	<!DOCTYPE html>
+	<html data-theme="dim" lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<link rel="stylesheet" href="/static/css/output.css"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<script src="/static/js/htmx-min.js"></script>
+			<title>Chrono</title>
+		</head>
+		<body class="h-screen flex flex-col">
+			{ children... }
+		</body>
+	</html>
+}
+
 templ Notifications(notifications []repo.Notification) {
 	<div class="indicator">
 		if len(notifications) > 0 {
@@ -53,7 +69,7 @@ templ Notifications(notifications []repo.Notification) {
 	</div>
 }
 
-templ Header(loggedIn bool, notifications []repo.Notification) {
+templ Header(user *repo.User, notifications []repo.Notification) {
 	{{
 	now := time.Now()
 	month := strconv.Itoa(int(now.Month()))
@@ -64,9 +80,13 @@ templ Header(loggedIn bool, notifications []repo.Notification) {
 		<div>
 			<a href="/" class="btn btn-ghost text-xl">Chrono</a>
 			<a href={ templ.URL(url) } class="btn btn-ghost">Calendar</a>
+			<a href="/team" class="btn btn-ghost">Team</a>
+			if user != nil && (*user).IsSuperuser {
+				<a href="/requests" class="btn btn-ghost">Requests</a>
+			}
 		</div>
 		<div class="justify-end">
-			if loggedIn {
+			if user != nil {
 				@Notifications(notifications)
 				<form action="/logout" method="post">
 					<button type="submit" class="btn btn-ghost">Logout</button>

@@ -1,4 +1,47 @@
 package templates
 
-templ Team() {
+import "calendar/db/repo"
+import "fmt"
+
+templ Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) {
+	@Index(&currUser, notifications) {
+		<div class="m-5 bg-base-300 overflow-x-auto">
+			<table class="table">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Admin</th>
+						<th>Vacation days</th>
+						<th>Vacation days used</th>
+						<th>Vacation days remaining</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, user := range users {
+						@TeamRow(user)
+					}
+				</tbody>
+			</table>
+		</div>
+	}
+}
+
+templ TeamRow(user repo.GetUsersWithVacationCountRow) {
+	{{
+	icon := ""
+	if user.IsSuperuser {
+		icon = "check_circle"
+	}
+	}}
+	<tr class="hover">
+		<th>{ fmt.Sprint(user.ID) }</th>
+		<th>{ user.Username }</th>
+		<td>{ user.Email }</td>
+		<td class="icon-outlined">{ icon }</td>
+		<td>{ fmt.Sprint(user.VacationDays) }</td>
+		<td>{ fmt.Sprint(user.VacationCount) }</td>
+		<td>{ fmt.Sprint(user.VacationDays-user.VacationCount) }</td>
+	</tr>
 }

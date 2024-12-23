@@ -7,6 +7,7 @@ package repo
 
 import (
 	"context"
+	"time"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -116,6 +117,73 @@ func (q *Queries) GetUserByName(ctx context.Context, username string) (User, err
 		&i.EditedAt,
 	)
 	return i, err
+}
+
+const getUsersWithVacationCount = `-- name: GetUsersWithVacationCount :many
+SELECT 
+    users.id, users.username, users.email, users.password, users.vacation_days, users.is_superuser, users.created_at, users.edited_at,
+    COUNT(events.id) AS vacation_count
+FROM 
+    users
+LEFT JOIN 
+    events
+ON 
+    users.id = events.user_id
+    AND events.name = "urlaub"
+    AND events.scheduled_at >= ?
+    AND events.scheduled_at < ?
+GROUP BY 
+    users.id, users.username, users.email, users.vacation_days
+`
+
+type GetUsersWithVacationCountParams struct {
+	ScheduledAt   time.Time `json:"scheduled_at"`
+	ScheduledAt_2 time.Time `json:"scheduled_at_2"`
+}
+
+type GetUsersWithVacationCountRow struct {
+	ID            int64     `json:"id"`
+	Username      string    `json:"username"`
+	Email         string    `json:"email"`
+	Password      string    `json:"password"`
+	VacationDays  int64     `json:"vacation_days"`
+	IsSuperuser   bool      `json:"is_superuser"`
+	CreatedAt     time.Time `json:"created_at"`
+	EditedAt      time.Time `json:"edited_at"`
+	VacationCount int64     `json:"vacation_count"`
+}
+
+func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWithVacationCountParams) ([]GetUsersWithVacationCountRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUsersWithVacationCount, arg.ScheduledAt, arg.ScheduledAt_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUsersWithVacationCountRow
+	for rows.Next() {
+		var i GetUsersWithVacationCountRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.VacationDays,
+			&i.IsSuperuser,
+			&i.CreatedAt,
+			&i.EditedAt,
+			&i.VacationCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateVacationDays = `-- name: UpdateVacationDays :one

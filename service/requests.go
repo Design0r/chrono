@@ -30,3 +30,14 @@ func CreateRequest(db *sql.DB, msg string, user repo.User, event repo.Event) (re
 
 	return request, nil
 }
+
+func GetPendingRequests(db *sql.DB) ([]repo.GetPendingRequestsRow, error) {
+	r := repo.New(db)
+
+	req, err := r.GetPendingRequests(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}

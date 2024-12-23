@@ -25,3 +25,18 @@ SET vacation_days = ?
 WHERE id = ?
 RETURNING *;
 
+-- name: GetUsersWithVacationCount :many
+SELECT 
+    users.*,
+    COUNT(events.id) AS vacation_count
+FROM 
+    users
+LEFT JOIN 
+    events
+ON 
+    users.id = events.user_id
+    AND events.name = "urlaub"
+    AND events.scheduled_at >= ?
+    AND events.scheduled_at < ?
+GROUP BY 
+    users.id, users.username, users.email, users.vacation_days;

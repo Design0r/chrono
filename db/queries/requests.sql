@@ -8,8 +8,8 @@ SELECT * FROM requests
 WHERE user_id = ?;
 
 -- name: GetPendingRequests :many
-SELECT * FROM requests
-WHERE user_id = ?
+SELECT * FROM requests r
+JOIN users u ON r.user_id = u.id
 AND state = "pending";
 
 -- name: UpdateRequestState :one

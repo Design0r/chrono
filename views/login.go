@@ -3,6 +3,7 @@ package views
 import (
 	"context"
 	"database/sql"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 
@@ -72,8 +73,7 @@ func HandleLogout(c echo.Context, db *sql.DB) error {
 	service.DeleteSession(db, session.Value)
 
 	c.SetCookie(service.DeleteSessionCookie())
-	htmx.HxRedirect("/login", c)
-	return nil
+	return c.Redirect(http.StatusFound, "/login")
 }
 
 func HandleSignup(c echo.Context, db *sql.DB) error {

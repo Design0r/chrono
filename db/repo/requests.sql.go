@@ -7,6 +7,7 @@ package repo
 
 import (
 	"context"
+	"time"
 )
 
 const createRequest = `-- name: CreateRequest :one
@@ -43,20 +44,38 @@ func (q *Queries) CreateRequest(ctx context.Context, arg CreateRequestParams) (R
 }
 
 const getPendingRequests = `-- name: GetPendingRequests :many
-SELECT id, message, state, created_at, edited_at, user_id, event_id FROM requests
-WHERE user_id = ?
+SELECT r.id, message, state, r.created_at, r.edited_at, user_id, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at FROM requests r
+JOIN users u ON r.user_id = u.id
 AND state = "pending"
 `
 
-func (q *Queries) GetPendingRequests(ctx context.Context, userID int64) ([]Request, error) {
-	rows, err := q.db.QueryContext(ctx, getPendingRequests, userID)
+type GetPendingRequestsRow struct {
+	ID           int64     `json:"id"`
+	Message      *string   `json:"message"`
+	State        string    `json:"state"`
+	CreatedAt    time.Time `json:"created_at"`
+	EditedAt     time.Time `json:"edited_at"`
+	UserID       int64     `json:"user_id"`
+	EventID      int64     `json:"event_id"`
+	ID_2         int64     `json:"id_2"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	Password     string    `json:"password"`
+	VacationDays int64     `json:"vacation_days"`
+	IsSuperuser  bool      `json:"is_superuser"`
+	CreatedAt_2  time.Time `json:"created_at_2"`
+	EditedAt_2   time.Time `json:"edited_at_2"`
+}
+
+func (q *Queries) GetPendingRequests(ctx context.Context) ([]GetPendingRequestsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPendingRequests)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Request
+	var items []GetPendingRequestsRow
 	for rows.Next() {
-		var i Request
+		var i GetPendingRequestsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Message,
@@ -65,6 +84,14 @@ func (q *Queries) GetPendingRequests(ctx context.Context, userID int64) ([]Reque
 			&i.EditedAt,
 			&i.UserID,
 			&i.EventID,
+			&i.ID_2,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.VacationDays,
+			&i.IsSuperuser,
+			&i.CreatedAt_2,
+			&i.EditedAt_2,
 		); err != nil {
 			return nil, err
 		}

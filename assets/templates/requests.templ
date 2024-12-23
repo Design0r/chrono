@@ -1,0 +1,13 @@
+package templates
+
+import "calendar/db/repo"
+
+templ Requests(user *repo.User, requests []repo.GetPendingRequestsRow, notifications []repo.Notification) {
+	@Index(user, notifications) {
+		<div>
+			for _, request := range requests {
+				<div>{ request.Username }</div>
+			}
+		</div>
+	}
+}

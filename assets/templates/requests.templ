@@ -13,6 +13,7 @@ templ Requests(user *repo.User, requests []repo.GetPendingRequestsRow, notificat
 						<th>Name</th>
 						<th>Message</th>
 						<th>Event Type</th>
+						<th>Event Date</th>
 						<th></th>
 						<th></th>
 					</tr>
@@ -34,13 +35,15 @@ templ RequestRow(request repo.GetPendingRequestsRow) {
 		msg = *request.Message
 	}
 	url := fmt.Sprintf("/requests/%v", request.ID)
+	year, month, day := request.ScheduledAt.Date()
 	}}
 	<tr id={ fmt.Sprintf("request-%v", request.ID) } class="hover">
 		<td>{ fmt.Sprint(request.ID) }</td>
 		<td>{ request.Username }</td>
 		<td>{ msg }</td>
 		<td>{ request.Name }</td>
-		<td hx-patch={ url } hx-vals='{"state":"accepted"}' hx-swap="delete" hx-target={ fmt.Sprintf("#request-%v", request.ID) } class="icon-outlined btn btn-ghost">check</td>
-		<td hx-patch={ url } hx-vals='{"state":"declined"}' hx-swap="delete" hx-target={ fmt.Sprintf("#request-%v", request.ID) } class="icon-outlined btn btn-ghost">close</td>
+		<td>{ fmt.Sprintf("%v. %v %v",day, month, year) }</td>
+		<td hx-patch={ url } hx-vals='{"state":"accepted"}' hx-swap="delete" hx-target={ fmt.Sprintf("#request-%v", request.ID) } class="icon-outlined btn btn-ghost text-xl">check</td>
+		<td hx-patch={ url } hx-vals='{"state":"declined"}' hx-swap="delete" hx-target={ fmt.Sprintf("#request-%v", request.ID) } class="icon-outlined btn btn-ghost text-xl">close</td>
 	</tr>
 }

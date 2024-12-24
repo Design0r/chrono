@@ -4,6 +4,8 @@ import "strconv"
 import "fmt"
 import "time"
 import "calendar/db/repo"
+import "calendar/service"
+import "strings"
 
 templ Index(user *repo.User, notifications []repo.Notification) {
 	<!DOCTYPE html>
@@ -81,10 +83,36 @@ templ Header(user *repo.User, notifications []repo.Notification) {
 		</div>
 		<div class="justify-end">
 			if user != nil {
+				{{
+	bgColor := service.GenerateHSL(int((*user).ID))
+				}}
 				@Notifications(notifications)
 				<form action="/logout" method="post">
 					<button type="submit" class="btn btn-ghost">Logout</button>
 				</form>
+				<div class="dropdown dropdown-end">
+					<div
+						tabindex="0"
+						role="button"
+						{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
+						class="btn btn-ghost btn-circle text-xl avatar"
+					>
+						{ strings.Title(user.Username[:1]) }
+					</div>
+					<ul
+						tabindex="0"
+						class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+					>
+						<li>
+							<a class="justify-between">
+								Profile
+								<span class="badge">New</span>
+							</a>
+						</li>
+						<li><a>Settings</a></li>
+						<li><a>Logout</a></li>
+					</ul>
+				</div>
 			} else {
 				<a href="/login" class="btn btn-ghost">Login</a>
 				<a href="/signup" class="btn btn-ghost">Signup</a>

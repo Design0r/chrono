@@ -12,6 +12,8 @@ import "strconv"
 import "fmt"
 import "time"
 import "calendar/db/repo"
+import "calendar/service"
+import "strings"
 
 func Index(user *repo.User, notifications []repo.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -186,11 +188,34 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 			return templ_7745c5c3_Err
 		}
 		if user != nil {
+
+			bgColor := service.GenerateHSL(int((*user).ID))
 			templ_7745c5c3_Err = Notifications(notifications).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <form action=\"/logout\" method=\"post\"><button type=\"submit\" class=\"btn btn-ghost\">Logout</button></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <form action=\"/logout\" method=\"post\"><button type=\"submit\" class=\"btn btn-ghost\">Logout</button></form><div class=\"dropdown dropdown-end\"><div tabindex=\"0\" role=\"button\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, templ.Attributes{"style": fmt.Sprintf("background-color: %v;", bgColor)})
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"btn btn-ghost btn-circle text-xl avatar\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Title(user.Username[:1]))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 100, Col: 40}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><ul tabindex=\"0\" class=\"menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow\"><li><a class=\"justify-between\">Profile <span class=\"badge\">New</span></a></li><li><a>Settings</a></li><li><a>Logout</a></li></ul></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

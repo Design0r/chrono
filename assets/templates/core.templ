@@ -55,16 +55,10 @@ templ Static() {
 
 templ Notifications(notifications []repo.Notification) {
 	<div class="indicator">
-		if len(notifications) > 0 {
-			<span class="indicator-item align-items-start badge badge-primary">{ fmt.Sprintf("%v", len(notifications)) }</span>
-		}
+		@NotificationIndicator(len(notifications))
 		<div class="dropdown dropdown-end">
-			<div tabindex="0" role="button" class="btn btn-ghost text-xl icon-outlined">notifications</div>
-			<ul tabindex="0" class="dropdown-content menu bg-base-200 rounded-box z-[1] w-52 p-2 shadow">
-				for _, n := range notifications {
-					<li><a>{ n.Message }</a></li>
-				}
-			</ul>
+			<div tabindex="0" hx-get="/notifications" hx-swap="outerHTML" hx-target="#notification-container" role="button" class="btn btn-ghost text-xl icon-outlined">notifications</div>
+			@NotificationContainer([]repo.Notification{})
 		</div>
 	</div>
 }

@@ -5,12 +5,12 @@ RETURNING *;
 
 -- name: ClearNotification :exec
 UPDATE notifications
-SET viewed = CURRENT_TIMESTAMP
+SET viewed_at = CURRENT_TIMESTAMP
 WHERE id = ?;
 
 -- name: ClearAllNotification :exec
 UPDATE notifications
-SET viewed = CURRENT_TIMESTAMP
+SET viewed_at = CURRENT_TIMESTAMP
 WHERE user_id = ?;
 
 -- name: GetUserNotifications :many

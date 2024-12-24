@@ -11,7 +11,7 @@ import (
 
 const clearAllNotification = `-- name: ClearAllNotification :exec
 UPDATE notifications
-SET viewed = CURRENT_TIMESTAMP
+SET viewed_at = CURRENT_TIMESTAMP
 WHERE user_id = ?
 `
 
@@ -22,7 +22,7 @@ func (q *Queries) ClearAllNotification(ctx context.Context, userID int64) error 
 
 const clearNotification = `-- name: ClearNotification :exec
 UPDATE notifications
-SET viewed = CURRENT_TIMESTAMP
+SET viewed_at = CURRENT_TIMESTAMP
 WHERE id = ?
 `
 

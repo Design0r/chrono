@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"calendar/assets/templates"
+	"calendar/htmx"
 	"calendar/middleware"
 	"calendar/schemas"
 	"calendar/service"
@@ -51,7 +52,13 @@ func CreateEventHandler(c echo.Context, db *sql.DB) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "")
 	}
 
-	templates.CreateEventUpdate(e, currUser, vacationUsed).
+	notifications, err := service.GetUserNotifications(db, currUser.ID)
+	if err != nil {
+		htmx.ErrorMessage("Failed to get notifications", c)
+		return err
+	}
+
+	templates.CreateEventUpdate(e, currUser, vacationUsed, len(notifications)).
 		Render(context.Background(), c.Response().Writer)
 	return nil
 }
@@ -83,7 +90,13 @@ func DeleteEventHandler(c echo.Context, db *sql.DB) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "")
 	}
 
-	templates.CreateEventUpdate(e, currUser, vacationUsed).
+	notifications, err := service.GetUserNotifications(db, currUser.ID)
+	if err != nil {
+		htmx.ErrorMessage("Failed getting notifications", c)
+		return err
+	}
+
+	templates.CreateEventUpdate(e, currUser, vacationUsed, len(notifications)).
 		Render(context.Background(), c.Response().Writer)
 	return nil
 }

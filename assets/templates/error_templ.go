@@ -41,7 +41,7 @@ func AdminError() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-base-100 h-screen gap-5 flex items-center flex-col justify-center text-center\"><h1 class=\"text-4xl\">Error</h1><p class=\"text-xl\">Whoops, this page is only available for admins.</p><a href=\"/\" class=\"btn max-w-30 btn-primary\">Return to Home</a></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

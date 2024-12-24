@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 
 	"calendar/db/repo"
@@ -36,8 +37,34 @@ func GetPendingRequests(db *sql.DB) ([]repo.GetPendingRequestsRow, error) {
 
 	req, err := r.GetPendingRequests(context.Background())
 	if err != nil {
-		return nil, err
+		return []repo.GetPendingRequestsRow{}, err
 	}
 
 	return req, nil
+}
+
+func UpdateRequestState(db *sql.DB, state string, currUser repo.User, reqId int64) error {
+	r := repo.New(db)
+
+	if state != "accepted" && state != "declined" {
+		return fmt.Errorf("Invalid state: %v", state)
+	}
+
+	data := repo.UpdateRequestStateParams{State: state, EditedBy: &currUser.ID, ID: reqId}
+	req, err := r.UpdateRequestState(context.Background(), data)
+	if err != nil {
+		return err
+	}
+
+	event, err := UpdateEventState(db, state, req.EventID)
+	if err != nil {
+		return err
+	}
+
+	_, err = CreateNotification(db, GenerateUpdateMsg(currUser.Username, state, event), req.UserID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -16,10 +16,16 @@ templ Event(event schemas.Event, user repo.User) {
 	}}
 	<div
 		id={ eventId }
-		if event.State != "pending" {
-			{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
+		if event.State == "pending" {
+			class="bg-gray-500 text-center relative rounded text-base-content"
 		}
-		class="bg-gray-500 text-center relative rounded text-base-content"
+		if event.State == "declined" {
+			class="bg-error text-center relative rounded text-base-100"
+		}
+		if event.State == "accepted" {
+			{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
+			class="text-center relative rounded text-base-content"
+		}
 	>
 		if event.UserID == user.ID {
 			<button

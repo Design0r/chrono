@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	_ "github.com/mattn/go-sqlite3"
 
@@ -21,5 +24,5 @@ func main() {
 	server.InitMiddleware()
 	server.InitRoutes(apiV1)
 
-	log.Fatal(server.Start(":8080"))
+	log.Fatal(server.Start(fmt.Sprintf(":%v", os.Getenv("CHRONO_PORT"))))
 }

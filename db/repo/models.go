@@ -39,6 +39,7 @@ type Request struct {
 	CreatedAt time.Time `json:"created_at"`
 	EditedAt  time.Time `json:"edited_at"`
 	UserID    int64     `json:"user_id"`
+	EditedBy  *int64    `json:"edited_by"`
 	EventID   int64     `json:"event_id"`
 }
 

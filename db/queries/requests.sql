@@ -10,12 +10,14 @@ WHERE user_id = ?;
 -- name: GetPendingRequests :many
 SELECT * FROM requests r
 JOIN users u ON r.user_id = u.id
-AND state = "pending";
+JOIN events e ON r.event_id = e.id
+WHERE r.state = "pending";
 
 -- name: UpdateRequestState :one
 UPDATE requests
-SET state = ?
-WHERE user_id = ?
-AND id = ?
+SET state = ?,
+edited_by = ?,
+edited_at = CURRENT_TIMESTAMP
+WHERE id = ?
 RETURNING *;
 

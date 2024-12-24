@@ -69,3 +69,7 @@ func GenerateAcceptMsg(username string, event repo.Event) string {
 func GenerateRejectMsg(username string, event repo.Event) string {
 	return fmt.Sprintf("%v rejected your %v request!", username, event.Name)
 }
+
+func GenerateUpdateMsg(username string, state string, event repo.Event) string {
+	return fmt.Sprintf("%v %v your %v request!", username, state, event.Name)
+}

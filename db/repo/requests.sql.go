@@ -13,7 +13,7 @@ import (
 const createRequest = `-- name: CreateRequest :one
 INSERT INTO requests (message, state, user_id, event_id)
 VALUES (?, ?, ?, ?)
-RETURNING id, message, state, created_at, edited_at, user_id, event_id
+RETURNING id, message, state, created_at, edited_at, user_id, edited_by, event_id
 `
 
 type CreateRequestParams struct {
@@ -38,15 +38,17 @@ func (q *Queries) CreateRequest(ctx context.Context, arg CreateRequestParams) (R
 		&i.CreatedAt,
 		&i.EditedAt,
 		&i.UserID,
+		&i.EditedBy,
 		&i.EventID,
 	)
 	return i, err
 }
 
 const getPendingRequests = `-- name: GetPendingRequests :many
-SELECT r.id, message, state, r.created_at, r.edited_at, user_id, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at FROM requests r
+SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, e.id, scheduled_at, name, e.state, e.created_at, e.edited_at, e.user_id FROM requests r
 JOIN users u ON r.user_id = u.id
-AND state = "pending"
+JOIN events e ON r.event_id = e.id
+WHERE r.state = "pending"
 `
 
 type GetPendingRequestsRow struct {
@@ -56,6 +58,7 @@ type GetPendingRequestsRow struct {
 	CreatedAt    time.Time `json:"created_at"`
 	EditedAt     time.Time `json:"edited_at"`
 	UserID       int64     `json:"user_id"`
+	EditedBy     *int64    `json:"edited_by"`
 	EventID      int64     `json:"event_id"`
 	ID_2         int64     `json:"id_2"`
 	Username     string    `json:"username"`
@@ -65,6 +68,13 @@ type GetPendingRequestsRow struct {
 	IsSuperuser  bool      `json:"is_superuser"`
 	CreatedAt_2  time.Time `json:"created_at_2"`
 	EditedAt_2   time.Time `json:"edited_at_2"`
+	ID_3         int64     `json:"id_3"`
+	ScheduledAt  time.Time `json:"scheduled_at"`
+	Name         string    `json:"name"`
+	State_2      string    `json:"state_2"`
+	CreatedAt_3  time.Time `json:"created_at_3"`
+	EditedAt_3   time.Time `json:"edited_at_3"`
+	UserID_2     int64     `json:"user_id_2"`
 }
 
 func (q *Queries) GetPendingRequests(ctx context.Context) ([]GetPendingRequestsRow, error) {
@@ -83,6 +93,7 @@ func (q *Queries) GetPendingRequests(ctx context.Context) ([]GetPendingRequestsR
 			&i.CreatedAt,
 			&i.EditedAt,
 			&i.UserID,
+			&i.EditedBy,
 			&i.EventID,
 			&i.ID_2,
 			&i.Username,
@@ -92,6 +103,13 @@ func (q *Queries) GetPendingRequests(ctx context.Context) ([]GetPendingRequestsR
 			&i.IsSuperuser,
 			&i.CreatedAt_2,
 			&i.EditedAt_2,
+			&i.ID_3,
+			&i.ScheduledAt,
+			&i.Name,
+			&i.State_2,
+			&i.CreatedAt_3,
+			&i.EditedAt_3,
+			&i.UserID_2,
 		); err != nil {
 			return nil, err
 		}
@@ -107,7 +125,7 @@ func (q *Queries) GetPendingRequests(ctx context.Context) ([]GetPendingRequestsR
 }
 
 const getUserRequests = `-- name: GetUserRequests :many
-SELECT id, message, state, created_at, edited_at, user_id, event_id FROM requests
+SELECT id, message, state, created_at, edited_at, user_id, edited_by, event_id FROM requests
 WHERE user_id = ?
 `
 
@@ -127,6 +145,7 @@ func (q *Queries) GetUserRequests(ctx context.Context, userID int64) ([]Request,
 			&i.CreatedAt,
 			&i.EditedAt,
 			&i.UserID,
+			&i.EditedBy,
 			&i.EventID,
 		); err != nil {
 			return nil, err
@@ -144,20 +163,21 @@ func (q *Queries) GetUserRequests(ctx context.Context, userID int64) ([]Request,
 
 const updateRequestState = `-- name: UpdateRequestState :one
 UPDATE requests
-SET state = ?
-WHERE user_id = ?
-AND id = ?
-RETURNING id, message, state, created_at, edited_at, user_id, event_id
+SET state = ?,
+edited_by = ?,
+edited_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING id, message, state, created_at, edited_at, user_id, edited_by, event_id
 `
 
 type UpdateRequestStateParams struct {
-	State  string `json:"state"`
-	UserID int64  `json:"user_id"`
-	ID     int64  `json:"id"`
+	State    string `json:"state"`
+	EditedBy *int64 `json:"edited_by"`
+	ID       int64  `json:"id"`
 }
 
 func (q *Queries) UpdateRequestState(ctx context.Context, arg UpdateRequestStateParams) (Request, error) {
-	row := q.db.QueryRowContext(ctx, updateRequestState, arg.State, arg.UserID, arg.ID)
+	row := q.db.QueryRowContext(ctx, updateRequestState, arg.State, arg.EditedBy, arg.ID)
 	var i Request
 	err := row.Scan(
 		&i.ID,
@@ -166,6 +186,7 @@ func (q *Queries) UpdateRequestState(ctx context.Context, arg UpdateRequestState
 		&i.CreatedAt,
 		&i.EditedAt,
 		&i.UserID,
+		&i.EditedBy,
 		&i.EventID,
 	)
 	return i, err

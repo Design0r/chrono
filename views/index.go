@@ -3,8 +3,11 @@ package views
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 
@@ -28,7 +31,12 @@ func InitIndexRoutes(group *echo.Group, db *sql.DB) {
 	)
 	group.GET(
 		"/requests",
-		func(c echo.Context) error { return HandleTeam(c, db) },
+		func(c echo.Context) error { return HandleRequests(c, db) },
+		middleware.SessionMiddleware(db),
+	)
+	group.PATCH(
+		"/requests/:id",
+		func(c echo.Context) error { return HandlePatchRequests(c, db) },
 		middleware.SessionMiddleware(db),
 	)
 	group.GET(
@@ -107,10 +115,8 @@ func HandleRequests(c echo.Context, db *sql.DB) error {
 		return c.Redirect(http.StatusFound, "/admin-error")
 	}
 
-	requests, err := service.GetPendingRequests(db)
-	if err != nil {
-		return err
-	}
+	requests, _ := service.GetPendingRequests(db)
+	log.Println(requests)
 
 	notifications, err := service.GetUserNotifications(db, currUser.ID)
 	if err != nil {
@@ -119,6 +125,35 @@ func HandleRequests(c echo.Context, db *sql.DB) error {
 
 	templates.Requests(&currUser, requests, notifications).
 		Render(context.Background(), c.Response().Writer)
+	return nil
+}
+
+func HandlePatchRequests(c echo.Context, db *sql.DB) error {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		htmx.ErrorMessage("Invalid request id", c)
+		return err
+	}
+
+	stateParam := c.FormValue("state")
+
+	currUser, err := service.GetCurrentUser(db, c)
+	if err != nil {
+		return err
+	}
+
+	if !currUser.IsSuperuser {
+		return c.Redirect(http.StatusFound, "/admin-error")
+	}
+
+	err = service.UpdateRequestState(db, stateParam, currUser, int64(id))
+	if err != nil {
+		htmx.ErrorMessage("Failed updating request", c)
+		return err
+	}
+
+	htmx.SuccessMessage(fmt.Sprintf("%v %v", strings.Title(stateParam), "Request"), c)
 	return nil
 }
 

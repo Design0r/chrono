@@ -296,3 +296,30 @@ func (q *Queries) GetVacationCountForUser(ctx context.Context, arg GetVacationCo
 	err := row.Scan(&count)
 	return count, err
 }
+
+const updateEventState = `-- name: UpdateEventState :one
+UPDATE events
+SET state = ?
+WHERE id = ?
+RETURNING id, scheduled_at, name, state, created_at, edited_at, user_id
+`
+
+type UpdateEventStateParams struct {
+	State string `json:"state"`
+	ID    int64  `json:"id"`
+}
+
+func (q *Queries) UpdateEventState(ctx context.Context, arg UpdateEventStateParams) (Event, error) {
+	row := q.db.QueryRowContext(ctx, updateEventState, arg.State, arg.ID)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.ScheduledAt,
+		&i.Name,
+		&i.State,
+		&i.CreatedAt,
+		&i.EditedAt,
+		&i.UserID,
+	)
+	return i, err
+}

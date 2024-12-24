@@ -1,13 +1,46 @@
 package templates
 
 import "calendar/db/repo"
+import "fmt"
 
 templ Requests(user *repo.User, requests []repo.GetPendingRequestsRow, notifications []repo.Notification) {
 	@Index(user, notifications) {
-		<div>
-			for _, request := range requests {
-				<div>{ request.Username }</div>
-			}
+		<div class="m-5 bg-base-300 overflow-x-auto">
+			<table class="table">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Name</th>
+						<th>Message</th>
+						<th>Event Type</th>
+						<th></th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, request := range requests {
+						@RequestRow(request)
+					}
+				</tbody>
+			</table>
 		</div>
 	}
+}
+
+templ RequestRow(request repo.GetPendingRequestsRow) {
+	{{
+	msg := ""
+	if request.Message != nil {
+		msg = *request.Message
+	}
+	url := fmt.Sprintf("/requests/%v", request.ID)
+	}}
+	<tr id={ fmt.Sprintf("request-%v", request.ID) } class="hover">
+		<td>{ fmt.Sprint(request.ID) }</td>
+		<td>{ request.Username }</td>
+		<td>{ msg }</td>
+		<td>{ request.Name }</td>
+		<td hx-patch={ url } hx-vals='{"state":"accepted"}' hx-swap="delete" hx-target={ fmt.Sprintf("#request-%v", request.ID) } class="icon-outlined btn btn-ghost">check</td>
+		<td hx-patch={ url } hx-vals='{"state":"declined"}' hx-swap="delete" hx-target={ fmt.Sprintf("#request-%v", request.ID) } class="icon-outlined btn btn-ghost">close</td>
+	</tr>
 }

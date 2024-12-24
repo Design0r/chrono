@@ -45,3 +45,4 @@ build:
 	@npx --yes tailwindcss -i ./assets/static/css/input.css -o ./assets/static/css/output.css --minify
 	@templ generate
 	@go build -o ./build/Chrono.exe ./cmd/main.go
+

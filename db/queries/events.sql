@@ -36,3 +36,9 @@ WHERE user_id = ?
 AND scheduled_at >= ?
 AND scheduled_at < ?
 AND name = "urlaub";
+
+-- name: UpdateEventState :one
+UPDATE events
+SET state = ?
+WHERE id = ?
+RETURNING *;

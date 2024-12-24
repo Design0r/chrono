@@ -180,3 +180,16 @@ func GetVacationCountForUserYear(db *sql.DB, userId int, year int) (int, error) 
 
 	return int(count), nil
 }
+
+func UpdateEventState(db *sql.DB, state string, eventId int64) (repo.Event, error) {
+	r := repo.New(db)
+	params := repo.UpdateEventStateParams{State: state, ID: eventId}
+
+	event, err := r.UpdateEventState(context.Background(), params)
+	if err != nil {
+		log.Printf("Failed to update event state: %v", err)
+		return repo.Event{}, err
+	}
+
+	return event, nil
+}

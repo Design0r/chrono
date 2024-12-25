@@ -14,7 +14,10 @@ templ Event(event schemas.Event, user repo.User) {
 	eventId := fmt.Sprintf("event-%v", event.ID)
 	deleteUrl := fmt.Sprintf("#%v", eventId)
 	}}
-	<div class="indicator w-full">
+	<div
+		id={ eventId }
+		class="indicator w-full"
+	>
 		<span
 			if event.State == "pending" {
 				class="indicator-item indicator-start left-3 top-3 badge badge-ghost"
@@ -24,16 +27,15 @@ templ Event(event schemas.Event, user repo.User) {
 			}
 		></span>
 		<div
-			id={ eventId }
 			{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
-			class="text-center relative  w-full rounded text-base-content"
+			class="text-center relative w-full rounded text-base-content"
 		>
 			if event.UserID == user.ID {
 				<button
 					hx-swap="delete"
 					hx-target={ deleteUrl }
 					hx-delete={ fmt.Sprintf("/events/%v", event.ID) }
-					class="btn btn-ghost rounded text-xl p-0 icon-outlined absolute right-0"
+					class="rounded h-full text-xl p-0 icon-outlined absolute right-0"
 				>close</button>
 			}
 			<div class="text-md">{ strings.Title(event.Name) }</div>

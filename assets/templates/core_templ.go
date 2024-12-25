@@ -237,7 +237,7 @@ func Avatar(user repo.User) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 
 		bgColor := service.GenerateHSL(int(user.ID))
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"dropdown dropdown-end\"><div tabindex=\"0\" role=\"button\" class=\"avatar placeholder\"><div")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"dropdown dropdown-end pr-2\"><div tabindex=\"0\" role=\"button\" class=\"avatar placeholder\"><div")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

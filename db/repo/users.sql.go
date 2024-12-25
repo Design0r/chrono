@@ -56,6 +56,43 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 	return err
 }
 
+const getAdmins = `-- name: GetAdmins :many
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at FROM users
+WHERE is_superuser = true
+`
+
+func (q *Queries) GetAdmins(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getAdmins)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.VacationDays,
+			&i.IsSuperuser,
+			&i.CreatedAt,
+			&i.EditedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at FROM users
 WHERE email = ?

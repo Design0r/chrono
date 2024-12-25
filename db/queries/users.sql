@@ -40,3 +40,7 @@ ON
     AND events.scheduled_at < ?
 GROUP BY 
     users.id, users.username, users.email, users.vacation_days;
+
+-- name: GetAdmins :many
+SELECT * FROM users
+WHERE is_superuser = true;

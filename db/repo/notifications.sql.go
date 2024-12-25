@@ -9,17 +9,6 @@ import (
 	"context"
 )
 
-const clearAllNotification = `-- name: ClearAllNotification :exec
-UPDATE notifications
-SET viewed_at = CURRENT_TIMESTAMP
-WHERE user_id = ?
-`
-
-func (q *Queries) ClearAllNotification(ctx context.Context, userID int64) error {
-	_, err := q.db.ExecContext(ctx, clearAllNotification, userID)
-	return err
-}
-
 const clearNotification = `-- name: ClearNotification :exec
 UPDATE notifications
 SET viewed_at = CURRENT_TIMESTAMP
@@ -32,60 +21,19 @@ func (q *Queries) ClearNotification(ctx context.Context, id int64) error {
 }
 
 const createNotification = `-- name: CreateNotification :one
-INSERT INTO notifications (message, user_id)
-VALUES (?, ?)
-RETURNING id, message, created_at, viewed_at, user_id
+INSERT INTO notifications (message)
+VALUES (?)
+RETURNING id, message, created_at, viewed_at
 `
 
-type CreateNotificationParams struct {
-	Message string `json:"message"`
-	UserID  int64  `json:"user_id"`
-}
-
-func (q *Queries) CreateNotification(ctx context.Context, arg CreateNotificationParams) (Notification, error) {
-	row := q.db.QueryRowContext(ctx, createNotification, arg.Message, arg.UserID)
+func (q *Queries) CreateNotification(ctx context.Context, message string) (Notification, error) {
+	row := q.db.QueryRowContext(ctx, createNotification, message)
 	var i Notification
 	err := row.Scan(
 		&i.ID,
 		&i.Message,
 		&i.CreatedAt,
 		&i.ViewedAt,
-		&i.UserID,
 	)
 	return i, err
-}
-
-const getUserNotifications = `-- name: GetUserNotifications :many
-SELECT id, message, created_at, viewed_at, user_id FROM notifications
-WHERE user_id = ?
-AND viewed_at IS NULL
-`
-
-func (q *Queries) GetUserNotifications(ctx context.Context, userID int64) ([]Notification, error) {
-	rows, err := q.db.QueryContext(ctx, getUserNotifications, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Notification
-	for rows.Next() {
-		var i Notification
-		if err := rows.Scan(
-			&i.ID,
-			&i.Message,
-			&i.CreatedAt,
-			&i.ViewedAt,
-			&i.UserID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }

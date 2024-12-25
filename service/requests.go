@@ -24,7 +24,7 @@ func CreateRequest(db *sql.DB, msg string, user repo.User, event repo.Event) (re
 		return repo.Request{}, err
 	}
 
-	_, err = CreateNotification(db, GenerateRequestMsg(user.Username, event), user.ID)
+	_, err = CreateAdminNotification(db, GenerateRequestMsg(user.Username, event))
 	if err != nil {
 		return repo.Request{}, err
 	}
@@ -61,7 +61,11 @@ func UpdateRequestState(db *sql.DB, state string, currUser repo.User, reqId int6
 		return err
 	}
 
-	_, err = CreateNotification(db, GenerateUpdateMsg(currUser.Username, state, event), req.UserID)
+	_, err = CreateUserNotification(
+		db,
+		GenerateUpdateMsg(currUser.Username, state, event),
+		req.UserID,
+	)
 	if err != nil {
 		return err
 	}

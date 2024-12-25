@@ -9,11 +9,10 @@ import (
 	"calendar/db/repo"
 )
 
-func CreateNotification(db *sql.DB, msg string, userId int64) (repo.Notification, error) {
+func _createNotification(db *sql.DB, msg string) (repo.Notification, error) {
 	r := repo.New(db)
-	data := repo.CreateNotificationParams{Message: msg, UserID: userId}
 
-	n, err := r.CreateNotification(context.Background(), data)
+	n, err := r.CreateNotification(context.Background(), msg)
 	if err != nil {
 		log.Printf("Failed to create notification: %v", err)
 		return repo.Notification{}, err
@@ -22,10 +21,54 @@ func CreateNotification(db *sql.DB, msg string, userId int64) (repo.Notification
 	return n, nil
 }
 
+func CreateUserNotification(db *sql.DB, msg string, userId int64) (repo.Notification, error) {
+	r := repo.New(db)
+
+	n, err := r.CreateNotification(context.Background(), msg)
+	if err != nil {
+		log.Printf("Failed to create notification: %v", err)
+		return repo.Notification{}, err
+	}
+
+	params := repo.CreateNotificationUserParams{NotificationID: n.ID, UserID: userId}
+	err = r.CreateNotificationUser(context.Background(), params)
+	if err != nil {
+		log.Printf("Failed to create notification user association: %v", err)
+	}
+
+	return n, nil
+}
+
+func CreateAdminNotification(db *sql.DB, msg string) (repo.Notification, error) {
+	r := repo.New(db)
+	ctx := context.Background()
+
+	n, err := _createNotification(db, msg)
+	if err != nil {
+		return repo.Notification{}, err
+	}
+
+	admins, err := r.GetAdmins(ctx)
+	if err != nil {
+		log.Printf("Failed to get admin users: %v", admins)
+		return repo.Notification{}, err
+	}
+
+	for _, a := range admins {
+		params := repo.CreateNotificationUserParams{NotificationID: n.ID, UserID: a.ID}
+		err := r.CreateNotificationUser(ctx, params)
+		if err != nil {
+			log.Printf("Failed to create notification user association: %v", err)
+		}
+	}
+
+	return n, nil
+}
+
 func ClearAllNotifications(db *sql.DB, userId int64) error {
 	r := repo.New(db)
 
-	err := r.ClearAllNotification(context.Background(), userId)
+	err := r.ClearAllUserNotifications(context.Background(), userId)
 	if err != nil {
 		log.Printf("Failed to clear notifications: %v", err)
 		return err

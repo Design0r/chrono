@@ -59,9 +59,17 @@ CREATE TABLE IF NOT EXISTS notifications (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   message TEXT NOT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  viewed_at DATETIME,
+  viewed_at DATETIME
+);
 
+
+CREATE TABLE IF NOT EXISTS notification_user (
+  notification_id INTEGER NOT NULL,
   user_id INTEGER NOT NULL,
+
+  PRIMARY KEY(notification_id, user_id),
+
+  FOREIGN KEY(notification_id) REFERENCES notifications(id) ON DELETE CASCADE,
   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -71,4 +79,5 @@ DROP TABLE IF EXISTS sessions;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS api_cache;
 DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS notification_user;
 DROP TABLE IF EXISTS requests;

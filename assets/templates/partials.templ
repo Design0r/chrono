@@ -84,7 +84,12 @@ templ NotificationIndicator(num int) {
 templ NotificationContainer(notifications []repo.Notification) {
 	<ul id="notification-container" tabindex="0" class="dropdown-content menu bg-base-200 rounded-box z-[1] w-52 p-2 shadow">
 		for _, n := range notifications {
-			<li id={ fmt.Sprintf("notification-%v", n.ID) }><div><p>{ n.Message }</p><button hx-patch={ fmt.Sprintf("/notifications/%v", n.ID) } hx-swap="delete" hx-target={ fmt.Sprintf("#notification-%v", n.ID) } class="btn btn-ghost text-xl icon-outlined">close</button></div></li>
+			<li id={ fmt.Sprintf("notification-%v", n.ID) }>
+				<div>
+					<p>{ n.Message }</p>
+					<button hx-patch={ fmt.Sprintf("/notifications/%v", n.ID) } hx-swap="delete" hx-target={ fmt.Sprintf("#notification-%v", n.ID) } class="btn btn-ghost text-xl icon-outlined">close</button>
+				</div>
+			</li>
 		}
 		<button class="btn btn-ghost btn-sm" hx-patch="/notifications" hx-swap="delete" hx-target="#notification-container">Clear All</button>
 	</ul>

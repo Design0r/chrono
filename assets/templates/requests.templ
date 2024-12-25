@@ -5,7 +5,7 @@ import "fmt"
 
 templ Requests(user *repo.User, requests []repo.GetPendingRequestsRow, notifications []repo.Notification) {
 	@Index(user, notifications) {
-		<div class="m-5 bg-base-300 overflow-x-auto">
+		<div class="m-2 bg-base-300 overflow-x-auto">
 			<table class="table">
 				<thead>
 					<tr>

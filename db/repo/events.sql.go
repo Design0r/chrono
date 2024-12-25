@@ -282,6 +282,7 @@ WHERE user_id = ?
 AND scheduled_at >= ?
 AND scheduled_at < ?
 AND name = "urlaub"
+AND state = "accepted"
 `
 
 type GetVacationCountForUserParams struct {

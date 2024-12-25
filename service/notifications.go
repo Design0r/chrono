@@ -58,8 +58,8 @@ func GetUserNotifications(db *sql.DB, userId int64) ([]repo.Notification, error)
 	return n, nil
 }
 
-func GenerateRequestMsg(username string) string {
-	return fmt.Sprintf("%v sent a new request!", username)
+func GenerateRequestMsg(username string, event repo.Event) string {
+	return fmt.Sprintf("%v sent a new request for %v!", username, event.Name)
 }
 
 func GenerateAcceptMsg(username string, event repo.Event) string {

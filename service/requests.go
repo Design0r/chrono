@@ -24,7 +24,7 @@ func CreateRequest(db *sql.DB, msg string, user repo.User, event repo.Event) (re
 		return repo.Request{}, err
 	}
 
-	_, err = CreateNotification(db, GenerateRequestMsg(user.Username), user.ID)
+	_, err = CreateNotification(db, GenerateRequestMsg(user.Username, event), user.ID)
 	if err != nil {
 		return repo.Request{}, err
 	}

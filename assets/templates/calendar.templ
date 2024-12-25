@@ -7,9 +7,9 @@ import "calendar/db/repo"
 
 templ Calendar(user repo.User, month schemas.Month, vacationUsed int) {
 	@Index(&user, []repo.Notification{}) {
-		<div class="px-5">
-			@Info(month, user, vacationUsed)
-			<div class="grid grid-cols-7">
+		<div class="mx-2">
+			<div class="grid grid-cols-7 gap-1">
+				@Info(month, user, vacationUsed)
 				@WeekdayHeader("Monday")
 				@WeekdayHeader("Tuesday")
 				@WeekdayHeader("Wednesday")
@@ -29,7 +29,7 @@ templ Calendar(user repo.User, month schemas.Month, vacationUsed int) {
 }
 
 templ WeekdayHeader(name string) {
-	<div class="bg-base-300 p-2 text-center text-lg">{ name }</div>
+	<div class="bg-base-300 rounded p-2 text-center text-lg">{ name }</div>
 }
 
 templ Day(year int, month int, day schemas.Day, user repo.User) {
@@ -41,19 +41,19 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 	}}
 	<div
 		if day.Name == "Saturday" || day.Name == "Sunday" {
-			class="bg-neutral-content text-neutral rounded m-2 p-0 flex min-h-24 shadow-xl"
+			class="bg-base-200 rounded flex flex-col shadow-xl"
 		} else {
-			class="bg-base-300 rounded m-2 p-0 flex min-h-24 shadow-xl"
+			class="bg-base-300 rounded flex flex-col shadow-xl"
 		}
 	>
-		<div class="card-actions justify-end p-2 text-2xl ">
-			<div class="align-bottom min-w-8">{ strDay }</div>
+		<div class="p-1 pl-2 text-xl">
+			{ strDay }
 		</div>
 		<div
-			class="card-body p-2 h-full bg-neutral rounded-r"
+			class="card-body p-2 h-full bg-neutral rounded-b"
 		>
 			<div
-				class="card-body px-0 pb-2 pt-0 h-full bg-neutral rounded-r"
+				class="card-body px-0 pb-2 pt-0 h-full bg-neutral rounded-b"
 				id={ dayId }
 			>
 				for _, event := range day.Events {
@@ -65,7 +65,7 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 				hx-vals="js:{name: getEventName()}"
 				hx-target={ dayTarget }
 				hx-swap="beforeend"
-				class="btn  hover:border-base-content bg-neutral rounded hover:text-base-content text-base-100 text-center hover:border border-dashed icon-outlined w-full text-2xl"
+				class="btn hover:border-base-content btn-sm bg-neutral rounded hover:text-base-content text-base-100 text-center hover:border border-dashed icon-outlined w-full text-2xl"
 			>add_circle</button>
 		</div>
 	</div>
@@ -96,20 +96,20 @@ templ Info(month schemas.Month, user repo.User, vacationUsed int) {
 	urlPrevYear := fmt.Sprintf("/%v/%v", prevStrYear, strMonth)
 	urlNextYear := fmt.Sprintf("/%v/%v", nextStrYear, strMonth)
 	}}
-	<div class="flex p-3 justify-between items-center space-x-2 ">
-		<div class="flex space-x-5">
+	<div class="col-span-7 grid grid-cols-7 py-1 items-center gap-1">
+		<div class="col-span-3 flex justify-center space-x-5 bg-base-200 rounded p-2">
 			<div class="flex w-30">
-				<a href={ templ.URL(urlPrevMonth) } class="text-2xl icon-outlined">arrow_back</a>
-				<div class="text-2xl text-center w-40 h-1">{ month.Name }</div>
-				<a href={ templ.URL(urlNextMonth) } class="text-2xl icon-outlined">arrow_forward</a>
+				<a href={ templ.URL(urlPrevMonth) } class="text-xl icon-outlined">arrow_back</a>
+				<div class="text-xl text-center w-40 h-1">{ month.Name }</div>
+				<a href={ templ.URL(urlNextMonth) } class="text-xl icon-outlined">arrow_forward</a>
 			</div>
 			<div class="flex">
-				<a href={ templ.URL(urlPrevYear) } class="text-2xl icon-outlined">arrow_back</a>
-				<div class="text-2xl w-20 text-center">{ strYear }</div>
-				<a href={ templ.URL(urlNextYear) } class="text-2xl icon-outlined">arrow_forward</a>
+				<a href={ templ.URL(urlPrevYear) } class="text-xl icon-outlined">arrow_back</a>
+				<div class="text-xl w-20 text-center">{ strYear }</div>
+				<a href={ templ.URL(urlNextYear) } class="text-xl icon-outlined">arrow_forward</a>
 			</div>
 		</div>
-		<select class="select select-bordered h-2 w-full max-w-xs text-xl" name="eventName" id="eventName">
+		<select class="col-span-1 select select-bordered h-2 rounded bg-base-200 max-w-xs text-lg" name="eventName" id="eventName">
 			<option value="urlaub">Urlaub</option>
 			<option value="workation">Workation</option>
 			<option value="krank">Krank</option>
@@ -126,12 +126,12 @@ templ Info(month schemas.Month, user repo.User, vacationUsed int) {
 
 templ VacationCounter(user repo.User, vacationUsed int) {
 	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
-	<div id="vacation-counter" hx-swap-oob="true" class="text-xl ">
-		<h2>Vacation Days:</h2>
-		<div class="flex space-x-2">
-			<div class="text-info">Overall: { strNum }</div>
-			<div class="text-warning">Used: { strconv.Itoa(vacationUsed) }</div>
-			<div class="text-success">Remaining: { fmt.Sprintf("%v", int(user.VacationDays) - vacationUsed) }</div>
+	<div id="vacation-counter" hx-swap-oob="true" class="col-span-3 text-lg">
+		<div class="flex justify-center items-center space-x-2 p-2 rounded bg-base-200">
+			<h2>Vacation</h2>
+			<div class="text-info">Overall { strNum }</div>
+			<div class="text-warning">Used { strconv.Itoa(vacationUsed) }</div>
+			<div class="text-success">Remaining { fmt.Sprintf("%v", int(user.VacationDays) - vacationUsed) }</div>
 		</div>
 	</div>
 }

@@ -5,7 +5,7 @@ import "fmt"
 
 templ Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) {
 	@Index(&currUser, notifications) {
-		<div class="m-5 bg-base-300 overflow-x-auto">
+		<div class="m-2 bg-base-300 overflow-x-auto">
 			<table class="table">
 				<thead>
 					<tr>

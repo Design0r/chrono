@@ -69,7 +69,7 @@ func createRequestEvent(
 		return repo.Event{}, err
 	}
 
-	_, err = CreateRequest(db, GenerateRequestMsg(user.Username), user, event)
+	_, err = CreateRequest(db, GenerateRequestMsg(user.Username, event), user, event)
 	if err != nil {
 		return repo.Event{}, err
 	}

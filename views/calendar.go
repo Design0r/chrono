@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"calendar/assets/templates"
+	"calendar/htmx"
 	"calendar/middleware"
 	"calendar/schemas"
 	"calendar/service"
@@ -26,7 +27,8 @@ func MonthCalendarHandler(c echo.Context, db *sql.DB) error {
 	user, err := service.GetCurrentUser(db, c)
 	var date schemas.YMDate
 	if err := c.Bind(&date); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter")
+		htmx.ErrorPage(http.StatusBadRequest, "Invalid parameter", c)
+		return nil
 	}
 	service.UpdateHolidays(db, date.Year)
 
@@ -37,10 +39,23 @@ func MonthCalendarHandler(c echo.Context, db *sql.DB) error {
 	}
 	vacationUsed, err := service.GetVacationCountForUserYear(db, int(user.ID), date.Year)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "")
+		htmx.ErrorPage(http.StatusBadRequest, err.Error(), c)
+		return err
 	}
 
-	templates.Calendar(user, month, vacationUsed).
+	notifications, err := service.GetUserNotifications(db, user.ID)
+	if err != nil {
+		htmx.ErrorPage(http.StatusBadRequest, err.Error(), c)
+		return err
+	}
+
+	pendingEvents, err := service.GetPendingEventsForYear(db, user.ID, date.Year)
+	if err != nil {
+		htmx.ErrorPage(http.StatusBadRequest, err.Error(), c)
+		return err
+	}
+
+	templates.Calendar(user, month, vacationUsed, pendingEvents, notifications).
 		Render(context.Background(), c.Response().Writer)
 	return nil
 }

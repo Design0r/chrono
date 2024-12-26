@@ -239,6 +239,27 @@ func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthPa
 	return items, nil
 }
 
+const getPendingEventsForYear = `-- name: GetPendingEventsForYear :one
+SELECT Count(id) from events
+WHERE state = "pending"
+AND scheduled_at >= ?
+AND scheduled_at < ?
+AND user_id = ?
+`
+
+type GetPendingEventsForYearParams struct {
+	ScheduledAt   time.Time `json:"scheduled_at"`
+	ScheduledAt_2 time.Time `json:"scheduled_at_2"`
+	UserID        int64     `json:"user_id"`
+}
+
+func (q *Queries) GetPendingEventsForYear(ctx context.Context, arg GetPendingEventsForYearParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getPendingEventsForYear, arg.ScheduledAt, arg.ScheduledAt_2, arg.UserID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getUserPendingEvents = `-- name: GetUserPendingEvents :many
 SELECT id, scheduled_at, name, state, created_at, edited_at, user_id FROM events
 WHERE user_id = ?

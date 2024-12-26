@@ -5,11 +5,11 @@ import "fmt"
 import "calendar/schemas"
 import "calendar/db/repo"
 
-templ Calendar(user repo.User, month schemas.Month, vacationUsed int) {
-	@Index(&user, []repo.Notification{}) {
+templ Calendar(user repo.User, month schemas.Month, vacationUsed int, pendingEvents int, notifications []repo.Notification) {
+	@Index(&user, notifications) {
 		<div class="mx-2">
 			<div class="grid grid-cols-7 gap-1">
-				@Info(month, user, vacationUsed)
+				@Info(month, user, vacationUsed, pendingEvents)
 				@WeekdayHeader("Monday")
 				@WeekdayHeader("Tuesday")
 				@WeekdayHeader("Wednesday")
@@ -71,7 +71,7 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 	</div>
 }
 
-templ Info(month schemas.Month, user repo.User, vacationUsed int) {
+templ Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents int) {
 	{{
 	strYear := strconv.Itoa(month.Year)
 	prevStrYear := strconv.Itoa(month.Year - 1)
@@ -115,7 +115,7 @@ templ Info(month schemas.Month, user repo.User, vacationUsed int) {
 			<option value="krank">Krank</option>
 			<option value="home office">Home Office</option>
 		</select>
-		@VacationCounter(user, vacationUsed)
+		@VacationCounter(user, vacationUsed, pendingEvents)
 	</div>
 	<script>
     function getEventName(){
@@ -124,7 +124,7 @@ templ Info(month schemas.Month, user repo.User, vacationUsed int) {
   </script>
 }
 
-templ VacationCounter(user repo.User, vacationUsed int) {
+templ VacationCounter(user repo.User, vacationUsed int, pendingEvents int) {
 	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
 	<div id="vacation-counter" hx-swap-oob="true" class="col-span-3 text-lg">
 		<div class="flex justify-center items-center space-x-2 p-2 rounded bg-base-200">
@@ -132,6 +132,7 @@ templ VacationCounter(user repo.User, vacationUsed int) {
 			<div class="text-info">Overall { strNum }</div>
 			<div class="text-warning">Used { strconv.Itoa(vacationUsed) }</div>
 			<div class="text-success">Remaining { fmt.Sprintf("%v", int(user.VacationDays) - vacationUsed) }</div>
+			<div class="text-base-content">Pending { fmt.Sprint(pendingEvents) }</div>
 		</div>
 	</div>
 }

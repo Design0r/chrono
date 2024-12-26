@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -54,16 +53,18 @@ func InitIndexRoutes(group *echo.Group, db *sql.DB) {
 		func(c echo.Context) error { return HandleClearAllNotifications(c, db) },
 		middleware.SessionMiddleware(db),
 	)
-	group.GET("/errors/admin", HandleAdminError, middleware.SessionMiddleware(db))
+	group.GET("/error", HandleError, middleware.SessionMiddleware(db))
 }
 
 func HandleIndex(c echo.Context, db *sql.DB) error {
 	currUser, err := service.GetCurrentUser(db, c)
 	if err != nil {
+		htmx.ErrorPage(http.StatusNotFound, err.Error(), c)
 		return err
 	}
 	vacDays, err := service.GetVacationCountForUserYear(db, int(currUser.ID), service.CurrentYear())
 	if err != nil {
+		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
 		return err
 	}
 
@@ -77,10 +78,17 @@ func HandleIndex(c echo.Context, db *sql.DB) error {
 
 	notifications, err := service.GetUserNotifications(db, currUser.ID)
 	if err != nil {
+		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
 		return err
 	}
 
-	templates.Home(currUser, vacDays, stats, notifications).
+	pendingEvents, err := service.GetPendingEventsForYear(db, currUser.ID, currYear)
+	if err != nil {
+		htmx.ErrorPage(http.StatusBadRequest, err.Error(), c)
+		return err
+	}
+
+	templates.Home(currUser, vacDays, pendingEvents, stats, notifications).
 		Render(context.Background(), c.Response().Writer)
 	return nil
 }
@@ -88,15 +96,18 @@ func HandleIndex(c echo.Context, db *sql.DB) error {
 func HandleTeam(c echo.Context, db *sql.DB) error {
 	currUser, err := service.GetCurrentUser(db, c)
 	if err != nil {
+		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
 		return err
 	}
 	users, err := service.GetAllVacUsers(db)
 	if err != nil {
+		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
 		return err
 	}
 
 	notifications, err := service.GetUserNotifications(db, currUser.ID)
 	if err != nil {
+		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
 		return err
 	}
 
@@ -108,18 +119,20 @@ func HandleTeam(c echo.Context, db *sql.DB) error {
 func HandleRequests(c echo.Context, db *sql.DB) error {
 	currUser, err := service.GetCurrentUser(db, c)
 	if err != nil {
+		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
 		return err
 	}
 
 	if !currUser.IsSuperuser {
-		return c.Redirect(http.StatusFound, "/admin-error")
+		htmx.ErrorPage(http.StatusForbidden, "This page is only accessible by admins", c)
+		return nil
 	}
 
 	requests, _ := service.GetPendingRequests(db)
-	log.Println(requests)
 
 	notifications, err := service.GetUserNotifications(db, currUser.ID)
 	if err != nil {
+		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
 		return err
 	}
 
@@ -140,11 +153,13 @@ func HandlePatchRequests(c echo.Context, db *sql.DB) error {
 
 	currUser, err := service.GetCurrentUser(db, c)
 	if err != nil {
+		htmx.ErrorMessage("Internal Error", c)
 		return err
 	}
 
 	if !currUser.IsSuperuser {
-		return c.Redirect(http.StatusFound, "/admin-error")
+		htmx.ErrorMessage("Not authorized", c)
+		return err
 	}
 
 	err = service.UpdateRequestState(db, stateParam, currUser, int64(id))
@@ -226,7 +241,8 @@ func HandleNotifications(c echo.Context, db *sql.DB) error {
 	return nil
 }
 
-func HandleAdminError(c echo.Context) error {
-	templates.AdminError().Render(context.Background(), c.Response().Writer)
+func HandleError(c echo.Context) error {
+	templates.Error(http.StatusInternalServerError, "").
+		Render(context.Background(), c.Response().Writer)
 	return nil
 }

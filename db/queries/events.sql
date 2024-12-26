@@ -30,6 +30,13 @@ JOIN users u ON e.user_id = u.id
 WHERE scheduled_at >= ? AND scheduled_at < ?
 AND state = "accepted";
 
+-- name: GetPendingEventsForYear :one
+SELECT Count(id) from events
+WHERE state = "pending"
+AND scheduled_at >= ?
+AND scheduled_at < ?
+AND user_id = ?;
+
 -- name: GetVacationCountForUser :one 
 SELECT Count(*) from events
 WHERE user_id = ?

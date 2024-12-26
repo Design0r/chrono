@@ -44,9 +44,9 @@ templ Event(event schemas.Event, user repo.User) {
 	</div>
 }
 
-templ CreateEventUpdate(event schemas.Event, user repo.User, vacationUsed int, notificationCount int) {
+templ CreateEventUpdate(event schemas.Event, user repo.User, vacationUsed int, pendingEvents int, notificationCount int) {
 	@Event(event, user)
-	@VacationCounter(user, vacationUsed)
+	@VacationCounter(user, vacationUsed, pendingEvents)
 	@NotificationIndicator(notificationCount)
 }
 
@@ -75,7 +75,11 @@ templ UpdateNotifications(notifications []repo.Notification) {
 
 templ NotificationIndicator(num int) {
 	if num > 0 {
-		<span id="notification-indicator" hx-swap-oob="true" class="indicator-item align-items-start badge badge-primary">{ fmt.Sprint(num) }</span>
+		<span
+			id="notification-indicator"
+			hx-swap-oob="true"
+			class="indicator-item align-items-start badge badge-primary"
+		>{ fmt.Sprint(num) }</span>
 	} else {
 		<span id="notification-indicator" hx-swap-oob="true"></span>
 	}
@@ -87,10 +91,20 @@ templ NotificationContainer(notifications []repo.Notification) {
 			<li id={ fmt.Sprintf("notification-%v", n.ID) }>
 				<div>
 					<p>{ n.Message }</p>
-					<button hx-patch={ fmt.Sprintf("/notifications/%v", n.ID) } hx-swap="delete" hx-target={ fmt.Sprintf("#notification-%v", n.ID) } class="btn btn-ghost text-xl icon-outlined">close</button>
+					<button
+						hx-patch={ fmt.Sprintf("/notifications/%v", n.ID) }
+						hx-swap="delete"
+						hx-target={ fmt.Sprintf("#notification-%v", n.ID) }
+						class="btn btn-ghost text-xl icon-outlined"
+					>close</button>
 				</div>
 			</li>
 		}
-		<button class="btn btn-ghost btn-sm" hx-patch="/notifications" hx-swap="delete" hx-target="#notification-container">Clear All</button>
+		<button
+			class="btn btn-ghost font-normal btn-sm"
+			hx-patch="/notifications"
+			hx-swap="delete"
+			hx-target="#notification-container"
+		>Clear All</button>
 	</ul>
 }

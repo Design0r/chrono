@@ -1,10 +1,13 @@
 package templates
 
-templ AdminError() {
+import "fmt"
+
+templ Error(statusCode int, msg string) {
 	@Static() {
 		<div class="bg-base-100 h-screen gap-5 flex items-center flex-col justify-center text-center">
-			<h1 class="text-4xl">Error</h1>
-			<p class="text-xl">Whoops, this page is only available for admins.</p>
+			<h1 class="text-4xl">Error { fmt.Sprint(statusCode) }</h1>
+			<p class="text-xl">Whoops, looks like something went wrong</p>
+			<p class="text-lg">{ msg }</p>
 			<a href="/" class="btn max-w-30 btn-primary">Return to Home</a>
 		</div>
 	}

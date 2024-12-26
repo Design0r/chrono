@@ -59,7 +59,14 @@ templ Notifications(notifications []repo.Notification) {
 	<div class="indicator">
 		@NotificationIndicator(len(notifications))
 		<div class="dropdown dropdown-end">
-			<div tabindex="0" hx-get="/notifications" hx-swap="outerHTML" hx-target="#notification-container" role="button" class="btn btn-ghost text-xl icon-outlined">notifications</div>
+			<div
+				tabindex="0"
+				hx-get="/notifications"
+				hx-swap="outerHTML"
+				hx-target="#notification-container"
+				role="button"
+				class="btn btn-ghost text-xl icon-outlined"
+			>notifications</div>
 			@NotificationContainer([]repo.Notification{})
 		</div>
 	</div>

@@ -193,3 +193,21 @@ func UpdateEventState(db *sql.DB, state string, eventId int64) (repo.Event, erro
 
 	return event, nil
 }
+
+func GetPendingEventsForYear(db *sql.DB, userId int64, year int) (int, error) {
+	r := repo.New(db)
+	start := time.Date(year, 1, 1, 0, 0, 0, 0, time.Now().Location())
+
+	params := repo.GetPendingEventsForYearParams{
+		ScheduledAt:   start,
+		ScheduledAt_2: start.AddDate(1, 0, 0),
+		UserID:        userId,
+	}
+	count, err := r.GetPendingEventsForYear(context.Background(), params)
+	if err != nil {
+		log.Printf("Failed getting pending events: %v", count)
+		return 0, err
+	}
+
+	return int(count), nil
+}

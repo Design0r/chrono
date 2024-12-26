@@ -67,7 +67,7 @@ func HandleLogin(c echo.Context, db *sql.DB) error {
 func HandleLogout(c echo.Context, db *sql.DB) error {
 	session, err := c.Cookie("session")
 	if err != nil {
-		return err
+		return c.Redirect(http.StatusFound, "/error")
 	}
 
 	service.DeleteSession(db, session.Value)

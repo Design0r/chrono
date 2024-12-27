@@ -21,7 +21,17 @@ WHERE id = ?;
 
 -- name: UpdateVacationDays :one
 UPDATE users
-SET vacation_days = ?
+SET vacation_days = ?,
+edited_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING *;
+
+-- name: UpdateUser :one
+UPDATE users
+SET vacation_days = ?,
+username = ?,
+email = ?,
+edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING *;
 

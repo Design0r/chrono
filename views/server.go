@@ -44,6 +44,7 @@ func (self *Server) InitRoutes(group *echo.Group) {
 	InitEventRoutes(group, self.Db)
 	InitCalendarRoutes(group, self.Db)
 	InitLoginRoutes(group, self.Db)
+	InitProfileRoutes(group, self.Db)
 }
 
 func (self *Server) Start(address string) error {

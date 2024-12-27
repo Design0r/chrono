@@ -223,9 +223,48 @@ func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWit
 	return items, nil
 }
 
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET vacation_days = ?,
+username = ?,
+email = ?,
+edited_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at
+`
+
+type UpdateUserParams struct {
+	VacationDays int64  `json:"vacation_days"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	ID           int64  `json:"id"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUser,
+		arg.VacationDays,
+		arg.Username,
+		arg.Email,
+		arg.ID,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.VacationDays,
+		&i.IsSuperuser,
+		&i.CreatedAt,
+		&i.EditedAt,
+	)
+	return i, err
+}
+
 const updateVacationDays = `-- name: UpdateVacationDays :one
 UPDATE users
-SET vacation_days = ?
+SET vacation_days = ?,
+edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at
 `

@@ -258,7 +258,7 @@ func Avatar(user repo.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div></div><ul tabindex=\"0\" class=\"menu menu-sm dropdown-content bg-base-200 rounded-box z-[1] mt-3 w-52 p-2 shadow\"><li><a>Profile</a></li><li><a>Settings</a></li><li><a><form action=\"/logout\" method=\"post\"><button type=\"submit\" class=\"\">Logout</button></form></a></li></ul></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div></div><ul tabindex=\"0\" class=\"menu menu-sm dropdown-content bg-base-200 rounded-box z-[1] mt-3 w-52 p-2 shadow\"><li><a href=\"/profile\">Profile</a></li><li><a><form action=\"/logout\" method=\"post\"><button type=\"submit\" class=\"\">Logout</button></form></a></li></ul></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

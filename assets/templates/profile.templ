@@ -1,0 +1,72 @@
+package templates
+
+import "calendar/db/repo"
+import "fmt"
+
+templ ProfilePage(user repo.User, notifications []repo.Notification) {
+	@Index(&user, notifications) {
+		@Profile(user, notifications)
+	}
+}
+
+templ Profile(user repo.User, notifications []repo.Notification) {
+	<div id="profile" class="space-y-2 bg-base-300 rounded m-2 p-5 ">
+		<h1 class="font-bold text-xl">Profile</h1>
+		<div class="grid gap-2 grid-cols-2">
+			<p>Username</p>
+			<p>{ user.Username }</p>
+			<p>Email</p>
+			<p>{ user.Email }</p>
+			<p>Admin</p>
+			<p>{ fmt.Sprint(user.IsSuperuser) }</p>
+			<p>Yearly Vacation</p>
+			<p>{ fmt.Sprint(user.VacationDays) }</p>
+			<p>Joined</p>
+			<p>{ user.CreatedAt.Format("2. January 2006") }</p>
+			<p>Last Edit</p>
+			<p>{ user.EditedAt.Format("2. January 2006") }</p>
+		</div>
+		<button hx-get="/profile/edit" hx-swap="outerHTML" hx-target="#profile" class="btn btn-primary">Edit</button>
+	</div>
+}
+
+templ ProfileEditForm(user repo.User, notifications []repo.Notification) {
+	<div id="profile" class="space-y-2 bg-base-300 rounded m-2 p-5 ">
+		<h1 class="font-bold text-xl">Profile</h1>
+		<form hx-patch="/profile" hx-swap="outerHTML" hx-target="#profile">
+			<div class="grid gap-2 grid-cols-2">
+				<label for="name">Name</label>
+				<input
+					class="input w-full input-bordered"
+					type="text"
+					name="name"
+					value={ user.Username }
+					required
+				/>
+				<label for="email">Email</label>
+				<input
+					class="input w-full input-bordered"
+					type="email"
+					name="email"
+					value={ user.Email }
+					required
+				/>
+				<p>Admin</p>
+				<p>{ fmt.Sprint(user.IsSuperuser) }</p>
+				<label for="vacation">Yearly Vacation</label>
+				<input
+					class="input w-full input-bordered"
+					type="number"
+					name="vacation"
+					value={ fmt.Sprint(user.VacationDays) }
+					required
+				/>
+				<p>Joined</p>
+				<p>{ user.CreatedAt.Format("2. January 2006") }</p>
+				<p>Last Edit</p>
+				<p>{ user.EditedAt.Format("2. January 2006") }</p>
+			</div>
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</form>
+	</div>
+}

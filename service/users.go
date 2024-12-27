@@ -24,6 +24,18 @@ func CreateUser(db *sql.DB, data repo.CreateUserParams) (repo.User, error) {
 	return user, nil
 }
 
+func UpdateUser(db *sql.DB, data repo.UpdateUserParams) (repo.User, error) {
+	r := repo.New(db)
+
+	user, err := r.UpdateUser(context.Background(), data)
+	if err != nil {
+		log.Printf("Failed to update user: %v", err)
+		return repo.User{}, err
+	}
+
+	return user, nil
+}
+
 func GetUserById(db *sql.DB, id int64) (repo.User, error) {
 	r := repo.New(db)
 

@@ -321,7 +321,8 @@ func (q *Queries) GetVacationCountForUser(ctx context.Context, arg GetVacationCo
 
 const updateEventState = `-- name: UpdateEventState :one
 UPDATE events
-SET state = ?
+SET state = ?,
+edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING id, scheduled_at, name, state, created_at, edited_at, user_id
 `

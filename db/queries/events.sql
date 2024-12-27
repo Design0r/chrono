@@ -47,6 +47,7 @@ AND state = "accepted";
 
 -- name: UpdateEventState :one
 UPDATE events
-SET state = ?
+SET state = ?,
+edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING *;

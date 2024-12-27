@@ -108,3 +108,8 @@ templ NotificationContainer(notifications []repo.Notification) {
 		>Clear All</button>
 	</ul>
 }
+
+templ UpdateProfileWithMessage(user repo.User, notifications []repo.Notification) {
+	@Profile(user, notifications)
+	@Message("Successfully updated profile", "success")
+}

@@ -89,6 +89,10 @@ func HandleProfileEdit(c echo.Context, db *sql.DB) error {
 			ID:           currUser.ID,
 		},
 	)
+	if err != nil {
+		htmx.ErrorMessage(err.Error(), c)
+		return err
+	}
 
 	notifications, err := service.GetUserNotifications(db, currUser.ID)
 	if err != nil {

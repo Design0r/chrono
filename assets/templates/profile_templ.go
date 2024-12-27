@@ -186,7 +186,7 @@ func ProfileEditForm(user repo.User, notifications []repo.Notification) templ.Co
 			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"profile\" class=\"space-y-2 bg-base-300 rounded m-2 p-5 \"><h1 class=\"font-bold text-xl\">Profile</h1><form hx-patch=\"/profile\" hx-swap=\"outerHTML\" hx-target=\"#profile\"><div class=\"grid gap-2 grid-cols-2\"><label for=\"name\">Name</label> <input class=\"input w-full input-bordered\" type=\"text\" name=\"name\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"profile\" class=\"space-y-2 bg-base-300 rounded m-2 p-5 \"><h1 class=\"font-bold text-xl\">Profile</h1><form hx-patch=\"/profile\" hx-swap=\"outerHTML\" hx-target=\"#profile\"><div class=\"grid gap-2 grid-cols-2\"><label for=\"name\">Name</label> <input class=\"input input-bordered\" type=\"text\" name=\"name\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,4 +1,4 @@
-module calendar
+module chrono
 
 go 1.23.4
 

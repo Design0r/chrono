@@ -9,8 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 	_ "github.com/mattn/go-sqlite3"
 
-	"calendar/db"
-	"calendar/views"
+	"chrono/db"
+	"chrono/views"
 )
 
 func main() {

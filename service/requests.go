@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"calendar/db/repo"
+	"chrono/db/repo"
 )
 
 func CreateRequest(db *sql.DB, msg string, user repo.User, event repo.Event) (repo.Request, error) {

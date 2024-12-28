@@ -1,6 +1,6 @@
 package schemas
 
-import "calendar/db/repo"
+import "chrono/db/repo"
 
 type CreateUser struct {
 	Name     string `form:"name"`

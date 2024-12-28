@@ -7,11 +7,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"calendar/assets/templates"
-	"calendar/db/repo"
-	"calendar/htmx"
-	"calendar/schemas"
-	"calendar/service"
+	"chrono/assets/templates"
+	"chrono/db/repo"
+	"chrono/htmx"
+	"chrono/schemas"
+	"chrono/service"
 )
 
 func InitLoginRoutes(group *echo.Group, db *sql.DB) {

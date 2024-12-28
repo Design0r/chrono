@@ -3,7 +3,7 @@ package schemas
 import (
 	"time"
 
-	"calendar/db/repo"
+	"chrono/db/repo"
 )
 
 type Month struct {

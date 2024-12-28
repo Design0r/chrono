@@ -9,7 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"calendar/db/repo"
+	"chrono/db/repo"
 )
 
 func CreateUser(db *sql.DB, data repo.CreateUserParams) (repo.User, error) {

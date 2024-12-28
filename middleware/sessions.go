@@ -6,7 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"calendar/service"
+	"chrono/service"
 )
 
 type MiddlewareFunc = func(echo.HandlerFunc) echo.HandlerFunc

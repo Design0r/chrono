@@ -11,8 +11,8 @@ import templruntime "github.com/a-h/templ/runtime"
 import "strconv"
 import "fmt"
 import "time"
-import "calendar/db/repo"
-import "calendar/service"
+import "chrono/db/repo"
+import "chrono/service"
 import "strings"
 
 func Index(user *repo.User, notifications []repo.Notification) templ.Component {

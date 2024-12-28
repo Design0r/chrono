@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"calendar/db/repo"
-	"calendar/schemas"
+	"chrono/db/repo"
+	"chrono/schemas"
 )
 
 func CreateEvent(

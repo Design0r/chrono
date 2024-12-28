@@ -3,7 +3,7 @@ package service
 import (
 	"time"
 
-	"calendar/schemas"
+	"chrono/schemas"
 )
 
 var monthDays map[time.Month]int = map[time.Month]int{

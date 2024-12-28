@@ -8,7 +8,7 @@ package templates
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "calendar/db/repo"
+import "chrono/db/repo"
 import "fmt"
 
 func Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) templ.Component {

@@ -7,11 +7,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"calendar/assets/templates"
-	"calendar/htmx"
-	"calendar/middleware"
-	"calendar/schemas"
-	"calendar/service"
+	"chrono/assets/templates"
+	"chrono/htmx"
+	"chrono/middleware"
+	"chrono/schemas"
+	"chrono/service"
 )
 
 func InitEventRoutes(group *echo.Group, db *sql.DB) {

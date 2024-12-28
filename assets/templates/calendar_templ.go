@@ -10,8 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "strconv"
 import "fmt"
-import "calendar/schemas"
-import "calendar/db/repo"
+import "chrono/schemas"
+import "chrono/db/repo"
 
 func Calendar(user repo.User, month schemas.Month, vacationUsed int, pendingEvents int, notifications []repo.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {

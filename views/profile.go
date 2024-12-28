@@ -7,12 +7,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"calendar/assets/templates"
-	"calendar/db/repo"
-	"calendar/htmx"
-	"calendar/middleware"
-	"calendar/schemas"
-	"calendar/service"
+	"chrono/assets/templates"
+	"chrono/db/repo"
+	"chrono/htmx"
+	"chrono/middleware"
+	"chrono/schemas"
+	"chrono/service"
 )
 
 func InitProfileRoutes(group *echo.Group, db *sql.DB) {

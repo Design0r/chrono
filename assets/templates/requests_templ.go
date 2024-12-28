@@ -8,7 +8,7 @@ package templates
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "calendar/db/repo"
+import "chrono/db/repo"
 import "fmt"
 
 func Requests(user *repo.User, requests []repo.GetPendingRequestsRow, notifications []repo.Notification) templ.Component {

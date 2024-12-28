@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"calendar/db/repo"
+	"chrono/db/repo"
 )
 
 func CreateSession(db *sql.DB, userId int64) (repo.Session, error) {

@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"calendar/db/repo"
+	"chrono/db/repo"
 )
 
 func InitAPIBot(db *sql.DB) error {

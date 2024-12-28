@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"time"
 
-	"calendar/db/repo"
-	"calendar/schemas"
+	"chrono/db/repo"
+	"chrono/schemas"
 )
 
 type Holidays = map[string]map[string]string

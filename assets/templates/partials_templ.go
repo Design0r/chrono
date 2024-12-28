@@ -9,9 +9,9 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"calendar/db/repo"
-	"calendar/schemas"
-	"calendar/service"
+	"chrono/db/repo"
+	"chrono/schemas"
+	"chrono/service"
 	"fmt"
 	"strings"
 )

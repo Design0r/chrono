@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"calendar/assets/templates"
+	"chrono/assets/templates"
 )
 
 func ErrorPage(statusCode int, message string, c echo.Context) {

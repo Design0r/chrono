@@ -2,8 +2,8 @@ package templates
 
 import "strconv"
 import "fmt"
-import "calendar/schemas"
-import "calendar/db/repo"
+import "chrono/schemas"
+import "chrono/db/repo"
 
 templ Calendar(user repo.User, month schemas.Month, vacationUsed int, pendingEvents int, notifications []repo.Notification) {
 	@Index(&user, notifications) {

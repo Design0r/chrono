@@ -1,15 +1,14 @@
 package service
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"net/http"
 	"time"
 
-	"crypto/rand"
-
 	"golang.org/x/crypto/bcrypt"
 
-	"calendar/db/repo"
+	"chrono/db/repo"
 )
 
 func HashPassword(password string) (string, error) {

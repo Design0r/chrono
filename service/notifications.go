@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"calendar/db/repo"
+	"chrono/db/repo"
 )
 
 func _createNotification(db *sql.DB, msg string) (repo.Notification, error) {

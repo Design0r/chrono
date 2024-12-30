@@ -5,25 +5,27 @@ import "fmt"
 
 templ Requests(user *repo.User, requests []repo.GetPendingRequestsRow, notifications []repo.Notification) {
 	@Index(user, notifications) {
-		<div class="m-2 bg-base-300 overflow-x-auto">
-			<table class="table">
-				<thead>
-					<tr>
-						<th>ID</th>
-						<th>Name</th>
-						<th>Message</th>
-						<th>Event Type</th>
-						<th>Event Date</th>
-						<th></th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					for _, request := range requests {
-						@RequestRow(request)
-					}
-				</tbody>
-			</table>
+		<div class="p-2 ">
+			<div class="bg-base-300 overflow-x-auto">
+				<table class="table">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Name</th>
+							<th>Message</th>
+							<th>Event Type</th>
+							<th>Event Date</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, request := range requests {
+							@RequestRow(request)
+						}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	}
 }

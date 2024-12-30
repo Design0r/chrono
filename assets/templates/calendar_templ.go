@@ -46,7 +46,7 @@ func Calendar(user repo.User, month schemas.Month, vacationUsed int, pendingEven
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mx-2\"><div class=\"grid grid-cols-7 gap-1\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"p-2 \"><div class=\"\"><div class=\"grid grid-cols-7 gap-1\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -94,7 +94,7 @@ func Calendar(user repo.User, month schemas.Month, vacationUsed int, pendingEven
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -129,14 +129,14 @@ func WeekdayHeader(name string) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-base-300 rounded p-2 text-center text-lg\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-base-300 rounded border border-accent-content p-2 text-center text-lg\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 32, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 34, Col: 93}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -181,12 +181,12 @@ func Day(year int, month int, day schemas.Day, user repo.User) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if day.Name == "Saturday" || day.Name == "Sunday" {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"bg-base-200 rounded flex flex-col shadow-xl\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"bg-base-200 rounded border-accent-content border flex flex-col shadow-sm shadow-gray-900\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"bg-base-300 rounded flex flex-col shadow-xl\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"bg-base-300 rounded border-accent-content border flex flex-col shadow-sm shadow-gray-900\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -198,7 +198,7 @@ func Day(year int, month int, day schemas.Day, user repo.User) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strDay)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 50, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 52, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -211,7 +211,7 @@ func Day(year int, month int, day schemas.Day, user repo.User) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(dayId)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 57, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 59, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -234,7 +234,7 @@ func Day(year int, month int, day schemas.Day, user repo.User) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(url)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 64, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 66, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -247,7 +247,7 @@ func Day(year int, month int, day schemas.Day, user repo.User) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(dayTarget)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 66, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 68, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -305,7 +305,7 @@ func Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents i
 		urlNextMonth := fmt.Sprintf("/%v/%v", strYear, nextStrMonth)
 		urlPrevYear := fmt.Sprintf("/%v/%v", prevStrYear, strMonth)
 		urlNextYear := fmt.Sprintf("/%v/%v", nextStrYear, strMonth)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"col-span-7 grid grid-cols-7 py-1 items-center gap-1\"><div class=\"col-span-3 flex justify-center space-x-5 bg-base-200 rounded p-2\"><div class=\"flex w-30\"><a href=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"col-span-7 grid grid-cols-7 items-center \"><div class=\"col-span-3 flex justify-center space-x-5 bg-base-200 p-3\"><div class=\"flex w-30\"><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -321,7 +321,7 @@ func Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents i
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(month.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 103, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 105, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -352,7 +352,7 @@ func Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents i
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(strYear)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 108, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 110, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -405,14 +405,14 @@ func VacationCounter(user repo.User, vacationUsed int, pendingEvents int) templ.
 		}
 		ctx = templ.ClearChildren(ctx)
 		strNum := strconv.Itoa(int(user.VacationDays))
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"vacation-counter\" hx-swap-oob=\"true\" class=\"col-span-3 text-lg\"><div class=\"flex justify-center items-center space-x-2 p-2 rounded bg-base-200\"><h2>Vacation</h2><div class=\"text-info\">Overall ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"vacation-counter\" hx-swap-oob=\"true\" class=\"col-span-3 text-lg\"><div class=\"flex justify-center items-center space-x-2 p-3 bg-base-200\"><h2>Vacation</h2><div class=\"text-info\">Overall ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(strNum)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 132, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 134, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -425,7 +425,7 @@ func VacationCounter(user repo.User, vacationUsed int, pendingEvents int) templ.
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(vacationUsed))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 133, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 135, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -438,7 +438,7 @@ func VacationCounter(user repo.User, vacationUsed int, pendingEvents int) templ.
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", int(user.VacationDays)-vacationUsed))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 134, Col: 97}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 136, Col: 97}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -451,7 +451,7 @@ func VacationCounter(user repo.User, vacationUsed int, pendingEvents int) templ.
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(pendingEvents))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 135, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 137, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {

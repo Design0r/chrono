@@ -123,3 +123,26 @@ func GenerateHSL(seed int) string {
 	lightness := 40 + (seed % 20)
 	return fmt.Sprintf("hsl(%d, %d%%, %d%%)", hue, saturation, lightness)
 }
+
+func ToggleAdmin(db *sql.DB, editor repo.User, userId int64) (repo.User, error) {
+	r := repo.New(db)
+
+	user, err := r.ToggleAdmin(context.Background(), userId)
+	if err != nil {
+		return repo.User{}, err
+	}
+
+	var msg string
+	if !user.IsSuperuser {
+		msg = "revoked your admin status"
+	} else {
+		msg = "gave you admin status"
+	}
+
+	_, err = CreateUserNotification(db, fmt.Sprintf("%v %v", editor.Username, msg), userId)
+	if err != nil {
+		return repo.User{}, err
+	}
+
+	return user, nil
+}

@@ -8,20 +8,13 @@ import "chrono/service"
 import "strings"
 
 templ Index(user *repo.User, notifications []repo.Notification) {
-	<!DOCTYPE html>
-	<html data-theme="dim" lang="en">
-		<head>
-			<meta charset="UTF-8"/>
-			<link rel="stylesheet" href="/static/css/output.css"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<script src="/static/js/htmx-min.js"></script>
-			<title>Chrono</title>
-		</head>
-		<body class="h-screen flex flex-col">
-			@Header(user, notifications)
+	@Static() {
+		@Header(user, notifications)
+		<div class="container bg-base-200 h-full justify-center mx-auto ">
 			{ children... }
-			<div id="message-banner" class="fixed left-3 bottom-3 space-y-2"></div>
-			<script>
+		</div>
+		<div id="message-banner" class="fixed left-3 bottom-3 space-y-2"></div>
+		<script>
         function removeMessageBanners() {
           const banner = document.getElementById("message-banner");
           const elements = banner.childNodes;
@@ -35,8 +28,7 @@ templ Index(user *repo.User, notifications []repo.Notification) {
         document.addEventListener("DOMContentLoaded", removeMessageBanners);
         document.addEventListener("htmx:afterOnLoad", removeMessageBanners);
       </script>
-		</body>
-	</html>
+	}
 }
 
 templ Static() {

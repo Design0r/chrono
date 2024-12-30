@@ -54,3 +54,9 @@ GROUP BY
 -- name: GetAdmins :many
 SELECT * FROM users
 WHERE is_superuser = true;
+
+-- name: ToggleAdmin :one
+UPDATE users
+SET is_superuser = NOT is_superuser
+WHERE id = ?
+RETURNING *;

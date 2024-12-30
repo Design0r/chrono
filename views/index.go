@@ -54,6 +54,12 @@ func InitIndexRoutes(group *echo.Group, db *sql.DB) {
 		middleware.SessionMiddleware(db),
 	)
 	group.GET("/error", HandleError, middleware.SessionMiddleware(db))
+
+	group.PUT(
+		"/:id/admin",
+		func(c echo.Context) error { return HandleToggleAdmin(c, db) },
+		middleware.SessionMiddleware(db),
+	)
 }
 
 func HandleIndex(c echo.Context, db *sql.DB) error {
@@ -243,6 +249,36 @@ func HandleNotifications(c echo.Context, db *sql.DB) error {
 
 func HandleError(c echo.Context) error {
 	templates.Error(http.StatusInternalServerError, "").
+		Render(context.Background(), c.Response().Writer)
+	return nil
+}
+
+func HandleToggleAdmin(c echo.Context, db *sql.DB) error {
+	currUser, err := service.GetCurrentUser(db, c)
+	if err != nil {
+		htmx.ErrorMessage(err.Error(), c)
+		return err
+	}
+
+	if !currUser.IsSuperuser {
+		htmx.ErrorMessage("Admin rights are required to change your teams admin status", c)
+		return err
+	}
+
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		htmx.ErrorMessage(err.Error(), c)
+		return err
+	}
+
+	user, err := service.ToggleAdmin(db, currUser, int64(id))
+	if err != nil {
+		htmx.ErrorMessage(err.Error(), c)
+		return err
+	}
+
+	templates.AdminCheckbox(currUser, user).
 		Render(context.Background(), c.Response().Writer)
 	return nil
 }

@@ -223,6 +223,29 @@ func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWit
 	return items, nil
 }
 
+const toggleAdmin = `-- name: ToggleAdmin :one
+UPDATE users
+SET is_superuser = NOT is_superuser
+WHERE id = ?
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at
+`
+
+func (q *Queries) ToggleAdmin(ctx context.Context, id int64) (User, error) {
+	row := q.db.QueryRowContext(ctx, toggleAdmin, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.VacationDays,
+		&i.IsSuperuser,
+		&i.CreatedAt,
+		&i.EditedAt,
+	)
+	return i, err
+}
+
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET vacation_days = ?,

@@ -46,3 +46,5 @@ build:
 	@templ generate
 	@go build -o ./build/Chrono.exe ./cmd/main.go
 
+test: 
+	go test ./tests/ -v

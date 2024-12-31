@@ -10,6 +10,7 @@ templ Login() {
 					<h1 class="font-bold text-xl">Log in</h1>
 					<br/>
 					<form class="w-max" hx-post="/login" hx-swap="none">
+						@CSRF()
 						<div>
 							<label for="email">Email</label>
 							<br/>
@@ -53,6 +54,7 @@ templ Signup() {
 					<h1 class="font-bold text-xl">Sign up</h1>
 					<br/>
 					<form class="w-max" hx-post="/signup" hx-swap="none">
+						@CSRF()
 						<div>
 							<label for="name">Name</label>
 							<br/>

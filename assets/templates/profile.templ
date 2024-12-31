@@ -34,6 +34,7 @@ templ ProfileEditForm(user repo.User, notifications []repo.Notification) {
 	<div id="profile" class="space-y-2 bg-base-300 rounded m-2 p-5 ">
 		<h1 class="font-bold text-xl">Profile</h1>
 		<form hx-patch="/profile" hx-swap="outerHTML" hx-target="#profile">
+			@CSRF()
 			<div class="grid gap-2 grid-cols-2">
 				<label for="name">Name</label>
 				<input

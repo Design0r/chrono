@@ -1,14 +1,12 @@
 package views
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 
 	"chrono/assets/templates"
 	"chrono/db/repo"
-	"chrono/htmx"
 	"chrono/service"
 )
 
@@ -19,22 +17,29 @@ func InitTeamRoutes(group *echo.Group, r *repo.Queries) {
 func HandleTeam(c echo.Context, r *repo.Queries) error {
 	currUser, err := service.GetCurrentUser(r, c)
 	if err != nil {
-		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			templates.Error(http.StatusInternalServerError, err.Error()),
+		)
 	}
 	users, err := service.GetAllVacUsers(r)
 	if err != nil {
-		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			templates.Error(http.StatusInternalServerError, err.Error()),
+		)
 	}
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
-		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			templates.Error(http.StatusInternalServerError, err.Error()),
+		)
 	}
 
-	templates.Team(users, currUser, notifications).
-		Render(context.Background(), c.Response().Writer)
-	return nil
+	return Render(c, http.StatusOK, templates.Team(users, currUser, notifications))
 }

@@ -41,7 +41,7 @@ templ Static() {
 			<script src="/static/js/htmx-min.js"></script>
 			<title>Chrono</title>
 		</head>
-		<body class="h-screen flex flex-col">
+		<body hx-headers={ fmt.Sprintf("{\"X-CSRF-Token\":\"%v\"}", ctx.Value("csrf")) } class="h-screen flex flex-col">
 			{ children... }
 		</body>
 	</html>
@@ -119,10 +119,15 @@ templ Avatar(user repo.User) {
 			<li>
 				<a>
 					<form action="/logout" method="post">
+						@CSRF()
 						<button type="submit" class="">Logout</button>
 					</form>
 				</a>
 			</li>
 		</ul>
 	</div>
+}
+
+templ CSRF() {
+	<input type="hidden" name="csrf" value={ ctx.Value("csrf").(string) }/>
 }

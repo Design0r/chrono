@@ -1,7 +1,6 @@
 package views
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -9,23 +8,17 @@ import (
 	"chrono/assets/templates"
 	"chrono/calendar"
 	"chrono/db/repo"
-	"chrono/htmx"
 	"chrono/service"
 )
 
 func InitIndexRoutes(group *echo.Group, r *repo.Queries) {
-	group.GET(
-		"",
-		func(c echo.Context) error { return HandleIndex(c, r) },
-	)
-	group.GET("/error", HandleError)
+	group.GET("", func(c echo.Context) error { return HandleIndex(c, r) })
 }
 
 func HandleIndex(c echo.Context, r *repo.Queries) error {
 	currUser, err := service.GetCurrentUser(r, c)
 	if err != nil {
-		htmx.ErrorPage(http.StatusNotFound, err.Error(), c)
-		return err
+		return Render(c, http.StatusNotFound, templates.Error(http.StatusNotFound, err.Error()))
 	}
 	vacDays, err := service.GetVacationCountForUserYear(
 		r,
@@ -33,31 +26,36 @@ func HandleIndex(c echo.Context, r *repo.Queries) error {
 		calendar.CurrentYear(),
 	)
 	if err != nil {
-		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			templates.Error(http.StatusInternalServerError, err.Error()),
+		)
 	}
 
 	stats := calendar.GetCurrentYearProgress()
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
-		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			templates.Error(http.StatusInternalServerError, err.Error()),
+		)
 	}
 
 	pendingEvents, err := service.GetPendingEventsForYear(r, currUser.ID, calendar.CurrentYear())
 	if err != nil {
-		htmx.ErrorPage(http.StatusBadRequest, err.Error(), c)
-		return err
+		return Render(
+			c,
+			http.StatusBadRequest,
+			templates.Error(http.StatusBadRequest, err.Error()),
+		)
 	}
 
-	templates.Home(currUser, vacDays, pendingEvents, stats, notifications).
-		Render(context.Background(), c.Response().Writer)
-	return nil
-}
-
-func HandleError(c echo.Context) error {
-	templates.Error(http.StatusInternalServerError, "").
-		Render(context.Background(), c.Response().Writer)
-	return nil
+	return Render(
+		c,
+		http.StatusOK,
+		templates.Home(currUser, vacDays, pendingEvents, stats, notifications),
+	)
 }

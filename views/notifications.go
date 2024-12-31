@@ -1,7 +1,7 @@
 package views
 
 import (
-	"context"
+	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -31,67 +31,80 @@ func HandleClearNotification(c echo.Context, r *repo.Queries) error {
 	param := c.Param("id")
 	num, err := strconv.Atoi(param)
 	if err != nil {
-		htmx.ErrorMessage("Invalid notification id", c)
-		return err
+		return Render(c, http.StatusBadRequest, htmx.ErrorMessage("Invalid notification id", c))
 	}
 
 	currUser, err := service.GetCurrentUser(r, c)
 
 	err = service.ClearNotification(r, int64(num))
 	if err != nil {
-		htmx.ErrorMessage("Failed to clear notification", c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			htmx.ErrorMessage("Failed to clear notification", c),
+		)
 	}
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
-		htmx.ErrorMessage("Internal Error", c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			htmx.ErrorMessage("Internal server error", c),
+		)
 	}
 
-	templates.NotificationIndicator(len(notifications)).
-		Render(context.Background(), c.Response().Writer)
-
-	return nil
+	return Render(c, http.StatusOK, templates.NotificationIndicator(len(notifications)))
 }
 
 func HandleClearAllNotifications(c echo.Context, r *repo.Queries) error {
 	currUser, err := service.GetCurrentUser(r, c)
 	if err != nil {
-		htmx.ErrorMessage("Internal error", c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			htmx.ErrorMessage("Internal server error", c),
+		)
 	}
 	err = service.ClearAllNotifications(r, currUser.ID)
 	if err != nil {
-		htmx.ErrorMessage("Failed to clear notifications", c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			htmx.ErrorMessage("Failed to clear notifications", c),
+		)
 	}
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
-		htmx.ErrorMessage("Internal Error", c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			htmx.ErrorMessage("Internal server error", c),
+		)
 	}
 
-	templates.NotificationIndicator(len(notifications)).
-		Render(context.Background(), c.Response().Writer)
-	return nil
+	return Render(c, http.StatusOK, templates.NotificationIndicator(len(notifications)))
 }
 
 func HandleNotifications(c echo.Context, r *repo.Queries) error {
 	currUser, err := service.GetCurrentUser(r, c)
 	if err != nil {
-		htmx.ErrorMessage("Internal error", c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			htmx.ErrorMessage("Internal server error", c),
+		)
 	}
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
-		htmx.ErrorMessage("Internal Error", c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			htmx.ErrorMessage("Internal server error", c),
+		)
 	}
 
-	templates.UpdateNotifications(notifications).
-		Render(context.Background(), c.Response().Writer)
-	return nil
+	return Render(c, http.StatusOK, templates.UpdateNotifications(notifications))
 }

@@ -1,9 +1,11 @@
 package views
 
 import (
+	"context"
 	"database/sql"
 	"net/http"
 
+	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -28,6 +30,20 @@ func NewServer(router *echo.Echo, db *sql.DB) *Server {
 
 func (self *Server) InitMiddleware() {
 	self.Router.Use(middleware.Logger())
+	self.Router.Use(middleware.Secure())
+	// self.Router.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+	// 	Skipper: func(c echo.Context) bool {
+	// 		return c.Path() == "/static/*"
+	// 	},
+	// 	TokenLength:    32,
+	// 	TokenLookup:    fmt.Sprintf("form:csrf,header:%v", echo.HeaderXCSRFToken),
+	// 	ContextKey:     "csrf",
+	// 	CookieName:     "_csrf",
+	// 	CookieMaxAge:   86400,
+	// 	CookieHTTPOnly: true,
+	// 	CookieSecure:   false,
+	// 	CookieDomain:   "/*",
+	// }))
 
 	staticHandler := echo.WrapHandler(
 		http.StripPrefix(
@@ -55,4 +71,19 @@ func (self *Server) InitRoutes() {
 
 func (self *Server) Start(address string) error {
 	return self.Router.Start(address)
+}
+
+func Render(ctx echo.Context, statusCode int, t templ.Component) error {
+	buf := templ.GetBuffer()
+	defer templ.ReleaseBuffer(buf)
+
+	// csrf := ctx.Get("csrf").(string)
+	csrf := "1234354"
+	reqCtx := context.WithValue(ctx.Request().Context(), "csrf", csrf)
+
+	if err := t.Render(reqCtx, buf); err != nil {
+		return err
+	}
+
+	return ctx.HTML(statusCode, buf.String())
 }

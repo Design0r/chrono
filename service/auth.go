@@ -49,6 +49,19 @@ func DeleteSessionCookie() *http.Cookie {
 	return &cookie
 }
 
+func DeleteCSRFCookie() *http.Cookie {
+	cookie := http.Cookie{}
+	cookie.Path = "/"
+	cookie.Name = "_csrf"
+	cookie.Value = ""
+	cookie.HttpOnly = true
+	cookie.Secure = false // Ensure this is set to true in production
+	cookie.Expires = time.Unix(0, 0)
+	cookie.MaxAge = -1
+
+	return &cookie
+}
+
 func SecureRandom(length int) string {
 	randomBytes := make([]byte, length)
 	_, err := rand.Read(randomBytes)

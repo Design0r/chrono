@@ -1,27 +1,26 @@
 package htmx
 
 import (
-	"context"
-
+	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 
 	"chrono/assets/templates"
 )
 
-func ErrorMessage(msg string, c echo.Context) {
-	RenderMessage(msg, "error", c)
+func ErrorMessage(msg string, c echo.Context) templ.Component {
+	return RenderMessage(msg, "error", c)
 }
 
-func InfoMessage(msg string, c echo.Context) {
-	RenderMessage(msg, "info", c)
+func InfoMessage(msg string, c echo.Context) templ.Component {
+	return RenderMessage(msg, "info", c)
 }
 
-func SuccessMessage(msg string, c echo.Context) {
-	RenderMessage(msg, "success", c)
+func SuccessMessage(msg string, c echo.Context) templ.Component {
+	return RenderMessage(msg, "success", c)
 }
 
-func RenderMessage(msg string, mtype string, c echo.Context) {
-	templates.Message(msg, mtype).Render(context.Background(), c.Response().Writer)
+func RenderMessage(msg string, mtype string, c echo.Context) templ.Component {
+	return templates.Message(msg, mtype)
 }
 
 func HxRedirect(path string, c echo.Context) {

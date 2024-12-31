@@ -1,7 +1,6 @@
 package views
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -29,55 +28,76 @@ func InitRequestRoutes(group *echo.Group, r *repo.Queries) {
 func HandleRequests(c echo.Context, r *repo.Queries) error {
 	currUser, err := service.GetCurrentUser(r, c)
 	if err != nil {
-		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			templates.Error(http.StatusInternalServerError, err.Error()),
+		)
 	}
 
 	if !currUser.IsSuperuser {
-		htmx.ErrorPage(http.StatusForbidden, "This page is only accessible by admins", c)
-		return nil
+		return Render(
+			c,
+			http.StatusForbidden,
+			templates.Error(
+				http.StatusForbidden,
+				"This page is only accessible by admins",
+			),
+		)
 	}
 
 	requests, _ := service.GetPendingRequests(r)
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
-		htmx.ErrorPage(http.StatusInternalServerError, err.Error(), c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			templates.Error(http.StatusInternalServerError, err.Error()),
+		)
 	}
 
-	templates.Requests(&currUser, requests, notifications).
-		Render(context.Background(), c.Response().Writer)
-	return nil
+	return Render(c, http.StatusOK, templates.Requests(&currUser, requests, notifications))
 }
 
 func HandlePatchRequests(c echo.Context, r *repo.Queries) error {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		htmx.ErrorMessage("Invalid request id", c)
-		return err
+		return Render(c, http.StatusBadRequest, htmx.ErrorMessage("Invalid request id", c))
 	}
 
 	stateParam := c.FormValue("state")
 
 	currUser, err := service.GetCurrentUser(r, c)
 	if err != nil {
-		htmx.ErrorMessage("Internal Error", c)
-		return err
+		return Render(
+			c,
+			http.StatusInternalServerError,
+			htmx.ErrorMessage("Internal server error", c),
+		)
 	}
 
 	if !currUser.IsSuperuser {
-		htmx.ErrorMessage("Not authorized", c)
-		return err
+		return Render(
+			c,
+			http.StatusForbidden,
+			htmx.ErrorMessage("Not authorized", c),
+		)
 	}
 
 	err = service.UpdateRequestState(r, stateParam, currUser, int64(id))
 	if err != nil {
-		htmx.ErrorMessage("Failed updating request", c)
-		return err
+		return Render(
+			c,
+			http.StatusForbidden,
+			htmx.ErrorMessage("Failed updating request", c),
+		)
 	}
 
-	htmx.SuccessMessage(fmt.Sprintf("%v %v", strings.Title(stateParam), "Request"), c)
-	return nil
+	return Render(
+		c,
+		http.StatusOK,
+		htmx.SuccessMessage(fmt.Sprintf("%v %v", strings.Title(stateParam), "Request"), c),
+	)
 }

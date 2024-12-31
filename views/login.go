@@ -1,7 +1,6 @@
 package views
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -23,37 +22,43 @@ func InitLoginRoutes(group *echo.Group, r *repo.Queries) {
 }
 
 func HandleLoginForm(c echo.Context, r *repo.Queries) error {
-	templates.Login().Render(context.Background(), c.Response().Writer)
-	return nil
+	return Render(c, http.StatusOK, templates.Login())
 }
 
 func HandleSignupForm(c echo.Context, r *repo.Queries) error {
-	templates.Signup().Render(context.Background(), c.Response().Writer)
-	return nil
+	return Render(c, http.StatusOK, templates.Signup())
 }
 
 func HandleLogin(c echo.Context, r *repo.Queries) error {
 	var loginUser schemas.Login
 	if err := c.Bind(&loginUser); err != nil {
-		htmx.ErrorMessage("Invalid inputs.", c)
-		return err
+		return Render(c, http.StatusBadRequest, htmx.ErrorMessage("Invalid inputs", c))
 	}
 	user, err := service.GetUserByEmail(r, loginUser.Email)
 	if err != nil {
-		htmx.ErrorMessage("Email or password incorrect.", c)
-		return err
+		return Render(
+			c,
+			http.StatusBadRequest,
+			htmx.ErrorMessage("Email or password incorrect.", c),
+		)
 	}
 
 	ok := service.CheckPassword(user.Password, loginUser.Password)
 	if !ok {
-		htmx.ErrorMessage("Email or password incorrect.", c)
-		return nil
+		return Render(
+			c,
+			http.StatusBadRequest,
+			htmx.ErrorMessage("Email or password incorrect.", c),
+		)
 	}
 
 	session, err := service.CreateSession(r, user.ID)
 	if err != nil {
-		htmx.ErrorMessage("Internal error.", c)
-		return err
+		return Render(
+			c,
+			http.StatusBadRequest,
+			htmx.ErrorMessage("Internal error.", c),
+		)
 	}
 
 	sessionCookie := service.CreateSessionCookie(session)
@@ -78,20 +83,25 @@ func HandleLogout(c echo.Context, r *repo.Queries) error {
 func HandleSignup(c echo.Context, r *repo.Queries) error {
 	var createUser schemas.CreateUser
 	if err := c.Bind(&createUser); err != nil {
-		htmx.ErrorMessage("Invalid inputs.", c)
-		return err
+		return Render(c, http.StatusBadRequest, htmx.ErrorMessage("Invalid inputs", c))
 	}
 
 	_, err := service.GetUserByEmail(r, createUser.Email)
 	if err == nil {
-		htmx.ErrorMessage("User with email already exists.", c)
-		return err
+		return Render(
+			c,
+			http.StatusBadRequest,
+			htmx.ErrorMessage("User with this email already exists.", c),
+		)
 	}
 
 	hashedPw, err := service.HashPassword(createUser.Password)
 	if err != nil {
-		htmx.ErrorMessage("Internal error.", c)
-		return err
+		return Render(
+			c,
+			http.StatusBadRequest,
+			htmx.ErrorMessage("Internal error.", c),
+		)
 	}
 	user, err := service.CreateUser(
 		r,
@@ -103,14 +113,20 @@ func HandleSignup(c echo.Context, r *repo.Queries) error {
 		},
 	)
 	if err != nil {
-		htmx.ErrorMessage("Failed to create user.", c)
-		return err
+		return Render(
+			c,
+			http.StatusBadRequest,
+			htmx.ErrorMessage("Failed to create user.", c),
+		)
 	}
 
 	session, err := service.CreateSession(r, user.ID)
 	if err != nil {
-		htmx.ErrorMessage("Internal error.", c)
-		return err
+		return Render(
+			c,
+			http.StatusBadRequest,
+			htmx.ErrorMessage("Internal error.", c),
+		)
 	}
 
 	sessionCookie := service.CreateSessionCookie(session)

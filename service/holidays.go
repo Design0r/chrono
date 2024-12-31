@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,16 +15,16 @@ import (
 
 type Holidays = map[string]map[string]string
 
-func UpdateHolidays(db *sql.DB, year int) error {
-	if HolidayCacheExists(db, year) {
+func UpdateHolidays(r *repo.Queries, year int) error {
+	if HolidayCacheExists(r, year) {
 		return nil
 	}
-	bot, err := GetUserByName(db, "Chrono Bot")
+	bot, err := GetUserByName(r, "Chrono Bot")
 	if err != nil {
 		return err
 	}
 
-	holidays, err := FetchHolidays(db, year)
+	holidays, err := FetchHolidays(r, year)
 	if err != nil {
 		return err
 	}
@@ -33,23 +32,21 @@ func UpdateHolidays(db *sql.DB, year int) error {
 	for name, data := range holidays {
 		date, err := time.Parse("2006-01-02", data["datum"])
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			continue
 		}
 		_, err = CreateEvent(
-			db,
+			r,
 			schemas.YMDDate{Year: date.Year(), Month: int(date.Month()), Day: date.Day()},
 			bot,
 			name,
 		)
 	}
 
-	CreateCache(db, year)
-
-	return nil
+	return CreateCache(r, year)
 }
 
-func FetchHolidays(db *sql.DB, year int) (Holidays, error) {
+func FetchHolidays(r *repo.Queries, year int) (Holidays, error) {
 	holidays := Holidays{}
 	resp, err := http.Get(fmt.Sprintf("https://feiertage-api.de/api/?jahr=%v&nur_land=BW", year))
 	if err != nil {
@@ -68,9 +65,7 @@ func FetchHolidays(db *sql.DB, year int) (Holidays, error) {
 	return holidays, nil
 }
 
-func HolidayCacheExists(db *sql.DB, year int) bool {
-	r := repo.New(db)
-
+func HolidayCacheExists(r *repo.Queries, year int) bool {
 	count, err := r.CacheExists(context.Background(), int64(year))
 	if err != nil {
 		return false
@@ -78,9 +73,7 @@ func HolidayCacheExists(db *sql.DB, year int) bool {
 	return count > 0
 }
 
-func CreateCache(db *sql.DB, year int) error {
-	r := repo.New(db)
-
+func CreateCache(r *repo.Queries, year int) error {
 	err := r.CreateCache(context.Background(), int64(year))
 	if err != nil {
 		return err

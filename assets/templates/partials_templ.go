@@ -463,7 +463,7 @@ func UpdateProfileWithMessage(user repo.User, notifications []repo.Notification)
 	})
 }
 
-func AdminCheckbox(currUser repo.User, user repo.User) templ.Component {
+func AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -486,7 +486,7 @@ func AdminCheckbox(currUser repo.User, user repo.User) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 
 		icon := "check_box_outline_blank"
-		if user.IsSuperuser {
+		if isSuperuser {
 			icon = "check_box"
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<td id=\"")
@@ -494,9 +494,9 @@ func AdminCheckbox(currUser repo.User, user repo.User) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("admin-%v", user.ID))
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("admin-%v", userId))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 124, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 124, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -512,9 +512,9 @@ func AdminCheckbox(currUser repo.User, user repo.User) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var21 string
-			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/%v/admin", user.ID))
+			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("profile/%v/admin", userId))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 127, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 127, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -525,9 +525,9 @@ func AdminCheckbox(currUser repo.User, user repo.User) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var22 string
-			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#admin-%v", user.ID))
+			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#admin-%v", userId))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 129, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 129, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {

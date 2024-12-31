@@ -2,16 +2,13 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"time"
 
 	"chrono/db/repo"
 )
 
-func CreateSession(db *sql.DB, userId int64) (repo.Session, error) {
-	r := repo.New(db)
-
+func CreateSession(r *repo.Queries, userId int64) (repo.Session, error) {
 	secRand := SecureRandom(64)
 
 	date := time.Now().Add(time.Hour * 24 * 7) // 1 week
@@ -25,9 +22,7 @@ func CreateSession(db *sql.DB, userId int64) (repo.Session, error) {
 	return session, nil
 }
 
-func GetUserFromSession(db *sql.DB, id string) (repo.User, error) {
-	r := repo.New(db)
-
+func GetUserFromSession(r *repo.Queries, id string) (repo.User, error) {
 	user, err := r.GetUserFromSession(context.Background(), id)
 	if err != nil {
 		log.Printf("Failed getting session: %v", err)
@@ -37,9 +32,7 @@ func GetUserFromSession(db *sql.DB, id string) (repo.User, error) {
 	return user, nil
 }
 
-func DeleteSession(db *sql.DB, id string) error {
-	r := repo.New(db)
-
+func DeleteSession(r *repo.Queries, id string) error {
 	err := r.DeleteSession(context.Background(), id)
 	if err != nil {
 		log.Printf("Failed deleting session: %v", err)
@@ -49,9 +42,7 @@ func DeleteSession(db *sql.DB, id string) error {
 	return nil
 }
 
-func IsValidSession(db *sql.DB, id string) bool {
-	r := repo.New(db)
-
+func IsValidSession(r *repo.Queries, id string) bool {
 	_, err := r.GetValidSession(
 		context.Background(),
 		repo.GetValidSessionParams{ID: id, ValidUntil: time.Now()},

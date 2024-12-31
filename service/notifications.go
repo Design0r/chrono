@@ -2,16 +2,13 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 
 	"chrono/db/repo"
 )
 
-func _createNotification(db *sql.DB, msg string) (repo.Notification, error) {
-	r := repo.New(db)
-
+func _createNotification(r *repo.Queries, msg string) (repo.Notification, error) {
 	n, err := r.CreateNotification(context.Background(), msg)
 	if err != nil {
 		log.Printf("Failed to create notification: %v", err)
@@ -21,9 +18,7 @@ func _createNotification(db *sql.DB, msg string) (repo.Notification, error) {
 	return n, nil
 }
 
-func CreateUserNotification(db *sql.DB, msg string, userId int64) (repo.Notification, error) {
-	r := repo.New(db)
-
+func CreateUserNotification(r *repo.Queries, msg string, userId int64) (repo.Notification, error) {
 	n, err := r.CreateNotification(context.Background(), msg)
 	if err != nil {
 		log.Printf("Failed to create notification: %v", err)
@@ -39,11 +34,10 @@ func CreateUserNotification(db *sql.DB, msg string, userId int64) (repo.Notifica
 	return n, nil
 }
 
-func CreateAdminNotification(db *sql.DB, msg string) (repo.Notification, error) {
-	r := repo.New(db)
+func CreateAdminNotification(r *repo.Queries, msg string) (repo.Notification, error) {
 	ctx := context.Background()
 
-	n, err := _createNotification(db, msg)
+	n, err := _createNotification(r, msg)
 	if err != nil {
 		return repo.Notification{}, err
 	}
@@ -65,9 +59,7 @@ func CreateAdminNotification(db *sql.DB, msg string) (repo.Notification, error) 
 	return n, nil
 }
 
-func ClearAllNotifications(db *sql.DB, userId int64) error {
-	r := repo.New(db)
-
+func ClearAllNotifications(r *repo.Queries, userId int64) error {
 	err := r.ClearAllUserNotifications(context.Background(), userId)
 	if err != nil {
 		log.Printf("Failed to clear notifications: %v", err)
@@ -77,9 +69,7 @@ func ClearAllNotifications(db *sql.DB, userId int64) error {
 	return nil
 }
 
-func ClearNotification(db *sql.DB, notifId int64) error {
-	r := repo.New(db)
-
+func ClearNotification(r *repo.Queries, notifId int64) error {
 	err := r.ClearNotification(context.Background(), notifId)
 	if err != nil {
 		log.Printf("Failed to clear notification: %v", err)
@@ -89,9 +79,7 @@ func ClearNotification(db *sql.DB, notifId int64) error {
 	return nil
 }
 
-func GetUserNotifications(db *sql.DB, userId int64) ([]repo.Notification, error) {
-	r := repo.New(db)
-
+func GetUserNotifications(r *repo.Queries, userId int64) ([]repo.Notification, error) {
 	n, err := r.GetUserNotifications(context.Background(), userId)
 	if err != nil {
 		log.Printf("Failed to clear notification: %v", err)

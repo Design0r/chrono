@@ -2,32 +2,32 @@ package views
 
 import (
 	"context"
-	"database/sql"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 
 	"chrono/assets/templates"
+	"chrono/db/repo"
 	"chrono/htmx"
 	"chrono/middleware"
 	"chrono/schemas"
 	"chrono/service"
 )
 
-func InitEventRoutes(group *echo.Group, db *sql.DB) {
+func InitEventRoutes(group *echo.Group, r *repo.Queries) {
 	group.POST(
 		"/:year/:month/:day",
-		func(c echo.Context) error { return CreateEventHandler(c, db) },
-		middleware.SessionMiddleware(db),
+		func(c echo.Context) error { return CreateEventHandler(c, r) },
+		middleware.SessionMiddleware(r),
 	)
 	group.DELETE(
 		"/events/:id",
-		func(c echo.Context) error { return DeleteEventHandler(c, db) },
-		middleware.SessionMiddleware(db),
+		func(c echo.Context) error { return DeleteEventHandler(c, r) },
+		middleware.SessionMiddleware(r),
 	)
 }
 
-func CreateEventHandler(c echo.Context, db *sql.DB) error {
+func CreateEventHandler(c echo.Context, r *repo.Queries) error {
 	var date schemas.YMDDate
 	if err := c.Bind(&date); err != nil {
 		htmx.ErrorMessage(err.Error(), c)
@@ -35,13 +35,13 @@ func CreateEventHandler(c echo.Context, db *sql.DB) error {
 	}
 	eventName := c.FormValue("name")
 
-	currUser, err := service.GetCurrentUser(db, c)
+	currUser, err := service.GetCurrentUser(r, c)
 	if err != nil {
 		htmx.ErrorMessage(err.Error(), c)
 		return err
 	}
 
-	event, err := service.CreateEvent(db, date, currUser, eventName)
+	event, err := service.CreateEvent(r, date, currUser, eventName)
 	if err != nil {
 		htmx.ErrorMessage(err.Error(), c)
 		return err
@@ -49,20 +49,20 @@ func CreateEventHandler(c echo.Context, db *sql.DB) error {
 
 	e := schemas.Event{Username: currUser.Username, Event: event}
 
-	vacationUsed, err := service.GetVacationCountForUserYear(db, int(currUser.ID), date.Year)
+	vacationUsed, err := service.GetVacationCountForUserYear(r, int(currUser.ID), date.Year)
 	if err != nil {
 		htmx.ErrorMessage(err.Error(), c)
 		return err
 	}
 
-	notifications, err := service.GetUserNotifications(db, currUser.ID)
+	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
 		htmx.ErrorMessage(err.Error(), c)
 		return err
 	}
 
 	pendingEvents, err := service.GetPendingEventsForYear(
-		db,
+		r,
 		currUser.ID,
 		event.ScheduledAt.Year(),
 	)
@@ -72,20 +72,20 @@ func CreateEventHandler(c echo.Context, db *sql.DB) error {
 	return nil
 }
 
-func DeleteEventHandler(c echo.Context, db *sql.DB) error {
+func DeleteEventHandler(c echo.Context, r *repo.Queries) error {
 	event := c.Param("id")
 	eventId, err := strconv.Atoi(event)
 	if err != nil {
 		htmx.ErrorMessage(err.Error(), c)
 		return err
 	}
-	currUser, err := service.GetCurrentUser(db, c)
+	currUser, err := service.GetCurrentUser(r, c)
 	if err != nil {
 		htmx.ErrorMessage(err.Error(), c)
 		return err
 	}
 
-	deletedEvent, err := service.DeleteEvent(db, eventId)
+	deletedEvent, err := service.DeleteEvent(r, eventId)
 	if err != nil {
 		htmx.ErrorMessage(err.Error(), c)
 		return err
@@ -94,7 +94,7 @@ func DeleteEventHandler(c echo.Context, db *sql.DB) error {
 	e := schemas.Event{Username: currUser.Username, Event: deletedEvent}
 
 	vacationUsed, err := service.GetVacationCountForUserYear(
-		db,
+		r,
 		int(currUser.ID),
 		deletedEvent.ScheduledAt.Year(),
 	)
@@ -103,14 +103,14 @@ func DeleteEventHandler(c echo.Context, db *sql.DB) error {
 		return err
 	}
 
-	notifications, err := service.GetUserNotifications(db, currUser.ID)
+	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
 		htmx.ErrorMessage(err.Error(), c)
 		return err
 	}
 
 	pendingEvents, err := service.GetPendingEventsForYear(
-		db,
+		r,
 		currUser.ID,
 		deletedEvent.ScheduledAt.Year(),
 	)

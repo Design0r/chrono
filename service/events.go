@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"time"
 
@@ -11,26 +10,24 @@ import (
 )
 
 func CreateEvent(
-	db *sql.DB,
+	r *repo.Queries,
 	data schemas.YMDDate,
 	user repo.User,
 	name string,
 ) (repo.Event, error) {
 	if user.IsSuperuser {
-		return createEvent(db, data, user, name)
+		return createEvent(r, data, user, name)
 	}
 
-	return createRequestEvent(db, data, user, name)
+	return createRequestEvent(r, data, user, name)
 }
 
 func createEvent(
-	db *sql.DB,
+	r *repo.Queries,
 	data schemas.YMDDate,
 	user repo.User,
 	name string,
 ) (repo.Event, error) {
-	r := repo.New(db)
-
 	date := time.Date(
 		data.Year,
 		time.Month(data.Month),
@@ -59,17 +56,17 @@ func createEvent(
 }
 
 func createRequestEvent(
-	db *sql.DB,
+	r *repo.Queries,
 	data schemas.YMDDate,
 	user repo.User,
 	name string,
 ) (repo.Event, error) {
-	event, err := createEvent(db, data, user, name)
+	event, err := createEvent(r, data, user, name)
 	if err != nil {
 		return repo.Event{}, err
 	}
 
-	_, err = CreateRequest(db, GenerateRequestMsg(user.Username, event), user, event)
+	_, err = CreateRequest(r, GenerateRequestMsg(user.Username, event), user, event)
 	if err != nil {
 		return repo.Event{}, err
 	}
@@ -77,9 +74,7 @@ func createRequestEvent(
 	return event, nil
 }
 
-func DeleteEvent(db *sql.DB, eventId int) (repo.Event, error) {
-	r := repo.New(db)
-
+func DeleteEvent(r *repo.Queries, eventId int) (repo.Event, error) {
 	event, err := r.DeleteEvent(context.Background(), int64(eventId))
 	if err != nil {
 		log.Printf("Failed deleting event: %v", err)
@@ -89,9 +84,7 @@ func DeleteEvent(db *sql.DB, eventId int) (repo.Event, error) {
 	return event, nil
 }
 
-func GetEventsForDay(db *sql.DB, data schemas.YMDDate) ([]repo.Event, error) {
-	r := repo.New(db)
-
+func GetEventsForDay(r *repo.Queries, data schemas.YMDDate) ([]repo.Event, error) {
 	date := time.Date(
 		data.Year,
 		time.Month(data.Month),
@@ -113,7 +106,7 @@ func GetEventsForDay(db *sql.DB, data schemas.YMDDate) ([]repo.Event, error) {
 }
 
 func GetEventsForMonth(
-	db *sql.DB,
+	r *repo.Queries,
 	month *schemas.Month,
 ) error {
 	date := time.Date(
@@ -126,8 +119,6 @@ func GetEventsForMonth(
 		0,
 		time.Now().Local().Location(),
 	)
-	r := repo.New(db)
-
 	events, err := r.GetEventsForMonth(
 		context.Background(),
 		repo.GetEventsForMonthParams{ScheduledAt: date, ScheduledAt_2: date.AddDate(0, 1, 0)},
@@ -139,7 +130,7 @@ func GetEventsForMonth(
 
 	for _, event := range events {
 		idx := event.ScheduledAt.Day() - 1
-		user, err := GetUserById(db, event.UserID)
+		user, err := GetUserById(r, event.UserID)
 		if err != nil {
 			continue
 		}
@@ -161,8 +152,7 @@ func GetEventsForMonth(
 	return nil
 }
 
-func GetVacationCountForUserYear(db *sql.DB, userId int, year int) (int, error) {
-	r := repo.New(db)
+func GetVacationCountForUserYear(r *repo.Queries, userId int, year int) (int, error) {
 	yearStart := time.Date(year, 1, 1, 0, 0, 0, 0, time.Now().Location())
 	yearEnd := yearStart.AddDate(1, 0, 0)
 
@@ -181,8 +171,7 @@ func GetVacationCountForUserYear(db *sql.DB, userId int, year int) (int, error) 
 	return int(count), nil
 }
 
-func UpdateEventState(db *sql.DB, state string, eventId int64) (repo.Event, error) {
-	r := repo.New(db)
+func UpdateEventState(r *repo.Queries, state string, eventId int64) (repo.Event, error) {
 	params := repo.UpdateEventStateParams{State: state, ID: eventId}
 
 	event, err := r.UpdateEventState(context.Background(), params)
@@ -194,8 +183,7 @@ func UpdateEventState(db *sql.DB, state string, eventId int64) (repo.Event, erro
 	return event, nil
 }
 
-func GetPendingEventsForYear(db *sql.DB, userId int64, year int) (int, error) {
-	r := repo.New(db)
+func GetPendingEventsForYear(r *repo.Queries, userId int64, year int) (int, error) {
 	start := time.Date(year, 1, 1, 0, 0, 0, 0, time.Now().Location())
 
 	params := repo.GetPendingEventsForYearParams{

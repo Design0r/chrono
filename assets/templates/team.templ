@@ -31,28 +31,11 @@ templ Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifi
 }
 
 templ TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow) {
-	{{
-	icon := "check_box_outline_blank"
-	if user.IsSuperuser {
-		icon = "check_box"
-	}
-	}}
 	<tr class="hover">
 		<th>{ fmt.Sprint(user.ID) }</th>
 		<th>{ user.Username }</th>
 		<td>{ user.Email }</td>
-		<td id={ fmt.Sprintf("admin-%v", user.ID) } class="icon-outlined">
-			if currUser.IsSuperuser {
-				<a
-					hx-put={ fmt.Sprintf("/%v/admin", user.ID) }
-					hx-swap="outerHTML"
-					hx-target={ fmt.Sprintf("#admin-%v", user.ID) }
-					class="icon-outlined cursor-pointer"
-				>{ icon }</a>
-			} else {
-				{ icon }
-			}
-		</td>
+		@AdminCheckbox(currUser, user.ID, user.IsSuperuser)
 		<td>{ fmt.Sprint(user.VacationDays) }</td>
 		<td>{ fmt.Sprint(user.VacationCount) }</td>
 		<td>{ fmt.Sprint(user.VacationDays-user.VacationCount) }</td>

@@ -8,18 +8,21 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"chrono/assets"
-	"chrono/service"
+	"chrono/db/repo"
+	mw "chrono/middleware"
 )
 
 type Server struct {
 	Router *echo.Echo
 	Db     *sql.DB
+	Repo   *repo.Queries
 }
 
 func NewServer(router *echo.Echo, db *sql.DB) *Server {
 	return &Server{
 		Router: router,
 		Db:     db,
+		Repo:   repo.New(db),
 	}
 }
 
@@ -37,14 +40,17 @@ func (self *Server) InitMiddleware() {
 	self.Router.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
 }
 
-func (self *Server) InitRoutes(group *echo.Group) {
-	service.InitAPIBot(self.Db)
+func (self *Server) InitRoutes() {
+	sessionMW := self.Router.Group("", mw.SessionMiddleware(self.Repo))
+	InitIndexRoutes(sessionMW, self.Repo)
+	InitEventRoutes(sessionMW, self.Repo)
+	InitCalendarRoutes(sessionMW, self.Repo)
+	InitProfileRoutes(sessionMW, self.Repo)
+	InitNotificationRoutes(sessionMW, self.Repo)
+	InitRequestRoutes(sessionMW, self.Repo)
+	InitTeamRoutes(sessionMW, self.Repo)
 
-	InitIndexRoutes(group, self.Db)
-	InitEventRoutes(group, self.Db)
-	InitCalendarRoutes(group, self.Db)
-	InitLoginRoutes(group, self.Db)
-	InitProfileRoutes(group, self.Db)
+	InitLoginRoutes(self.Router.Group(""), self.Repo)
 }
 
 func (self *Server) Start(address string) error {

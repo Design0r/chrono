@@ -1,4 +1,4 @@
-package service
+package calendar
 
 import (
 	"time"
@@ -86,7 +86,7 @@ func YearProgressPercent(year int) float32 {
 	return (float32(now) / float32(days)) * float32(100)
 }
 
-func YearProgress(year int) int {
+func CurrentYearDay(year int) int {
 	now := time.Now().YearDay()
 
 	return now
@@ -102,4 +102,14 @@ func NumWorkDays(year int) int {
 	}
 
 	return counter
+}
+
+func GetCurrentYearProgress() schemas.YearProgress {
+	currYear := CurrentYear()
+	return schemas.YearProgress{
+		NumDays:           NumDaysInYear(currYear),
+		NumWorkDays:       NumWorkDays(currYear),
+		NumDaysPassed:     CurrentYearDay(currYear),
+		DaysPassedPercent: YearProgressPercent(currYear),
+	}
 }

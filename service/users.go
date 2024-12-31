@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"time"
@@ -12,9 +11,7 @@ import (
 	"chrono/db/repo"
 )
 
-func CreateUser(db *sql.DB, data repo.CreateUserParams) (repo.User, error) {
-	r := repo.New(db)
-
+func CreateUser(r *repo.Queries, data repo.CreateUserParams) (repo.User, error) {
 	user, err := r.CreateUser(context.Background(), data)
 	if err != nil {
 		log.Printf("Failed creating user: %v", err)
@@ -24,9 +21,7 @@ func CreateUser(db *sql.DB, data repo.CreateUserParams) (repo.User, error) {
 	return user, nil
 }
 
-func UpdateUser(db *sql.DB, data repo.UpdateUserParams) (repo.User, error) {
-	r := repo.New(db)
-
+func UpdateUser(r *repo.Queries, data repo.UpdateUserParams) (repo.User, error) {
 	user, err := r.UpdateUser(context.Background(), data)
 	if err != nil {
 		log.Printf("Failed to update user: %v", err)
@@ -36,9 +31,7 @@ func UpdateUser(db *sql.DB, data repo.UpdateUserParams) (repo.User, error) {
 	return user, nil
 }
 
-func GetUserById(db *sql.DB, id int64) (repo.User, error) {
-	r := repo.New(db)
-
+func GetUserById(r *repo.Queries, id int64) (repo.User, error) {
 	user, err := r.GetUserByID(context.Background(), id)
 	if err != nil {
 		log.Printf("Failed getting user: %v", err)
@@ -48,9 +41,7 @@ func GetUserById(db *sql.DB, id int64) (repo.User, error) {
 	return user, nil
 }
 
-func GetUserByName(db *sql.DB, name string) (repo.User, error) {
-	r := repo.New(db)
-
+func GetUserByName(r *repo.Queries, name string) (repo.User, error) {
 	user, err := r.GetUserByName(context.Background(), name)
 	if err != nil {
 		log.Printf("Failed getting user: %v", err)
@@ -60,9 +51,7 @@ func GetUserByName(db *sql.DB, name string) (repo.User, error) {
 	return user, nil
 }
 
-func GetUserByEmail(db *sql.DB, email string) (repo.User, error) {
-	r := repo.New(db)
-
+func GetUserByEmail(r *repo.Queries, email string) (repo.User, error) {
 	user, err := r.GetUserByEmail(context.Background(), email)
 	if err != nil {
 		log.Printf("Failed getting user: %v", err)
@@ -72,9 +61,7 @@ func GetUserByEmail(db *sql.DB, email string) (repo.User, error) {
 	return user, nil
 }
 
-func DeleteUser(db *sql.DB, id int64) error {
-	r := repo.New(db)
-
+func DeleteUser(r *repo.Queries, id int64) error {
 	err := r.DeleteUser(context.Background(), id)
 	if err != nil {
 		log.Printf("Failed getting user: %v", err)
@@ -84,17 +71,15 @@ func DeleteUser(db *sql.DB, id int64) error {
 	return nil
 }
 
-func GetCurrentUser(db *sql.DB, c echo.Context) (repo.User, error) {
+func GetCurrentUser(r *repo.Queries, c echo.Context) (repo.User, error) {
 	session, err := c.Cookie("session")
 	if err != nil {
 		return repo.User{}, err
 	}
-	return GetUserFromSession(db, session.Value)
+	return GetUserFromSession(r, session.Value)
 }
 
-func GetAllVacUsers(db *sql.DB) ([]repo.GetUsersWithVacationCountRow, error) {
-	r := repo.New(db)
-
+func GetAllVacUsers(r *repo.Queries) ([]repo.GetUsersWithVacationCountRow, error) {
 	start := time.Date(time.Now().Year(), 1, 1, 0, 0, 0, 0, time.Now().Location())
 
 	data := repo.GetUsersWithVacationCountParams{
@@ -124,9 +109,7 @@ func GenerateHSL(seed int) string {
 	return fmt.Sprintf("hsl(%d, %d%%, %d%%)", hue, saturation, lightness)
 }
 
-func ToggleAdmin(db *sql.DB, editor repo.User, userId int64) (repo.User, error) {
-	r := repo.New(db)
-
+func ToggleAdmin(r *repo.Queries, editor repo.User, userId int64) (repo.User, error) {
 	user, err := r.ToggleAdmin(context.Background(), userId)
 	if err != nil {
 		return repo.User{}, err
@@ -139,7 +122,7 @@ func ToggleAdmin(db *sql.DB, editor repo.User, userId int64) (repo.User, error) 
 		msg = "gave you admin status"
 	}
 
-	_, err = CreateUserNotification(db, fmt.Sprintf("%v %v", editor.Username, msg), userId)
+	_, err = CreateUserNotification(r, fmt.Sprintf("%v %v", editor.Username, msg), userId)
 	if err != nil {
 		return repo.User{}, err
 	}

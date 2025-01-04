@@ -26,6 +26,17 @@ func InitNotificationRoutes(group *echo.Group, r *repo.Queries) {
 	)
 }
 
+func HandleNotifications(c echo.Context, r *repo.Queries) error {
+	currUser := c.Get("user").(repo.User)
+
+	notifications, err := service.GetUserNotifications(r, currUser.ID)
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return Render(c, http.StatusOK, templates.UpdateNotifications(notifications))
+}
+
 func HandleClearNotification(c echo.Context, r *repo.Queries) error {
 	currUser := c.Get("user").(repo.User)
 
@@ -62,15 +73,4 @@ func HandleClearAllNotifications(c echo.Context, r *repo.Queries) error {
 	}
 
 	return Render(c, http.StatusOK, templates.NotificationIndicator(len(notifications)))
-}
-
-func HandleNotifications(c echo.Context, r *repo.Queries) error {
-	currUser := c.Get("user").(repo.User)
-
-	notifications, err := service.GetUserNotifications(r, currUser.ID)
-	if err != nil {
-		return RenderError(c, http.StatusInternalServerError, err.Error())
-	}
-
-	return Render(c, http.StatusOK, templates.UpdateNotifications(notifications))
 }

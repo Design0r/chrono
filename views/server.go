@@ -62,7 +62,7 @@ func (self *Server) InitRoutes() {
 		mw.SessionMiddleware(self.Repo),
 		mw.AuthenticationMiddleware(self.Repo),
 	)
-	InitIndexRoutes(protected, self.Repo)
+	InitHomeRoutes(protected, self.Repo)
 	InitEventRoutes(protected, self.Repo)
 	InitCalendarRoutes(protected, self.Repo)
 	InitProfileRoutes(protected, self.Repo)

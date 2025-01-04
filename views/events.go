@@ -15,15 +15,15 @@ import (
 func InitEventRoutes(group *echo.Group, r *repo.Queries) {
 	group.POST(
 		"/:year/:month/:day",
-		func(c echo.Context) error { return CreateEventHandler(c, r) },
+		func(c echo.Context) error { return HandleCreateEvent(c, r) },
 	)
 	group.DELETE(
 		"/events/:id",
-		func(c echo.Context) error { return DeleteEventHandler(c, r) },
+		func(c echo.Context) error { return HandleDeleteEvent(c, r) },
 	)
 }
 
-func CreateEventHandler(c echo.Context, r *repo.Queries) error {
+func HandleCreateEvent(c echo.Context, r *repo.Queries) error {
 	currUser := c.Get("user").(repo.User)
 
 	var date schemas.YMDDate
@@ -62,7 +62,7 @@ func CreateEventHandler(c echo.Context, r *repo.Queries) error {
 	)
 }
 
-func DeleteEventHandler(c echo.Context, r *repo.Queries) error {
+func HandleDeleteEvent(c echo.Context, r *repo.Queries) error {
 	currUser := c.Get("user").(repo.User)
 
 	event := c.Param("id")

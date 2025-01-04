@@ -11,11 +11,11 @@ import (
 	"chrono/service"
 )
 
-func InitIndexRoutes(group *echo.Group, r *repo.Queries) {
-	group.GET("", func(c echo.Context) error { return HandleIndex(c, r) })
+func InitHomeRoutes(group *echo.Group, r *repo.Queries) {
+	group.GET("", func(c echo.Context) error { return HandleHome(c, r) })
 }
 
-func HandleIndex(c echo.Context, r *repo.Queries) error {
+func HandleHome(c echo.Context, r *repo.Queries) error {
 	currUser := c.Get("user").(repo.User)
 	vacDays, err := service.GetVacationCountForUserYear(
 		r,

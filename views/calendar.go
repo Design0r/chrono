@@ -16,11 +16,11 @@ import (
 func InitCalendarRoutes(group *echo.Group, r *repo.Queries) {
 	group.GET(
 		"/:year/:month",
-		func(c echo.Context) error { return MonthCalendarHandler(c, r) },
+		func(c echo.Context) error { return HandleCalendar(c, r) },
 	)
 }
 
-func MonthCalendarHandler(c echo.Context, r *repo.Queries) error {
+func HandleCalendar(c echo.Context, r *repo.Queries) error {
 	currUser := c.Get("user").(repo.User)
 
 	var date schemas.YMDate

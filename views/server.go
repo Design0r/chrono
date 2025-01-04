@@ -1,7 +1,6 @@
 package views
 
 import (
-	"context"
 	"database/sql"
 	"net/http"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"chrono/assets"
-	"chrono/assets/templates"
 	"chrono/db/repo"
 	"chrono/htmx"
 	mw "chrono/middleware"

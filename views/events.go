@@ -8,7 +8,6 @@ import (
 
 	"chrono/assets/templates"
 	"chrono/db/repo"
-	"chrono/htmx"
 	"chrono/schemas"
 	"chrono/service"
 )

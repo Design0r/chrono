@@ -25,32 +25,29 @@ func InitEventRoutes(group *echo.Group, r *repo.Queries) {
 }
 
 func CreateEventHandler(c echo.Context, r *repo.Queries) error {
+	currUser := c.Get("user").(repo.User)
+
 	var date schemas.YMDDate
 	if err := c.Bind(&date); err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage(err.Error(), c))
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 	eventName := c.FormValue("name")
 
-	currUser, err := service.GetCurrentUser(r, c)
-	if err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage(err.Error(), c))
-	}
-
 	event, err := service.CreateEvent(r, date, currUser, eventName)
 	if err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage(err.Error(), c))
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	e := schemas.Event{Username: currUser.Username, Event: event}
 
 	vacationUsed, err := service.GetVacationCountForUserYear(r, int(currUser.ID), date.Year)
 	if err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage(err.Error(), c))
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage(err.Error(), c))
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	pendingEvents, err := service.GetPendingEventsForYear(
@@ -67,19 +64,17 @@ func CreateEventHandler(c echo.Context, r *repo.Queries) error {
 }
 
 func DeleteEventHandler(c echo.Context, r *repo.Queries) error {
+	currUser := c.Get("user").(repo.User)
+
 	event := c.Param("id")
 	eventId, err := strconv.Atoi(event)
 	if err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage(err.Error(), c))
-	}
-	currUser, err := service.GetCurrentUser(r, c)
-	if err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage(err.Error(), c))
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	deletedEvent, err := service.DeleteEvent(r, eventId)
 	if err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage(err.Error(), c))
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	e := schemas.Event{Username: currUser.Username, Event: deletedEvent}
@@ -90,12 +85,12 @@ func DeleteEventHandler(c echo.Context, r *repo.Queries) error {
 		deletedEvent.ScheduledAt.Year(),
 	)
 	if err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage(err.Error(), c))
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage(err.Error(), c))
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	pendingEvents, err := service.GetPendingEventsForYear(

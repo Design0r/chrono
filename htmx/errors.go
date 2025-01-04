@@ -11,3 +11,11 @@ import (
 func ErrorPage(statusCode int, message string, c echo.Context) {
 	templates.Error(statusCode, message).Render(context.Background(), c.Response().Writer)
 }
+
+func IsHTMXRequest(c echo.Context) bool {
+	if _, exists := c.Request().Header["HX-Request"]; exists {
+		return true
+	}
+
+	return false
+}

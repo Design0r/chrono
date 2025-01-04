@@ -10,7 +10,9 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"chrono/assets"
+	"chrono/assets/templates"
 	"chrono/db/repo"
+	"chrono/htmx"
 	mw "chrono/middleware"
 )
 
@@ -57,14 +59,20 @@ func (self *Server) InitMiddleware() {
 }
 
 func (self *Server) InitRoutes() {
-	sessionMW := self.Router.Group("", mw.SessionMiddleware(self.Repo))
-	InitIndexRoutes(sessionMW, self.Repo)
-	InitEventRoutes(sessionMW, self.Repo)
-	InitCalendarRoutes(sessionMW, self.Repo)
-	InitProfileRoutes(sessionMW, self.Repo)
-	InitNotificationRoutes(sessionMW, self.Repo)
-	InitRequestRoutes(sessionMW, self.Repo)
-	InitTeamRoutes(sessionMW, self.Repo)
+	protected := self.Router.Group(
+		"",
+		mw.SessionMiddleware(self.Repo),
+		mw.AuthenticationMiddleware(self.Repo),
+	)
+	InitIndexRoutes(protected, self.Repo)
+	InitEventRoutes(protected, self.Repo)
+	InitCalendarRoutes(protected, self.Repo)
+	InitProfileRoutes(protected, self.Repo)
+	InitNotificationRoutes(protected, self.Repo)
+	InitTeamRoutes(protected, self.Repo)
+
+	admin := protected.Group("", mw.AdminMiddleware(self.Repo))
+	InitRequestRoutes(admin, self.Repo)
 
 	InitLoginRoutes(self.Router.Group(""), self.Repo)
 }
@@ -73,17 +81,10 @@ func (self *Server) Start(address string) error {
 	return self.Router.Start(address)
 }
 
-func Render(ctx echo.Context, statusCode int, t templ.Component) error {
-	buf := templ.GetBuffer()
-	defer templ.ReleaseBuffer(buf)
+func Render(c echo.Context, statusCode int, t templ.Component) error {
+	return htmx.Render(c, statusCode, t)
+}
 
-	// csrf := ctx.Get("csrf").(string)
-	csrf := "1234354"
-	reqCtx := context.WithValue(ctx.Request().Context(), "csrf", csrf)
-
-	if err := t.Render(reqCtx, buf); err != nil {
-		return err
-	}
-
-	return ctx.HTML(statusCode, buf.String())
+func RenderError(c echo.Context, statusCode int, msg string) error {
+	return htmx.RenderError(c, statusCode, msg)
 }

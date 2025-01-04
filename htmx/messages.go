@@ -7,19 +7,19 @@ import (
 	"chrono/assets/templates"
 )
 
-func ErrorMessage(msg string, c echo.Context) templ.Component {
-	return RenderMessage(msg, "error", c)
+func ErrorMessage(msg string) templ.Component {
+	return RenderMessage(msg, "error")
 }
 
-func InfoMessage(msg string, c echo.Context) templ.Component {
-	return RenderMessage(msg, "info", c)
+func InfoMessage(msg string) templ.Component {
+	return RenderMessage(msg, "info")
 }
 
-func SuccessMessage(msg string, c echo.Context) templ.Component {
-	return RenderMessage(msg, "success", c)
+func SuccessMessage(msg string) templ.Component {
+	return RenderMessage(msg, "success")
 }
 
-func RenderMessage(msg string, mtype string, c echo.Context) templ.Component {
+func RenderMessage(msg string, mtype string) templ.Component {
 	return templates.Message(msg, mtype)
 }
 

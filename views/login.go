@@ -32,33 +32,21 @@ func HandleSignupForm(c echo.Context, r *repo.Queries) error {
 func HandleLogin(c echo.Context, r *repo.Queries) error {
 	var loginUser schemas.Login
 	if err := c.Bind(&loginUser); err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage("Invalid inputs", c))
+		return RenderError(c, http.StatusBadRequest, "Invalid inputs")
 	}
 	user, err := service.GetUserByEmail(r, loginUser.Email)
 	if err != nil {
-		return Render(
-			c,
-			http.StatusBadRequest,
-			htmx.ErrorMessage("Email or password incorrect.", c),
-		)
+		return RenderError(c, http.StatusBadRequest, "Incorrect email or password")
 	}
 
 	ok := service.CheckPassword(user.Password, loginUser.Password)
 	if !ok {
-		return Render(
-			c,
-			http.StatusBadRequest,
-			htmx.ErrorMessage("Email or password incorrect.", c),
-		)
+		return RenderError(c, http.StatusBadRequest, "Incorrect email or password")
 	}
 
 	session, err := service.CreateSession(r, user.ID)
 	if err != nil {
-		return Render(
-			c,
-			http.StatusBadRequest,
-			htmx.ErrorMessage("Internal error.", c),
-		)
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	sessionCookie := service.CreateSessionCookie(session)
@@ -71,7 +59,7 @@ func HandleLogin(c echo.Context, r *repo.Queries) error {
 func HandleLogout(c echo.Context, r *repo.Queries) error {
 	session, err := c.Cookie("session")
 	if err != nil {
-		return c.Redirect(http.StatusFound, "/error")
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	service.DeleteSession(r, session.Value)
@@ -83,25 +71,17 @@ func HandleLogout(c echo.Context, r *repo.Queries) error {
 func HandleSignup(c echo.Context, r *repo.Queries) error {
 	var createUser schemas.CreateUser
 	if err := c.Bind(&createUser); err != nil {
-		return Render(c, http.StatusBadRequest, htmx.ErrorMessage("Invalid inputs", c))
+		return RenderError(c, http.StatusBadRequest, "Invalid inputs")
 	}
 
 	_, err := service.GetUserByEmail(r, createUser.Email)
 	if err == nil {
-		return Render(
-			c,
-			http.StatusBadRequest,
-			htmx.ErrorMessage("User with this email already exists.", c),
-		)
+		return RenderError(c, http.StatusBadRequest, "A user with this email already exists")
 	}
 
 	hashedPw, err := service.HashPassword(createUser.Password)
 	if err != nil {
-		return Render(
-			c,
-			http.StatusBadRequest,
-			htmx.ErrorMessage("Internal error.", c),
-		)
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 	user, err := service.CreateUser(
 		r,
@@ -113,20 +93,12 @@ func HandleSignup(c echo.Context, r *repo.Queries) error {
 		},
 	)
 	if err != nil {
-		return Render(
-			c,
-			http.StatusBadRequest,
-			htmx.ErrorMessage("Failed to create user.", c),
-		)
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	session, err := service.CreateSession(r, user.ID)
 	if err != nil {
-		return Render(
-			c,
-			http.StatusBadRequest,
-			htmx.ErrorMessage("Internal error.", c),
-		)
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	sessionCookie := service.CreateSessionCookie(session)

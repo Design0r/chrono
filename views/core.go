@@ -16,41 +16,26 @@ func InitIndexRoutes(group *echo.Group, r *repo.Queries) {
 }
 
 func HandleIndex(c echo.Context, r *repo.Queries) error {
-	currUser, err := service.GetCurrentUser(r, c)
-	if err != nil {
-		return Render(c, http.StatusNotFound, templates.Error(http.StatusNotFound, err.Error()))
-	}
+	currUser := c.Get("user").(repo.User)
 	vacDays, err := service.GetVacationCountForUserYear(
 		r,
 		int(currUser.ID),
 		calendar.CurrentYear(),
 	)
 	if err != nil {
-		return Render(
-			c,
-			http.StatusInternalServerError,
-			templates.Error(http.StatusInternalServerError, err.Error()),
-		)
+		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
 	stats := calendar.GetCurrentYearProgress()
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
-		return Render(
-			c,
-			http.StatusInternalServerError,
-			templates.Error(http.StatusInternalServerError, err.Error()),
-		)
+		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
 	pendingEvents, err := service.GetPendingEventsForYear(r, currUser.ID, calendar.CurrentYear())
 	if err != nil {
-		return Render(
-			c,
-			http.StatusBadRequest,
-			templates.Error(http.StatusBadRequest, err.Error()),
-		)
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	return Render(

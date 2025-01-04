@@ -15,30 +15,16 @@ func InitTeamRoutes(group *echo.Group, r *repo.Queries) {
 }
 
 func HandleTeam(c echo.Context, r *repo.Queries) error {
-	currUser, err := service.GetCurrentUser(r, c)
-	if err != nil {
-		return Render(
-			c,
-			http.StatusInternalServerError,
-			templates.Error(http.StatusInternalServerError, err.Error()),
-		)
-	}
+	currUser := c.Get("user").(repo.User)
+
 	users, err := service.GetAllVacUsers(r)
 	if err != nil {
-		return Render(
-			c,
-			http.StatusInternalServerError,
-			templates.Error(http.StatusInternalServerError, err.Error()),
-		)
+		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
-		return Render(
-			c,
-			http.StatusInternalServerError,
-			templates.Error(http.StatusInternalServerError, err.Error()),
-		)
+		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
 	return Render(c, http.StatusOK, templates.Team(users, currUser, notifications))

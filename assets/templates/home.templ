@@ -73,10 +73,13 @@ templ Card(title string) {
 }
 
 templ YearProgress(progress schemas.YearProgress) {
-	<div class="w-96 bg-base-300 border-2 border-white h-10 shadow rounded-xl">
+	<div class="w-96 bg-base-300 flex border-2 border-white h-10 shadow rounded-xl">
 		<div
 			{ templ.Attributes{"style":fmt.Sprintf("width: %v%%;", progress.DaysPassedPercent)}... }
-			class="bg-success h-full text-neutral flex items-center justify-center text-xl text-center rounded-lg"
-		>{ fmt.Sprintf("%v / %v (%.2f%%)", progress.NumDaysPassed, progress.NumDays, progress.DaysPassedPercent) }</div>
+			class="bg-success h-full text-neutral rounded-lg"
+		></div>
+		<div class="w-full justify-center h-full text-xl text-center">
+			{ fmt.Sprintf("%v / %v (%.2f%%)", progress.NumDaysPassed, progress.NumDays, progress.DaysPassedPercent) }
+		</div>
 	</div>
 }

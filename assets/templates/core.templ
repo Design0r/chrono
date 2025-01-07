@@ -10,7 +10,7 @@ import "strings"
 templ Index(user *repo.User, notifications []repo.Notification) {
 	@Static() {
 		@Header(user, notifications)
-		<div class="container bg-base-200 h-full justify-center mx-auto ">
+		<div class="container h-full justify-center mx-auto ">
 			{ children... }
 		</div>
 		<div id="message-banner" class="fixed left-3 bottom-3 space-y-2"></div>

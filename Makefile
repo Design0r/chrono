@@ -46,5 +46,10 @@ build:
 	@templ generate
 	@go build -o ./build/Chrono.exe ./cmd/main.go
 
+install:
+	@go install github.com/a-h/templ/cmd/templ@latest
+	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+	@go mod tidy
+
 test: 
 	go test ./tests/ -v

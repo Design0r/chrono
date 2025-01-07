@@ -1,0 +1,10 @@
+.DS_Store
+*.db*
+tmp
+*.txt
+node_modules
+build
+.git
+.dockerignore
+.gitignore
+.air.toml

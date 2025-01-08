@@ -2,9 +2,10 @@ package views
 
 import (
 	"fmt"
+	"log"
 	"net/http"
-	"strconv"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -20,7 +21,7 @@ func InitRequestRoutes(group *echo.Group, r *repo.Queries) {
 		func(c echo.Context) error { return HandleRequests(c, r) },
 	)
 	group.PATCH(
-		"/requests/:id",
+		"/requests",
 		func(c echo.Context) error { return HandlePatchRequests(c, r) },
 	)
 }
@@ -39,17 +40,23 @@ func HandleRequests(c echo.Context, r *repo.Queries) error {
 }
 
 func HandlePatchRequests(c echo.Context, r *repo.Queries) error {
+	log.Println("hello")
 	currUser := c.Get("user").(repo.User)
 
-	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
-	if err != nil {
-		return RenderError(c, http.StatusBadRequest, "Invalid request id")
-	}
-
 	stateParam := c.FormValue("state")
+	startDateParam := c.FormValue("start_date")
+	endDateParam := c.FormValue("end_date")
+	startDate, err := time.Parse("2022-01-02 00:00:00 +0100 +0100", startDateParam)
+	if err != nil {
+		return RenderError(c, http.StatusBadRequest, "Failed parsing start date")
+	}
+	endDate, err := time.Parse("2022-01-02 00:00:00 +0100 +0100", endDateParam)
+	if err != nil {
+		return RenderError(c, http.StatusBadRequest, "Failed parsing end date")
+	}
+	log.Println(startDate, endDate)
 
-	err = service.UpdateRequestState(r, stateParam, currUser, int64(id))
+	err = service.UpdateRequestStateRange(r, currUser.ID, stateParam, startDate, endDate)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, "Failed updating request")
 	}

@@ -2,8 +2,9 @@ package templates
 
 import "chrono/db/repo"
 import "fmt"
+import "chrono/schemas"
 
-templ Requests(user *repo.User, requests []repo.GetPendingRequestsRow, notifications []repo.Notification) {
+templ Requests(user *repo.User, requests []schemas.BatchRequest, notifications []repo.Notification) {
 	@Index(user, notifications) {
 		<div class="p-2 ">
 			<div class="bg-base-300 overflow-x-auto">
@@ -14,7 +15,9 @@ templ Requests(user *repo.User, requests []repo.GetPendingRequestsRow, notificat
 							<th>Name</th>
 							<th>Message</th>
 							<th>Event Type</th>
-							<th>Event Date</th>
+							<th>Number of Days</th>
+							<th>Event Start Date</th>
+							<th>Event End Date</th>
 							<th></th>
 							<th></th>
 						</tr>
@@ -30,22 +33,38 @@ templ Requests(user *repo.User, requests []repo.GetPendingRequestsRow, notificat
 	}
 }
 
-templ RequestRow(request repo.GetPendingRequestsRow) {
+templ RequestRow(request schemas.BatchRequest) {
 	{{
 	msg := ""
-	if request.Message != nil {
-		msg = *request.Message
+	if request.Request.Message != nil {
+		msg = *request.Request.Message
 	}
-	url := fmt.Sprintf("/requests/%v", request.ID)
-	year, month, day := request.ScheduledAt.Date()
+	startYear, startMonth, startDay := request.StartDate.Date()
+	endYear, endMonth, endDay := request.EndDate.Date()
 	}}
-	<tr id={ fmt.Sprintf("request-%v", request.ID) } class="hover">
-		<td>{ fmt.Sprint(request.ID) }</td>
-		<td>{ request.Username }</td>
+	<tr id={ fmt.Sprintf("request-%v", request.Request.ID) } class="hover">
+		<td>{ fmt.Sprint(request.Request.ID) }</td>
+		<td>{ request.Request.Username }</td>
 		<td>{ msg }</td>
-		<td>{ request.Name }</td>
-		<td>{ fmt.Sprintf("%v. %v %v",day, month, year) }</td>
-		<td hx-patch={ url } hx-vals='{"state":"accepted"}' hx-swap="delete" hx-target={ fmt.Sprintf("#request-%v", request.ID) } class="icon-outlined btn btn-ghost text-xl">check</td>
-		<td hx-patch={ url } hx-vals='{"state":"declined"}' hx-swap="delete" hx-target={ fmt.Sprintf("#request-%v", request.ID) } class="icon-outlined btn btn-ghost text-xl">close</td>
+		<td>{ request.Request.Name }</td>
+		<td>{ fmt.Sprint(request.EventCount) }</td>
+		<td>{ fmt.Sprintf("%v. %v %v",startDay, startMonth, startYear) }</td>
+		<td>{ fmt.Sprintf("%v. %v %v",endDay, endMonth, endYear) }</td>
+		<td
+			hx-patch="/requests"
+			hx-vals={ fmt.Sprintf("{\"state\":\"accepted\", \"start_date\":\"%v\", \"end_date\":\"%v\"}", request.StartDate, request.EndDate) }
+			hx-swap="delete"
+			hx-target={ fmt.Sprintf("#request-%v", request.Request.ID) }
+			class="icon-outlined btn btn-ghost text-xl"
+		>
+			check
+		</td>
+		<td
+			hx-patch="requests"
+			hx-vals={ fmt.Sprintf("{\"state\":\"declied\", \"start_date\":\"%v\", \"end_date\":\"%v\"}", request.StartDate, request.EndDate) }
+			hx-swap="delete"
+			hx-target={ fmt.Sprintf("#request-%v", request.Request.ID) }
+			class="icon-outlined btn btn-ghost text-xl"
+		>close</td>
 	</tr>
 }

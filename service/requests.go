@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"chrono/db/repo"
+	"chrono/schemas"
 )
 
 func CreateRequest(
@@ -35,13 +37,39 @@ func CreateRequest(
 	return request, nil
 }
 
-func GetPendingRequests(r *repo.Queries) ([]repo.GetPendingRequestsRow, error) {
+func GetPendingRequests(r *repo.Queries) ([]schemas.BatchRequest, error) {
 	req, err := r.GetPendingRequests(context.Background())
 	if err != nil {
-		return []repo.GetPendingRequestsRow{}, err
+		return nil, err
 	}
 
-	return req, nil
+	if len(req) == 0 {
+		return nil, nil
+	}
+
+	var requestsToShow []schemas.BatchRequest
+
+	startIndex := 0
+	for startIndex < len(req) {
+		endIndex := startIndex
+
+		for endIndex+1 < len(req) &&
+			req[endIndex].ScheduledAt.Year() == req[endIndex+1].ScheduledAt.Year() &&
+			req[endIndex].ScheduledAt.YearDay()+1 == req[endIndex+1].ScheduledAt.YearDay() {
+			endIndex++
+		}
+
+		requestsToShow = append(requestsToShow, schemas.BatchRequest{
+			StartDate:  req[startIndex].ScheduledAt,
+			EndDate:    req[endIndex].ScheduledAt,
+			EventCount: endIndex - startIndex + 1,
+			Request:    &req[endIndex],
+		})
+
+		startIndex = endIndex + 1
+	}
+
+	return requestsToShow, nil
 }
 
 func UpdateRequestState(r *repo.Queries, state string, currUser repo.User, reqId int64) error {
@@ -70,4 +98,25 @@ func UpdateRequestState(r *repo.Queries, state string, currUser repo.User, reqId
 	}
 
 	return nil
+}
+
+func UpdateRequestStateRange(
+	r *repo.Queries,
+	userId int64,
+	state string,
+	startDate time.Time,
+	endDate time.Time,
+) error {
+	params := repo.UpdateRequestStateRangeParams{
+		UserID:        userId,
+		State:         state,
+		ScheduledAt:   startDate,
+		ScheduledAt_2: endDate,
+	}
+	err := r.UpdateRequestStateRange(context.Background(), params)
+	if err != nil {
+		log.Printf("Failed to update requests: %v", err)
+	}
+
+	return err
 }

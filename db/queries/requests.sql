@@ -21,3 +21,12 @@ edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING *;
 
+-- name: UpdateRequestStateRange :exec
+UPDATE events
+SET state = ?,
+edited_at = CURRENT_TIMESTAMP
+WHERE user_id = ?
+AND scheduled_at >= ?
+AND scheduled_at <= ?
+RETURNING *;
+

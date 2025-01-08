@@ -15,6 +15,10 @@ func CreateEvent(
 	user repo.User,
 	name string,
 ) (repo.Event, error) {
+	if name != "urlaub" {
+		return createEvent(r, data, user, name)
+	}
+
 	if user.IsSuperuser {
 		return createEvent(r, data, user, name)
 	}

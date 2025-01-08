@@ -104,3 +104,7 @@ func GenerateRejectMsg(username string, event repo.Event) string {
 func GenerateUpdateMsg(username string, state string, event repo.Event) string {
 	return fmt.Sprintf("%v %v your %v request!", username, state, event.Name)
 }
+
+func GenerateBatchUpdateMsg(username string, state string) string {
+	return fmt.Sprintf("%v %v your request!", username, state)
+}

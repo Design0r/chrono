@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -43,20 +44,27 @@ func HandlePatchRequests(c echo.Context, r *repo.Queries) error {
 	log.Println("hello")
 	currUser := c.Get("user").(repo.User)
 
+	reqUserIdParam := c.FormValue("user_id")
 	stateParam := c.FormValue("state")
 	startDateParam := c.FormValue("start_date")
 	endDateParam := c.FormValue("end_date")
-	startDate, err := time.Parse("2022-01-02 00:00:00 +0100 +0100", startDateParam)
+
+	reqUserId, err := strconv.ParseInt(reqUserIdParam, 10, 64)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, "Failed parsing start date")
 	}
-	endDate, err := time.Parse("2022-01-02 00:00:00 +0100 +0100", endDateParam)
+	startUnix, err := strconv.ParseInt(startDateParam, 10, 64)
 	if err != nil {
-		return RenderError(c, http.StatusBadRequest, "Failed parsing end date")
+		return RenderError(c, http.StatusBadRequest, "Failed parsing start date")
 	}
-	log.Println(startDate, endDate)
+	endUnix, err := strconv.ParseInt(endDateParam, 10, 64)
+	if err != nil {
+		return RenderError(c, http.StatusBadRequest, "Failed parsing start date")
+	}
+	startDate := time.Unix(startUnix, 0)
+	endDate := time.Unix(endUnix, 0)
 
-	err = service.UpdateRequestStateRange(r, currUser.ID, stateParam, startDate, endDate)
+	err = service.UpdateRequestStateRange(r, currUser, reqUserId, stateParam, startDate, endDate)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, "Failed updating request")
 	}

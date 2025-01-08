@@ -102,6 +102,7 @@ func UpdateRequestState(r *repo.Queries, state string, currUser repo.User, reqId
 
 func UpdateRequestStateRange(
 	r *repo.Queries,
+	editor repo.User,
 	userId int64,
 	state string,
 	startDate time.Time,
@@ -109,6 +110,7 @@ func UpdateRequestStateRange(
 ) error {
 	params := repo.UpdateRequestStateRangeParams{
 		UserID:        userId,
+		EditedBy:      &editor.ID,
 		State:         state,
 		ScheduledAt:   startDate,
 		ScheduledAt_2: endDate,
@@ -117,6 +119,24 @@ func UpdateRequestStateRange(
 	if err != nil {
 		log.Printf("Failed to update requests: %v", err)
 	}
+
+	params2 := repo.UpdateEventsRangeParams{
+		UserID:        userId,
+		State:         state,
+		ScheduledAt:   startDate,
+		ScheduledAt_2: endDate,
+	}
+
+	err = r.UpdateEventsRange(context.Background(), params2)
+	if err != nil {
+		log.Printf("Failed to update events: %v", err)
+	}
+
+	_, err = CreateUserNotification(
+		r,
+		GenerateBatchUpdateMsg(editor.Username, state),
+		userId,
+	)
 
 	return err
 }

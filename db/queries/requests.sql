@@ -22,11 +22,15 @@ WHERE id = ?
 RETURNING *;
 
 -- name: UpdateRequestStateRange :exec
-UPDATE events
+UPDATE requests
 SET state = ?,
-edited_at = CURRENT_TIMESTAMP
-WHERE user_id = ?
-AND scheduled_at >= ?
-AND scheduled_at <= ?
-RETURNING *;
+    edited_by = ?,
+    edited_at = CURRENT_TIMESTAMP
+WHERE requests.user_id = ?
+  AND event_id IN (
+    SELECT e.id
+    FROM events e
+    WHERE e.scheduled_at >= ?
+      AND e.scheduled_at <= ?
+  );
 

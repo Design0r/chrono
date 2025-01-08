@@ -52,7 +52,7 @@ templ RequestRow(request schemas.BatchRequest) {
 		<td>{ fmt.Sprintf("%v. %v %v",endDay, endMonth, endYear) }</td>
 		<td
 			hx-patch="/requests"
-			hx-vals={ fmt.Sprintf("{\"state\":\"accepted\", \"start_date\":\"%v\", \"end_date\":\"%v\"}", request.StartDate, request.EndDate) }
+			hx-vals={ fmt.Sprintf("{\"state\":\"accepted\", \"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID) }
 			hx-swap="delete"
 			hx-target={ fmt.Sprintf("#request-%v", request.Request.ID) }
 			class="icon-outlined btn btn-ghost text-xl"
@@ -61,7 +61,7 @@ templ RequestRow(request schemas.BatchRequest) {
 		</td>
 		<td
 			hx-patch="requests"
-			hx-vals={ fmt.Sprintf("{\"state\":\"declied\", \"start_date\":\"%v\", \"end_date\":\"%v\"}", request.StartDate, request.EndDate) }
+			hx-vals={ fmt.Sprintf("{\"state\":\"declined\", \"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID) }
 			hx-swap="delete"
 			hx-target={ fmt.Sprintf("#request-%v", request.Request.ID) }
 			class="icon-outlined btn btn-ghost text-xl"

@@ -193,17 +193,22 @@ func (q *Queries) UpdateRequestState(ctx context.Context, arg UpdateRequestState
 }
 
 const updateRequestStateRange = `-- name: UpdateRequestStateRange :exec
-UPDATE events
+UPDATE requests
 SET state = ?,
-edited_at = CURRENT_TIMESTAMP
-WHERE user_id = ?
-AND scheduled_at >= ?
-AND scheduled_at <= ?
-RETURNING id, scheduled_at, name, state, created_at, edited_at, user_id
+    edited_by = ?,
+    edited_at = CURRENT_TIMESTAMP
+WHERE requests.user_id = ?
+  AND event_id IN (
+    SELECT e.id
+    FROM events e
+    WHERE e.scheduled_at >= ?
+      AND e.scheduled_at <= ?
+  )
 `
 
 type UpdateRequestStateRangeParams struct {
 	State         string    `json:"state"`
+	EditedBy      *int64    `json:"edited_by"`
 	UserID        int64     `json:"user_id"`
 	ScheduledAt   time.Time `json:"scheduled_at"`
 	ScheduledAt_2 time.Time `json:"scheduled_at_2"`
@@ -212,6 +217,7 @@ type UpdateRequestStateRangeParams struct {
 func (q *Queries) UpdateRequestStateRange(ctx context.Context, arg UpdateRequestStateRangeParams) error {
 	_, err := q.db.ExecContext(ctx, updateRequestStateRange,
 		arg.State,
+		arg.EditedBy,
 		arg.UserID,
 		arg.ScheduledAt,
 		arg.ScheduledAt_2,

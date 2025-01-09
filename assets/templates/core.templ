@@ -122,15 +122,10 @@ templ Avatar(user repo.User) {
 			<li>
 				<a>
 					<form action="/logout" method="post">
-						@CSRF()
 						<button type="submit" class="">Logout</button>
 					</form>
 				</a>
 			</li>
 		</ul>
 	</div>
-}
-
-templ CSRF() {
-	<input type="hidden" name="csrf" value={ ctx.Value("csrf").(string) }/>
 }

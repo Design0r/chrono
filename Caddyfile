@@ -1,3 +1,7 @@
-localhost
+{
+  auto_https off
+}
 
-reverse_proxy 127.0.0.1:8080
+:80 {
+  reverse_proxy chrono:8080
+}

@@ -375,7 +375,7 @@ func Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents i
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div><script>\r\n    function getEventName(){\r\n      return document.getElementById(\"eventName\").value\r\n    }\r\n  </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div><script>\n    function getEventName(){\n      return document.getElementById(\"eventName\").value\n    }\n  </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -9,9 +9,9 @@ services:
       - caddy_data:/data
       - caddy_config:/config
   chrono:
-    restart: on-failure
+    restart: unless-stopped
     volumes:
-      - chrono_db:/db
+      - ./chrono.db:/app/chrono.db
     env_file:
       - .env
     build:

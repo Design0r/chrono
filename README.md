@@ -11,6 +11,8 @@ A vacatation and event management tool
 - Node.js
 
 ## Installation
+Make sure to have your ~/go/bin folder on PATH
+
 Run once to install the required tools and libraries
 
 ```bash

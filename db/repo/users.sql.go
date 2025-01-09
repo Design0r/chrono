@@ -171,6 +171,7 @@ ON
     AND events.scheduled_at < ?
 GROUP BY 
     users.id, users.username, users.email, users.vacation_days
+ORDER BY users.id
 `
 
 type GetUsersWithVacationCountParams struct {

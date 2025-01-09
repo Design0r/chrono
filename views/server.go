@@ -3,6 +3,7 @@ package views
 import (
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
@@ -29,21 +30,11 @@ func NewServer(router *echo.Echo, db *sql.DB) *Server {
 }
 
 func (self *Server) InitMiddleware() {
-	self.Router.Use(middleware.Logger())
+	self.Router.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format:           "[${time_custom}][${method}][${status}] ${uri} ${error} ${latency_human}\n",
+		CustomTimeFormat: time.DateTime,
+	}))
 	self.Router.Use(middleware.Secure())
-	// self.Router.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-	// 	Skipper: func(c echo.Context) bool {
-	// 		return c.Path() == "/static/*"
-	// 	},
-	// 	TokenLength:    32,
-	// 	TokenLookup:    fmt.Sprintf("form:csrf,header:%v", echo.HeaderXCSRFToken),
-	// 	ContextKey:     "csrf",
-	// 	CookieName:     "_csrf",
-	// 	CookieMaxAge:   86400,
-	// 	CookieHTTPOnly: true,
-	// 	CookieSecure:   false,
-	// 	CookieDomain:   "/*",
-	// }))
 
 	staticHandler := echo.WrapHandler(
 		http.StripPrefix(

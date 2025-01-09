@@ -16,14 +16,11 @@ func SessionMiddleware(r *repo.Queries) MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			cookie, err := c.Cookie("session")
-			csrfCookie := service.DeleteCSRFCookie()
 			if err != nil {
-				c.SetCookie(csrfCookie)
 				return c.Redirect(http.StatusFound, "/login")
 			}
 			ok := service.IsValidSession(r, cookie.Value)
 			if !ok {
-				c.SetCookie(csrfCookie)
 				return c.Redirect(http.StatusFound, "/login")
 			}
 

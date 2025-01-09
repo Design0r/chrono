@@ -25,41 +25,28 @@ func CheckPassword(hashedPassword, password string) bool {
 }
 
 func CreateSessionCookie(session repo.Session) *http.Cookie {
-	cookie := http.Cookie{}
-	cookie.Path = "/"
-	cookie.Name = "session"
-	cookie.Value = session.ID
-	cookie.HttpOnly = true
-	cookie.Secure = false // Ensure this is set to true in production
-	cookie.Expires = session.ValidUntil
-
-	return &cookie
+	return &http.Cookie{
+		Path:     "/",
+		Name:     "session",
+		Value:    session.ID,
+		HttpOnly: true,
+		Secure:   false,
+		Expires:  session.ValidUntil,
+		SameSite: http.SameSiteStrictMode,
+	}
 }
 
 func DeleteSessionCookie() *http.Cookie {
-	cookie := http.Cookie{}
-	cookie.Path = "/"
-	cookie.Name = "session"
-	cookie.Value = ""
-	cookie.HttpOnly = true
-	cookie.Secure = false // Ensure this is set to true in production
-	cookie.Expires = time.Unix(0, 0)
-	cookie.MaxAge = -1
-
-	return &cookie
-}
-
-func DeleteCSRFCookie() *http.Cookie {
-	cookie := http.Cookie{}
-	cookie.Path = "/"
-	cookie.Name = "_csrf"
-	cookie.Value = ""
-	cookie.HttpOnly = true
-	cookie.Secure = false // Ensure this is set to true in production
-	cookie.Expires = time.Unix(0, 0)
-	cookie.MaxAge = -1
-
-	return &cookie
+	return &http.Cookie{
+		Path:     "/",
+		Name:     "session",
+		Value:    "",
+		HttpOnly: true,
+		Secure:   false,
+		Expires:  time.Unix(0, 0),
+		MaxAge:   -1,
+		SameSite: http.SameSiteStrictMode,
+	}
 }
 
 func SecureRandom(length int) string {

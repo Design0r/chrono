@@ -9,10 +9,11 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
+
   chrono:
     restart: unless-stopped
     volumes:
-      - chrono_db:/app/db
+      - db:/app/db
     env_file:
       - .env
     build:
@@ -21,6 +22,6 @@ services:
       - 8080
 
 volumes:
+  db:
   caddy_data:
   caddy_config:
-  chrono_db:

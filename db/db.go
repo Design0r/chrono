@@ -5,15 +5,23 @@ import (
 	"database/sql"
 	"io/fs"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/pressly/goose/v3"
 )
 
 func NewDB(name string) *sql.DB {
-	db, err := sql.Open("sqlite3", name)
+	err := os.MkdirAll("db", 0755)
+	if err != nil {
+		log.Fatalf("Failed to create directory: %v", err)
+	}
+
+	dbPath := filepath.Join("db", name)
+
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatalf("Failed to open database: %v", err)
-		return nil
 	}
 
 	pragmas := []string{

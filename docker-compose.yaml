@@ -12,7 +12,7 @@ services:
   chrono:
     restart: unless-stopped
     volumes:
-      - ./chrono.db:/app/chrono.db
+      - chrono_db:/app/db
     env_file:
       - .env
     build:

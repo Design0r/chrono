@@ -113,3 +113,7 @@ func GetCurrentYearProgress() schemas.YearProgress {
 		DaysPassedPercent: YearProgressPercent(currYear),
 	}
 }
+
+func GetStrWeekday(day time.Weekday) string {
+	return weekdays[day]
+}

@@ -1,9 +1,13 @@
 package templates
 
-import "strconv"
-import "fmt"
-import "chrono/schemas"
-import "chrono/db/repo"
+import (
+	"chrono/calendar"
+	"chrono/db/repo"
+	"chrono/schemas"
+	"fmt"
+	"strconv"
+	"time"
+)
 
 templ Calendar(user repo.User, month schemas.Month, vacationUsed int, pendingEvents int, notifications []repo.Notification) {
 	@Index(&user, notifications) {
@@ -11,13 +15,13 @@ templ Calendar(user repo.User, month schemas.Month, vacationUsed int, pendingEve
 			<div class="">
 				<div class="grid grid-cols-7 gap-1">
 					@Info(month, user, vacationUsed, pendingEvents)
-					@WeekdayHeader("Monday")
-					@WeekdayHeader("Tuesday")
-					@WeekdayHeader("Wednesday")
-					@WeekdayHeader("Thursday")
-					@WeekdayHeader("Friday")
-					@WeekdayHeader("Saturday")
-					@WeekdayHeader("Sunday")
+					@WeekdayHeader("Monday", month)
+					@WeekdayHeader("Tuesday", month)
+					@WeekdayHeader("Wednesday", month)
+					@WeekdayHeader("Thursday", month)
+					@WeekdayHeader("Friday", month)
+					@WeekdayHeader("Saturday", month)
+					@WeekdayHeader("Sunday", month)
 					for range month.Offset {
 						<div></div>
 					}
@@ -30,22 +34,39 @@ templ Calendar(user repo.User, month schemas.Month, vacationUsed int, pendingEve
 	}
 }
 
-templ WeekdayHeader(name string) {
-	<div class="bg-base-300 rounded border border-accent-content p-2 text-center text-lg">{ name }</div>
+templ WeekdayHeader(name string, month schemas.Month) {
+	{{
+		currWeekday := time.Now().Weekday()
+		strWeekday := calendar.GetStrWeekday(currWeekday)
+		now := time.Now()
+	}}
+	if strWeekday == name && int(now.Month()) == month.Number && now.Year() == month.Year {
+		<div class="bg-red-500 rounded border border-accent-content p-2 text-center text-lg">{ name }</div>
+	} else {
+		<div class="bg-base-300 rounded border border-accent-content p-2 text-center text-lg">{ name }</div>
+	}
 }
 
 templ Day(year int, month int, day schemas.Day, user repo.User) {
 	{{
 	url := fmt.Sprintf("/%d/%d/%d", year, month, day.Number)
 	strDay := strconv.Itoa(day.Number)
+	now := time.Now()
+	currDay := now.Day()
 	dayId := fmt.Sprintf("day-%v", strDay)
 	dayTarget := fmt.Sprintf("#%v", dayId)
+
+	baseCss := "rounded border-accent-content border flex flex-col shadow-sm shadow-gray-900"
 	}}
 	<div
-		if day.Name == "Saturday" || day.Name == "Sunday" {
-			class="bg-base-200 rounded border-accent-content border flex flex-col shadow-sm shadow-gray-900"
+		if currDay == day.Number && int(now.Month()) == month && now.Year() == year {
+			class={ fmt.Sprintf("%v %v", "bg-red-500", baseCss) }
 		} else {
-			class="bg-base-300 rounded border-accent-content border flex flex-col shadow-sm shadow-gray-900"
+			if day.Name == "Saturday" || day.Name == "Sunday" {
+				class="bg-base-200 rounded border-accent-content border flex flex-col shadow-sm shadow-gray-900"
+			} else {
+				class="bg-base-300 rounded border-accent-content border flex flex-col shadow-sm shadow-gray-900"
+			}
 		}
 	>
 		<div class="p-1 pl-2 text-xl">
@@ -67,8 +88,8 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 				hx-vals="js:{name: getEventName()}"
 				hx-target={ dayTarget }
 				hx-swap="beforeend"
-				class="btn hover:border-base-content btn-sm bg-neutral rounded hover:text-base-content text-base-100 text-center hover:border border-dashed icon-outlined w-full text-2xl"
-			>add_circle</button>
+				class="btn hover:border-base-content btn-sm bg-neutral rounded hover:text-base-content text-base-100 hover:border-2 border-2 border-base-100 border-dottedicon-outlined w-full hover:icon-filled"
+			><span class="icon-outlined hover:icon-filled text-2xl leading-5">add_circle</span></button>
 		</div>
 	</div>
 }
@@ -76,15 +97,17 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 templ Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents int) {
 	{{
 	strYear := strconv.Itoa(month.Year)
-	prevStrYear := strconv.Itoa(month.Year - 1)
-	nextStrYear := strconv.Itoa(month.Year + 1)
+	year := month.Year
+	nextYear := year
 	prevMNum := month.Number - 1
 	nextMNum := month.Number + 1
 	if prevMNum <= 0 {
 		prevMNum = 12
+		year--
 	}
 	if nextMNum > 12 {
 		nextMNum = nextMNum % 12
+		nextYear++
 		if nextMNum == 0 {
 			nextMNum = 1
 		}
@@ -92,23 +115,19 @@ templ Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents 
 	prevStrMonth := strconv.Itoa(prevMNum)
 	nextStrMonth := strconv.Itoa(nextMNum)
 
-	strMonth := strconv.Itoa((month.Number))
-	urlPrevMonth := fmt.Sprintf("/%v/%v", strYear, prevStrMonth)
-	urlNextMonth := fmt.Sprintf("/%v/%v", strYear, nextStrMonth)
-	urlPrevYear := fmt.Sprintf("/%v/%v", prevStrYear, strMonth)
-	urlNextYear := fmt.Sprintf("/%v/%v", nextStrYear, strMonth)
+	urlPrevMonth := fmt.Sprintf("/%v/%v", year, prevStrMonth)
+	urlNextMonth := fmt.Sprintf("/%v/%v", nextYear, nextStrMonth)
 	}}
 	<div class="col-span-7 grid grid-cols-7 items-center ">
-		<div class="col-span-3 flex justify-center space-x-5 bg-base-200 p-3">
-			<div class="flex w-30">
-				<a href={ templ.URL(urlPrevMonth) } class="text-xl icon-outlined">arrow_back</a>
-				<div class="text-xl text-center w-40 h-1">{ month.Name }</div>
-				<a href={ templ.URL(urlNextMonth) } class="text-xl icon-outlined">arrow_forward</a>
-			</div>
-			<div class="flex">
-				<a href={ templ.URL(urlPrevYear) } class="text-xl icon-outlined">arrow_back</a>
-				<div class="text-xl w-20 text-center">{ strYear }</div>
-				<a href={ templ.URL(urlNextYear) } class="text-xl icon-outlined">arrow_forward</a>
+		<div class="flex justify-between col-span-3 space-x-5 bg-base-200 p-3 gap-4">
+			<div class="flex items-center justify-start gap-2">
+				<div class="w-8 h-8 flex justify-center items-center rounded-full bg-base-100">
+					<a href={ templ.URL(urlPrevMonth) } class="text-xl icon-outlined">arrow_back</a>
+				</div>
+				<div class="w-8 h-8 flex justify-center items-center rounded-full bg-base-100">
+					<a href={ templ.URL(urlNextMonth) } class="text-xl icon-outlined">arrow_forward</a>
+				</div>
+				<div class="pl-4 text-xl">{ month.Name } { strYear }</div>
 			</div>
 		</div>
 		<select class="col-span-1 select select-bordered h-2 rounded bg-base-200 max-w-xs text-lg" name="eventName" id="eventName">
@@ -120,10 +139,10 @@ templ Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents 
 		@VacationCounter(user, vacationUsed, pendingEvents)
 	</div>
 	<script>
-    function getEventName(){
-      return document.getElementById("eventName").value
-    }
-  </script>
+		function getEventName(){
+			return document.getElementById("eventName").value
+		}
+	</script>
 }
 
 templ VacationCounter(user repo.User, vacationUsed int, pendingEvents int) {

@@ -11,7 +11,8 @@ WHERE user_id = ?;
 SELECT * FROM requests r
 JOIN users u ON r.user_id = u.id
 JOIN events e ON r.event_id = e.id
-WHERE r.state = "pending";
+WHERE r.state = "pending"
+ORDER BY e.scheduled_at;
 
 -- name: UpdateRequestState :one
 UPDATE requests

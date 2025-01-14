@@ -28,7 +28,7 @@ templ Event(event schemas.Event, user repo.User) {
 		></span>
 		<div
 			{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
-			class="text-center relative w-full rounded text-base-content"
+			class="text-center relative w-full rounded-xl text-base-content"
 		>
 			if event.UserID == user.ID {
 				<span>
@@ -36,7 +36,7 @@ templ Event(event schemas.Event, user repo.User) {
 						hx-swap="delete"
 						hx-target={ deleteUrl }
 						hx-delete={ fmt.Sprintf("/events/%v", event.ID) }
-						class="flex items-start rounded h-full text-xl p-0 icon-outlined absolute right-0"
+						class="flex items-start rounded-xl h-full text-xl p-0 icon-outlined absolute right-0"
 					>close</button>
 				</span>
 			}

@@ -15,11 +15,7 @@ func CreateEvent(
 	user repo.User,
 	name string,
 ) (repo.Event, error) {
-	if name != "urlaub" {
-		return createEvent(r, data, user, name)
-	}
-
-	if user.IsSuperuser {
+	if name != "urlaub" || user.IsSuperuser {
 		return createEvent(r, data, user, name)
 	}
 
@@ -42,8 +38,9 @@ func createEvent(
 		0,
 		time.Now().Local().Location(),
 	)
+
 	state := "pending"
-	if user.IsSuperuser {
+	if name != "urlaub" || user.IsSuperuser {
 		state = "accepted"
 	}
 

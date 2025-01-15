@@ -62,7 +62,7 @@ func Index(user *repo.User, notifications []repo.Notification) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div id=\"message-banner\" class=\"fixed left-3 bottom-3 space-y-2\"></div><script>\n        function removeMessageBanners() {\n          const banner = document.getElementById(\"message-banner\");\n          const elements = banner.childNodes;\n          elements.forEach((e) => {\n            setTimeout(() => {\n              e.remove();\n            }, 3000);\n          });\n        }\n\n        document.addEventListener(\"DOMContentLoaded\", removeMessageBanners);\n        document.addEventListener(\"htmx:afterOnLoad\", removeMessageBanners);\n      </script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div id=\"message-banner\" class=\"fixed left-3 bottom-3 space-y-2\"></div><script>\r\n        function removeMessageBanners() {\r\n          const banner = document.getElementById(\"message-banner\");\r\n          const elements = banner.childNodes;\r\n          elements.forEach((e) => {\r\n            setTimeout(() => {\r\n              e.remove();\r\n            }, 3000);\r\n          });\r\n        }\r\n\r\n        document.addEventListener(\"DOMContentLoaded\", removeMessageBanners);\r\n        document.addEventListener(\"htmx:afterOnLoad\", removeMessageBanners);\r\n      </script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -97,20 +97,7 @@ func Static() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!doctype html><html data-theme=\"dim\" lang=\"en\"><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" href=\"/static/css/output.css\"><link rel=\"icon\" href=\"/static/favicon.ico\" sizes=\"any\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"/static/js/htmx-min.js\"></script><title>Chrono</title></head><body hx-headers=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{\"X-CSRF-Token\":\"%v\"}", ctx.Value("csrf")))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 47, Col: 80}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"h-screen flex flex-col\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!doctype html><html data-theme=\"dim\" lang=\"en\"><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" href=\"/static/css/output.css\"><link rel=\"icon\" href=\"/static/favicon.ico\" sizes=\"any\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"/static/js/htmx-min.js\"></script><title>Chrono</title></head><body class=\"h-screen flex flex-col\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -118,7 +105,7 @@ func Static() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -142,12 +129,12 @@ func Notifications(notifications []repo.Notification) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"indicator\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"indicator\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -155,7 +142,7 @@ func Notifications(notifications []repo.Notification) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"dropdown dropdown-end\"><div tabindex=\"0\" hx-get=\"/notifications\" hx-swap=\"outerHTML\" hx-target=\"#notification-container\" role=\"button\" class=\"btn btn-ghost text-xl icon-outlined\">notifications</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"dropdown dropdown-end\"><div tabindex=\"0\" hx-get=\"/notifications\" hx-swap=\"outerHTML\" hx-target=\"#notification-container\" role=\"button\" class=\"btn btn-ghost text-xl icon-outlined\">notifications</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -163,7 +150,7 @@ func Notifications(notifications []repo.Notification) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -187,9 +174,9 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var6 == nil {
-			templ_7745c5c3_Var6 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 
@@ -197,32 +184,32 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 		month := strconv.Itoa(int(now.Month()))
 		year := strconv.Itoa(now.Year())
 		url := fmt.Sprintf("/%v/%v", year, month)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"px-4 pt-4 pb-0\"><div class=\"navbar flex justify-between rounded-xl bg-base-100\"><div><a href=\"/\" class=\"btn btn-ghost text-xl\">Chrono</a> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"px-4 pt-4 pb-0\"><div class=\"navbar flex justify-between rounded-xl bg-base-100\"><div><a href=\"/\" class=\"btn btn-ghost text-xl\">Chrono</a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if user != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var7 templ.SafeURL = templ.URL(url)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var7)))
+			var templ_7745c5c3_Var6 templ.SafeURL = templ.URL(url)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var6)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"btn btn-ghost\">Calendar</a> <a href=\"/team\" class=\"btn btn-ghost\">Team</a> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"btn btn-ghost\">Calendar</a> <a href=\"/team\" class=\"btn btn-ghost\">Team</a> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if (*user).IsSuperuser {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<a href=\"/requests\" class=\"btn btn-ghost\">Requests</a>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a href=\"/requests\" class=\"btn btn-ghost\">Requests</a>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div><div class=\"justify-end space-x-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div><div class=\"justify-end space-x-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -231,7 +218,7 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -240,12 +227,12 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<a href=\"/login\" class=\"btn btn-ghost\">Login</a> <a href=\"/signup\" class=\"btn btn-ghost\">Signup</a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a href=\"/login\" class=\"btn btn-ghost\">Login</a> <a href=\"/signup\" class=\"btn btn-ghost\">Signup</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -269,14 +256,14 @@ func Avatar(user repo.User) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 
 		bgColor := service.GenerateHSL(int(user.ID))
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"dropdown dropdown-end pr-2\"><div tabindex=\"0\" role=\"button\" class=\"avatar placeholder\"><div")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"dropdown dropdown-end pr-2\"><div tabindex=\"0\" role=\"button\" class=\"avatar placeholder\"><div")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -284,20 +271,20 @@ func Avatar(user repo.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " class=\"text-neutral-content w-10 rounded-full\"><span class=\"text-xl\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " class=\"text-neutral-content w-10 rounded-full\"><span class=\"text-xl\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Title(user.Username[:1]))
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Title(user.Username[:1]))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 117, Col: 39}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span></div></div><ul tabindex=\"0\" class=\"menu menu-sm dropdown-content bg-base-200 rounded-box z-[1] mt-3 w-52 p-2 shadow\"><li><a href=\"/profile\">Profile</a></li><li><a><form action=\"/logout\" method=\"post\"><button type=\"submit\" class=\"\">Logout</button></form></a></li></ul></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span></div></div><ul tabindex=\"0\" class=\"menu menu-sm dropdown-content bg-base-200 rounded-box z-[1] mt-3 w-52 p-2 shadow\"><li><a href=\"/profile\">Profile</a></li><li><a><form action=\"/logout\" method=\"post\"><button type=\"submit\" class=\"\">Logout</button></form></a></li></ul></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

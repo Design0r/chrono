@@ -44,7 +44,7 @@ templ Static() {
 			<script src="/static/js/htmx-min.js"></script>
 			<title>Chrono</title>
 		</head>
-		<body hx-headers={ fmt.Sprintf("{\"X-CSRF-Token\":\"%v\"}", ctx.Value("csrf")) } class="h-screen flex flex-col">
+		<body class="h-screen flex flex-col">
 			{ children... }
 		</body>
 	</html>

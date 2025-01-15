@@ -16,6 +16,9 @@ func IsHTMXRequest(c echo.Context) bool {
 	if _, exists := c.Request().Header["HX-Request"]; exists {
 		return true
 	}
+	if _, exists := c.Request().Header["Hx-Request"]; exists {
+		return true
+	}
 
 	return false
 }

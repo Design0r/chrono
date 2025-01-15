@@ -36,17 +36,17 @@ func HandleLogin(c echo.Context, r *repo.Queries) error {
 	}
 	user, err := service.GetUserByEmail(r, loginUser.Email)
 	if err != nil {
-		return RenderError(c, http.StatusBadRequest, "Incorrect email or password")
+		return RenderError(c, http.StatusNotFound, "Incorrect email or password")
 	}
 
 	ok := service.CheckPassword(user.Password, loginUser.Password)
 	if !ok {
-		return RenderError(c, http.StatusBadRequest, "Incorrect email or password")
+		return RenderError(c, http.StatusNotFound, "Incorrect email or password")
 	}
 
 	session, err := service.CreateSession(r, user.ID)
 	if err != nil {
-		return RenderError(c, http.StatusBadRequest, err.Error())
+		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
 	sessionCookie := service.CreateSessionCookie(session)

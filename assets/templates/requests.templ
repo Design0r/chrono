@@ -3,9 +3,11 @@ package templates
 import "chrono/db/repo"
 import "fmt"
 import "chrono/schemas"
+import "time"
 
 templ Requests(user *repo.User, requests []schemas.BatchRequest, notifications []repo.Notification) {
 	@Index(user, notifications) {
+		<div id="reject-modal"></div>
 		<div class="p-2 ">
 			<div class="bg-base-300 overflow-x-auto">
 				<table class="table">
@@ -60,11 +62,57 @@ templ RequestRow(request schemas.BatchRequest) {
 			check
 		</td>
 		<td
-			hx-patch="requests"
-			hx-vals={ fmt.Sprintf("{\"state\":\"declined\", \"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID) }
-			hx-swap="delete"
-			hx-target={ fmt.Sprintf("#request-%v", request.Request.ID) }
-			class="icon-outlined btn btn-ghost text-xl"
+			hx-get="/requests/modal"
+			hx-target="#reject-modal"
+			hx-swap="outerHTML"
+			hx-vals={ fmt.Sprintf("{\"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\", \"request_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID, request.Request.ID) }
+			class="btn icon-outlined text-xl"
 		>close</td>
 	</tr>
+}
+
+templ RejectModal(message *string, startDate time.Time, endDate time.Time, userId int64, requestId int64) {
+	<div id="reject-modal" class="fixed z-10 inset-0 bg-opacity-50 backdrop-blur-md flex items-center justify-center">
+		<div class="modal-box">
+			<h3 class="text-lg font-bold">Reject Requeust</h3>
+			if message != nil {
+				<h4>{ *message }</h4>
+			}
+			<div class="modal-backdrop">
+				<h5>Reject Reason</h5>
+				<textarea
+					id="modal-reason"
+					class="textarea w-full text-white textarea-bordered"
+					type="text"
+				></textarea>
+				<br/>
+				<button
+					id="reject-btn"
+					hx-patch="requests"
+					hx-vals={ fmt.Sprintf("js:{state:\"declined\", start_date:\"%v\", end_date:\"%v\", user_id:\"%v\", reason: getReason()}", startDate.Unix(), endDate.Unix(), userId) }
+					hx-swap="delete"
+					hx-target={ fmt.Sprintf("#request-%v", requestId) }
+					class="btn btn-error text-xl"
+				>Reject</button>
+			</div>
+		</div>
+	</div>
+	<script>
+  function getReason(){
+    return document.getElementById("modal-reason").value
+  }
+  {
+    const modal = document.querySelector('#reject-modal')
+    const btn = document.querySelector('#reject-btn')
+  
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal){
+        modal.remove()
+      }
+    })
+    btn.addEventListener("click", (event) => {
+      modal.remove()
+      })
+  }
+</script>
 }

@@ -35,3 +35,11 @@ WHERE requests.user_id = ?
       AND e.scheduled_at <= ?
   );
 
+-- name: GetRequestRange :many
+SELECT * FROM requests r
+JOIN users u ON r.user_id = u.id
+JOIN events e ON r.event_id = e.id
+WHERE r.user_id = ?
+AND e.scheduled_at >= ?
+AND e.scheduled_at <= ?
+ORDER BY e.scheduled_at;

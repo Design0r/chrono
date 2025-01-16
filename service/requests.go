@@ -107,6 +107,7 @@ func UpdateRequestStateRange(
 	state string,
 	startDate time.Time,
 	endDate time.Time,
+	reason string,
 ) error {
 	params := repo.UpdateRequestStateRangeParams{
 		UserID:        userId,
@@ -132,11 +133,32 @@ func UpdateRequestStateRange(
 		log.Printf("Failed to update events: %v", err)
 	}
 
-	_, err = CreateUserNotification(
-		r,
-		GenerateBatchUpdateMsg(editor.Username, state),
-		userId,
-	)
+	msg := GenerateBatchUpdateMsg(editor.Username, state)
+	if reason != "" {
+		msg = GenerateBatchUpdateReasonMsg(editor.Username, state, reason)
+	}
+
+	_, err = CreateUserNotification(r, msg, userId)
 
 	return err
+}
+
+func GetRequestRange(
+	r *repo.Queries,
+	startDate time.Time,
+	endDate time.Time,
+	userID int64,
+) ([]repo.GetRequestRangeRow, error) {
+	params := repo.GetRequestRangeParams{
+		UserID:        userID,
+		ScheduledAt:   startDate,
+		ScheduledAt_2: endDate,
+	}
+
+	requests, err := r.GetRequestRange(context.Background(), params)
+	if err != nil {
+		return nil, err
+	}
+
+	return requests, nil
 }

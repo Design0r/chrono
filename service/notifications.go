@@ -108,3 +108,7 @@ func GenerateUpdateMsg(username string, state string, event repo.Event) string {
 func GenerateBatchUpdateMsg(username string, state string) string {
 	return fmt.Sprintf("%v %v your request!", username, state)
 }
+
+func GenerateBatchUpdateReasonMsg(username string, state string, reason string) string {
+	return fmt.Sprintf("%v %v your request: %v", username, state, reason)
+}

@@ -72,8 +72,9 @@ templ RequestRow(request schemas.BatchRequest) {
 }
 
 templ RejectModal(message *string, startDate time.Time, endDate time.Time, userId int64, requestId int64) {
-	<div id="reject-modal" class="fixed z-10 inset-0 bg-opacity-50 backdrop-blur-md flex items-center justify-center">
-		<div class="modal-box">
+	<div id="reject-modal" class="fixed z-10 container flex items-center justify-center">
+		<div id="inner-modal" class="modal-box">
+			<button id="close-modal" class="icon-outlined justify-end">close</button>
 			<h3 class="text-lg font-bold">Reject Requeust</h3>
 			if message != nil {
 				<h4>{ *message }</h4>
@@ -98,21 +99,16 @@ templ RejectModal(message *string, startDate time.Time, endDate time.Time, userI
 		</div>
 	</div>
 	<script>
-  function getReason(){
-    return document.getElementById("modal-reason").value
-  }
   {
-    const modal = document.querySelector('#reject-modal')
+    const getReason = () => document.getElementById("modal-reason").value
+    const modal = document.querySelector('#inner-modal')
     const btn = document.querySelector('#reject-btn')
+    const closeBtn = document.querySelector('#close-modal')
+    
+    const closeModal = () => {modal.remove()}
   
-    modal.addEventListener('click', (event) => {
-      if (event.target === modal){
-        modal.remove()
-      }
-    })
-    btn.addEventListener("click", (event) => {
-      modal.remove()
-      })
+    btn.addEventListener("click", (event) => {modal.remove()})
+    closeBtn.addEventListener("click", (event) => {modal.remove()})
   }
-</script>
+  </script>
 }

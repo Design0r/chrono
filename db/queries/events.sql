@@ -65,4 +65,4 @@ SELECT DISTINCT u.* FROM events e
 JOIN users u on e.user_id = u.id
 WHERE u.id != ? 
 AND e.scheduled_at >= ?
-AND e.scheduled_at < ?;
+AND e.scheduled_at <= ?;

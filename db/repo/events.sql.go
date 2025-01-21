@@ -139,7 +139,7 @@ SELECT DISTINCT u.id, u.username, u.email, u.password, u.vacation_days, u.is_sup
 JOIN users u on e.user_id = u.id
 WHERE u.id != ? 
 AND e.scheduled_at >= ?
-AND e.scheduled_at < ?
+AND e.scheduled_at <= ?
 `
 
 type GetConflictingEventUsersParams struct {

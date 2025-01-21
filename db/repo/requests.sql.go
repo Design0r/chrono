@@ -49,7 +49,7 @@ SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, 
 JOIN users u ON r.user_id = u.id
 JOIN events e ON r.event_id = e.id
 WHERE r.state = "pending"
-ORDER BY e.scheduled_at
+ORDER BY r.user_id, e.scheduled_at
 `
 
 type GetPendingRequestsRow struct {

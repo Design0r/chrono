@@ -46,7 +46,7 @@ func Requests(user *repo.User, requests []schemas.BatchRequest, notifications []
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"reject-modal\"></div><div class=\"p-2 \"><div class=\"bg-base-300 overflow-x-auto\"><table class=\"table\"><thead><tr><th>ID</th><th>Name</th><th>Message</th><th>Event Type</th><th>Number of Days</th><th>Event Start Date</th><th>Event End Date</th><th></th><th></th></tr></thead> <tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"reject-modal\"></div><div class=\"p-2 \"><div class=\"bg-base-300 overflow-x-auto\"><table class=\"table \"><thead><tr><th>ID</th><th>Name</th><th>Message</th><th>Event Type</th><th>Number of Days</th><th>Event Start Date</th><th>Event End Date</th><th></th><th></th><th>Conflicts</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -105,7 +105,7 @@ func RequestRow(request schemas.BatchRequest) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("request-%v", request.Request.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 47, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 48, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -118,7 +118,7 @@ func RequestRow(request schemas.BatchRequest) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(request.Request.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 48, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 49, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -131,7 +131,7 @@ func RequestRow(request schemas.BatchRequest) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(request.Request.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 49, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 50, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -144,7 +144,7 @@ func RequestRow(request schemas.BatchRequest) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(msg)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 50, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 51, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -157,7 +157,7 @@ func RequestRow(request schemas.BatchRequest) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(request.Request.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 51, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 52, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -170,7 +170,7 @@ func RequestRow(request schemas.BatchRequest) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(request.EventCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 52, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 53, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -183,7 +183,7 @@ func RequestRow(request schemas.BatchRequest) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v. %v %v", startDay, startMonth, startYear))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 53, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 54, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -196,20 +196,20 @@ func RequestRow(request schemas.BatchRequest) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v. %v %v", endDay, endMonth, endYear))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 54, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 55, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</td><td hx-patch=\"/requests\" hx-vals=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</td><td><button hx-patch=\"/requests\" hx-vals=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{\"state\":\"accepted\", \"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 57, Col: 190}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 59, Col: 191}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -222,51 +222,59 @@ func RequestRow(request schemas.BatchRequest) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#request-%v", request.Request.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 59, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 61, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" class=\"icon-outlined btn btn-ghost text-xl\">check</td><td hx-get=\"/requests/modal\" hx-target=\"#reject-modal\" hx-swap=\"outerHTML\" hx-vals=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" class=\"icon-outlined btn btn-ghost text-xl\">check</button></td><td><button hx-get=\"/requests/modal\" hx-target=\"#reject-modal\" hx-swap=\"outerHTML\" hx-vals=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{\"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\", \"request_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID, request.Request.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 68, Col: 209}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 72, Col: 210}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" class=\"btn icon-outlined text-xl\">close</td><td>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" class=\"btn btn-ghost icon-outlined text-xl\">close</button></td><td>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if request.Conflicts != nil {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"flex flex-col space-y-1\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 			for _, user := range *request.Conflicts {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"bg-red-500\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<span class=\"badge badge-error flex\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 75, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 83, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</td></tr>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</td></tr>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -295,56 +303,56 @@ func RejectModal(message *string, startDate time.Time, endDate time.Time, userId
 			templ_7745c5c3_Var16 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div id=\"reject-modal\" class=\"fixed z-10 container flex items-center justify-center\"><div id=\"inner-modal\" class=\"modal-box\"><button id=\"close-modal\" class=\"icon-outlined justify-end\">close</button><h3 class=\"text-lg font-bold\">Reject Requeust</h3>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div id=\"reject-modal\" class=\"fixed z-10 container flex items-center justify-center\"><div id=\"inner-modal\" class=\"modal-box\"><button id=\"close-modal\" class=\"icon-outlined justify-end\">close</button><h3 class=\"text-lg font-bold\">Reject Requeust</h3>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if message != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<h4>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<h4>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(*message)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 89, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 98, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</h4>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</h4>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"modal-backdrop\"><h5>Reject Reason</h5><textarea id=\"modal-reason\" class=\"textarea w-full text-white textarea-bordered\" type=\"text\"></textarea><br><button id=\"reject-btn\" hx-patch=\"requests\" hx-vals=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"modal-backdrop\"><h5>Reject Reason</h5><textarea id=\"modal-reason\" class=\"textarea w-full text-white textarea-bordered\" type=\"text\"></textarea><br><button id=\"reject-btn\" hx-patch=\"requests\" hx-vals=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("js:{state:\"declined\", start_date:\"%v\", end_date:\"%v\", user_id:\"%v\", reason: getReason()}", startDate.Unix(), endDate.Unix(), userId))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 102, Col: 168}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 111, Col: 168}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" hx-swap=\"delete\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" hx-swap=\"delete\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#request-%v", requestId))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 104, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 113, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"btn btn-error text-xl\">Reject</button></div></div></div><script>\n  {\n    const getReason = () => document.getElementById(\"modal-reason\").value\n    const modal = document.querySelector('#inner-modal')\n    const btn = document.querySelector('#reject-btn')\n    const closeBtn = document.querySelector('#close-modal')\n    \n    const closeModal = () => {modal.remove()}\n  \n    btn.addEventListener(\"click\", (event) => {modal.remove()})\n    closeBtn.addEventListener(\"click\", (event) => {modal.remove()})\n  }\n  </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" class=\"btn btn-error text-xl\">Reject</button></div></div></div><script>\n  {\n    const getReason = () => document.getElementById(\"modal-reason\").value\n    const modal = document.querySelector('#inner-modal')\n    const btn = document.querySelector('#reject-btn')\n    const closeBtn = document.querySelector('#close-modal')\n    \n    const closeModal = () => {modal.remove()}\n  \n    btn.addEventListener(\"click\", (event) => {modal.remove()})\n    closeBtn.addEventListener(\"click\", (event) => {modal.remove()})\n  }\n  </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

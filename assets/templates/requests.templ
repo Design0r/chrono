@@ -10,7 +10,7 @@ templ Requests(user *repo.User, requests []schemas.BatchRequest, notifications [
 		<div id="reject-modal"></div>
 		<div class="p-2 ">
 			<div class="bg-base-300 overflow-x-auto">
-				<table class="table">
+				<table class="table ">
 					<thead>
 						<tr>
 							<th>ID</th>
@@ -22,6 +22,7 @@ templ Requests(user *repo.User, requests []schemas.BatchRequest, notifications [
 							<th>Event End Date</th>
 							<th></th>
 							<th></th>
+							<th>Conflicts</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -52,29 +53,37 @@ templ RequestRow(request schemas.BatchRequest) {
 		<td>{ fmt.Sprint(request.EventCount) }</td>
 		<td>{ fmt.Sprintf("%v. %v %v",startDay, startMonth, startYear) }</td>
 		<td>{ fmt.Sprintf("%v. %v %v",endDay, endMonth, endYear) }</td>
-		<td
-			hx-patch="/requests"
-			hx-vals={ fmt.Sprintf("{\"state\":\"accepted\", \"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID) }
-			hx-swap="delete"
-			hx-target={ fmt.Sprintf("#request-%v", request.Request.ID) }
-			class="icon-outlined btn btn-ghost text-xl"
-		>
-			check
+		<td>
+			<button
+				hx-patch="/requests"
+				hx-vals={ fmt.Sprintf("{\"state\":\"accepted\", \"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID) }
+				hx-swap="delete"
+				hx-target={ fmt.Sprintf("#request-%v", request.Request.ID) }
+				class="icon-outlined btn btn-ghost text-xl"
+			>
+				check
+			</button>
 		</td>
-		<td
-			hx-get="/requests/modal"
-			hx-target="#reject-modal"
-			hx-swap="outerHTML"
-			hx-vals={ fmt.Sprintf("{\"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\", \"request_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID, request.Request.ID) }
-			class="btn icon-outlined text-xl"
-		>close</td>
+		<td>
+			<button
+				hx-get="/requests/modal"
+				hx-target="#reject-modal"
+				hx-swap="outerHTML"
+				hx-vals={ fmt.Sprintf("{\"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\", \"request_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID, request.Request.ID) }
+				class="btn btn-ghost icon-outlined text-xl"
+			>
+				close
+			</button>
+		</td>
 		<td>
 			if request.Conflicts != nil {
-				for _, user := range *request.Conflicts {
-					<div class="bg-red-500">
-						{ user.Username }
-					</div>
-				}
+				<div class="flex flex-col space-y-1">
+					for _, user := range *request.Conflicts {
+						<span class="badge badge-error flex">
+							{ user.Username }
+						</span>
+					}
+				</div>
 			}
 		</td>
 	</tr>

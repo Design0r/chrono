@@ -55,15 +55,26 @@ func GetPendingRequests(r *repo.Queries) ([]schemas.BatchRequest, error) {
 
 		for endIndex+1 < len(req) &&
 			req[endIndex].ScheduledAt.Year() == req[endIndex+1].ScheduledAt.Year() &&
-			req[endIndex].ScheduledAt.YearDay()+1 == req[endIndex+1].ScheduledAt.YearDay() {
+			req[endIndex].ScheduledAt.YearDay()+1 == req[endIndex+1].ScheduledAt.YearDay() &&
+			req[endIndex].UserID == req[endIndex+1].UserID {
 			endIndex++
 		}
 
+		startDate := req[startIndex].ScheduledAt
+		endDate := req[endIndex].ScheduledAt
+		confilctingUsers, _ := GetConflictingEventUsers(
+			r,
+			req[startIndex].UserID,
+			startDate,
+			endDate,
+		)
+
 		requestsToShow = append(requestsToShow, schemas.BatchRequest{
-			StartDate:  req[startIndex].ScheduledAt,
-			EndDate:    req[endIndex].ScheduledAt,
+			StartDate:  startDate,
+			EndDate:    endDate,
 			EventCount: endIndex - startIndex + 1,
 			Request:    &req[endIndex],
+			Conflicts:  &confilctingUsers,
 		})
 
 		startIndex = endIndex + 1
@@ -161,4 +172,24 @@ func GetRequestRange(
 	}
 
 	return requests, nil
+}
+
+func GetConflictingEventUsers(
+	r *repo.Queries,
+	userId int64,
+	startDate time.Time,
+	endDate time.Time,
+) ([]repo.User, error) {
+	params := repo.GetConflictingEventUsersParams{
+		ID:            userId,
+		ScheduledAt:   startDate,
+		ScheduledAt_2: endDate,
+	}
+	users, err := r.GetConflictingEventUsers(context.Background(), params)
+	if err != nil {
+		log.Printf("Failed to fetch conflicting users: %v", err)
+		return []repo.User{}, err
+	}
+
+	return users, nil
 }

@@ -68,6 +68,15 @@ templ RequestRow(request schemas.BatchRequest) {
 			hx-vals={ fmt.Sprintf("{\"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\", \"request_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID, request.Request.ID) }
 			class="btn icon-outlined text-xl"
 		>close</td>
+		<td>
+			if request.Conflicts != nil {
+				for _, user := range *request.Conflicts {
+					<div class="bg-red-500">
+						{ user.Username }
+					</div>
+				}
+			}
+		</td>
 	</tr>
 }
 

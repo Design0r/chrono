@@ -11,4 +11,5 @@ type BatchRequest struct {
 	EndDate    time.Time
 	EventCount int
 	Request    *repo.GetPendingRequestsRow
+	Conflicts  *[]repo.User
 }

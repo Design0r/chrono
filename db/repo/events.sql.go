@@ -134,6 +134,52 @@ func (q *Queries) GetAcceptedEventsForMonth(ctx context.Context, arg GetAccepted
 	return items, nil
 }
 
+const getConflictingEventUsers = `-- name: GetConflictingEventUsers :many
+SELECT DISTINCT u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at FROM events e
+JOIN users u on e.user_id = u.id
+WHERE u.id != ? 
+AND e.scheduled_at >= ?
+AND e.scheduled_at < ?
+`
+
+type GetConflictingEventUsersParams struct {
+	ID            int64     `json:"id"`
+	ScheduledAt   time.Time `json:"scheduled_at"`
+	ScheduledAt_2 time.Time `json:"scheduled_at_2"`
+}
+
+func (q *Queries) GetConflictingEventUsers(ctx context.Context, arg GetConflictingEventUsersParams) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getConflictingEventUsers, arg.ID, arg.ScheduledAt, arg.ScheduledAt_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.VacationDays,
+			&i.IsSuperuser,
+			&i.CreatedAt,
+			&i.EditedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getEventsForDay = `-- name: GetEventsForDay :many
 SELECT id, scheduled_at, name, state, created_at, edited_at, user_id FROM events 
 WHERE Date(scheduled_at) = ?

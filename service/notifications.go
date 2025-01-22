@@ -90,25 +90,25 @@ func GetUserNotifications(r *repo.Queries, userId int64) ([]repo.Notification, e
 }
 
 func GenerateRequestMsg(username string, event repo.Event) string {
-	return fmt.Sprintf("%v sent a new request for %v!", username, event.Name)
+	return fmt.Sprintf("%v sent a new request for %v.", username, event.Name)
 }
 
 func GenerateAcceptMsg(username string, event repo.Event) string {
-	return fmt.Sprintf("%v accepted your %v request!", username, event.Name)
+	return fmt.Sprintf("%v accepted your %v request.", username, event.Name)
 }
 
 func GenerateRejectMsg(username string, event repo.Event) string {
-	return fmt.Sprintf("%v rejected your %v request!", username, event.Name)
+	return fmt.Sprintf("%v rejected your %v request.", username, event.Name)
 }
 
 func GenerateUpdateMsg(username string, state string, event repo.Event) string {
-	return fmt.Sprintf("%v %v your %v request!", username, state, event.Name)
+	return fmt.Sprintf("%v %v your %v request.", username, state, event.Name)
 }
 
 func GenerateBatchUpdateMsg(username string, state string) string {
-	return fmt.Sprintf("%v %v your request!", username, state)
+	return fmt.Sprintf("%v %v your request.", username, state)
 }
 
 func GenerateBatchUpdateReasonMsg(username string, state string, reason string) string {
-	return fmt.Sprintf("%v %v your request: %v", username, state, reason)
+	return fmt.Sprintf("%v %v your request: %v.", username, state, reason)
 }

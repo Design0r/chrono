@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func Calendar(user repo.User, month schemas.Month, vacationUsed int, pendingEvents int, notifications []repo.Notification) templ.Component {
+func Calendar(user repo.User, month schemas.Month, vacationUsed float64, pendingEvents int, notifications []repo.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -318,7 +318,7 @@ func Day(year int, month int, day schemas.Day, user repo.User) templ.Component {
 	})
 }
 
-func Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents int) templ.Component {
+func Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEvents int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -421,7 +421,7 @@ func Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents i
 	})
 }
 
-func VacationCounter(user repo.User, vacationUsed int, pendingEvents int) templ.Component {
+func VacationCounter(user repo.User, vacationRemaining float64, pendingEvents int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -461,9 +461,9 @@ func VacationCounter(user repo.User, vacationUsed int, pendingEvents int) templ.
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(vacationUsed))
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(float64(user.VacationDays) - vacationRemaining))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 152, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 152, Col: 95}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -474,9 +474,9 @@ func VacationCounter(user repo.User, vacationUsed int, pendingEvents int) templ.
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", int(user.VacationDays)-vacationUsed))
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(vacationRemaining))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 153, Col: 98}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 153, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {

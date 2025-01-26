@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -16,6 +17,7 @@ func CreateEvent(
 	name string,
 ) (repo.Event, error) {
 	if name != "urlaub" || user.IsSuperuser {
+		CreateToken(r, user.ID, data.Year, -1.0)
 		return createEvent(r, data, user, name)
 	}
 
@@ -153,23 +155,20 @@ func GetEventsForMonth(
 	return nil
 }
 
-func GetVacationCountForUserYear(r *repo.Queries, userId int, year int) (int, error) {
-	yearStart := time.Date(year, 1, 1, 0, 0, 0, 0, time.Now().Location())
-	yearEnd := yearStart.AddDate(1, 0, 0)
+func GetVacationCountForUserYear(
+	r *repo.Queries,
+	userId int,
+	year int,
+	month int,
+) (float64, error) {
+	yearStart := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.Now().Location())
 
-	count, err := r.GetVacationCountForUser(
-		context.Background(),
-		repo.GetVacationCountForUserParams{
-			UserID:        int64(userId),
-			ScheduledAt:   yearStart,
-			ScheduledAt_2: yearEnd,
-		},
-	)
+	value, err := GetValidUserTokenSum(r, int64(userId), yearStart)
 	if err != nil {
 		return 0, err
 	}
 
-	return int(count), nil
+	return value, nil
 }
 
 func UpdateEventState(r *repo.Queries, state string, eventId int64) (repo.Event, error) {

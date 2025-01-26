@@ -117,6 +117,11 @@ func HandlePatchRequests(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, "Failed updating request")
 	}
 
+	if stateParam == "accepted" {
+		days := (startDate.Sub(endDate).Hours() / 24) - 1.0
+		service.CreateToken(r, reqUserId, startDate.Year(), days)
+	}
+
 	return Render(
 		c,
 		http.StatusOK,

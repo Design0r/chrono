@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-templ Calendar(user repo.User, month schemas.Month, vacationUsed int, pendingEvents int, notifications []repo.Notification) {
+templ Calendar(user repo.User, month schemas.Month, vacationUsed float64, pendingEvents int, notifications []repo.Notification) {
 	@Index(&user, notifications) {
 		<div class="pt-2">
 			<div class="grid grid-cols-7 gap-x-1 gap-y-2">
@@ -92,7 +92,7 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 	</div>
 }
 
-templ Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents int) {
+templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEvents int) {
 	{{
 	strYear := strconv.Itoa(month.Year)
 	year := month.Year
@@ -143,14 +143,14 @@ templ Info(month schemas.Month, user repo.User, vacationUsed int, pendingEvents 
 	</script>
 }
 
-templ VacationCounter(user repo.User, vacationUsed int, pendingEvents int) {
+templ VacationCounter(user repo.User, vacationRemaining float64, pendingEvents int) {
 	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
 	<div id="vacation-counter" hx-swap-oob="true" class="col-span-4 text-lg">
 		<div class="flex justify-end items-center space-x-2 p-3 px-6 rounded-xl bg-base-300">
 			<h2>Vacation Days:</h2>
 			<div class="text-info">Total: { strNum }</div> <span class="text-slate-600">| </span>
-			<div class="text-warning">Used: { strconv.Itoa(vacationUsed) }</div> <span class="text-slate-600">| </span>
-			<div class="text-success">Remaining: { fmt.Sprintf("%v", int(user.VacationDays) - vacationUsed) }</div> <span class="text-slate-600">| </span>
+			<div class="text-warning">Used: { fmt.Sprint(float64(user.VacationDays) - vacationRemaining) }</div> <span class="text-slate-600">| </span>
+			<div class="text-success">Remaining: { fmt.Sprint(vacationRemaining) }</div> <span class="text-slate-600">| </span>
 			<div class="text-base-content">Pending: { fmt.Sprint(pendingEvents) }</div>
 		</div>
 	</div>

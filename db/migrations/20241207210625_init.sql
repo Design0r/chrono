@@ -73,6 +73,26 @@ CREATE TABLE IF NOT EXISTS notification_user (
   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS vacation_tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  start_date DATETIME NOT NULL,
+  end_date DATETIME NOT NULL,
+  value FLOAT NOT NULL,
+
+  user_id INTEGER NOT NULL,
+
+  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS token_refresh (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    year INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- +goose Down
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS sessions;
@@ -81,3 +101,5 @@ DROP TABLE IF EXISTS api_cache;
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS notification_user;
 DROP TABLE IF EXISTS requests;
+DROP TABLE IF EXISTS vacation_tokens;
+DROP TABLE IF EXISTS token_refresh;

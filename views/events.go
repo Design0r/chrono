@@ -39,7 +39,12 @@ func HandleCreateEvent(c echo.Context, r *repo.Queries) error {
 
 	e := schemas.Event{Username: currUser.Username, Event: event}
 
-	vacationUsed, err := service.GetVacationCountForUserYear(r, int(currUser.ID), date.Year)
+	vacationUsed, err := service.GetVacationCountForUserYear(
+		r,
+		int(currUser.ID),
+		date.Year,
+		date.Month,
+	)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
@@ -76,12 +81,18 @@ func HandleDeleteEvent(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
+	_, err = service.CreateToken(r, currUser.ID, deletedEvent.ScheduledAt.Year(), 1.0)
+	if err != nil {
+		return RenderError(c, http.StatusBadRequest, err.Error())
+	}
+
 	e := schemas.Event{Username: currUser.Username, Event: deletedEvent}
 
 	vacationUsed, err := service.GetVacationCountForUserYear(
 		r,
 		int(currUser.ID),
 		deletedEvent.ScheduledAt.Year(),
+		int(deletedEvent.ScheduledAt.Month()),
 	)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())

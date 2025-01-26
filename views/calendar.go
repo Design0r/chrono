@@ -1,6 +1,7 @@
 package views
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -28,16 +29,23 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 	service.UpdateHolidays(r, date.Year)
+	service.InitYearlyTokens(r, currUser, date.Year)
 
 	month := calendar.GetDaysOfMonth(time.Month(date.Month), date.Year)
 	err := service.GetEventsForMonth(r, &month)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
-	vacationUsed, err := service.GetVacationCountForUserYear(r, int(currUser.ID), date.Year)
+	vacationRemaining, err := service.GetVacationCountForUserYear(
+		r,
+		int(currUser.ID),
+		date.Year,
+		date.Month,
+	)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
+	fmt.Println(vacationRemaining)
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
@@ -52,6 +60,6 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 	return Render(
 		c,
 		http.StatusOK,
-		templates.Calendar(currUser, month, vacationUsed, pendingEvents, notifications),
+		templates.Calendar(currUser, month, vacationRemaining, pendingEvents, notifications),
 	)
 }

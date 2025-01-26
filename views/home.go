@@ -2,6 +2,7 @@ package views
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -17,10 +18,12 @@ func InitHomeRoutes(group *echo.Group, r *repo.Queries) {
 
 func HandleHome(c echo.Context, r *repo.Queries) error {
 	currUser := c.Get("user").(repo.User)
-	vacDays, err := service.GetVacationCountForUserYear(
+	service.InitYearlyTokens(r, currUser, time.Now().Year())
+	remainingDays, err := service.GetVacationCountForUserYear(
 		r,
 		int(currUser.ID),
 		calendar.CurrentYear(),
+		0,
 	)
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, err.Error())
@@ -41,6 +44,6 @@ func HandleHome(c echo.Context, r *repo.Queries) error {
 	return Render(
 		c,
 		http.StatusOK,
-		templates.Home(currUser, vacDays, pendingEvents, stats, notifications),
+		templates.Home(currUser, remainingDays, pendingEvents, stats, notifications),
 	)
 }

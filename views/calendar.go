@@ -28,7 +28,9 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
-	service.UpdateHolidays(r, date.Year)
+	if date.Year >= 1900 {
+		service.UpdateHolidays(r, date.Year)
+	}
 	service.InitYearlyTokens(r, currUser, date.Year)
 
 	month := calendar.GetDaysOfMonth(time.Month(date.Month), date.Year)

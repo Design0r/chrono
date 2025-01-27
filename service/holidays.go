@@ -30,12 +30,12 @@ func UpdateHolidays(r *repo.Queries, year int) error {
 	}
 
 	for name, data := range holidays {
-		date, err := time.Parse("2006-01-02", data["datum"])
+		date, err := time.Parse(time.DateOnly, data["datum"])
 		if err != nil {
 			log.Println(err)
 			continue
 		}
-		_, err = CreateEvent(
+		CreateEvent(
 			r,
 			schemas.YMDDate{Year: date.Year(), Month: int(date.Month()), Day: date.Day()},
 			bot,

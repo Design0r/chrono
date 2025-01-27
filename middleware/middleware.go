@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -56,16 +55,6 @@ func AdminMiddleware(r *repo.Queries) MiddlewareFunc {
 				)
 			}
 
-			return next(c)
-		}
-	}
-}
-
-func TokenRefreshMiddleware(r *repo.Queries) MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			user := c.Get("user").(repo.User)
-			service.InitYearlyTokens(r, user, time.Now().Year())
 			return next(c)
 		}
 	}

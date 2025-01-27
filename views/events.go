@@ -39,9 +39,9 @@ func HandleCreateEvent(c echo.Context, r *repo.Queries) error {
 
 	e := schemas.Event{Username: currUser.Username, Event: event}
 
-	vacationUsed, err := service.GetVacationCountForUserYear(
+	vacationUsed, err := service.GetRemainingVacation(
 		r,
-		int(currUser.ID),
+		currUser.ID,
 		date.Year,
 		date.Month,
 	)
@@ -59,6 +59,9 @@ func HandleCreateEvent(c echo.Context, r *repo.Queries) error {
 		currUser.ID,
 		event.ScheduledAt.Year(),
 	)
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
+	}
 
 	return Render(
 		c,
@@ -90,9 +93,9 @@ func HandleDeleteEvent(c echo.Context, r *repo.Queries) error {
 
 	e := schemas.Event{Username: currUser.Username, Event: deletedEvent}
 
-	vacationUsed, err := service.GetVacationCountForUserYear(
+	vacationUsed, err := service.GetRemainingVacation(
 		r,
-		int(currUser.ID),
+		currUser.ID,
 		deletedEvent.ScheduledAt.Year(),
 		int(deletedEvent.ScheduledAt.Month()),
 	)
@@ -110,6 +113,9 @@ func HandleDeleteEvent(c echo.Context, r *repo.Queries) error {
 		currUser.ID,
 		deletedEvent.ScheduledAt.Year(),
 	)
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
+	}
 
 	return Render(
 		c,

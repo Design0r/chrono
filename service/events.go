@@ -154,15 +154,10 @@ func GetEventsForMonth(
 	return nil
 }
 
-func GetVacationCountForUserYear(
-	r *repo.Queries,
-	userId int,
-	year int,
-	month int,
-) (float64, error) {
+func GetRemainingVacation(r *repo.Queries, userId int64, year int, month int) (float64, error) {
 	yearStart := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.Now().Location())
 
-	value, err := GetValidUserTokenSum(r, int64(userId), yearStart)
+	value, err := GetValidUserTokenSum(r, userId, yearStart)
 	if err != nil {
 		return 0, err
 	}

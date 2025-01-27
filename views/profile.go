@@ -40,12 +40,9 @@ func HandleProfile(c echo.Context, r *repo.Queries) error {
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
-		return Render(
-			c,
-			http.StatusInternalServerError,
-			templates.Error(http.StatusNotFound, err.Error()),
-		)
+		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
+
 	return Render(
 		c,
 		http.StatusOK,

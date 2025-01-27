@@ -19,9 +19,9 @@ func InitHomeRoutes(group *echo.Group, r *repo.Queries) {
 func HandleHome(c echo.Context, r *repo.Queries) error {
 	currUser := c.Get("user").(repo.User)
 	service.InitYearlyTokens(r, currUser, time.Now().Year())
-	remainingDays, err := service.GetVacationCountForUserYear(
+	remainingDays, err := service.GetRemainingVacation(
 		r,
-		int(currUser.ID),
+		currUser.ID,
 		calendar.CurrentYear(),
 		0,
 	)

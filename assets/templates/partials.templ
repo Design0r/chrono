@@ -138,7 +138,7 @@ templ AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool) {
 }
 
 templ CalendarCore(month schemas.Month, user repo.User) {
-	<div id="calendar" class="grid grid-cols-7 gap-x-1 gap-y-2">
+	<div id="calendar" class="grid grid-cols-7 gap-x-2 gap-y-2">
 		@WeekdayHeader("Monday", month)
 		@WeekdayHeader("Tuesday", month)
 		@WeekdayHeader("Wednesday", month)

@@ -75,12 +75,12 @@ templ Header(user *repo.User, notifications []repo.Notification) {
 	url := fmt.Sprintf("/%v/%v", year, month)
 	}}
 	<div class="px-4 pt-4 pb-0">
-		<div class="navbar flex justify-between rounded-xl bg-base-100">
-			<div>
-				<a href="/" class="btn btn-ghost text-xl">Chrono</a>
+		<div class="navbar flex justify-between rounded-xl bg-base-100 ">
+			<div class="flex gap-4">
+				<a href="/" class="btn btn-ghost text-xl text-white"><img class="w-28" alt="" src="/static/chrono.svg"/></a>
 				if user != nil {
-					<a href={ templ.URL(url) } class="btn btn-ghost">Calendar</a>
-					<a href="/team" class="btn btn-ghost">Team</a>
+					<a href={ templ.URL(url) } class="btn btn-ghost text-[15px] tracking-wide">Calendar</a>
+					<a href="/team" class="btn btn-ghost text-[15px] tracking-wide">Team</a>
 					if (*user).IsSuperuser {
 						<a href="/requests" class="btn btn-ghost">Requests</a>
 					}

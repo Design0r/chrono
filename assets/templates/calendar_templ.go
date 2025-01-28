@@ -50,7 +50,7 @@ func Calendar(user repo.User, month schemas.Month, vacationUsed float64, pending
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"pt-2\"><div class=\"grid grid-cols-7 gap-x-1 gap-y-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"pt-2\"><div class=\"grid grid-cols-7\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -197,7 +197,7 @@ func Day(year int, month int, day schemas.Day, user repo.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><div class=\"pt-2 pb-2 pl-2 text-lg bg-slate-\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><div class=\"pt-2 pb-2 pl-2 text-lg\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -310,7 +310,7 @@ func Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEven
 
 		urlPrevMonth := fmt.Sprintf("/%v/%v", year, prevStrMonth)
 		urlNextMonth := fmt.Sprintf("/%v/%v", nextYear, nextStrMonth)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"col-span-7 grid grid-cols-7 items-center gap-x-2 mt-2 mb-12\"><select class=\"col-span-1 select focus:border-0 h-full border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl\" name=\"eventName\" id=\"eventName\"><option value=\"urlaub\">Urlaub</option> <option value=\"workation\">Workation</option> <option value=\"krank\">Krank</option> <option value=\"home office\">Home Office</option></select><div class=\"flex justify-start col-span-2 space-x-2 bg-base-300 p-3 rounded-xl gap-4\"><div class=\"flex items-center justify-center gap-3\"><div class=\"w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors\"><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"col-span-7 grid grid-cols-7 items-center gap-x-2 mt-2 mb-10\"><select class=\"col-span-1 select focus:border-0 h-full border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl\" name=\"eventName\" id=\"eventName\"><option value=\"urlaub\">Urlaub</option> <option value=\"workation\">Workation</option> <option value=\"krank\">Krank</option> <option value=\"home office\">Home Office</option></select><div class=\"flex justify-start col-span-2 space-x-2 bg-base-300 p-3 rounded-xl gap-4\"><div class=\"flex items-center justify-center gap-3\"><div class=\"w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors\"><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

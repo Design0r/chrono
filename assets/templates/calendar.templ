@@ -12,7 +12,7 @@ import (
 templ Calendar(user repo.User, month schemas.Month, vacationUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User) {
 	@Index(&user, notifications) {
 		<div class="pt-2">
-			<div class="grid grid-cols-7 gap-x-1 gap-y-2">
+			<div class="grid grid-cols-7">
 				@Info(month, user, vacationUsed, pendingEvents, users)
 			</div>
 			@CalendarCore(month, user)
@@ -48,7 +48,7 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 	}
 	}}
 	<div class={ css }>
-		<div class="pt-2 pb-2 pl-2 text-lg bg-slate-">
+		<div class="pt-2 pb-2 pl-2 text-lg">
 			{ strDay }
 		</div>
 		<div
@@ -99,7 +99,7 @@ templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEve
 	urlPrevMonth := fmt.Sprintf("/%v/%v", year, prevStrMonth)
 	urlNextMonth := fmt.Sprintf("/%v/%v", nextYear, nextStrMonth)
 	}}
-	<div class="col-span-7 grid grid-cols-7 items-center gap-x-2 mt-2 mb-12">
+	<div class="col-span-7 grid grid-cols-7 items-center gap-x-2 mt-2 mb-10">
 		<select class="col-span-1 select focus:border-0 h-full border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl" name="eventName" id="eventName">
 			<option value="urlaub">Urlaub</option>
 			<option value="workation">Workation</option>

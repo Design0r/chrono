@@ -20,15 +20,15 @@ templ Event(event schemas.Event, user repo.User) {
 	>
 		<span
 			if event.State == "pending" {
-				class="indicator-item indicator-start left-3 top-3 badge badge-ghost"
+				class="indicator-item indicator-start left-4 top-4 w-4 h-4 border-2 border-base-content border-opacity-90 rounded-badge badge-ghost "
 			}
 			if event.State == "declined" {
-				class="indicator-item indicator-start left-3 top-3 badge badge-error"
+				class="indicator-item indicator-start left-4 top-4 w-4 h-4 rounded-badge badge-error "
 			}
 		></span>
 		<div
 			{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
-			class="text-center relative w-full rounded-xl text-base-content"
+			class="text-center py-1 relative w-full rounded-lg"
 		>
 			if event.UserID == user.ID {
 				<span>
@@ -36,12 +36,12 @@ templ Event(event schemas.Event, user repo.User) {
 						hx-swap="delete"
 						hx-target={ deleteUrl }
 						hx-delete={ fmt.Sprintf("/events/%v", event.ID) }
-						class="flex items-start rounded-xl h-full text-xl p-0 icon-outlined absolute right-0"
+						class="flex text-white text-opacity-80 hover:text-error transition-colors items-start rounded-xl text-lg p-0 icon-outlined absolute right-1 top-0.5"
 					>close</button>
 				</span>
 			}
-			<div class="text-md">{ strings.Title(event.Name) }</div>
-			<div class="text-sm">{ event.Username }</div>
+			<div class="text-md text-white text-opacity-80">{ strings.Title(event.Name) }</div>
+			<div class="text-sm text-base-content text-opacity-80">{ event.Username }</div>
 		</div>
 	</div>
 }

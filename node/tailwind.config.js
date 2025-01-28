@@ -1,10 +1,16 @@
 import daisyui from 'daisyui'
 export default {
 	content: ['../**/*.html', '../**/*.templ', '../**/*.go'],
-	theme: {extend: {}},
+	theme: {},
 	plugins: [daisyui],
 	daisyui: {
 		themes: [
+			{
+				dim: {
+					...require('daisyui/src/theming/themes')['dim'],
+					info: '#9ED0F1',
+				},
+			},
 			'light',
 			'dark',
 			'cupcake',

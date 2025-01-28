@@ -29,6 +29,9 @@ templ Event(event schemas.Event, user repo.User) {
 			if event.State == "declined" {
 				class="indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 border-2 border-base-100 rounded-badge badge-error"
 			}
+			if event.State == "accepted" {
+				class="indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 border-2 border-base-100 rounded-badge badge-success"
+			}
 		></span>
 		<div
 			{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }

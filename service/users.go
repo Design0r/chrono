@@ -139,3 +139,14 @@ func GetAllUsers(r *repo.Queries) ([]repo.User, error) {
 
 	return users, nil
 }
+
+func SetUserVacation(r *repo.Queries, userId int64, vacation int) error {
+	params := repo.SetUserVacationParams{ID: userId, VacationDays: int64(vacation)}
+	err := r.SetUserVacation(context.Background(), params)
+	if err != nil {
+		log.Printf("Failed updating user vacation", err)
+		return err
+	}
+
+	return nil
+}

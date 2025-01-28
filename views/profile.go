@@ -104,5 +104,9 @@ func HandleToggleAdmin(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
-	return Render(c, http.StatusOK, templates.AdminCheckbox(currUser, user.ID, user.IsSuperuser))
+	return Render(
+		c,
+		http.StatusOK,
+		templates.AdminCheckbox(currUser, user.ID, user.IsSuperuser, true),
+	)
 }

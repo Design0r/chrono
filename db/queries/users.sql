@@ -65,3 +65,8 @@ RETURNING *;
 -- name: GetAllUsers :many
 SELECT * FROM users
 WHERE id != 1;
+
+-- name: SetUserVacation :exec
+UPDATE users
+SET vacation_days = ?
+WHERE id = ?;

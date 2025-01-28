@@ -261,6 +261,22 @@ func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWit
 	return items, nil
 }
 
+const setUserVacation = `-- name: SetUserVacation :exec
+UPDATE users
+SET vacation_days = ?
+WHERE id = ?
+`
+
+type SetUserVacationParams struct {
+	VacationDays int64 `json:"vacation_days"`
+	ID           int64 `json:"id"`
+}
+
+func (q *Queries) SetUserVacation(ctx context.Context, arg SetUserVacationParams) error {
+	_, err := q.db.ExecContext(ctx, setUserVacation, arg.VacationDays, arg.ID)
+	return err
+}
+
 const toggleAdmin = `-- name: ToggleAdmin :one
 UPDATE users
 SET is_superuser = NOT is_superuser

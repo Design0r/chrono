@@ -63,8 +63,6 @@ func GetPendingRequests(r *repo.Queries) ([]schemas.BatchRequest, error) {
 		startDate := req[startIndex].ScheduledAt
 		endDate := req[endIndex].ScheduledAt
 
-		fmt.Println(startDate, endDate)
-
 		confilctingUsers, _ := GetConflictingEventUsers(
 			r,
 			req[startIndex].UserID,

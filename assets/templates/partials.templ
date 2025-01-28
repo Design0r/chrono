@@ -116,7 +116,7 @@ templ UpdateProfileWithMessage(user repo.User, notifications []repo.Notification
 	@Message("Successfully updated profile", "success")
 }
 
-templ AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool) {
+templ AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form bool) {
 	{{
 	icon := "check_box_outline_blank"
 	if isSuperuser {
@@ -124,7 +124,7 @@ templ AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool) {
 	}
 	}}
 	<td id={ fmt.Sprintf("admin-%v", userId) } class="icon-outlined">
-		if currUser.IsSuperuser {
+		if currUser.IsSuperuser && form {
 			<a
 				hx-put={ fmt.Sprintf("profile/%v/admin", userId) }
 				hx-swap="outerHTML"

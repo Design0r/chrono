@@ -28,6 +28,11 @@ func LoadDebugUsers(r *repo.Queries, path string) (schemas.DebugUsers, error) {
 	}
 
 	for _, user := range users.Users {
+		pw, err := HashPassword(user.Password)
+		if err != nil {
+			continue
+		}
+		user.Password = pw
 		CreateUser(r, user)
 	}
 

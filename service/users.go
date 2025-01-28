@@ -104,8 +104,15 @@ func HashCode(s string) int {
 
 func GenerateHSL(seed int) string {
 	hue := (seed * 12345) % 360
-	saturation := 50 + (seed % 50)
-	lightness := 40 + (seed % 20)
+	saturation := 50
+	lightness := 40
+	return fmt.Sprintf("hsl(%d, %d%%, %d%%)", hue, saturation, lightness)
+}
+
+func GenerateHSLDark(seed int) string {
+	hue := (seed * 12345) % 360
+	saturation := 30
+	lightness := 30
 	return fmt.Sprintf("hsl(%d, %d%%, %d%%)", hue, saturation, lightness)
 }
 

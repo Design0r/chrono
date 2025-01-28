@@ -5,14 +5,18 @@ import (
 	"chrono/schemas"
 	"chrono/service"
 	"fmt"
+	"os"
 	"strings"
 )
 
 templ Event(event schemas.Event, user repo.User) {
 	{{
-	bgColor := service.GenerateHSL(int(event.UserID))
-	eventId := fmt.Sprintf("event-%v", event.ID)
-	deleteUrl := fmt.Sprintf("#%v", eventId)
+			bgColor := service.GenerateHSL(int(event.UserID))
+			if event.Name != "urlaub" && event.Username != os.Getenv("BOT_NAME") {
+				bgColor = service.GenerateHSLDark(int(event.UserID))
+			}
+			eventId := fmt.Sprintf("event-%v", event.ID)
+			deleteUrl := fmt.Sprintf("#%v", eventId)
 	}}
 	<div
 		id={ eventId }

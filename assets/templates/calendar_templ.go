@@ -409,7 +409,7 @@ func VacationCounter(user repo.User, vacationRemaining float64, pendingEvents in
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div><span class=\"text-base-content pl-2\">pending | </span><div class=\"text-warning\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div><span class=\"text-base-content pl-2\">pending</span><span class=\"text-base-content opacity-50 px-3\">|</span><div class=\"text-warning\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -422,7 +422,7 @@ func VacationCounter(user repo.User, vacationRemaining float64, pendingEvents in
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div><span class=\"text-base-content pl-2\">used | </span><div class=\"text-success\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div><span class=\"text-base-content pl-2\">used</span><span class=\"text-base-content opacity-50 px-3\">|</span><div class=\"text-success\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -490,7 +490,7 @@ func UserFilter(users []repo.User, month schemas.Month) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" hx-target=\"#calendar\" hx-swap=\"outerHTML\" class=\"col-span-1 select h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl\" name=\"filter\" id=\"filter\" hx-push-url=\"true\"><option value=\"all\">All</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" hx-target=\"#calendar\" hx-swap=\"outerHTML\" class=\"col-span-1 select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl\" name=\"filter\" id=\"filter\" hx-push-url=\"true\"><option value=\"all\">All</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

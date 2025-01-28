@@ -65,7 +65,7 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 			}
 		}
 		if event.State == "declined" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " class=\"indicator-item indicator-start left-4 top-4 w-4 h-4 rounded-badge badge-error \"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " class=\"indicator-item indicator-start left-4 top-4 w-4 h-4 border-2 border-base-100 rounded-badge badge-error\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

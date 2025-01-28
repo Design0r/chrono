@@ -36,7 +36,13 @@ templ TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow) {
 		<th>{ user.Username }</th>
 		<td>{ user.Email }</td>
 		@AdminCheckbox(currUser, user.ID, user.IsSuperuser)
-		<td>{ fmt.Sprint(user.VacationDays) }</td>
+		if currUser.IsSuperuser {
+			<td>
+				<input type="number" name={ fmt.Sprintf("%v", user.ID) } value={ fmt.Sprint(user.VacationDays) }/>
+			</td>
+		} else {
+			<td>{ fmt.Sprint(user.VacationDays) }</td>
+		}
 		<td>{ fmt.Sprint(user.VacationCount) }</td>
 		<td>{ fmt.Sprint(user.VacationDays-user.VacationCount) }</td>
 	</tr>

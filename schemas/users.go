@@ -3,10 +3,10 @@ package schemas
 import "chrono/db/repo"
 
 type CreateUser struct {
-	Name     string `form:"name"`
-	Email    string `form:"email"`
-	Password string `form:"password"`
-	Vacation int    `form:"vacation"`
+	Name     string `form:"name"     json:"name"`
+	Email    string `form:"email"    json:"email"`
+	Password string `form:"password" json:"password"`
+	Vacation int    `form:"vacation" json:"vacation"`
 }
 
 type PatchUser struct {
@@ -23,4 +23,8 @@ type Login struct {
 type VacUser struct {
 	PlannedVacation int
 	repo.User
+}
+
+type DebugUsers struct {
+	Users []repo.CreateUserParams `json:"users"`
 }

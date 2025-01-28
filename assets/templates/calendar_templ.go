@@ -409,7 +409,7 @@ func VacationCounter(user repo.User, vacationRemaining float64, pendingEvents in
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div><span class=\"text-base-content pl-2\">pending・ </span><div class=\"text-warning\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div><span class=\"text-base-content pl-2\">pending | </span><div class=\"text-warning\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -422,7 +422,7 @@ func VacationCounter(user repo.User, vacationRemaining float64, pendingEvents in
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div><span class=\"text-base-content pl-2\">used・ </span><div class=\"text-success\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div><span class=\"text-base-content pl-2\">used | </span><div class=\"text-success\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

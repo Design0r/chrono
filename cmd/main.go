@@ -30,5 +30,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	service.LoadDebugUsers(server.Repo, "debug_users.json")
+
 	log.Fatal(server.Start(fmt.Sprintf(":%v", os.Getenv("CHRONO_PORT"))))
 }

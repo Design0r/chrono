@@ -3,7 +3,6 @@ package views
 import (
 	"database/sql"
 	"net/http"
-	"time"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
@@ -31,8 +30,8 @@ func NewServer(router *echo.Echo, db *sql.DB) *Server {
 
 func (self *Server) InitMiddleware() {
 	self.Router.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format:           "[${time_custom}][${method}][${status}] ${uri} ${error} ${latency_human}\n",
-		CustomTimeFormat: time.DateTime,
+		Format:           "${time_custom} ${method} ${status} ${uri} ${error} ${latency_human}\n",
+		CustomTimeFormat: "2006/01/02 15:04:05",
 	}))
 	self.Router.Use(middleware.Secure())
 

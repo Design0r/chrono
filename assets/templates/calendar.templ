@@ -9,25 +9,13 @@ import (
 	"time"
 )
 
-templ Calendar(user repo.User, month schemas.Month, vacationUsed float64, pendingEvents int, notifications []repo.Notification) {
+templ Calendar(user repo.User, month schemas.Month, vacationUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User) {
 	@Index(&user, notifications) {
 		<div class="pt-2">
 			<div class="grid grid-cols-7 gap-x-1 gap-y-2">
-				@Info(month, user, vacationUsed, pendingEvents)
-				@WeekdayHeader("Monday", month)
-				@WeekdayHeader("Tuesday", month)
-				@WeekdayHeader("Wednesday", month)
-				@WeekdayHeader("Thursday", month)
-				@WeekdayHeader("Friday", month)
-				@WeekdayHeader("Saturday", month)
-				@WeekdayHeader("Sunday", month)
-				for range month.Offset {
-					<div></div>
-				}
-				for _, day := range month.Days {
-					@Day(month.Year, month.Number, day, user)
-				}
+				@Info(month, user, vacationUsed, pendingEvents, users)
 			</div>
+			@CalendarCore(month, user)
 		</div>
 	}
 }
@@ -54,19 +42,12 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 	dayId := fmt.Sprintf("day-%v", strDay)
 	dayTarget := fmt.Sprintf("#%v", dayId)
 
-	baseCss := "rounded-xl flex flex-col"
+	css := "bg-neutral rounded-xl border-accent-content flex flex-col"
+	if currDay == day.Number && int(now.Month()) == month && now.Year() == year {
+		css = "bg-neutral-content text-base-300 rounded-xl flex flex-col"
+	}
 	}}
-	<div
-		if currDay == day.Number && int(now.Month()) == month && now.Year() == year {
-			class={ fmt.Sprintf("%v %v", "bg-neutral-content text-base-300", baseCss) }
-		} else {
-			if day.Name == "Saturday" || day.Name == "Sunday" {
-				class="bg-neutral rounded-xl border-accent-content flex flex-col "
-			} else {
-				class="bg-neutral rounded-xl border-accent-content flex flex-col "
-			}
-		}
-	>
+	<div class={ css }>
 		<div class="pt-2 pb-2 pl-2 text-lg">
 			{ strDay }
 		</div>
@@ -87,12 +68,14 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 				hx-target={ dayTarget }
 				hx-swap="beforeend"
 				class="btn btn-sm bg-base-300 rounded-xl text-base-content opacity-10 hover:text-base-content hover:opacity-100 w-full hover:icon-filled"
-			><span class="icon-outlined hover:icon-filled text-2xl leading-5">add</span></button>
+			>
+				<span class="icon-outlined hover:icon-filled text-2xl leading-5">add</span>
+			</button>
 		</div>
 	</div>
 }
 
-templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEvents int) {
+templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEvents int, users []repo.User) {
 	{{
 	strYear := strconv.Itoa(month.Year)
 	year := month.Year
@@ -134,6 +117,7 @@ templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEve
 				<div class="pl-4 text-lg">{ month.Name } { strYear }</div>
 			</div>
 		</div>
+		@UserFilter(users, month)
 		@VacationCounter(user, vacationUsed, pendingEvents)
 	</div>
 	<script>
@@ -143,9 +127,26 @@ templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEve
 	</script>
 }
 
+templ UserFilter(users []repo.User, month schemas.Month) {
+	<select
+		hx-get={ fmt.Sprintf("/%v/%v", month.Year, month.Number) }
+		hx-target="#calendar"
+		hx-swap="outerHTML"
+		class="col-span-1 select border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl"
+		name="filter"
+		id="filter"
+		hx-push-url="true"
+	>
+		<option value="all">All</option>
+		for _, user := range users {
+			<option value={ user.Username }>{ user.Username }</option>
+		}
+	</select>
+}
+
 templ VacationCounter(user repo.User, vacationRemaining float64, pendingEvents int) {
 	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
-	<div id="vacation-counter" hx-swap-oob="true" class="col-span-4 text-lg">
+	<div id="vacation-counter" hx-swap-oob="true" class="col-span-3 text-lg">
 		<div class="flex justify-end items-center space-x-2 p-3 px-6 rounded-xl bg-base-300">
 			<h2>Vacation Days:</h2>
 			<div class="text-info">Total: { strNum }</div> <span class="text-slate-600">| </span>

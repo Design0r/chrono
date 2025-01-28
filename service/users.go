@@ -129,3 +129,13 @@ func ToggleAdmin(r *repo.Queries, editor repo.User, userId int64) (repo.User, er
 
 	return user, nil
 }
+
+func GetAllUsers(r *repo.Queries) ([]repo.User, error) {
+	users, err := r.GetAllUsers(context.Background())
+	if err != nil {
+		log.Printf("Failed getting all users: %v", err)
+		return nil, err
+	}
+
+	return users, nil
+}

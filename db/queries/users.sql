@@ -61,3 +61,6 @@ UPDATE users
 SET is_superuser = NOT is_superuser
 WHERE id = ?
 RETURNING *;
+
+-- name: GetAllUsers :many
+SELECT * FROM users;

@@ -136,3 +136,21 @@ templ AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool) {
 		}
 	</td>
 }
+
+templ CalendarCore(month schemas.Month, user repo.User) {
+	<div id="calendar" class="grid grid-cols-7 gap-x-1 gap-y-2">
+		@WeekdayHeader("Monday", month)
+		@WeekdayHeader("Tuesday", month)
+		@WeekdayHeader("Wednesday", month)
+		@WeekdayHeader("Thursday", month)
+		@WeekdayHeader("Friday", month)
+		@WeekdayHeader("Saturday", month)
+		@WeekdayHeader("Sunday", month)
+		for range month.Offset {
+			<div></div>
+		}
+		for _, day := range month.Days {
+			@Day(month.Year, month.Number, day, user)
+		}
+	</div>
+}

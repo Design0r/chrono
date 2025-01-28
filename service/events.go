@@ -110,6 +110,7 @@ func GetEventsForDay(r *repo.Queries, data schemas.YMDDate) ([]repo.Event, error
 func GetEventsForMonth(
 	r *repo.Queries,
 	month *schemas.Month,
+	filter *repo.User,
 ) error {
 	date := time.Date(
 		month.Year,
@@ -134,6 +135,9 @@ func GetEventsForMonth(
 		idx := event.ScheduledAt.Day() - 1
 		user, err := GetUserById(r, event.UserID)
 		if err != nil {
+			continue
+		}
+		if filter != nil && user.Username != filter.Username {
 			continue
 		}
 		newEvent := schemas.Event{

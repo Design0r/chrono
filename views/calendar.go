@@ -9,6 +9,7 @@ import (
 	"chrono/assets/templates"
 	"chrono/calendar"
 	"chrono/db/repo"
+	"chrono/htmx"
 	"chrono/schemas"
 	"chrono/service"
 )
@@ -28,16 +29,25 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
+	var filtered *repo.User
+	filteredUser, err := service.GetUserByName(r, c.QueryParam("filter"))
+	if err != nil {
+		filtered = nil
+	} else {
+		filtered = &filteredUser
+	}
+
 	if date.Year >= 1900 {
 		service.UpdateHolidays(r, date.Year)
 	}
 	service.InitYearlyTokens(r, currUser, date.Year)
 
 	month := calendar.GetDaysOfMonth(time.Month(date.Month), date.Year)
-	err := service.GetEventsForMonth(r, &month)
+	err = service.GetEventsForMonth(r, &month, filtered)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
+
 	vacationRemaining, err := service.GetRemainingVacation(
 		r,
 		currUser.ID,
@@ -58,9 +68,25 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
+	allUsers, err := service.GetAllUsers(r)
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
+	}
+
+	if htmx.IsHTMXRequest(c) {
+		return Render(c, http.StatusOK, templates.CalendarCore(month, currUser))
+	}
+
 	return Render(
 		c,
 		http.StatusOK,
-		templates.Calendar(currUser, month, vacationRemaining, pendingEvents, notifications),
+		templates.Calendar(
+			currUser,
+			month,
+			vacationRemaining,
+			pendingEvents,
+			notifications,
+			allUsers,
+		),
 	)
 }

@@ -45,7 +45,7 @@ LEFT JOIN
     events
 ON 
     users.id = events.user_id
-    AND events.name = "urlaub"
+    AND events.name IN ("urlaub", "urlaub halbtags")
     AND events.scheduled_at >= ?
     AND events.scheduled_at < ?
 GROUP BY 

@@ -42,7 +42,7 @@ SELECT Count(*) from events
 WHERE user_id = ?
 AND scheduled_at >= ?
 AND scheduled_at < ?
-AND name = "urlaub"
+AND name IN ("urlaub", "urlaub halbtags")
 AND state = "accepted";
 
 -- name: UpdateEventState :one

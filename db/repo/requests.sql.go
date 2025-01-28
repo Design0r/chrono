@@ -44,6 +44,19 @@ func (q *Queries) CreateRequest(ctx context.Context, arg CreateRequestParams) (R
 	return i, err
 }
 
+const getEventNameFromRequest = `-- name: GetEventNameFromRequest :one
+SELECT e.name FROM requests r
+JOIN events e on r.event_id = e.id
+WHERE r.id = ?
+`
+
+func (q *Queries) GetEventNameFromRequest(ctx context.Context, id int64) (string, error) {
+	row := q.db.QueryRowContext(ctx, getEventNameFromRequest, id)
+	var name string
+	err := row.Scan(&name)
+	return name, err
+}
+
 const getPendingRequests = `-- name: GetPendingRequests :many
 SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, e.id, scheduled_at, name, e.state, e.created_at, e.edited_at, e.user_id FROM requests r
 JOIN users u ON r.user_id = u.id
@@ -282,18 +295,19 @@ func (q *Queries) UpdateRequestState(ctx context.Context, arg UpdateRequestState
 	return i, err
 }
 
-const updateRequestStateRange = `-- name: UpdateRequestStateRange :exec
+const updateRequestStateRange = `-- name: UpdateRequestStateRange :one
 UPDATE requests
 SET state = ?,
     edited_by = ?,
     edited_at = CURRENT_TIMESTAMP
 WHERE requests.user_id = ?
-  AND event_id IN (
+AND event_id IN (
     SELECT e.id
     FROM events e
     WHERE e.scheduled_at >= ?
       AND e.scheduled_at <= ?
   )
+RETURNING requests.id
 `
 
 type UpdateRequestStateRangeParams struct {
@@ -304,13 +318,15 @@ type UpdateRequestStateRangeParams struct {
 	ScheduledAt_2 time.Time `json:"scheduled_at_2"`
 }
 
-func (q *Queries) UpdateRequestStateRange(ctx context.Context, arg UpdateRequestStateRangeParams) error {
-	_, err := q.db.ExecContext(ctx, updateRequestStateRange,
+func (q *Queries) UpdateRequestStateRange(ctx context.Context, arg UpdateRequestStateRangeParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, updateRequestStateRange,
 		arg.State,
 		arg.EditedBy,
 		arg.UserID,
 		arg.ScheduledAt,
 		arg.ScheduledAt_2,
 	)
-	return err
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }

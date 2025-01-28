@@ -56,6 +56,7 @@ func GetPendingRequests(r *repo.Queries) ([]schemas.BatchRequest, error) {
 		for endIndex+1 < len(req) &&
 			req[endIndex].ScheduledAt.Year() == req[endIndex+1].ScheduledAt.Year() &&
 			req[endIndex].ScheduledAt.YearDay()+1 == req[endIndex+1].ScheduledAt.YearDay() &&
+			req[endIndex].Name == req[endIndex+1].Name &&
 			req[endIndex].UserID == req[endIndex+1].UserID {
 			endIndex++
 		}
@@ -120,7 +121,7 @@ func UpdateRequestStateRange(
 	startDate time.Time,
 	endDate time.Time,
 	reason string,
-) error {
+) (int64, error) {
 	params := repo.UpdateRequestStateRangeParams{
 		UserID:        userId,
 		EditedBy:      &editor.ID,
@@ -128,7 +129,7 @@ func UpdateRequestStateRange(
 		ScheduledAt:   startDate,
 		ScheduledAt_2: endDate,
 	}
-	err := r.UpdateRequestStateRange(context.Background(), params)
+	reqId, err := r.UpdateRequestStateRange(context.Background(), params)
 	if err != nil {
 		log.Printf("Failed to update requests: %v", err)
 	}
@@ -152,7 +153,7 @@ func UpdateRequestStateRange(
 
 	_, err = CreateUserNotification(r, msg, userId)
 
-	return err
+	return reqId, err
 }
 
 func GetRequestRange(
@@ -193,4 +194,13 @@ func GetConflictingEventUsers(
 	}
 
 	return users, nil
+}
+
+func GetEventNameFromRequest(r *repo.Queries, reqId int64) (string, error) {
+	name, err := r.GetEventNameFromRequest(context.Background(), reqId)
+	if err != nil {
+		return "", err
+	}
+
+	return name, nil
 }

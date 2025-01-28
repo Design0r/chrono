@@ -4,11 +4,18 @@ import (
 	"context"
 	"log"
 	"os"
+	"slices"
 	"time"
 
 	"chrono/db/repo"
 	"chrono/schemas"
 )
+
+var vacationNames []string = []string{"urlaub", "urlaub halbtags"}
+
+func IsVacation(name string) bool {
+	return slices.Contains(vacationNames, name)
+}
 
 func CreateEvent(
 	r *repo.Queries,
@@ -16,8 +23,12 @@ func CreateEvent(
 	user repo.User,
 	name string,
 ) (repo.Event, error) {
-	if name != "urlaub" || user.IsSuperuser {
+	if IsVacation(name) && user.IsSuperuser {
 		CreateToken(r, user.ID, data.Year, -1.0)
+		return createEvent(r, data, user, name)
+	}
+
+	if !IsVacation(name) {
 		return createEvent(r, data, user, name)
 	}
 
@@ -42,7 +53,7 @@ func createEvent(
 	)
 
 	state := "pending"
-	if name != "urlaub" || user.IsSuperuser {
+	if !IsVacation(name) || user.IsSuperuser {
 		state = "accepted"
 	}
 

@@ -104,7 +104,7 @@ func HandlePatchRequests(c echo.Context, r *repo.Queries) error {
 	startDate := time.Unix(startUnix, 0)
 	endDate := time.Unix(endUnix, 0)
 
-	err = service.UpdateRequestStateRange(
+	reqId, err := service.UpdateRequestStateRange(
 		r,
 		currUser,
 		reqUserId,
@@ -117,8 +117,16 @@ func HandlePatchRequests(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, "Failed updating request")
 	}
 
+	eventName, err := service.GetEventNameFromRequest(r, reqId)
+	if err != nil {
+		return RenderError(c, http.StatusBadRequest, "Failed getting event name")
+	}
+
 	if stateParam == "accepted" {
 		days := (startDate.Sub(endDate).Hours() / 24) - 1.0
+		if eventName == "urlaub halbtags" {
+			days /= 2
+		}
 		service.CreateToken(r, reqUserId, startDate.Year(), days)
 	}
 

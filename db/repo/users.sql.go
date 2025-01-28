@@ -95,6 +95,7 @@ func (q *Queries) GetAdmins(ctx context.Context) ([]User, error) {
 
 const getAllUsers = `-- name: GetAllUsers :many
 SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at FROM users
+WHERE id != 1
 `
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {

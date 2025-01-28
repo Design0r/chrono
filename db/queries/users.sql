@@ -63,4 +63,5 @@ WHERE id = ?
 RETURNING *;
 
 -- name: GetAllUsers :many
-SELECT * FROM users;
+SELECT * FROM users
+WHERE id != 1;

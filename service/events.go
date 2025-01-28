@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"chrono/db/repo"
@@ -137,7 +138,8 @@ func GetEventsForMonth(
 		if err != nil {
 			continue
 		}
-		if filter != nil && user.Username != filter.Username {
+		if filter != nil && user.Username != filter.Username &&
+			user.Username != os.Getenv("BOT_NAME") {
 			continue
 		}
 		newEvent := schemas.Event{

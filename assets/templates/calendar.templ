@@ -27,7 +27,7 @@ templ WeekdayHeader(name string, month schemas.Month) {
 		now := time.Now()
 	}}
 	if strWeekday == name && int(now.Month()) == month.Number && now.Year() == month.Year {
-		<div class="bg-neutral-content text-base-300 rounded-xl border-accent-content p-2 text-center text-lg">{ name }</div>
+		<div class="bg-base-200 text-base-content border-t-2 border-success rounded-xl p-2 text-center text-lg">{ name }</div>
 	} else {
 		<div class="bg-base-200 rounded-xl border-accent-content p-2 text-center text-lg">{ name }</div>
 	}
@@ -44,11 +44,11 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 
 	css := "bg-neutral rounded-xl border-accent-content flex flex-col"
 	if currDay == day.Number && int(now.Month()) == month && now.Year() == year {
-		css = "bg-neutral-content text-base-300 rounded-xl flex flex-col"
+		css = "bg-neutral border-t-2 border-success text-base-content rounded-xl flex flex-col"
 	}
 	}}
 	<div class={ css }>
-		<div class="pt-2 pb-2 pl-2 text-lg">
+		<div class="pt-2 pb-2 pl-2 text-lg bg-slate-">
 			{ strDay }
 		</div>
 		<div
@@ -99,8 +99,8 @@ templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEve
 	urlPrevMonth := fmt.Sprintf("/%v/%v", year, prevStrMonth)
 	urlNextMonth := fmt.Sprintf("/%v/%v", nextYear, nextStrMonth)
 	}}
-	<div class="col-span-7 grid grid-cols-7 items-center gap-x-1 mb-4">
-		<select class="col-span-1 select border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl" name="eventName" id="eventName">
+	<div class="col-span-7 grid grid-cols-7 items-center gap-x-2 mt-2 mb-12">
+		<select class="col-span-1 select focus:border-0 h-full border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl" name="eventName" id="eventName">
 			<option value="urlaub">Urlaub</option>
 			<option value="workation">Workation</option>
 			<option value="krank">Krank</option>
@@ -117,8 +117,12 @@ templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEve
 				<div class="pl-4 text-lg">{ month.Name } { strYear }</div>
 			</div>
 		</div>
-		@UserFilter(users, month)
-		@VacationCounter(user, vacationUsed, pendingEvents)
+		<div class="col-span-4 h-full text-lg">
+			<div class="flex h-full justify-between items-center space-x-2 pl-0 pr-6 rounded-xl bg-base-300">
+				@UserFilter(users, month)
+				@VacationCounter(user, vacationUsed, pendingEvents)
+			</div>
+		</div>
 	</div>
 	<script>
 		function getEventName(){
@@ -127,12 +131,22 @@ templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEve
 	</script>
 }
 
+templ VacationCounter(user repo.User, vacationRemaining float64, pendingEvents int) {
+	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
+	<div id="vacation-counter" hx-swap-oob="true" class="flex">
+		<div class="text-info">{ fmt.Sprint(pendingEvents) } </div><span class="text-base-content pl-2">pending・ </span>
+		<div class="text-warning">{ fmt.Sprint(float64(user.VacationDays) - vacationRemaining) } </div> <span class="text-base-content pl-2">used・ </span>
+		<div class="text-success">{ fmt.Sprint(vacationRemaining) } </div> <span class="text-base-content pl-2">remaining</span>
+		<div class="text-info hidden">{ strNum } total</div>
+	</div>
+}
+
 templ UserFilter(users []repo.User, month schemas.Month) {
 	<select
 		hx-get={ fmt.Sprintf("/%v/%v", month.Year, month.Number) }
 		hx-target="#calendar"
 		hx-swap="outerHTML"
-		class="col-span-1 select border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl"
+		class="col-span-1 select h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl"
 		name="filter"
 		id="filter"
 		hx-push-url="true"
@@ -142,17 +156,4 @@ templ UserFilter(users []repo.User, month schemas.Month) {
 			<option value={ user.Username }>{ user.Username }</option>
 		}
 	</select>
-}
-
-templ VacationCounter(user repo.User, vacationRemaining float64, pendingEvents int) {
-	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
-	<div id="vacation-counter" hx-swap-oob="true" class="col-span-3 text-lg">
-		<div class="flex justify-end items-center space-x-2 p-3 px-6 rounded-xl bg-base-300">
-			<h2>Vacation Days:</h2>
-			<div class="text-info">Total: { strNum }</div> <span class="text-slate-600">| </span>
-			<div class="text-warning">Used: { fmt.Sprint(float64(user.VacationDays) - vacationRemaining) }</div> <span class="text-slate-600">| </span>
-			<div class="text-success">Remaining: { fmt.Sprint(vacationRemaining) }</div> <span class="text-slate-600">| </span>
-			<div class="text-base-content">Pending: { fmt.Sprint(pendingEvents) }</div>
-		</div>
-	</div>
 }

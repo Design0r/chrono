@@ -59,13 +59,13 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if event.State == "pending" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " class=\"indicator-item indicator-start left-4 top-4 w-4 h-4 border-2 border-base-content border-opacity-90 rounded-badge badge-ghost \"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " class=\"indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 border-2 border-base-100 rounded-badge badge-info \"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if event.State == "declined" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " class=\"indicator-item indicator-start left-4 top-4 w-4 h-4 border-2 border-base-100 rounded-badge badge-error\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " class=\"indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 border-2 border-base-100 rounded-badge badge-error\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -590,7 +590,7 @@ func CalendarCore(month schemas.Month, user repo.User) templ.Component {
 			templ_7745c5c3_Var25 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div id=\"calendar\" class=\"grid grid-cols-7 gap-x-1 gap-y-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div id=\"calendar\" class=\"grid grid-cols-7 gap-x-2 gap-y-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

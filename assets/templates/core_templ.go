@@ -184,7 +184,7 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 		month := strconv.Itoa(int(now.Month()))
 		year := strconv.Itoa(now.Year())
 		url := fmt.Sprintf("/%v/%v", year, month)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"px-4 pt-4 pb-0\"><div class=\"navbar flex justify-between rounded-xl bg-base-100\"><div><a href=\"/\" class=\"btn btn-ghost text-xl\">Chrono</a> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"px-4 pt-4 pb-0\"><div class=\"navbar flex justify-between rounded-xl bg-base-100 \"><div class=\"flex gap-4\"><a href=\"/\" class=\"btn btn-ghost text-xl text-white\"><img class=\"w-28\" alt=\"\" src=\"/static/chrono.svg\"></a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -198,7 +198,7 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"btn btn-ghost\">Calendar</a> <a href=\"/team\" class=\"btn btn-ghost\">Team</a> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"btn btn-ghost text-[15px] tracking-wide\">Calendar</a> <a href=\"/team\" class=\"btn btn-ghost text-[15px] tracking-wide\">Team</a> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

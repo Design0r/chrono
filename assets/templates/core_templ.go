@@ -198,7 +198,7 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"btn btn-ghost text-[15px] tracking-wide\">Calendar</a> <a href=\"/team\" class=\"btn btn-ghost text-[15px] tracking-wide\">Team</a> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"btn btn-ghost font-medium text-[15px] \"><span class=\"icon-outlined\">calendar_today</span>Calendar</a> <a href=\"/team\" class=\"btn btn-ghost font-medium text-[15px] \"><span class=\"icon-outlined\">group</span>Team</a> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

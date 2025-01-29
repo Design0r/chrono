@@ -83,6 +83,7 @@ templ Header(user *repo.User, notifications []repo.Notification) {
 					<a href="/team" class="btn btn-ghost font-medium text-[15px]">Team<span class="icon-outlined">group</span></a>
 					if (*user).IsSuperuser {
 						<a href="/requests" class="btn btn-ghost font-medium text-[15px]">Request<span class="icon-outlined">mark_chat_unread</span></a>
+						<a href="/tokens" class="btn btn-ghost font-medium text-[15px]">Tokens<span class="icon-outlined">local_activity</span></a>
 					}
 				}
 			</div>

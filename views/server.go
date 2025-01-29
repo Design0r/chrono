@@ -61,6 +61,7 @@ func (self *Server) InitRoutes() {
 
 	admin := protected.Group("", mw.AdminMiddleware(self.Repo))
 	InitRequestRoutes(admin, self.Repo)
+	InitTokenRoutes(admin, self.Repo)
 
 	InitLoginRoutes(self.Router.Group(""), self.Repo)
 }

@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-templ Home(user repo.User, vacationRemaining float64, pendingEvents int, progress schemas.YearProgress, notifications []repo.Notification) {
+templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress schemas.YearProgress, notifications []repo.Notification) {
 	@Index(&user, notifications) {
 		<div class="flex flex-col container mx-auto justify-center align-middle gap-10 p-4">
 			<div class="text-[48px] pl-2 font-black">{ fmt.Sprintf("> hey %v ", user.Username) }</div>
@@ -21,7 +21,7 @@ templ Home(user repo.User, vacationRemaining float64, pendingEvents int, progres
 					<div class="stat">
 						<div class="stat-figure icon-outlined"></div>
 						<div class="stat-title pb-1">Vacation taken</div>
-						<div class="stat-value pb-[1px] text-warning">{ fmt.Sprintf("%v days", float64(user.VacationDays)-vacationRemaining) }</div>
+						<div class="stat-value pb-[1px] text-warning">{ fmt.Sprintf("%v days", vacTaken) }</div>
 						<div class="stat-desc">{ fmt.Sprintf("%.0f %% taken", (float32(user.VacationDays) - float32(vacationRemaining)) / float32(user.VacationDays) * float32(100)) }</div>
 					</div>
 					<div class="stat">

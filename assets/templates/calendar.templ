@@ -9,11 +9,11 @@ import (
 	"time"
 )
 
-templ Calendar(user repo.User, month schemas.Month, vacationUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User) {
+templ Calendar(user repo.User, month schemas.Month, vacRemaining float64, vacUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User) {
 	@Index(&user, notifications) {
-		<div class="pt-2">
+		<div class="pt-2 mb-6">
 			<div class="grid grid-cols-7">
-				@Info(month, user, vacationUsed, pendingEvents, users)
+				@Info(month, user, vacRemaining, vacUsed, pendingEvents, users)
 			</div>
 			@CalendarCore(month, user)
 		</div>
@@ -75,7 +75,7 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 	</div>
 }
 
-templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEvents int, users []repo.User) {
+templ Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed float64, pendingEvents int, users []repo.User) {
 	{{
 	strYear := strconv.Itoa(month.Year)
 	year := month.Year
@@ -121,7 +121,7 @@ templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEve
 		<div class="col-span-4 h-full text-lg">
 			<div class="flex h-full justify-between items-center space-x-2 pl-0 pr-6 rounded-xl bg-base-300">
 				@UserFilter(users, month)
-				@VacationCounter(user, vacationUsed, pendingEvents)
+				@VacationCounter(user, vacRemaining, vacUsed, pendingEvents)
 			</div>
 		</div>
 	</div>
@@ -132,11 +132,11 @@ templ Info(month schemas.Month, user repo.User, vacationUsed float64, pendingEve
 	</script>
 }
 
-templ VacationCounter(user repo.User, vacationRemaining float64, pendingEvents int) {
+templ VacationCounter(user repo.User, vacationRemaining float64, vacUsed float64, pendingEvents int) {
 	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
 	<div id="vacation-counter" hx-swap-oob="true" class="flex">
 		<div class="text-info">{ fmt.Sprint(pendingEvents) } </div><span class="text-base-content pl-2">pending</span><span class="text-base-content opacity-50 px-3">|</span>
-		<div class="text-warning">{ fmt.Sprint(float64(user.VacationDays) - vacationRemaining) } </div> <span class="text-base-content pl-2">used</span><span class="text-base-content opacity-50 px-3">|</span>
+		<div class="text-warning">{ fmt.Sprint(vacUsed) } </div> <span class="text-base-content pl-2">used</span><span class="text-base-content opacity-50 px-3">|</span>
 		<div class="text-success">{ fmt.Sprint(vacationRemaining) } </div> <span class="text-base-content pl-2">remaining</span>
 		<div class="text-info hidden">{ strNum } total</div>
 	</div>

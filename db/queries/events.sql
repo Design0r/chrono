@@ -38,12 +38,15 @@ AND scheduled_at < ?
 AND user_id = ?;
 
 -- name: GetVacationCountForUser :one 
-SELECT Count(*) from events
+SELECT 
+  SUM(CASE WHEN name = 'urlaub' THEN 1 ELSE 0 END) AS total_urlaub,
+  SUM(CASE WHEN name = 'urlaub halbtags' THEN 1 ELSE 0 END) AS total_urlaub_halbtags
+FROM events
 WHERE user_id = ?
-AND scheduled_at >= ?
-AND scheduled_at < ?
-AND name IN ("urlaub", "urlaub halbtags")
-AND state = "accepted";
+  AND scheduled_at >= ?
+  AND scheduled_at < ?
+  AND name IN ('urlaub', 'urlaub halbtags')
+  AND state = 'accepted';
 
 -- name: UpdateEventState :one
 UPDATE events

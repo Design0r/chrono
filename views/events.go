@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"chrono/assets/templates"
+	"chrono/calendar"
 	"chrono/db/repo"
 	"chrono/schemas"
 	"chrono/service"
@@ -39,7 +40,7 @@ func HandleCreateEvent(c echo.Context, r *repo.Queries) error {
 
 	e := schemas.Event{Username: currUser.Username, Event: event}
 
-	vacationUsed, err := service.GetRemainingVacation(
+	vacationRemaining, err := service.GetRemainingVacation(
 		r,
 		currUser.ID,
 		date.Year,
@@ -47,6 +48,11 @@ func HandleCreateEvent(c echo.Context, r *repo.Queries) error {
 	)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())
+	}
+
+	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, calendar.CurrentYear())
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
@@ -66,7 +72,14 @@ func HandleCreateEvent(c echo.Context, r *repo.Queries) error {
 	return Render(
 		c,
 		http.StatusOK,
-		templates.CreateEventUpdate(e, currUser, vacationUsed, pendingEvents, len(notifications)),
+		templates.CreateEventUpdate(
+			e,
+			currUser,
+			vacationRemaining,
+			vacTaken,
+			pendingEvents,
+			len(notifications),
+		),
 	)
 }
 
@@ -93,7 +106,7 @@ func HandleDeleteEvent(c echo.Context, r *repo.Queries) error {
 
 	e := schemas.Event{Username: currUser.Username, Event: deletedEvent}
 
-	vacationUsed, err := service.GetRemainingVacation(
+	vacRemaining, err := service.GetRemainingVacation(
 		r,
 		currUser.ID,
 		deletedEvent.ScheduledAt.Year(),
@@ -101,6 +114,10 @@ func HandleDeleteEvent(c echo.Context, r *repo.Queries) error {
 	)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())
+	}
+	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, calendar.CurrentYear())
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
@@ -120,6 +137,13 @@ func HandleDeleteEvent(c echo.Context, r *repo.Queries) error {
 	return Render(
 		c,
 		http.StatusOK,
-		templates.CreateEventUpdate(e, currUser, vacationUsed, pendingEvents, len(notifications)),
+		templates.CreateEventUpdate(
+			e,
+			currUser,
+			vacRemaining,
+			vacTaken,
+			pendingEvents,
+			len(notifications),
+		),
 	)
 }

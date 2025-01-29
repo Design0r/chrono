@@ -58,6 +58,11 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
+	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, calendar.CurrentYear())
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
+	}
+
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())
@@ -84,6 +89,7 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 			currUser,
 			month,
 			vacationRemaining,
+			vacTaken,
 			pendingEvents,
 			notifications,
 			allUsers,

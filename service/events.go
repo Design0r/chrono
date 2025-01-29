@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"slices"
@@ -209,4 +210,31 @@ func GetPendingEventsForYear(r *repo.Queries, userId int64, year int) (int, erro
 	}
 
 	return int(count), nil
+}
+
+func GetVacationCountForUser(r *repo.Queries, userId int64, year int) (float64, error) {
+	start := time.Date(year, 1, 1, 0, 0, 0, 0, time.Now().Location())
+
+	params := repo.GetVacationCountForUserParams{
+		ScheduledAt:   start,
+		ScheduledAt_2: start.AddDate(1, 0, 0),
+		UserID:        userId,
+	}
+
+	count, err := r.GetVacationCountForUser(context.Background(), params)
+	if err != nil {
+		log.Printf("Failed getting vacation count: %v", err)
+		return 0, err
+	}
+
+	result := 0.0
+	if count.TotalUrlaub != nil {
+		result += *count.TotalUrlaub
+	}
+	if count.TotalUrlaubHalbtags != nil {
+		result += (*count.TotalUrlaubHalbtags) / 2
+	}
+	fmt.Println(result)
+
+	return result, nil
 }

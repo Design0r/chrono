@@ -29,6 +29,11 @@ func HandleHome(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
+	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, calendar.CurrentYear())
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
+	}
+
 	stats := calendar.GetCurrentYearProgress()
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
@@ -44,6 +49,6 @@ func HandleHome(c echo.Context, r *repo.Queries) error {
 	return Render(
 		c,
 		http.StatusOK,
-		templates.Home(currUser, remainingDays, pendingEvents, stats, notifications),
+		templates.Home(currUser, remainingDays, vacTaken, pendingEvents, stats, notifications),
 	)
 }

@@ -50,9 +50,9 @@ templ Event(event schemas.Event, user repo.User) {
 	</div>
 }
 
-templ CreateEventUpdate(event schemas.Event, user repo.User, vacationUsed float64, pendingEvents int, notificationCount int) {
+templ CreateEventUpdate(event schemas.Event, user repo.User, vacRemaining float64, vacUsed float64, pendingEvents int, notificationCount int) {
 	@Event(event, user)
-	@VacationCounter(user, vacationUsed, pendingEvents)
+	@VacationCounter(user, vacRemaining, vacUsed, pendingEvents)
 	@NotificationIndicator(notificationCount)
 }
 

@@ -152,7 +152,7 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 	})
 }
 
-func CreateEventUpdate(event schemas.Event, user repo.User, vacationUsed float64, pendingEvents int, notificationCount int) templ.Component {
+func CreateEventUpdate(event schemas.Event, user repo.User, vacRemaining float64, vacUsed float64, pendingEvents int, notificationCount int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -177,7 +177,7 @@ func CreateEventUpdate(event schemas.Event, user repo.User, vacationUsed float64
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = VacationCounter(user, vacationUsed, pendingEvents).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = VacationCounter(user, vacRemaining, vacUsed, pendingEvents).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

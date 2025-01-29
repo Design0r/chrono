@@ -198,12 +198,12 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"btn btn-ghost font-medium text-[15px] \"><span class=\"icon-outlined\">calendar_today</span>Calendar</a> <a href=\"/team\" class=\"btn btn-ghost font-medium text-[15px] \"><span class=\"icon-outlined\">group</span>Team</a> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"btn btn-ghost font-medium text-[15px]\">Calendar<span class=\"icon-outlined\">calendar_today</span></a> <a href=\"/team\" class=\"btn btn-ghost font-medium text-[15px]\">Team<span class=\"icon-outlined\">group</span></a> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if (*user).IsSuperuser {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a href=\"/requests\" class=\"btn btn-ghost\">Requests</a>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a href=\"/requests\" class=\"btn btn-ghost font-medium text-[15px]\">Request<span class=\"icon-outlined\">mark_chat_unread</span></a>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

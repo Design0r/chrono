@@ -11,12 +11,13 @@ import (
 
 templ Calendar(user repo.User, month schemas.Month, vacRemaining float64, vacUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User) {
 	@Index(&user, notifications) {
-		<div class="pt-2 mb-6">
+		<div class="pt-2">
 			<div class="grid grid-cols-7">
 				@Info(month, user, vacRemaining, vacUsed, pendingEvents, users)
 			</div>
 			@CalendarCore(month, user)
 		</div>
+		<div class="h-16"></div>
 	}
 }
 

@@ -9,52 +9,60 @@ import (
 templ Home(user repo.User, vacationRemaining float64, pendingEvents int, progress schemas.YearProgress, notifications []repo.Notification) {
 	@Index(&user, notifications) {
 		<div class="flex flex-col container mx-auto justify-center align-middle gap-10 p-4">
-			@Card("Vacation") {
-				<div class="stats shadow">
+			<div class="text-[48px] pl-2 font-black">{ fmt.Sprintf("> hey %v ", user.Username) }</div>
+			@Card("Your vacation stats") {
+				<div class="stats grid grid-cols-4 bg-base-200 w-full">
 					<div class="stat">
-						<div class="stat-figure text-primary"></div>
-						<div class="stat-title">Total Vacation</div>
-						<div class="stat-value text-primary">{ fmt.Sprintf("%v Days", user.VacationDays) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("You have %v vacation days this year", user.VacationDays) }</div>
+						<div class="stat-figure text-info"></div>
+						<div class="stat-title pb-1">Vacation remaining</div>
+						<div class="stat-value pb-[1px] text-success">{ fmt.Sprintf("%v days", float64(user.VacationDays)-vacationRemaining) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%.1f %% days remaining", (float32(vacationRemaining) / float32(user.VacationDays)) * float32(100)) }</div>
 					</div>
 					<div class="stat">
-						<div class="stat-figure text-secondary"></div>
-						<div class="stat-title">Vacation Taken</div>
-						<div class="stat-value">{ fmt.Sprintf("%v Days", float64(user.VacationDays)-vacationRemaining) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("You have used %v vacation days", vacationRemaining) }</div>
+						<div class="stat-figure icon-outlined"></div>
+						<div class="stat-title pb-1">Vacation taken</div>
+						<div class="stat-value pb-[1px] text-warning">{ fmt.Sprintf("%v days", vacationRemaining) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%v days taken", vacationRemaining) }</div>
 					</div>
 					<div class="stat">
-						<div class="stat-title">Remaining</div>
-						<div class="stat-value text-secondary">{ fmt.Sprintf("%v Days", vacationRemaining) }</div>
-						<div class="stat-desc text-secondary">{ fmt.Sprintf("%.2f%% remaining", (float32(vacationRemaining) / float32(user.VacationDays)) * float32(100)) }</div>
+						<div class="stat-figure text-info"></div>
+						<div class="stat-title pb-1">Vacation total</div>
+						<div class="stat-value  pb-[1px] text-info">{ fmt.Sprintf("%v days", user.VacationDays) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%v days total", user.VacationDays) }</div>
 					</div>
 					<div class="stat">
-						<div class="stat-title">Pending</div>
-						<div class="stat-value">{ fmt.Sprintf("%v Events",pendingEvents) }</div>
+						<div class="stat-figure text-info"></div>
+						<div class="stat-title pb-1">Vacation pending</div>
+						<div class="stat-value pb-[1px]">{ fmt.Sprintf("%v events",pendingEvents) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%v events pending",pendingEvents) }</div>
 					</div>
 				</div>
 			}
-			@Card("Year Progress") {
-				@YearProgress(progress)
-			}
-			@Card("Year Stats") {
-				<div class="stats shadow">
+			@Card("Your year stats") {
+				<div class="stats grid grid-cols-4 bg-base-200 w-full">
 					<div class="stat">
-						<div class="stat-figure text-primary"></div>
-						<div class="stat-title">Total Days</div>
-						<div class="stat-value text-primary">{ fmt.Sprintf("%v", progress.NumDays) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("The year has %v days in total", progress.NumDays) }</div>
+						<div class="stat-figure text-success"></div>
+						<div class="stat-title pb-1">Days this year</div>
+						<div class="stat-value pb-[1px] text-success">{ fmt.Sprintf("%v days", progress.NumDays) }</div>
+						<div class="stat-desc">{ fmt.Sprintf(" %v days total", progress.NumDays) }</div>
 					</div>
 					<div class="stat">
-						<div class="stat-figure text-secondary"></div>
-						<div class="stat-title">Days Passed</div>
-						<div class="stat-value text-secondary">{ fmt.Sprintf("%v", progress.NumDaysPassed) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("We are %v days into the year", progress.NumDaysPassed) }</div>
+						<div class="stat-figure text-warning"></div>
+						<div class="stat-title pb-1">Days passed</div>
+						<div class="stat-value pb-[1px] text-warning">{ fmt.Sprintf("%v days", progress.NumDaysPassed) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%v days passed ", progress.NumDaysPassed) }</div>
 					</div>
 					<div class="stat">
-						<div class="stat-title">Completed</div>
-						<div class="stat-value">{ fmt.Sprintf("%.2f%%", progress.DaysPassedPercent) }</div>
-						<div class="stat-desc text-secondary">{ fmt.Sprintf("%.2f%% remaining", float32(100)-progress.DaysPassedPercent) }</div>
+						<div class="stat-figure text-info"></div>
+						<div class="stat-title pb-1">Days completed</div>
+						<div class="stat-value pb-[1px] text-info">{ fmt.Sprintf("%.2f %%", progress.DaysPassedPercent) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%.2f %% remaining", float32(100)-progress.DaysPassedPercent) }</div>
+					</div>
+					<div class="stat">
+						<div class="stat-figure text-info"></div>
+						<div class="stat-title pb-1">Days progress</div>
+						@YearProgress(progress)
+						<div class="stat-desc">{ fmt.Sprintf("%.2f %% days passed", progress.DaysPassedPercent) }</div>
 					</div>
 				</div>
 			}
@@ -63,7 +71,7 @@ templ Home(user repo.User, vacationRemaining float64, pendingEvents int, progres
 }
 
 templ Card(title string) {
-	<div class="bg-base-200 space-y-2 shadow-xl p-3 rounded-xl flex flex-col items-center justify-center">
+	<div class="space-y-2 p-3 rounded-xl flex flex-col items-left justify-center">
 		<h1 class="text-xl">{ title }</h1>
 		<div class="divider"></div>
 		<div>
@@ -73,13 +81,7 @@ templ Card(title string) {
 }
 
 templ YearProgress(progress schemas.YearProgress) {
-	<div class="w-96 bg-base-300 flex border-2 border-white h-10 shadow rounded-xl">
-		<div
-			{ templ.Attributes{"style":fmt.Sprintf("width: %v%%;", progress.DaysPassedPercent)}... }
-			class="bg-success h-full text-neutral rounded-lg"
-		></div>
-		<div class="w-full justify-center h-full text-xl text-center">
-			{ fmt.Sprintf("%v / %v (%.2f%%)", progress.NumDaysPassed, progress.NumDays, progress.DaysPassedPercent) }
-		</div>
-	</div>
+	<progress class="progress progress-success mb-3 mt-2 h-6" { templ.Attributes{"value":fmt.Sprintf("%.1f", progress.DaysPassedPercent)}... } max="100" role="progressbar">
+		{ fmt.Sprintf("%.1f %%", progress.DaysPassedPercent) }
+	</progress>
 }

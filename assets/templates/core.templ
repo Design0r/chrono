@@ -79,8 +79,8 @@ templ Header(user *repo.User, notifications []repo.Notification) {
 			<div class="flex gap-4">
 				<a href="/" class="btn btn-ghost text-xl text-white"><img class="w-28" alt="" src="/static/chrono.svg"/></a>
 				if user != nil {
-					<a href={ templ.URL(url) } class="btn btn-ghost text-[15px] tracking-wide">Calendar</a>
-					<a href="/team" class="btn btn-ghost text-[15px] tracking-wide">Team</a>
+					<a href={ templ.URL(url) } class="btn btn-ghost font-medium text-[15px] "><span class="icon-outlined">calendar_today</span>Calendar</a>
+					<a href="/team" class="btn btn-ghost font-medium text-[15px] "><span class="icon-outlined">group</span>Team</a>
 					if (*user).IsSuperuser {
 						<a href="/requests" class="btn btn-ghost">Requests</a>
 					}

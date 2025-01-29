@@ -9,6 +9,7 @@ export default {
 				dim: {
 					...require('daisyui/src/theming/themes')['dim'],
 					info: '#9ED0F1',
+					error: '#fe7c5d',
 				},
 			},
 			'light',

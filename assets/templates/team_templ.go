@@ -8,9 +8,11 @@ package templates
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "chrono/db/repo"
-import "fmt"
-import "os"
+import (
+	"chrono/db/repo"
+	"fmt"
+	"os"
+)
 
 func Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -58,7 +60,7 @@ func Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notific
 				}
 				ctx = templ.InitializeContext(ctx)
 				if currUser.IsSuperuser {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<button hx-get=\"/team\" hx-target=\"#team-table\" hx-swap=\"outerHTML\" class=\"btn btn-primary\">Edit</button>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"mt-4\"><button hx-get=\"/team\" hx-target=\"#team-table\" hx-swap=\"outerHTML\" class=\"btn btn-warning\">Edit</button></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -113,7 +115,7 @@ func TeamHTMX(users []repo.GetUsersWithVacationCountRow, currUser repo.User, not
 			}
 			ctx = templ.InitializeContext(ctx)
 			if currUser.IsSuperuser {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<button hx-get=\"/team\" hx-target=\"#team-table\" hx-swap=\"outerHTML\" class=\"btn btn-primary\">Edit</button>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"mt-4\"><button hx-get=\"/team\" hx-target=\"#team-table\" hx-swap=\"outerHTML\" class=\"btn btn-warning\">Edit</button></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -170,7 +172,7 @@ func TeamForm(users []repo.GetUsersWithVacationCountRow, currUser repo.User, not
 			}
 			ctx = templ.InitializeContext(ctx)
 			if currUser.IsSuperuser {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<button type=\"submit\" hx-patch=\"/team\" hx-target=\"#team-table\" hx-swap=\"outerHTML\" class=\"btn btn-primary\">Save</button>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"mt-4\"><button type=\"submit\" hx-patch=\"/team\" hx-target=\"#team-table\" hx-swap=\"outerHTML\" class=\"btn btn-success\">Save</button></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -210,7 +212,7 @@ func TeamTable(users []repo.GetUsersWithVacationCountRow, currUser repo.User, no
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div id=\"team-table\" class=\"p-2\"><div class=\"bg-base-300\"><table class=\"table\"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Admin</th><th>Vacation days</th><th>Vacation days used</th><th>Vacation days remaining</th></tr></thead> <tbody>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div id=\"team-table\" class=\"p-2\"><div class=\"pt-2 bg-base-200 rounded-xl\"><table class=\"table rounded-xl\"><thead><tr class=\"text-[15px] text-base-content border-b-2 border-base-content border-opacity-10\"><th>ID</th><th>Name</th><th>Email</th><th>Admin</th><th>Vacation days</th><th>Vacation days used</th><th>Vacation days remaining</th></tr></thead> <tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -258,9 +260,9 @@ func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bo
 		}
 		ctx = templ.ClearChildren(ctx)
 
-		css := "hover"
+		css := "hover:bg-base-300 pt-8 border-b-2 border-base-100 opacity-80 border-opacity-50"
 		if user.VacationDays == 0 && user.Username != os.Getenv("BOT_NAME") {
-			css = "hover bg-error"
+			css = "hover bg-error text-base-300"
 		}
 		var templ_7745c5c3_Var10 = []any{css}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var10...)
@@ -287,7 +289,7 @@ func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bo
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(user.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 86, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 94, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -300,7 +302,7 @@ func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bo
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 87, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 95, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -313,7 +315,7 @@ func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bo
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 88, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 96, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -335,7 +337,7 @@ func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bo
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(user.VacationDays))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 91, Col: 98}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 99, Col: 98}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -348,7 +350,7 @@ func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bo
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(user.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 91, Col: 127}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 99, Col: 127}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -366,7 +368,7 @@ func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bo
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(user.VacationDays))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 93, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 101, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -384,7 +386,7 @@ func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bo
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(user.VacationCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 95, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 103, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -397,7 +399,7 @@ func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bo
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(user.VacationDays - user.VacationCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 96, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/team.templ`, Line: 104, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {

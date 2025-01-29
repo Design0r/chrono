@@ -1,19 +1,23 @@
 package templates
 
-import "chrono/db/repo"
-import "fmt"
-import "os"
+import (
+	"chrono/db/repo"
+	"fmt"
+	"os"
+)
 
 templ Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) {
 	@Index(&currUser, notifications) {
 		@TeamTable(users, currUser, notifications, false) {
 			if currUser.IsSuperuser {
-				<button
-					hx-get="/team"
-					hx-target="#team-table"
-					hx-swap="outerHTML"
-					class="btn btn-primary"
-				>Edit</button>
+				<div class="mt-4">
+					<button
+						hx-get="/team"
+						hx-target="#team-table"
+						hx-swap="outerHTML"
+						class="btn btn-warning"
+					>Edit</button>
+				</div>
 			}
 		}
 	}
@@ -22,12 +26,14 @@ templ Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifi
 templ TeamHTMX(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) {
 	@TeamTable(users, currUser, notifications, false) {
 		if currUser.IsSuperuser {
-			<button
-				hx-get="/team"
-				hx-target="#team-table"
-				hx-swap="outerHTML"
-				class="btn btn-primary"
-			>Edit</button>
+			<div class="mt-4">
+				<button
+					hx-get="/team"
+					hx-target="#team-table"
+					hx-swap="outerHTML"
+					class="btn btn-warning"
+				>Edit</button>
+			</div>
 		}
 	}
 	@Message("Saved changes", "success")
@@ -37,13 +43,15 @@ templ TeamForm(users []repo.GetUsersWithVacationCountRow, currUser repo.User, no
 	<form id="team-table" hx-patch="/team">
 		@TeamTable(users, currUser, notifications, true) {
 			if currUser.IsSuperuser {
-				<button
-					type="submit"
-					hx-patch="/team"
-					hx-target="#team-table"
-					hx-swap="outerHTML"
-					class="btn btn-primary"
-				>Save</button>
+				<div class="mt-4">
+					<button
+						type="submit"
+						hx-patch="/team"
+						hx-target="#team-table"
+						hx-swap="outerHTML"
+						class="btn btn-success"
+					>Save</button>
+				</div>
 			}
 		}
 	</form>
@@ -51,10 +59,10 @@ templ TeamForm(users []repo.GetUsersWithVacationCountRow, currUser repo.User, no
 
 templ TeamTable(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification, form bool) {
 	<div id="team-table" class="p-2">
-		<div class="bg-base-300">
-			<table class="table">
+		<div class="pt-2 bg-base-200 rounded-xl">
+			<table class="table rounded-xl">
 				<thead>
-					<tr>
+					<tr class="text-[15px] text-base-content border-b-2 border-base-content border-opacity-10">
 						<th>ID</th>
 						<th>Name</th>
 						<th>Email</th>
@@ -77,9 +85,9 @@ templ TeamTable(users []repo.GetUsersWithVacationCountRow, currUser repo.User, n
 
 templ TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bool) {
 	{{
-	css := "hover"
+	css := "hover:bg-base-300 pt-8 border-b-2 border-base-100 opacity-80 border-opacity-50"
 	if user.VacationDays == 0 && user.Username != os.Getenv("BOT_NAME") {
-		css = "hover bg-error"
+		css = "hover bg-error text-base-300"
 	}
 	}}
 	<tr class={ css }>

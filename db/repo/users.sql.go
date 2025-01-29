@@ -194,42 +194,39 @@ func (q *Queries) GetUserByName(ctx context.Context, username string) (User, err
 }
 
 const getUsersWithVacationCount = `-- name: GetUsersWithVacationCount :many
-SELECT 
-    users.id, users.username, users.email, users.password, users.vacation_days, users.is_superuser, users.created_at, users.edited_at,
-    COUNT(events.id) AS vacation_count
-FROM 
-    users
-LEFT JOIN 
-    events
-ON 
-    users.id = events.user_id
-    AND events.name IN ("urlaub", "urlaub halbtags")
-    AND events.scheduled_at >= ?
-    AND events.scheduled_at < ?
-GROUP BY 
-    users.id, users.username, users.email, users.vacation_days
-ORDER BY users.id
+SELECT
+    u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at,
+    SUM(vt.value) AS vac_remaining,
+    SUM(0.5) AS vac_used
+FROM users AS u
+JOIN vacation_tokens vt 
+    ON u.id = vt.user_id
+    AND vt.start_date <= ?
+    AND vt.end_date   >= ?
+GROUP BY u.id
+ORDER BY u.id
 `
 
 type GetUsersWithVacationCountParams struct {
-	ScheduledAt   time.Time `json:"scheduled_at"`
-	ScheduledAt_2 time.Time `json:"scheduled_at_2"`
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
 }
 
 type GetUsersWithVacationCountRow struct {
-	ID            int64     `json:"id"`
-	Username      string    `json:"username"`
-	Email         string    `json:"email"`
-	Password      string    `json:"password"`
-	VacationDays  int64     `json:"vacation_days"`
-	IsSuperuser   bool      `json:"is_superuser"`
-	CreatedAt     time.Time `json:"created_at"`
-	EditedAt      time.Time `json:"edited_at"`
-	VacationCount int64     `json:"vacation_count"`
+	ID           int64     `json:"id"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	Password     string    `json:"password"`
+	VacationDays int64     `json:"vacation_days"`
+	IsSuperuser  bool      `json:"is_superuser"`
+	CreatedAt    time.Time `json:"created_at"`
+	EditedAt     time.Time `json:"edited_at"`
+	VacRemaining *float64  `json:"vac_remaining"`
+	VacUsed      *float64  `json:"vac_used"`
 }
 
 func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWithVacationCountParams) ([]GetUsersWithVacationCountRow, error) {
-	rows, err := q.db.QueryContext(ctx, getUsersWithVacationCount, arg.ScheduledAt, arg.ScheduledAt_2)
+	rows, err := q.db.QueryContext(ctx, getUsersWithVacationCount, arg.StartDate, arg.EndDate)
 	if err != nil {
 		return nil, err
 	}
@@ -246,7 +243,8 @@ func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWit
 			&i.IsSuperuser,
 			&i.CreatedAt,
 			&i.EditedAt,
-			&i.VacationCount,
+			&i.VacRemaining,
+			&i.VacUsed,
 		); err != nil {
 			return nil, err
 		}

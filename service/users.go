@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"chrono/calendar"
 	"chrono/db/repo"
 )
 
@@ -80,15 +81,23 @@ func GetCurrentUser(r *repo.Queries, c echo.Context) (repo.User, error) {
 }
 
 func GetAllVacUsers(r *repo.Queries) ([]repo.GetUsersWithVacationCountRow, error) {
-	start := time.Date(time.Now().Year(), 1, 1, 0, 0, 0, 0, time.Now().Location())
+	start := time.Date(calendar.CurrentYear(), 1, 1, 0, 0, 0, 0, time.Now().Location())
 
 	data := repo.GetUsersWithVacationCountParams{
-		ScheduledAt:   start,
-		ScheduledAt_2: start.AddDate(1, 0, 0),
+		StartDate: start,
+		EndDate:   start,
 	}
 	users, err := r.GetUsersWithVacationCount(context.Background(), data)
 	if err != nil {
 		return nil, err
+	}
+
+	for i := range users {
+		vac, err := GetVacationCountForUser(r, users[i].ID, start.Year())
+		if err != nil {
+			continue
+		}
+		users[i].VacUsed = &vac
 	}
 
 	return users, err
@@ -151,7 +160,7 @@ func SetUserVacation(r *repo.Queries, userId int64, vacation int) error {
 	params := repo.SetUserVacationParams{ID: userId, VacationDays: int64(vacation)}
 	err := r.SetUserVacation(context.Background(), params)
 	if err != nil {
-		log.Printf("Failed updating user vacation", err)
+		log.Printf("Failed updating user vacation: %v", err)
 		return err
 	}
 

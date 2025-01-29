@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"slices"
@@ -227,14 +226,9 @@ func GetVacationCountForUser(r *repo.Queries, userId int64, year int) (float64, 
 		return 0, err
 	}
 
-	result := 0.0
-	if count.TotalUrlaub != nil {
-		result += *count.TotalUrlaub
+	if count != nil {
+		return *count, nil
 	}
-	if count.TotalUrlaubHalbtags != nil {
-		result += (*count.TotalUrlaubHalbtags) / 2
-	}
-	fmt.Println(result)
 
-	return result, nil
+	return 0, nil
 }

@@ -89,6 +89,14 @@ templ TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form b
 	if user.VacationDays == 0 && user.Username != os.Getenv("BOT_NAME") {
 		css = "hover bg-error text-base-300"
 	}
+	vacTaken := 0.0
+	vacRemaining := 0.0
+	if user.VacRemaining != nil {
+		vacRemaining = *user.VacRemaining
+	}
+	if user.VacUsed != nil {
+		vacTaken = *user.VacUsed
+	}
 	}}
 	<tr class={ css }>
 		<th>{ fmt.Sprint(user.ID) }</th>
@@ -100,7 +108,7 @@ templ TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form b
 		} else {
 			<td>{ fmt.Sprint(user.VacationDays) }</td>
 		}
-		<td>{ fmt.Sprint(user.VacationCount) }</td>
-		<td>{ fmt.Sprint(user.VacationDays-user.VacationCount) }</td>
+		<td>{ fmt.Sprint(vacTaken) }</td>
+		<td>{ fmt.Sprint(vacRemaining) }</td>
 	</tr>
 }

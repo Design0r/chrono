@@ -36,21 +36,17 @@ WHERE id = ?
 RETURNING *;
 
 -- name: GetUsersWithVacationCount :many
-SELECT 
-    users.*,
-    COUNT(events.id) AS vacation_count
-FROM 
-    users
-LEFT JOIN 
-    events
-ON 
-    users.id = events.user_id
-    AND events.name IN ("urlaub", "urlaub halbtags")
-    AND events.scheduled_at >= ?
-    AND events.scheduled_at < ?
-GROUP BY 
-    users.id, users.username, users.email, users.vacation_days
-ORDER BY users.id;
+SELECT
+    u.*,
+    SUM(vt.value) AS vac_remaining,
+    SUM(0.5) AS vac_used
+FROM users AS u
+JOIN vacation_tokens vt 
+    ON u.id = vt.user_id
+    AND vt.start_date <= ?
+    AND vt.end_date   >= ?
+GROUP BY u.id
+ORDER BY u.id;
 
 -- name: GetAdmins :many
 SELECT * FROM users

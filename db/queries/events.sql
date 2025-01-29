@@ -39,8 +39,13 @@ AND user_id = ?;
 
 -- name: GetVacationCountForUser :one 
 SELECT 
-  SUM(CASE WHEN name = 'urlaub' THEN 1 ELSE 0 END) AS total_urlaub,
-  SUM(CASE WHEN name = 'urlaub halbtags' THEN 1 ELSE 0 END) AS total_urlaub_halbtags
+  SUM(
+    CASE
+      WHEN name = 'urlaub'          THEN 1
+      WHEN name = 'urlaub halbtags' THEN 0.5
+      ELSE 0
+    END
+  ) 
 FROM events
 WHERE user_id = ?
   AND scheduled_at >= ?

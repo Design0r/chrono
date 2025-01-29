@@ -345,8 +345,13 @@ func (q *Queries) GetUserPendingEvents(ctx context.Context, userID int64) ([]Eve
 
 const getVacationCountForUser = `-- name: GetVacationCountForUser :one
 SELECT 
-  SUM(CASE WHEN name = 'urlaub' THEN 1 ELSE 0 END) AS total_urlaub,
-  SUM(CASE WHEN name = 'urlaub halbtags' THEN 1 ELSE 0 END) AS total_urlaub_halbtags
+  SUM(
+    CASE
+      WHEN name = 'urlaub'          THEN 1
+      WHEN name = 'urlaub halbtags' THEN 0.5
+      ELSE 0
+    END
+  ) 
 FROM events
 WHERE user_id = ?
   AND scheduled_at >= ?
@@ -361,16 +366,11 @@ type GetVacationCountForUserParams struct {
 	ScheduledAt_2 time.Time `json:"scheduled_at_2"`
 }
 
-type GetVacationCountForUserRow struct {
-	TotalUrlaub         *float64 `json:"total_urlaub"`
-	TotalUrlaubHalbtags *float64 `json:"total_urlaub_halbtags"`
-}
-
-func (q *Queries) GetVacationCountForUser(ctx context.Context, arg GetVacationCountForUserParams) (GetVacationCountForUserRow, error) {
+func (q *Queries) GetVacationCountForUser(ctx context.Context, arg GetVacationCountForUserParams) (*float64, error) {
 	row := q.db.QueryRowContext(ctx, getVacationCountForUser, arg.UserID, arg.ScheduledAt, arg.ScheduledAt_2)
-	var i GetVacationCountForUserRow
-	err := row.Scan(&i.TotalUrlaub, &i.TotalUrlaubHalbtags)
-	return i, err
+	var sum *float64
+	err := row.Scan(&sum)
+	return sum, err
 }
 
 const updateEventState = `-- name: UpdateEventState :one

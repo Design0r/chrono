@@ -15,10 +15,14 @@ import (
 )
 
 func main() {
+	fmt.Println(banner)
+	log.Println("Initializing chrono...")
+
 	db := db.NewDB("chrono.db")
 	defer db.Close()
 
 	e := echo.New()
+	e.HideBanner = true
 
 	server := views.NewServer(e, db)
 	server.InitMiddleware()
@@ -34,3 +38,12 @@ func main() {
 
 	log.Fatal(server.Start(fmt.Sprintf(":%v", os.Getenv("CHRONO_PORT"))))
 }
+
+const banner string = `
+     ________                         
+    / ____/ /_  _________  ____  ____ 
+   / /   / __ \/ ___/ __ \/ __ \/ __ \
+  / /___/ / / / /  / /_/ / / / / /_/ /
+  \____/_/ /_/_/   \____/_/ /_/\____/ 
+ ======================================
+`

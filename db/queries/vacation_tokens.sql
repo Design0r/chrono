@@ -18,3 +18,11 @@ SELECT SUM(value) FROM vacation_tokens
 WHERE user_id = ? 
 AND start_date <= ?
 AND end_date >= ?;
+
+-- name: UpdateYearlyTokens :exec
+UPDATE vacation_tokens
+SET value = ?
+WHERE user_id = ? 
+AND start_date <= ?
+AND end_date >= ?;
+

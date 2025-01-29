@@ -112,3 +112,21 @@ func AddTokenRefresh(r *repo.Queries, userId int64, year int) error {
 
 	return nil
 }
+
+func UpdateYearlyTokens(r *repo.Queries, userId int64, year int, value int) error {
+	startDate := time.Date(year, time.January, 1, 0, 0, 0, 0, time.Now().Location())
+	endDate := time.Date(year+1, time.March, 1, 0, 0, 0, 0, time.Now().Location())
+	params := repo.UpdateYearlyTokensParams{
+		Value:     float64(value),
+		UserID:    userId,
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+	err := r.UpdateYearlyTokens(context.Background(), params)
+	if err != nil {
+		log.Printf("Failed updating tokens: %v", err)
+		return err
+	}
+
+	return nil
+}

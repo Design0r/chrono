@@ -23,7 +23,7 @@ func HandleHome(c echo.Context, r *repo.Queries) error {
 		r,
 		currUser.ID,
 		calendar.CurrentYear(),
-		0,
+		1,
 	)
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, err.Error())

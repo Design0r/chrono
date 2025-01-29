@@ -155,5 +155,10 @@ func SetUserVacation(r *repo.Queries, userId int64, vacation int) error {
 		return err
 	}
 
+	err = UpdateYearlyTokens(r, userId, time.Now().Year(), vacation)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

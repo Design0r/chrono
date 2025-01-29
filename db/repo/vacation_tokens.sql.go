@@ -112,3 +112,28 @@ func (q *Queries) GetValidUserTokens(ctx context.Context, arg GetValidUserTokens
 	}
 	return items, nil
 }
+
+const updateYearlyTokens = `-- name: UpdateYearlyTokens :exec
+UPDATE vacation_tokens
+SET value = ?
+WHERE user_id = ? 
+AND start_date <= ?
+AND end_date >= ?
+`
+
+type UpdateYearlyTokensParams struct {
+	Value     float64   `json:"value"`
+	UserID    int64     `json:"user_id"`
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+}
+
+func (q *Queries) UpdateYearlyTokens(ctx context.Context, arg UpdateYearlyTokensParams) error {
+	_, err := q.db.ExecContext(ctx, updateYearlyTokens,
+		arg.Value,
+		arg.UserID,
+		arg.StartDate,
+		arg.EndDate,
+	)
+	return err
+}

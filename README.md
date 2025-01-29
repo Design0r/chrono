@@ -2,7 +2,7 @@
 
 A vacatation and event management tool
 
-![screenshot](./docs/chrono.png)
+![screenshot](./docs/chrono.jpg)
 
 ## Requirements
 

@@ -6,7 +6,6 @@ type CreateUser struct {
 	Name     string `form:"name"     json:"name"`
 	Email    string `form:"email"    json:"email"`
 	Password string `form:"password" json:"password"`
-	Vacation int    `form:"vacation" json:"vacation"`
 }
 
 type PatchUser struct {

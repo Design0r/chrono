@@ -262,7 +262,7 @@ func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bo
 
 		css := "hover:bg-base-300 pt-8 border-b-2 border-base-100 opacity-80 border-opacity-50"
 		if user.VacationDays == 0 && user.Username != os.Getenv("BOT_NAME") {
-			css = "hover bg-error text-base-300"
+			css = "hover:bg-error hover:bg-opacity-85 bg-error text-white "
 		}
 		vacTaken := 0.0
 		vacRemaining := 0.0

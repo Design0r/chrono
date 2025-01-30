@@ -34,7 +34,7 @@ templ Event(event schemas.Event, user repo.User) {
 			{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
 			class="text-center py-1 relative w-full rounded-lg"
 		>
-			if event.UserID == user.ID && event.State != "accepted" || user.IsSuperuser == true {
+			if (event.UserID == user.ID && event.State != "accepted") || !service.IsVacation(event.Name) || user.IsSuperuser {
 				<span>
 					<button
 						hx-swap="delete"

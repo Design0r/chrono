@@ -92,10 +92,10 @@ templ TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form b
 	vacTaken := 0.0
 	vacRemaining := 0.0
 	if user.VacRemaining != nil {
-		vacRemaining = *user.VacRemaining
+		vacRemaining = (user.VacRemaining).(float64)
 	}
 	if user.VacUsed != nil {
-		vacTaken = *user.VacUsed
+		vacTaken = *(user.VacUsed).(*float64)
 	}
 	}}
 	<tr class={ css }>

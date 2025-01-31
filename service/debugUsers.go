@@ -36,6 +36,6 @@ func LoadDebugUsers(r *repo.Queries, path string) (schemas.DebugUsers, error) {
 		CreateUser(r, user)
 	}
 
-	log.Println("created debug users")
+	log.Println("Created debug users")
 	return users, nil
 }

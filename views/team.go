@@ -1,12 +1,14 @@
 package views
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 
 	"chrono/assets/templates"
+	"chrono/calendar"
 	"chrono/db/repo"
 	"chrono/htmx"
 	"chrono/service"
@@ -53,7 +55,7 @@ func HandleTeamPatch(c echo.Context, r *repo.Queries) error {
 			continue
 		}
 
-		err = service.SetUserVacation(r, userId, vacation)
+		err = service.SetUserVacation(r, userId, vacation, calendar.CurrentYear())
 		if err != nil {
 			continue
 		}

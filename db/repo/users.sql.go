@@ -196,10 +196,10 @@ func (q *Queries) GetUserByName(ctx context.Context, username string) (User, err
 const getUsersWithVacationCount = `-- name: GetUsersWithVacationCount :many
 SELECT
     u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at,
-    SUM(vt.value) AS vac_remaining,
-    SUM(0.5) AS vac_used
+  COALESCE(SUM(vt.value), 0.0) AS vac_remaining,
+    COALESCE(SUM(0.5), 0.0) AS vac_used
 FROM users AS u
-JOIN vacation_tokens vt 
+LEFT JOIN vacation_tokens vt 
     ON u.id = vt.user_id
     AND vt.start_date <= ?
     AND vt.end_date   >= ?
@@ -213,16 +213,16 @@ type GetUsersWithVacationCountParams struct {
 }
 
 type GetUsersWithVacationCountRow struct {
-	ID           int64     `json:"id"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	Password     string    `json:"password"`
-	VacationDays int64     `json:"vacation_days"`
-	IsSuperuser  bool      `json:"is_superuser"`
-	CreatedAt    time.Time `json:"created_at"`
-	EditedAt     time.Time `json:"edited_at"`
-	VacRemaining *float64  `json:"vac_remaining"`
-	VacUsed      *float64  `json:"vac_used"`
+	ID           int64       `json:"id"`
+	Username     string      `json:"username"`
+	Email        string      `json:"email"`
+	Password     string      `json:"password"`
+	VacationDays int64       `json:"vacation_days"`
+	IsSuperuser  bool        `json:"is_superuser"`
+	CreatedAt    time.Time   `json:"created_at"`
+	EditedAt     time.Time   `json:"edited_at"`
+	VacRemaining interface{} `json:"vac_remaining"`
+	VacUsed      interface{} `json:"vac_used"`
 }
 
 func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWithVacationCountParams) ([]GetUsersWithVacationCountRow, error) {
@@ -259,10 +259,11 @@ func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWit
 	return items, nil
 }
 
-const setUserVacation = `-- name: SetUserVacation :exec
+const setUserVacation = `-- name: SetUserVacation :one
 UPDATE users
 SET vacation_days = ?
 WHERE id = ?
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at
 `
 
 type SetUserVacationParams struct {
@@ -270,9 +271,20 @@ type SetUserVacationParams struct {
 	ID           int64 `json:"id"`
 }
 
-func (q *Queries) SetUserVacation(ctx context.Context, arg SetUserVacationParams) error {
-	_, err := q.db.ExecContext(ctx, setUserVacation, arg.VacationDays, arg.ID)
-	return err
+func (q *Queries) SetUserVacation(ctx context.Context, arg SetUserVacationParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, setUserVacation, arg.VacationDays, arg.ID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.VacationDays,
+		&i.IsSuperuser,
+		&i.CreatedAt,
+		&i.EditedAt,
+	)
+	return i, err
 }
 
 const toggleAdmin = `-- name: ToggleAdmin :one

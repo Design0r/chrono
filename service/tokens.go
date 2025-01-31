@@ -89,6 +89,10 @@ func GetValidUserTokenSum(r *repo.Queries, userId int64,
 }
 
 func InitYearlyTokens(r *repo.Queries, user repo.User, year int) error {
+	if user.VacationDays <= 0 {
+		return nil
+	}
+
 	params := repo.GetTokenRefreshParams{UserID: user.ID, Year: int64(year)}
 	count, _ := r.GetTokenRefresh(context.Background(), params)
 	if count > 0 {
@@ -113,18 +117,17 @@ func AddTokenRefresh(r *repo.Queries, userId int64, year int) error {
 	return nil
 }
 
-func UpdateYearlyTokens(r *repo.Queries, userId int64, year int, value int) error {
-	startDate := time.Date(year, time.January, 1, 0, 0, 0, 0, time.Now().Location())
-	endDate := time.Date(year+1, time.March, 1, 0, 0, 0, 0, time.Now().Location())
-	params := repo.UpdateYearlyTokensParams{
-		Value:     float64(value),
-		UserID:    userId,
-		StartDate: startDate,
-		EndDate:   endDate,
+func UpdateYearlyTokens(r *repo.Queries, user repo.User, year int, value int) error {
+	params := repo.GetTokenRefreshParams{UserID: user.ID, Year: int64(year)}
+	count, _ := r.GetTokenRefresh(context.Background(), params)
+	if count == 0 {
+		err := AddTokenRefresh(r, user.ID, year)
+		if err != nil {
+			return err
+		}
 	}
-	err := r.UpdateYearlyTokens(context.Background(), params)
+	_, err := CreateToken(r, user.ID, year, float64(value))
 	if err != nil {
-		log.Printf("Failed updating tokens: %v", err)
 		return err
 	}
 

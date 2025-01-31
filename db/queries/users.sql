@@ -38,10 +38,10 @@ RETURNING *;
 -- name: GetUsersWithVacationCount :many
 SELECT
     u.*,
-    SUM(vt.value) AS vac_remaining,
-    SUM(0.5) AS vac_used
+    COALESCE(SUM(vt.value), 0.0) AS vac_remaining,
+    COALESCE(SUM(0.5), 0.0) AS vac_used
 FROM users AS u
-JOIN vacation_tokens vt 
+LEFT JOIN vacation_tokens vt 
     ON u.id = vt.user_id
     AND vt.start_date <= ?
     AND vt.end_date   >= ?
@@ -62,7 +62,8 @@ RETURNING *;
 SELECT * FROM users
 WHERE id != 1;
 
--- name: SetUserVacation :exec
+-- name: SetUserVacation :one
 UPDATE users
 SET vacation_days = ?
-WHERE id = ?;
+WHERE id = ?
+RETURNING *;

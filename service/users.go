@@ -156,15 +156,20 @@ func GetAllUsers(r *repo.Queries) ([]repo.User, error) {
 	return users, nil
 }
 
-func SetUserVacation(r *repo.Queries, userId int64, vacation int) error {
+func SetUserVacation(r *repo.Queries, userId int64, vacation int, year int) error {
+	oldUser, err := GetUserById(r, userId)
+	if err != nil {
+		return err
+	}
+
 	params := repo.SetUserVacationParams{ID: userId, VacationDays: int64(vacation)}
-	err := r.SetUserVacation(context.Background(), params)
+	updatedUser, err := r.SetUserVacation(context.Background(), params)
 	if err != nil {
 		log.Printf("Failed updating user vacation: %v", err)
 		return err
 	}
 
-	err = UpdateYearlyTokens(r, userId, time.Now().Year(), vacation)
+	err = UpdateYearlyTokens(r, updatedUser, year, vacation-int(oldUser.VacationDays))
 	if err != nil {
 		return err
 	}

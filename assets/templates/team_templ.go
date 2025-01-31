@@ -267,10 +267,10 @@ func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bo
 		vacTaken := 0.0
 		vacRemaining := 0.0
 		if user.VacRemaining != nil {
-			vacRemaining = *user.VacRemaining
+			vacRemaining = (user.VacRemaining).(float64)
 		}
 		if user.VacUsed != nil {
-			vacTaken = *user.VacUsed
+			vacTaken = *(user.VacUsed).(*float64)
 		}
 		var templ_7745c5c3_Var10 = []any{css}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var10...)

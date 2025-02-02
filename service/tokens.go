@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
@@ -93,6 +94,10 @@ func InitYearlyTokens(r *repo.Queries, user repo.User, year int) error {
 		return nil
 	}
 
+	if year < user.CreatedAt.Year() {
+		return nil
+	}
+
 	params := repo.GetTokenRefreshParams{UserID: user.ID, Year: int64(year)}
 	count, _ := r.GetTokenRefresh(context.Background(), params)
 	if count > 0 {
@@ -129,6 +134,42 @@ func UpdateYearlyTokens(r *repo.Queries, user repo.User, year int, value int) er
 	_, err := CreateToken(r, user.ID, year, float64(value))
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func DebugResetTokens(r *repo.Queries) error {
+	return r.DebugResetTokens(context.Background())
+}
+
+func DebugResetTokenRefresh(r *repo.Queries) error {
+	err := r.ResetTokenRefresh(context.Background())
+	if err != nil {
+		log.Printf("Failed to reset token refresh table: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func DebugCreateTokenForAcceptedEvents(r *repo.Queries) error {
+	users, err := GetAllUsers(r)
+	if err != nil {
+		return err
+	}
+
+	years, err := GetAPICacheYears(r)
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		for _, year := range years {
+			InitYearlyTokens(r, user, int(year))
+			count, _ := GetVacationCountForUser(r, user.ID, int(year))
+			CreateToken(r, user.ID, int(year), float64(-count))
+		}
 	}
 
 	return nil

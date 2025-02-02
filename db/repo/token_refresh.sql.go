@@ -49,3 +49,12 @@ func (q *Queries) GetTokenRefresh(ctx context.Context, arg GetTokenRefreshParams
 	err := row.Scan(&count)
 	return count, err
 }
+
+const resetTokenRefresh = `-- name: ResetTokenRefresh :exec
+DELETE FROM token_refresh
+`
+
+func (q *Queries) ResetTokenRefresh(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetTokenRefresh)
+	return err
+}

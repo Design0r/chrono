@@ -26,3 +26,5 @@ WHERE user_id = ?
 AND start_date <= ?
 AND end_date >= ?;
 
+-- name: DebugResetTokens :exec
+DELETE FROM vacation_tokens;

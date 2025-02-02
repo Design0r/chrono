@@ -41,6 +41,15 @@ func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Vacat
 	return i, err
 }
 
+const debugResetTokens = `-- name: DebugResetTokens :exec
+DELETE FROM vacation_tokens
+`
+
+func (q *Queries) DebugResetTokens(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, debugResetTokens)
+	return err
+}
+
 const deleteToken = `-- name: DeleteToken :exec
 DELETE FROM vacation_tokens
 WHERE id = ?

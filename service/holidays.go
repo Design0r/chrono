@@ -81,3 +81,12 @@ func CreateCache(r *repo.Queries, year int) error {
 
 	return nil
 }
+
+func GetAPICacheYears(r *repo.Queries) ([]int64, error) {
+	years, err := r.GetApiCacheYears(context.Background())
+	if err != nil {
+		log.Printf("Failed to get api cache years: %v", err)
+		return nil, err
+	}
+	return years, nil
+}

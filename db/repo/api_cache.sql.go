@@ -32,3 +32,31 @@ func (q *Queries) CreateCache(ctx context.Context, year int64) error {
 	_, err := q.db.ExecContext(ctx, createCache, year)
 	return err
 }
+
+const getApiCacheYears = `-- name: GetApiCacheYears :many
+SELECT year FROM api_cache
+GROUP BY year
+`
+
+func (q *Queries) GetApiCacheYears(ctx context.Context) ([]int64, error) {
+	rows, err := q.db.QueryContext(ctx, getApiCacheYears)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int64
+	for rows.Next() {
+		var year int64
+		if err := rows.Scan(&year); err != nil {
+			return nil, err
+		}
+		items = append(items, year)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

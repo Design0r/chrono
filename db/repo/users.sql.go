@@ -196,7 +196,7 @@ func (q *Queries) GetUserByName(ctx context.Context, username string) (User, err
 const getUsersWithVacationCount = `-- name: GetUsersWithVacationCount :many
 SELECT
     u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at,
-  COALESCE(SUM(vt.value), 0.0) AS vac_remaining,
+    COALESCE(SUM(vt.value), 0.0) AS vac_remaining,
     COALESCE(SUM(0.5), 0.0) AS vac_used
 FROM users AS u
 LEFT JOIN vacation_tokens vt 

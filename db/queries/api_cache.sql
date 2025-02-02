@@ -7,3 +7,7 @@ SELECT EXISTS(
 -- name: CreateCache :exec
 INSERT INTO api_cache (year)
 VALUES (?);
+
+-- name: GetApiCacheYears :many
+SELECT year FROM api_cache
+GROUP BY year;

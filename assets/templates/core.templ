@@ -102,7 +102,7 @@ templ Header(user *repo.User, notifications []repo.Notification) {
 
 templ Avatar(user repo.User) {
 	{{
-	bgColor := service.GenerateHSL(int(user.ID))
+			bgColor := service.HSLToString(service.HexToHSL(user.Color))
 	}}
 	<div class="dropdown dropdown-end pr-2">
 		<div

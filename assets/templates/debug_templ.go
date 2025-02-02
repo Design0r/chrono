@@ -43,7 +43,7 @@ func Debug(user *repo.User, notifications []repo.Notification) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container max-w-xs space-y-2 mt-6 justify-center items m-auto flex flex-col\"><button hx-delete=\"/debug/tokens\" hx-swap=\"none\" class=\"btn btn-warning\">Clear token table</button> <button hx-post=\"/debug/tokens\" hx-swap=\"none\" class=\"btn btn-warning\">Create tokens for accepted events</button></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container max-w-xs space-y-2 mt-6 justify-center items m-auto flex flex-col\"><button hx-delete=\"/debug/tokens\" hx-swap=\"none\" class=\"btn btn-warning\">Clear token table</button> <button hx-post=\"/debug/tokens\" hx-swap=\"none\" class=\"btn btn-warning\">Create tokens for accepted events</button> <button hx-patch=\"/debug/color\" hx-swap=\"none\" class=\"btn btn-warning\">Generate default user color</button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

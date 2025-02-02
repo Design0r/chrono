@@ -2,6 +2,7 @@ package templates
 
 import "chrono/db/repo"
 import "fmt"
+import "chrono/service"
 
 templ ProfilePage(user repo.User, notifications []repo.Notification) {
 	@Index(&user, notifications) {
@@ -10,6 +11,9 @@ templ ProfilePage(user repo.User, notifications []repo.Notification) {
 }
 
 templ Profile(user repo.User, notifications []repo.Notification) {
+	{{
+			bgColor := service.HSLToString(service.HexToHSL(user.Color))
+	}}
 	<div id="profile" class="space-y-2 bg-base-300 rounded m-2 p-5 ">
 		<h1 class="font-bold text-xl">Profile</h1>
 		<div class="grid gap-2 grid-cols-2">
@@ -21,12 +25,17 @@ templ Profile(user repo.User, notifications []repo.Notification) {
 			<p>{ fmt.Sprint(user.IsSuperuser) }</p>
 			<p>Yearly Vacation</p>
 			<p>{ fmt.Sprint(user.VacationDays) }</p>
+			<p>Color</p>
+			<p
+				class="w-full"
+				{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
+			></p>
 			<p>Joined</p>
 			<p>{ user.CreatedAt.Format("2. January 2006") }</p>
 			<p>Last Edit</p>
 			<p>{ user.EditedAt.Format("2. January 2006") }</p>
 		</div>
-		<button hx-get="/profile/edit" hx-swap="outerHTML" hx-target="#profile" class="btn btn-primary">Edit</button>
+		<button hx-get="/profile/edit" hx-swap="outerHTML" hx-target="#profile" class="btn btn-warning">Edit</button>
 	</div>
 }
 
@@ -53,12 +62,13 @@ templ ProfileEditForm(user repo.User, notifications []repo.Notification) {
 				/>
 				<p>Admin</p>
 				<p>{ fmt.Sprint(user.IsSuperuser) }</p>
-				<label for="vacation">Yearly Vacation</label>
+				<p>Yearly Vacation</p>
+				<p>{ fmt.Sprint(user.VacationDays) }</p>
+				<label for="color">Color</label>
 				<input
 					class="input w-full input-bordered"
-					type="number"
-					name="vacation"
-					value={ fmt.Sprint(user.VacationDays) }
+					type="color"
+					name="color"
 					required
 				/>
 				<p>Joined</p>
@@ -66,7 +76,7 @@ templ ProfileEditForm(user repo.User, notifications []repo.Notification) {
 				<p>Last Edit</p>
 				<p>{ user.EditedAt.Format("2. January 2006") }</p>
 			</div>
-			<button type="submit" class="btn btn-primary">Submit</button>
+			<button type="submit" class="btn btn-warning">Submit</button>
 		</form>
 	</div>
 }

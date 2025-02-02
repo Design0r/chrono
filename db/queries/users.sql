@@ -1,6 +1,6 @@
 -- name: CreateUser :one
-INSERT INTO users (username, vacation_days, email, password, is_superuser)
-VALUES (?, ?, ?, ?, ?)
+INSERT INTO users (username, color, vacation_days, email, password, is_superuser)
+VALUES (?, ?, ?, ?, ?, ?)
 RETURNING *;
 
 -- name: GetUserByID :one
@@ -28,7 +28,7 @@ RETURNING *;
 
 -- name: UpdateUser :one
 UPDATE users
-SET vacation_days = ?,
+SET color = ?,
 username = ?,
 email = ?,
 edited_at = CURRENT_TIMESTAMP
@@ -67,3 +67,8 @@ UPDATE users
 SET vacation_days = ?
 WHERE id = ?
 RETURNING *;
+
+-- name: SetUserColor :exec
+UPDATE users
+SET color = ?
+WHERE id = ?;

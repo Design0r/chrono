@@ -58,7 +58,7 @@ func (q *Queries) GetEventNameFromRequest(ctx context.Context, id int64) (string
 }
 
 const getPendingRequests = `-- name: GetPendingRequests :many
-SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, e.id, scheduled_at, name, e.state, e.created_at, e.edited_at, e.user_id FROM requests r
+SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color, e.id, scheduled_at, name, e.state, e.created_at, e.edited_at, e.user_id FROM requests r
 JOIN users u ON r.user_id = u.id
 JOIN events e ON r.event_id = e.id
 WHERE r.state = "pending"
@@ -82,6 +82,7 @@ type GetPendingRequestsRow struct {
 	IsSuperuser  bool      `json:"is_superuser"`
 	CreatedAt_2  time.Time `json:"created_at_2"`
 	EditedAt_2   time.Time `json:"edited_at_2"`
+	Color        string    `json:"color"`
 	ID_3         int64     `json:"id_3"`
 	ScheduledAt  time.Time `json:"scheduled_at"`
 	Name         string    `json:"name"`
@@ -117,6 +118,7 @@ func (q *Queries) GetPendingRequests(ctx context.Context) ([]GetPendingRequestsR
 			&i.IsSuperuser,
 			&i.CreatedAt_2,
 			&i.EditedAt_2,
+			&i.Color,
 			&i.ID_3,
 			&i.ScheduledAt,
 			&i.Name,
@@ -139,7 +141,7 @@ func (q *Queries) GetPendingRequests(ctx context.Context) ([]GetPendingRequestsR
 }
 
 const getRequestRange = `-- name: GetRequestRange :many
-SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, e.id, scheduled_at, name, e.state, e.created_at, e.edited_at, e.user_id FROM requests r
+SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color, e.id, scheduled_at, name, e.state, e.created_at, e.edited_at, e.user_id FROM requests r
 JOIN users u ON r.user_id = u.id
 JOIN events e ON r.event_id = e.id
 WHERE r.user_id = ?
@@ -171,6 +173,7 @@ type GetRequestRangeRow struct {
 	IsSuperuser  bool      `json:"is_superuser"`
 	CreatedAt_2  time.Time `json:"created_at_2"`
 	EditedAt_2   time.Time `json:"edited_at_2"`
+	Color        string    `json:"color"`
 	ID_3         int64     `json:"id_3"`
 	ScheduledAt  time.Time `json:"scheduled_at"`
 	Name         string    `json:"name"`
@@ -206,6 +209,7 @@ func (q *Queries) GetRequestRange(ctx context.Context, arg GetRequestRangeParams
 			&i.IsSuperuser,
 			&i.CreatedAt_2,
 			&i.EditedAt_2,
+			&i.Color,
 			&i.ID_3,
 			&i.ScheduledAt,
 			&i.Name,

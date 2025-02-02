@@ -65,7 +65,7 @@ func (q *Queries) DeleteEvent(ctx context.Context, id int64) (Event, error) {
 }
 
 const getAcceptedEventsForMonth = `-- name: GetAcceptedEventsForMonth :many
-SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at
+SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color
 FROM events e
 JOIN users u ON e.user_id = u.id
 WHERE scheduled_at >= ? AND scheduled_at < ?
@@ -93,6 +93,7 @@ type GetAcceptedEventsForMonthRow struct {
 	IsSuperuser  bool      `json:"is_superuser"`
 	CreatedAt_2  time.Time `json:"created_at_2"`
 	EditedAt_2   time.Time `json:"edited_at_2"`
+	Color        string    `json:"color"`
 }
 
 func (q *Queries) GetAcceptedEventsForMonth(ctx context.Context, arg GetAcceptedEventsForMonthParams) ([]GetAcceptedEventsForMonthRow, error) {
@@ -120,6 +121,7 @@ func (q *Queries) GetAcceptedEventsForMonth(ctx context.Context, arg GetAccepted
 			&i.IsSuperuser,
 			&i.CreatedAt_2,
 			&i.EditedAt_2,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}
@@ -135,7 +137,7 @@ func (q *Queries) GetAcceptedEventsForMonth(ctx context.Context, arg GetAccepted
 }
 
 const getConflictingEventUsers = `-- name: GetConflictingEventUsers :many
-SELECT DISTINCT u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at FROM events e
+SELECT DISTINCT u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at, u.color FROM events e
 JOIN users u on e.user_id = u.id
 WHERE u.id != ? 
 AND e.scheduled_at >= ?
@@ -166,6 +168,7 @@ func (q *Queries) GetConflictingEventUsers(ctx context.Context, arg GetConflicti
 			&i.IsSuperuser,
 			&i.CreatedAt,
 			&i.EditedAt,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}
@@ -217,7 +220,7 @@ func (q *Queries) GetEventsForDay(ctx context.Context, scheduledAt time.Time) ([
 }
 
 const getEventsForMonth = `-- name: GetEventsForMonth :many
-SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at
+SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color
 FROM events e
 JOIN users u ON e.user_id = u.id
 WHERE scheduled_at >= ? AND scheduled_at < ?
@@ -244,6 +247,7 @@ type GetEventsForMonthRow struct {
 	IsSuperuser  bool      `json:"is_superuser"`
 	CreatedAt_2  time.Time `json:"created_at_2"`
 	EditedAt_2   time.Time `json:"edited_at_2"`
+	Color        string    `json:"color"`
 }
 
 func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthParams) ([]GetEventsForMonthRow, error) {
@@ -271,6 +275,7 @@ func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthPa
 			&i.IsSuperuser,
 			&i.CreatedAt_2,
 			&i.EditedAt_2,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}

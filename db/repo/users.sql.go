@@ -11,13 +11,14 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (username, vacation_days, email, password, is_superuser)
-VALUES (?, ?, ?, ?, ?)
-RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at
+INSERT INTO users (username, color, vacation_days, email, password, is_superuser)
+VALUES (?, ?, ?, ?, ?, ?)
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color
 `
 
 type CreateUserParams struct {
 	Username     string `json:"username"`
+	Color        string `json:"color"`
 	VacationDays int64  `json:"vacation_days"`
 	Email        string `json:"email"`
 	Password     string `json:"password"`
@@ -27,6 +28,7 @@ type CreateUserParams struct {
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, createUser,
 		arg.Username,
+		arg.Color,
 		arg.VacationDays,
 		arg.Email,
 		arg.Password,
@@ -42,6 +44,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.IsSuperuser,
 		&i.CreatedAt,
 		&i.EditedAt,
+		&i.Color,
 	)
 	return i, err
 }
@@ -57,7 +60,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getAdmins = `-- name: GetAdmins :many
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color FROM users
 WHERE is_superuser = true
 `
 
@@ -79,6 +82,7 @@ func (q *Queries) GetAdmins(ctx context.Context) ([]User, error) {
 			&i.IsSuperuser,
 			&i.CreatedAt,
 			&i.EditedAt,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}
@@ -94,7 +98,7 @@ func (q *Queries) GetAdmins(ctx context.Context) ([]User, error) {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color FROM users
 WHERE id != 1
 `
 
@@ -116,6 +120,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 			&i.IsSuperuser,
 			&i.CreatedAt,
 			&i.EditedAt,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}
@@ -131,7 +136,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color FROM users
 WHERE email = ?
 `
 
@@ -147,12 +152,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.IsSuperuser,
 		&i.CreatedAt,
 		&i.EditedAt,
+		&i.Color,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color FROM users
 WHERE id = ?
 `
 
@@ -168,12 +174,13 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 		&i.IsSuperuser,
 		&i.CreatedAt,
 		&i.EditedAt,
+		&i.Color,
 	)
 	return i, err
 }
 
 const getUserByName = `-- name: GetUserByName :one
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color FROM users
 WHERE username = ?
 `
 
@@ -189,13 +196,14 @@ func (q *Queries) GetUserByName(ctx context.Context, username string) (User, err
 		&i.IsSuperuser,
 		&i.CreatedAt,
 		&i.EditedAt,
+		&i.Color,
 	)
 	return i, err
 }
 
 const getUsersWithVacationCount = `-- name: GetUsersWithVacationCount :many
 SELECT
-    u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at,
+    u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at, u.color,
     COALESCE(SUM(vt.value), 0.0) AS vac_remaining,
     COALESCE(SUM(0.5), 0.0) AS vac_used
 FROM users AS u
@@ -221,6 +229,7 @@ type GetUsersWithVacationCountRow struct {
 	IsSuperuser  bool        `json:"is_superuser"`
 	CreatedAt    time.Time   `json:"created_at"`
 	EditedAt     time.Time   `json:"edited_at"`
+	Color        string      `json:"color"`
 	VacRemaining interface{} `json:"vac_remaining"`
 	VacUsed      interface{} `json:"vac_used"`
 }
@@ -243,6 +252,7 @@ func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWit
 			&i.IsSuperuser,
 			&i.CreatedAt,
 			&i.EditedAt,
+			&i.Color,
 			&i.VacRemaining,
 			&i.VacUsed,
 		); err != nil {
@@ -259,11 +269,27 @@ func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWit
 	return items, nil
 }
 
+const setUserColor = `-- name: SetUserColor :exec
+UPDATE users
+SET color = ?
+WHERE id = ?
+`
+
+type SetUserColorParams struct {
+	Color string `json:"color"`
+	ID    int64  `json:"id"`
+}
+
+func (q *Queries) SetUserColor(ctx context.Context, arg SetUserColorParams) error {
+	_, err := q.db.ExecContext(ctx, setUserColor, arg.Color, arg.ID)
+	return err
+}
+
 const setUserVacation = `-- name: SetUserVacation :one
 UPDATE users
 SET vacation_days = ?
 WHERE id = ?
-RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color
 `
 
 type SetUserVacationParams struct {
@@ -283,6 +309,7 @@ func (q *Queries) SetUserVacation(ctx context.Context, arg SetUserVacationParams
 		&i.IsSuperuser,
 		&i.CreatedAt,
 		&i.EditedAt,
+		&i.Color,
 	)
 	return i, err
 }
@@ -291,7 +318,7 @@ const toggleAdmin = `-- name: ToggleAdmin :one
 UPDATE users
 SET is_superuser = NOT is_superuser
 WHERE id = ?
-RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color
 `
 
 func (q *Queries) ToggleAdmin(ctx context.Context, id int64) (User, error) {
@@ -306,30 +333,31 @@ func (q *Queries) ToggleAdmin(ctx context.Context, id int64) (User, error) {
 		&i.IsSuperuser,
 		&i.CreatedAt,
 		&i.EditedAt,
+		&i.Color,
 	)
 	return i, err
 }
 
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
-SET vacation_days = ?,
+SET color = ?,
 username = ?,
 email = ?,
 edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
-RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color
 `
 
 type UpdateUserParams struct {
-	VacationDays int64  `json:"vacation_days"`
-	Username     string `json:"username"`
-	Email        string `json:"email"`
-	ID           int64  `json:"id"`
+	Color    string `json:"color"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	ID       int64  `json:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, updateUser,
-		arg.VacationDays,
+		arg.Color,
 		arg.Username,
 		arg.Email,
 		arg.ID,
@@ -344,6 +372,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.IsSuperuser,
 		&i.CreatedAt,
 		&i.EditedAt,
+		&i.Color,
 	)
 	return i, err
 }
@@ -353,7 +382,7 @@ UPDATE users
 SET vacation_days = ?,
 edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
-RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color
 `
 
 type UpdateVacationDaysParams struct {
@@ -373,6 +402,7 @@ func (q *Queries) UpdateVacationDays(ctx context.Context, arg UpdateVacationDays
 		&i.IsSuperuser,
 		&i.CreatedAt,
 		&i.EditedAt,
+		&i.Color,
 	)
 	return i, err
 }

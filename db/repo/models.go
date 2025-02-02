@@ -71,6 +71,7 @@ type User struct {
 	IsSuperuser  bool      `json:"is_superuser"`
 	CreatedAt    time.Time `json:"created_at"`
 	EditedAt     time.Time `json:"edited_at"`
+	Color        string    `json:"color"`
 }
 
 type VacationToken struct {

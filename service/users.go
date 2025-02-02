@@ -103,28 +103,6 @@ func GetAllVacUsers(r *repo.Queries) ([]repo.GetUsersWithVacationCountRow, error
 	return users, err
 }
 
-func HashCode(s string) int {
-	hash := 0
-	for _, char := range s {
-		hash = int(char) + ((hash << 5) - hash)
-	}
-	return hash
-}
-
-func GenerateHSL(seed int) string {
-	hue := (seed * 12345) % 360
-	saturation := 50
-	lightness := 40
-	return fmt.Sprintf("hsl(%d, %d%%, %d%%)", hue, saturation, lightness)
-}
-
-func GenerateHSLDark(seed int) string {
-	hue := (seed * 12345) % 360
-	saturation := 30
-	lightness := 30
-	return fmt.Sprintf("hsl(%d, %d%%, %d%%)", hue, saturation, lightness)
-}
-
 func ToggleAdmin(r *repo.Queries, editor repo.User, userId int64) (repo.User, error) {
 	user, err := r.ToggleAdmin(context.Background(), userId)
 	if err != nil {
@@ -171,6 +149,17 @@ func SetUserVacation(r *repo.Queries, userId int64, vacation int, year int) erro
 
 	err = UpdateYearlyTokens(r, updatedUser, year, vacation-int(oldUser.VacationDays))
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func SetUserColor(r *repo.Queries, userId int64, color string) error {
+	params := repo.SetUserColorParams{Color: color, ID: userId}
+	err := r.SetUserColor(context.Background(), params)
+	if err != nil {
+		log.Printf("Failed to set user color: %v", err)
 		return err
 	}
 

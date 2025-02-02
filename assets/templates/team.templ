@@ -4,6 +4,7 @@ import (
 	"chrono/db/repo"
 	"fmt"
 	"os"
+	"chrono/service"
 )
 
 templ Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) {
@@ -64,6 +65,7 @@ templ TeamTable(users []repo.GetUsersWithVacationCountRow, currUser repo.User, n
 				<thead>
 					<tr class="text-[15px] text-base-content border-b-2 border-base-content border-opacity-10">
 						<th>ID</th>
+						<th>Color</th>
 						<th>Name</th>
 						<th>Email</th>
 						<th>Admin</th>
@@ -97,9 +99,23 @@ templ TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form b
 	if user.VacUsed != nil {
 		vacTaken = *(user.VacUsed).(*float64)
 	}
+
+	bgColor := service.HSLToString(service.HexToHSL(user.Color))
 	}}
 	<tr class={ css }>
 		<th>{ fmt.Sprint(user.ID) }</th>
+		<th>
+			<div
+				tabindex="0"
+				role="button"
+				class="avatar placeholder p-0"
+			>
+				<div
+					{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
+					class="w-10 rounded-full"
+				></div>
+			</div>
+		</th>
 		<th>{ user.Username }</th>
 		<td>{ user.Email }</td>
 		@AdminCheckbox(currUser, user.ID, user.IsSuperuser, form)

@@ -17,6 +17,7 @@ func InitDebugRoutes(group *echo.Group, r *repo.Queries) {
 		"/debug/tokens",
 		func(c echo.Context) error { return HandleCreateTokensForAcceptedEvents(c, r) },
 	)
+	group.PATCH("/debug/color", func(c echo.Context) error { return HandleUserColor(c, r) })
 }
 
 func HandleDebug(c echo.Context, r *repo.Queries) error {
@@ -59,4 +60,18 @@ func HandleCreateTokensForAcceptedEvents(c echo.Context, r *repo.Queries) error 
 		http.StatusOK,
 		templates.Message("Created tokens for accepted events", "success"),
 	)
+}
+
+func HandleUserColor(c echo.Context, r *repo.Queries) error {
+	users, err := service.GetAllUsers(r)
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
+	}
+
+	service.SetUserColor(r, 1, service.HSLToHex(service.GenerateHSLFloat(1)))
+	for _, user := range users {
+		service.SetUserColor(r, user.ID, service.HSLToHex(service.GenerateHSLFloat(int(user.ID))))
+	}
+
+	return Render(c, http.StatusOK, templates.Message("Changed user default colors", "success"))
 }

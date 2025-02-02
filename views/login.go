@@ -88,6 +88,7 @@ func HandleSignup(c echo.Context, r *repo.Queries) error {
 		repo.CreateUserParams{
 			Username:     createUser.Name,
 			Email:        createUser.Email,
+			Color:        service.RandomHexColor(),
 			VacationDays: 0,
 			Password:     hashedPw,
 		},

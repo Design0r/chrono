@@ -39,9 +39,9 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 
-		bgColor := service.GenerateHSL(int(event.UserID))
+		bgColor := service.HSLToString(service.HexToHSL(user.Color))
 		if !service.IsVacation(event.Name) && event.Username != os.Getenv("BOT_NAME") {
-			bgColor = service.GenerateHSLDark(int(event.UserID))
+			bgColor = service.GenerateHSLDarkFromHex(user.Color)
 		}
 		eventId := fmt.Sprintf("event-%v", event.ID)
 		deleteUrl := fmt.Sprintf("#%v", eventId)

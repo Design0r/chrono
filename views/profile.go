@@ -72,10 +72,10 @@ func HandleProfileEdit(c echo.Context, r *repo.Queries) error {
 	updatedUser, err := service.UpdateUser(
 		r,
 		repo.UpdateUserParams{
-			VacationDays: int64(patchedData.Vacation),
-			Email:        patchedData.Email,
-			Username:     patchedData.Name,
-			ID:           currUser.ID,
+			Color:    patchedData.Color,
+			Email:    patchedData.Email,
+			Username: patchedData.Name,
+			ID:       currUser.ID,
 		},
 	)
 	if err != nil {

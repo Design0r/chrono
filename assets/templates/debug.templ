@@ -7,6 +7,7 @@ templ Debug(user *repo.User, notifications []repo.Notification) {
 		<div class="container max-w-xs space-y-2 mt-6 justify-center items m-auto flex flex-col">
 			<button hx-delete="/debug/tokens" hx-swap="none" class="btn btn-warning">Clear token table</button>
 			<button hx-post="/debug/tokens" hx-swap="none" class="btn btn-warning">Create tokens for accepted events</button>
+			<button hx-patch="/debug/color" hx-swap="none" class="btn btn-warning">Generate default user color</button>
 		</div>
 	}
 }

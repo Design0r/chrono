@@ -48,6 +48,7 @@ func (self *APIBot) Register(r *repo.Queries) error {
 		repo.CreateUserParams{
 			Username:     self.Name,
 			Email:        self.Email,
+			Color:        RandomHexColor(),
 			Password:     hashedPw,
 			IsSuperuser:  self.IsSuperuser,
 			VacationDays: 0,

@@ -10,6 +10,7 @@ else
 endif
 
 MIGRATION_DIR = ./db/migrations/
+DB_DIR = ./db/chrono.db/
 CSS_DIR = ../assets/static/css
 
 generate:
@@ -19,7 +20,7 @@ generate:
 migrate:
 	@-mkdir ${MIGRATION_DIR}
 	$(eval args=$(filter-out $@,$(MAKECMDGOALS)))
-	@goose -dir=${MIGRATION_DIR} create ${args}
+	@goose sqlite3 ${DB_DIR} -dir=${MIGRATION_DIR} create ${args} sql
 
 live/templ:
 	templ generate --watch --proxy="http://localhost:8080"  --open-browser=true

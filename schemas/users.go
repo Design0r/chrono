@@ -9,9 +9,9 @@ type CreateUser struct {
 }
 
 type PatchUser struct {
-	Name     string `form:"name"`
-	Email    string `form:"email"`
-	Vacation int    `form:"vacation"`
+	Name  string `form:"name"`
+	Email string `form:"email"`
+	Color string `form:"color"`
 }
 
 type Login struct {

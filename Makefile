@@ -1,7 +1,7 @@
 %:
 	@:
 
-.PHONY: build dev
+.PHONY: build dev test
 
 ifeq ($(OS),Windows_NT)
   BIN_SUFFIX := .exe
@@ -52,9 +52,9 @@ install:
 	@go install github.com/air-verse/air@latest
 	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
-test: 
-	go test ./tests/ -v
-
 deploy:
 	@git pull origin main
 	@docker compose up --build -d
+
+test:
+	@go test ./... -v

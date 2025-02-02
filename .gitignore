@@ -5,3 +5,4 @@ tmp
 *.txt
 node_modules
 build
+sync_repo.sh

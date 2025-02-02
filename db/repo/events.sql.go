@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const createEvent = `-- name: CreateEvent :one
+const CreateEvent = `-- name: CreateEvent :one
 INSERT INTO events (name, user_id, scheduled_at, state)
 VALUES (?, ?, ?, ?)
 RETURNING id, scheduled_at, name, state, created_at, edited_at, user_id
@@ -24,7 +24,7 @@ type CreateEventParams struct {
 }
 
 func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error) {
-	row := q.db.QueryRowContext(ctx, createEvent,
+	row := q.db.QueryRowContext(ctx, CreateEvent,
 		arg.Name,
 		arg.UserID,
 		arg.ScheduledAt,
@@ -43,14 +43,14 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event
 	return i, err
 }
 
-const deleteEvent = `-- name: DeleteEvent :one
+const DeleteEvent = `-- name: DeleteEvent :one
 DELETE from events
 WHERE id = ?
 RETURNING id, scheduled_at, name, state, created_at, edited_at, user_id
 `
 
 func (q *Queries) DeleteEvent(ctx context.Context, id int64) (Event, error) {
-	row := q.db.QueryRowContext(ctx, deleteEvent, id)
+	row := q.db.QueryRowContext(ctx, DeleteEvent, id)
 	var i Event
 	err := row.Scan(
 		&i.ID,
@@ -64,7 +64,7 @@ func (q *Queries) DeleteEvent(ctx context.Context, id int64) (Event, error) {
 	return i, err
 }
 
-const getAcceptedEventsForMonth = `-- name: GetAcceptedEventsForMonth :many
+const GetAcceptedEventsForMonth = `-- name: GetAcceptedEventsForMonth :many
 SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color
 FROM events e
 JOIN users u ON e.user_id = u.id
@@ -97,7 +97,7 @@ type GetAcceptedEventsForMonthRow struct {
 }
 
 func (q *Queries) GetAcceptedEventsForMonth(ctx context.Context, arg GetAcceptedEventsForMonthParams) ([]GetAcceptedEventsForMonthRow, error) {
-	rows, err := q.db.QueryContext(ctx, getAcceptedEventsForMonth, arg.ScheduledAt, arg.ScheduledAt_2)
+	rows, err := q.db.QueryContext(ctx, GetAcceptedEventsForMonth, arg.ScheduledAt, arg.ScheduledAt_2)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (q *Queries) GetAcceptedEventsForMonth(ctx context.Context, arg GetAccepted
 	return items, nil
 }
 
-const getConflictingEventUsers = `-- name: GetConflictingEventUsers :many
+const GetConflictingEventUsers = `-- name: GetConflictingEventUsers :many
 SELECT DISTINCT u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at, u.color FROM events e
 JOIN users u on e.user_id = u.id
 WHERE u.id != ? 
@@ -151,7 +151,7 @@ type GetConflictingEventUsersParams struct {
 }
 
 func (q *Queries) GetConflictingEventUsers(ctx context.Context, arg GetConflictingEventUsersParams) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, getConflictingEventUsers, arg.ID, arg.ScheduledAt, arg.ScheduledAt_2)
+	rows, err := q.db.QueryContext(ctx, GetConflictingEventUsers, arg.ID, arg.ScheduledAt, arg.ScheduledAt_2)
 	if err != nil {
 		return nil, err
 	}
@@ -183,13 +183,13 @@ func (q *Queries) GetConflictingEventUsers(ctx context.Context, arg GetConflicti
 	return items, nil
 }
 
-const getEventsForDay = `-- name: GetEventsForDay :many
+const GetEventsForDay = `-- name: GetEventsForDay :many
 SELECT id, scheduled_at, name, state, created_at, edited_at, user_id FROM events 
 WHERE Date(scheduled_at) = ?
 `
 
 func (q *Queries) GetEventsForDay(ctx context.Context, scheduledAt time.Time) ([]Event, error) {
-	rows, err := q.db.QueryContext(ctx, getEventsForDay, scheduledAt)
+	rows, err := q.db.QueryContext(ctx, GetEventsForDay, scheduledAt)
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +219,7 @@ func (q *Queries) GetEventsForDay(ctx context.Context, scheduledAt time.Time) ([
 	return items, nil
 }
 
-const getEventsForMonth = `-- name: GetEventsForMonth :many
+const GetEventsForMonth = `-- name: GetEventsForMonth :many
 SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color
 FROM events e
 JOIN users u ON e.user_id = u.id
@@ -251,7 +251,7 @@ type GetEventsForMonthRow struct {
 }
 
 func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthParams) ([]GetEventsForMonthRow, error) {
-	rows, err := q.db.QueryContext(ctx, getEventsForMonth, arg.ScheduledAt, arg.ScheduledAt_2)
+	rows, err := q.db.QueryContext(ctx, GetEventsForMonth, arg.ScheduledAt, arg.ScheduledAt_2)
 	if err != nil {
 		return nil, err
 	}
@@ -290,7 +290,7 @@ func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthPa
 	return items, nil
 }
 
-const getPendingEventsForYear = `-- name: GetPendingEventsForYear :one
+const GetPendingEventsForYear = `-- name: GetPendingEventsForYear :one
 SELECT Count(id) from events
 WHERE state = "pending"
 AND scheduled_at >= ?
@@ -305,20 +305,20 @@ type GetPendingEventsForYearParams struct {
 }
 
 func (q *Queries) GetPendingEventsForYear(ctx context.Context, arg GetPendingEventsForYearParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getPendingEventsForYear, arg.ScheduledAt, arg.ScheduledAt_2, arg.UserID)
+	row := q.db.QueryRowContext(ctx, GetPendingEventsForYear, arg.ScheduledAt, arg.ScheduledAt_2, arg.UserID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
-const getUserPendingEvents = `-- name: GetUserPendingEvents :many
+const GetUserPendingEvents = `-- name: GetUserPendingEvents :many
 SELECT id, scheduled_at, name, state, created_at, edited_at, user_id FROM events
 WHERE user_id = ?
 AND state = "pending"
 `
 
 func (q *Queries) GetUserPendingEvents(ctx context.Context, userID int64) ([]Event, error) {
-	rows, err := q.db.QueryContext(ctx, getUserPendingEvents, userID)
+	rows, err := q.db.QueryContext(ctx, GetUserPendingEvents, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -348,7 +348,7 @@ func (q *Queries) GetUserPendingEvents(ctx context.Context, userID int64) ([]Eve
 	return items, nil
 }
 
-const getVacationCountForUser = `-- name: GetVacationCountForUser :one
+const GetVacationCountForUser = `-- name: GetVacationCountForUser :one
 SELECT 
   SUM(
     CASE
@@ -372,13 +372,13 @@ type GetVacationCountForUserParams struct {
 }
 
 func (q *Queries) GetVacationCountForUser(ctx context.Context, arg GetVacationCountForUserParams) (*float64, error) {
-	row := q.db.QueryRowContext(ctx, getVacationCountForUser, arg.UserID, arg.ScheduledAt, arg.ScheduledAt_2)
+	row := q.db.QueryRowContext(ctx, GetVacationCountForUser, arg.UserID, arg.ScheduledAt, arg.ScheduledAt_2)
 	var sum *float64
 	err := row.Scan(&sum)
 	return sum, err
 }
 
-const updateEventState = `-- name: UpdateEventState :one
+const UpdateEventState = `-- name: UpdateEventState :one
 UPDATE events
 SET state = ?,
 edited_at = CURRENT_TIMESTAMP
@@ -392,7 +392,7 @@ type UpdateEventStateParams struct {
 }
 
 func (q *Queries) UpdateEventState(ctx context.Context, arg UpdateEventStateParams) (Event, error) {
-	row := q.db.QueryRowContext(ctx, updateEventState, arg.State, arg.ID)
+	row := q.db.QueryRowContext(ctx, UpdateEventState, arg.State, arg.ID)
 	var i Event
 	err := row.Scan(
 		&i.ID,
@@ -406,7 +406,7 @@ func (q *Queries) UpdateEventState(ctx context.Context, arg UpdateEventStatePara
 	return i, err
 }
 
-const updateEventsRange = `-- name: UpdateEventsRange :exec
+const UpdateEventsRange = `-- name: UpdateEventsRange :exec
 UPDATE events
 SET state = ?, 
 edited_at = CURRENT_TIMESTAMP
@@ -423,7 +423,7 @@ type UpdateEventsRangeParams struct {
 }
 
 func (q *Queries) UpdateEventsRange(ctx context.Context, arg UpdateEventsRangeParams) error {
-	_, err := q.db.ExecContext(ctx, updateEventsRange,
+	_, err := q.db.ExecContext(ctx, UpdateEventsRange,
 		arg.State,
 		arg.UserID,
 		arg.ScheduledAt,

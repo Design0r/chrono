@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const createUser = `-- name: CreateUser :one
+const CreateUser = `-- name: CreateUser :one
 INSERT INTO users (username, color, vacation_days, email, password, is_superuser)
 VALUES (?, ?, ?, ?, ?, ?)
 RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color
@@ -26,7 +26,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser,
+	row := q.db.QueryRowContext(ctx, CreateUser,
 		arg.Username,
 		arg.Color,
 		arg.VacationDays,
@@ -49,23 +49,23 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
-const deleteUser = `-- name: DeleteUser :exec
+const DeleteUser = `-- name: DeleteUser :exec
 DELETE FROM users
 WHERE id = ?
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteUser, id)
+	_, err := q.db.ExecContext(ctx, DeleteUser, id)
 	return err
 }
 
-const getAdmins = `-- name: GetAdmins :many
+const GetAdmins = `-- name: GetAdmins :many
 SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color FROM users
 WHERE is_superuser = true
 `
 
 func (q *Queries) GetAdmins(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, getAdmins)
+	rows, err := q.db.QueryContext(ctx, GetAdmins)
 	if err != nil {
 		return nil, err
 	}
@@ -97,13 +97,13 @@ func (q *Queries) GetAdmins(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
-const getAllUsers = `-- name: GetAllUsers :many
+const GetAllUsers = `-- name: GetAllUsers :many
 SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color FROM users
 WHERE id != 1
 `
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, getAllUsers)
+	rows, err := q.db.QueryContext(ctx, GetAllUsers)
 	if err != nil {
 		return nil, err
 	}
@@ -135,13 +135,13 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
-const getUserByEmail = `-- name: GetUserByEmail :one
+const GetUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color FROM users
 WHERE email = ?
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	row := q.db.QueryRowContext(ctx, GetUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -157,13 +157,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	return i, err
 }
 
-const getUserByID = `-- name: GetUserByID :one
+const GetUserByID = `-- name: GetUserByID :one
 SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color FROM users
 WHERE id = ?
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByID, id)
+	row := q.db.QueryRowContext(ctx, GetUserByID, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -179,13 +179,13 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 	return i, err
 }
 
-const getUserByName = `-- name: GetUserByName :one
+const GetUserByName = `-- name: GetUserByName :one
 SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color FROM users
 WHERE username = ?
 `
 
 func (q *Queries) GetUserByName(ctx context.Context, username string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByName, username)
+	row := q.db.QueryRowContext(ctx, GetUserByName, username)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -201,7 +201,7 @@ func (q *Queries) GetUserByName(ctx context.Context, username string) (User, err
 	return i, err
 }
 
-const getUsersWithVacationCount = `-- name: GetUsersWithVacationCount :many
+const GetUsersWithVacationCount = `-- name: GetUsersWithVacationCount :many
 SELECT
     u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at, u.color,
     COALESCE(SUM(vt.value), 0.0) AS vac_remaining,
@@ -235,7 +235,7 @@ type GetUsersWithVacationCountRow struct {
 }
 
 func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWithVacationCountParams) ([]GetUsersWithVacationCountRow, error) {
-	rows, err := q.db.QueryContext(ctx, getUsersWithVacationCount, arg.StartDate, arg.EndDate)
+	rows, err := q.db.QueryContext(ctx, GetUsersWithVacationCount, arg.StartDate, arg.EndDate)
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +269,7 @@ func (q *Queries) GetUsersWithVacationCount(ctx context.Context, arg GetUsersWit
 	return items, nil
 }
 
-const setUserColor = `-- name: SetUserColor :exec
+const SetUserColor = `-- name: SetUserColor :exec
 UPDATE users
 SET color = ?
 WHERE id = ?
@@ -281,11 +281,11 @@ type SetUserColorParams struct {
 }
 
 func (q *Queries) SetUserColor(ctx context.Context, arg SetUserColorParams) error {
-	_, err := q.db.ExecContext(ctx, setUserColor, arg.Color, arg.ID)
+	_, err := q.db.ExecContext(ctx, SetUserColor, arg.Color, arg.ID)
 	return err
 }
 
-const setUserVacation = `-- name: SetUserVacation :one
+const SetUserVacation = `-- name: SetUserVacation :one
 UPDATE users
 SET vacation_days = ?
 WHERE id = ?
@@ -298,7 +298,7 @@ type SetUserVacationParams struct {
 }
 
 func (q *Queries) SetUserVacation(ctx context.Context, arg SetUserVacationParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, setUserVacation, arg.VacationDays, arg.ID)
+	row := q.db.QueryRowContext(ctx, SetUserVacation, arg.VacationDays, arg.ID)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -314,7 +314,7 @@ func (q *Queries) SetUserVacation(ctx context.Context, arg SetUserVacationParams
 	return i, err
 }
 
-const toggleAdmin = `-- name: ToggleAdmin :one
+const ToggleAdmin = `-- name: ToggleAdmin :one
 UPDATE users
 SET is_superuser = NOT is_superuser
 WHERE id = ?
@@ -322,7 +322,7 @@ RETURNING id, username, email, password, vacation_days, is_superuser, created_at
 `
 
 func (q *Queries) ToggleAdmin(ctx context.Context, id int64) (User, error) {
-	row := q.db.QueryRowContext(ctx, toggleAdmin, id)
+	row := q.db.QueryRowContext(ctx, ToggleAdmin, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -338,7 +338,7 @@ func (q *Queries) ToggleAdmin(ctx context.Context, id int64) (User, error) {
 	return i, err
 }
 
-const updateUser = `-- name: UpdateUser :one
+const UpdateUser = `-- name: UpdateUser :one
 UPDATE users
 SET color = ?,
 username = ?,
@@ -356,7 +356,7 @@ type UpdateUserParams struct {
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updateUser,
+	row := q.db.QueryRowContext(ctx, UpdateUser,
 		arg.Color,
 		arg.Username,
 		arg.Email,
@@ -377,7 +377,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 	return i, err
 }
 
-const updateVacationDays = `-- name: UpdateVacationDays :one
+const UpdateVacationDays = `-- name: UpdateVacationDays :one
 UPDATE users
 SET vacation_days = ?,
 edited_at = CURRENT_TIMESTAMP
@@ -391,7 +391,7 @@ type UpdateVacationDaysParams struct {
 }
 
 func (q *Queries) UpdateVacationDays(ctx context.Context, arg UpdateVacationDaysParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updateVacationDays, arg.VacationDays, arg.ID)
+	row := q.db.QueryRowContext(ctx, UpdateVacationDays, arg.VacationDays, arg.ID)
 	var i User
 	err := row.Scan(
 		&i.ID,

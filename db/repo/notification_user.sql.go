@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const clearAllUserNotifications = `-- name: ClearAllUserNotifications :exec
+const ClearAllUserNotifications = `-- name: ClearAllUserNotifications :exec
 UPDATE notifications
 SET viewed_at = CURRENT_TIMESTAMP
 WHERE id IN (
@@ -22,11 +22,11 @@ WHERE id IN (
 `
 
 func (q *Queries) ClearAllUserNotifications(ctx context.Context, userID int64) error {
-	_, err := q.db.ExecContext(ctx, clearAllUserNotifications, userID)
+	_, err := q.db.ExecContext(ctx, ClearAllUserNotifications, userID)
 	return err
 }
 
-const createNotificationUser = `-- name: CreateNotificationUser :exec
+const CreateNotificationUser = `-- name: CreateNotificationUser :exec
 INSERT INTO notification_user (notification_id, user_id)
 VALUES (?, ?)
 `
@@ -37,11 +37,11 @@ type CreateNotificationUserParams struct {
 }
 
 func (q *Queries) CreateNotificationUser(ctx context.Context, arg CreateNotificationUserParams) error {
-	_, err := q.db.ExecContext(ctx, createNotificationUser, arg.NotificationID, arg.UserID)
+	_, err := q.db.ExecContext(ctx, CreateNotificationUser, arg.NotificationID, arg.UserID)
 	return err
 }
 
-const getUserNotifications = `-- name: GetUserNotifications :many
+const GetUserNotifications = `-- name: GetUserNotifications :many
 SELECT n.id, n.message, n.created_at, n.viewed_at from notification_user nu
 JOIN notifications n ON nu.notification_id = n.id
 WHERE nu.user_id = ?
@@ -49,7 +49,7 @@ AND n.viewed_at IS NULL
 `
 
 func (q *Queries) GetUserNotifications(ctx context.Context, userID int64) ([]Notification, error) {
-	rows, err := q.db.QueryContext(ctx, getUserNotifications, userID)
+	rows, err := q.db.QueryContext(ctx, GetUserNotifications, userID)
 	if err != nil {
 		return nil, err
 	}

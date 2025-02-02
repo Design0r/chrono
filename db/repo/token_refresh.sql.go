@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const createTokenRefresh = `-- name: CreateTokenRefresh :one
+const CreateTokenRefresh = `-- name: CreateTokenRefresh :one
 INSERT INTO token_refresh (user_id, year)
 VALUES (?,?)
 RETURNING id, year, user_id, created_at
@@ -21,7 +21,7 @@ type CreateTokenRefreshParams struct {
 }
 
 func (q *Queries) CreateTokenRefresh(ctx context.Context, arg CreateTokenRefreshParams) (TokenRefresh, error) {
-	row := q.db.QueryRowContext(ctx, createTokenRefresh, arg.UserID, arg.Year)
+	row := q.db.QueryRowContext(ctx, CreateTokenRefresh, arg.UserID, arg.Year)
 	var i TokenRefresh
 	err := row.Scan(
 		&i.ID,
@@ -32,7 +32,7 @@ func (q *Queries) CreateTokenRefresh(ctx context.Context, arg CreateTokenRefresh
 	return i, err
 }
 
-const getTokenRefresh = `-- name: GetTokenRefresh :one
+const GetTokenRefresh = `-- name: GetTokenRefresh :one
 SELECT Count(*) FROM token_refresh
 WHERE user_id = ?
 AND year = ?
@@ -44,17 +44,17 @@ type GetTokenRefreshParams struct {
 }
 
 func (q *Queries) GetTokenRefresh(ctx context.Context, arg GetTokenRefreshParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getTokenRefresh, arg.UserID, arg.Year)
+	row := q.db.QueryRowContext(ctx, GetTokenRefresh, arg.UserID, arg.Year)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
-const resetTokenRefresh = `-- name: ResetTokenRefresh :exec
+const ResetTokenRefresh = `-- name: ResetTokenRefresh :exec
 DELETE FROM token_refresh
 `
 
 func (q *Queries) ResetTokenRefresh(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, resetTokenRefresh)
+	_, err := q.db.ExecContext(ctx, ResetTokenRefresh)
 	return err
 }

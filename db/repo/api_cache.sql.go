@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const cacheExists = `-- name: CacheExists :one
+const CacheExists = `-- name: CacheExists :one
 SELECT EXISTS(
     SELECT 1 FROM api_cache
     WHERE year = ?
@@ -17,29 +17,29 @@ SELECT EXISTS(
 `
 
 func (q *Queries) CacheExists(ctx context.Context, year int64) (int64, error) {
-	row := q.db.QueryRowContext(ctx, cacheExists, year)
+	row := q.db.QueryRowContext(ctx, CacheExists, year)
 	var column_1 int64
 	err := row.Scan(&column_1)
 	return column_1, err
 }
 
-const createCache = `-- name: CreateCache :exec
+const CreateCache = `-- name: CreateCache :exec
 INSERT INTO api_cache (year)
 VALUES (?)
 `
 
 func (q *Queries) CreateCache(ctx context.Context, year int64) error {
-	_, err := q.db.ExecContext(ctx, createCache, year)
+	_, err := q.db.ExecContext(ctx, CreateCache, year)
 	return err
 }
 
-const getApiCacheYears = `-- name: GetApiCacheYears :many
+const GetApiCacheYears = `-- name: GetApiCacheYears :many
 SELECT year FROM api_cache
 GROUP BY year
 `
 
 func (q *Queries) GetApiCacheYears(ctx context.Context) ([]int64, error) {
-	rows, err := q.db.QueryContext(ctx, getApiCacheYears)
+	rows, err := q.db.QueryContext(ctx, GetApiCacheYears)
 	if err != nil {
 		return nil, err
 	}

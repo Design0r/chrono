@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const createToken = `-- name: CreateToken :one
+const CreateToken = `-- name: CreateToken :one
 INSERT INTO vacation_tokens (user_id, start_date, end_date, value)
 VALUES (?,?,?,?)
 RETURNING id, start_date, end_date, value, user_id
@@ -24,7 +24,7 @@ type CreateTokenParams struct {
 }
 
 func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (VacationToken, error) {
-	row := q.db.QueryRowContext(ctx, createToken,
+	row := q.db.QueryRowContext(ctx, CreateToken,
 		arg.UserID,
 		arg.StartDate,
 		arg.EndDate,
@@ -41,26 +41,26 @@ func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Vacat
 	return i, err
 }
 
-const debugResetTokens = `-- name: DebugResetTokens :exec
+const DebugResetTokens = `-- name: DebugResetTokens :exec
 DELETE FROM vacation_tokens
 `
 
 func (q *Queries) DebugResetTokens(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, debugResetTokens)
+	_, err := q.db.ExecContext(ctx, DebugResetTokens)
 	return err
 }
 
-const deleteToken = `-- name: DeleteToken :exec
+const DeleteToken = `-- name: DeleteToken :exec
 DELETE FROM vacation_tokens
 WHERE id = ?
 `
 
 func (q *Queries) DeleteToken(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteToken, id)
+	_, err := q.db.ExecContext(ctx, DeleteToken, id)
 	return err
 }
 
-const getValidUserTokenSum = `-- name: GetValidUserTokenSum :one
+const GetValidUserTokenSum = `-- name: GetValidUserTokenSum :one
 SELECT SUM(value) FROM vacation_tokens
 WHERE user_id = ? 
 AND start_date <= ?
@@ -74,13 +74,13 @@ type GetValidUserTokenSumParams struct {
 }
 
 func (q *Queries) GetValidUserTokenSum(ctx context.Context, arg GetValidUserTokenSumParams) (*float64, error) {
-	row := q.db.QueryRowContext(ctx, getValidUserTokenSum, arg.UserID, arg.StartDate, arg.EndDate)
+	row := q.db.QueryRowContext(ctx, GetValidUserTokenSum, arg.UserID, arg.StartDate, arg.EndDate)
 	var sum *float64
 	err := row.Scan(&sum)
 	return sum, err
 }
 
-const getValidUserTokens = `-- name: GetValidUserTokens :many
+const GetValidUserTokens = `-- name: GetValidUserTokens :many
 SELECT id, start_date, end_date, value, user_id from vacation_tokens
 WHERE user_id = ? 
 AND ? >= start_date
@@ -94,7 +94,7 @@ type GetValidUserTokensParams struct {
 }
 
 func (q *Queries) GetValidUserTokens(ctx context.Context, arg GetValidUserTokensParams) ([]VacationToken, error) {
-	rows, err := q.db.QueryContext(ctx, getValidUserTokens, arg.UserID, arg.StartDate, arg.EndDate)
+	rows, err := q.db.QueryContext(ctx, GetValidUserTokens, arg.UserID, arg.StartDate, arg.EndDate)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func (q *Queries) GetValidUserTokens(ctx context.Context, arg GetValidUserTokens
 	return items, nil
 }
 
-const updateYearlyTokens = `-- name: UpdateYearlyTokens :exec
+const UpdateYearlyTokens = `-- name: UpdateYearlyTokens :exec
 UPDATE vacation_tokens
 SET value = ?
 WHERE user_id = ? 
@@ -138,7 +138,7 @@ type UpdateYearlyTokensParams struct {
 }
 
 func (q *Queries) UpdateYearlyTokens(ctx context.Context, arg UpdateYearlyTokensParams) error {
-	_, err := q.db.ExecContext(ctx, updateYearlyTokens,
+	_, err := q.db.ExecContext(ctx, UpdateYearlyTokens,
 		arg.Value,
 		arg.UserID,
 		arg.StartDate,

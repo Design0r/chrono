@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const createSession = `-- name: CreateSession :one
+const CreateSession = `-- name: CreateSession :one
 INSERT INTO sessions (id, valid_until, user_id)
 VALUES (?, ?, ?)
 RETURNING id, valid_until, created_at, edited_at, user_id
@@ -23,7 +23,7 @@ type CreateSessionParams struct {
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
-	row := q.db.QueryRowContext(ctx, createSession, arg.ID, arg.ValidUntil, arg.UserID)
+	row := q.db.QueryRowContext(ctx, CreateSession, arg.ID, arg.ValidUntil, arg.UserID)
 	var i Session
 	err := row.Scan(
 		&i.ID,
@@ -35,23 +35,23 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 	return i, err
 }
 
-const deleteSession = `-- name: DeleteSession :exec
+const DeleteSession = `-- name: DeleteSession :exec
 DELETE from sessions 
 WHERE id = ?
 `
 
 func (q *Queries) DeleteSession(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, deleteSession, id)
+	_, err := q.db.ExecContext(ctx, DeleteSession, id)
 	return err
 }
 
-const getSessionByID = `-- name: GetSessionByID :one
+const GetSessionByID = `-- name: GetSessionByID :one
 SELECT id, valid_until, created_at, edited_at, user_id FROM sessions
 WHERE id = ?
 `
 
 func (q *Queries) GetSessionByID(ctx context.Context, id string) (Session, error) {
-	row := q.db.QueryRowContext(ctx, getSessionByID, id)
+	row := q.db.QueryRowContext(ctx, GetSessionByID, id)
 	var i Session
 	err := row.Scan(
 		&i.ID,
@@ -63,14 +63,14 @@ func (q *Queries) GetSessionByID(ctx context.Context, id string) (Session, error
 	return i, err
 }
 
-const getUserFromSession = `-- name: GetUserFromSession :one
+const GetUserFromSession = `-- name: GetUserFromSession :one
 SELECT u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at, u.color FROM sessions s
 JOIN users u ON s.user_id = u.id
 WHERE s.id = ?
 `
 
 func (q *Queries) GetUserFromSession(ctx context.Context, id string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserFromSession, id)
+	row := q.db.QueryRowContext(ctx, GetUserFromSession, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -86,7 +86,7 @@ func (q *Queries) GetUserFromSession(ctx context.Context, id string) (User, erro
 	return i, err
 }
 
-const getValidSession = `-- name: GetValidSession :one
+const GetValidSession = `-- name: GetValidSession :one
 SELECT id, valid_until, created_at, edited_at, user_id FROM sessions
 WHERE id = ?
 AND valid_until >= ?
@@ -98,7 +98,7 @@ type GetValidSessionParams struct {
 }
 
 func (q *Queries) GetValidSession(ctx context.Context, arg GetValidSessionParams) (Session, error) {
-	row := q.db.QueryRowContext(ctx, getValidSession, arg.ID, arg.ValidUntil)
+	row := q.db.QueryRowContext(ctx, GetValidSession, arg.ID, arg.ValidUntil)
 	var i Session
 	err := row.Scan(
 		&i.ID,

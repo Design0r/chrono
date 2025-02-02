@@ -9,25 +9,25 @@ import (
 	"context"
 )
 
-const clearNotification = `-- name: ClearNotification :exec
+const ClearNotification = `-- name: ClearNotification :exec
 UPDATE notifications
 SET viewed_at = CURRENT_TIMESTAMP
 WHERE id = ?
 `
 
 func (q *Queries) ClearNotification(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, clearNotification, id)
+	_, err := q.db.ExecContext(ctx, ClearNotification, id)
 	return err
 }
 
-const createNotification = `-- name: CreateNotification :one
+const CreateNotification = `-- name: CreateNotification :one
 INSERT INTO notifications (message)
 VALUES (?)
 RETURNING id, message, created_at, viewed_at
 `
 
 func (q *Queries) CreateNotification(ctx context.Context, message string) (Notification, error) {
-	row := q.db.QueryRowContext(ctx, createNotification, message)
+	row := q.db.QueryRowContext(ctx, CreateNotification, message)
 	var i Notification
 	err := row.Scan(
 		&i.ID,

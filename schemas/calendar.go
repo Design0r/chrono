@@ -23,6 +23,7 @@ type Day struct {
 
 type Event struct {
 	Username string
+	Color    string
 	repo.Event
 }
 

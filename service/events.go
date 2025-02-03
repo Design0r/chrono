@@ -155,6 +155,7 @@ func GetEventsForMonth(
 		}
 		newEvent := schemas.Event{
 			Username: user.Username,
+			Color: user.Color,
 			Event: repo.Event{
 				Name:        event.Name,
 				ID:          event.ID,

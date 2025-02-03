@@ -38,7 +38,7 @@ func HandleCreateEvent(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
-	e := schemas.Event{Username: currUser.Username, Event: event}
+	e := schemas.Event{Username: currUser.Username, Color: currUser.Color, Event: event}
 
 	vacationRemaining, err := service.GetRemainingVacation(
 		r,
@@ -104,7 +104,7 @@ func HandleDeleteEvent(c echo.Context, r *repo.Queries) error {
 		}
 	}
 
-	e := schemas.Event{Username: currUser.Username, Event: deletedEvent}
+	e := schemas.Event{Username: currUser.Username, Color: currUser.Color, Event: deletedEvent}
 
 	vacRemaining, err := service.GetRemainingVacation(
 		r,

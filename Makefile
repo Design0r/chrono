@@ -42,7 +42,7 @@ build:
 	npx --yes tailwindcss -i $(CSS_DIR)/input.css -o $(CSS_DIR)/output.css --minify
 
 	templ generate
-	go build -o ./build/Chrono$(BIN_SUFFIX) ./cmd/main.go
+	go build -o ./build/Chrono$(BIN_SUFFIX) -ldflags="-s -w" ./cmd/main.go
 
 docker-install:
 	@go install github.com/a-h/templ/cmd/templ@latest

@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 
 	"chrono/db"
 	"chrono/service"

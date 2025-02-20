@@ -5,10 +5,8 @@
 
 ifeq ($(OS),Windows_NT)
   BIN_SUFFIX := .exe
-  CGO := set CGO_ENABLED=0 &&
 else
   BIN_SUFFIX :=
-  CGO := CGO_ENABLED=0
 endif
 
 MIGRATION_DIR = ./db/migrations/
@@ -43,8 +41,7 @@ build:
 	npm run build
 
 	templ generate
-
-	$(CGO) go build -o ./build/Chrono$(BIN_SUFFIX) -ldflags="-s -w" ./cmd/main.go 
+	go build -o ./build/Chrono$(BIN_SUFFIX) -ldflags="-s -w" ./cmd/main.go
 
 docker-install:
 	@go install github.com/a-h/templ/cmd/templ@latest

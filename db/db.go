@@ -19,7 +19,7 @@ func NewDB(name string) *sql.DB {
 
 	dbPath := filepath.Join("db", name)
 
-	db, err := sql.Open("sqlite", dbPath)
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatalf("Failed to open database: %v", err)
 	}

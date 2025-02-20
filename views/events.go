@@ -98,7 +98,7 @@ func HandleDeleteEvent(c echo.Context, r *repo.Queries) error {
 	}
 
 	if deletedEvent.State == "accepted" {
-		_, err = service.CreateToken(r, currUser.ID, deletedEvent.ScheduledAt.Year(), 1.0)
+		_, err = service.CreateToken(r, deletedEvent.UserID, deletedEvent.ScheduledAt.Year(), 1.0)
 		if err != nil {
 			return RenderError(c, http.StatusBadRequest, err.Error())
 		}

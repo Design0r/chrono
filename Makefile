@@ -5,15 +5,14 @@
 
 ifeq ($(OS),Windows_NT)
   BIN_SUFFIX := .exe
-  CGO := set CGO_ENABLED=0 && 
+  CGO := set CGO_ENABLED=0 &&
 else
   BIN_SUFFIX :=
-  CGO := CGO_ENABLED=0  
+  CGO := CGO_ENABLED=0
 endif
 
 MIGRATION_DIR = ./db/migrations/
 DB_DIR = ./db/chrono.db/
-CSS_DIR = ../assets/static/css
 
 generate:
 	@echo "Generating sqlc repositoy..."
@@ -25,7 +24,7 @@ migrate:
 	@goose sqlite3 ${DB_DIR} -dir=${MIGRATION_DIR} create ${args} sql
 
 live/templ:
-	templ generate --watch --proxy="http://localhost:8080"  --open-browser=true
+	templ generate --watch --proxy="http://localhost:8080" --open-browser=true
 
 live/server:
 	air
@@ -33,7 +32,7 @@ live/server:
 live/tailwind:
 	cd node && \
 	npm install && \
-	npx --yes tailwindcss -i $(CSS_DIR)/input.css -o $(CSS_DIR)/output.css --minify --watch
+	npm run dev
 
 dev: 
 	make -j3 live/templ live/server live/tailwind
@@ -41,7 +40,7 @@ dev:
 build:
 	@cd node && \
 	npm install && \
-	npx --yes tailwindcss -i $(CSS_DIR)/input.css -o $(CSS_DIR)/output.css --minify
+	npm run build
 
 	templ generate
 

@@ -16,7 +16,7 @@ import (
 
 func main() {
 	fmt.Println(banner)
-	log.Println("\nInitializing chrono...")
+	log.Println("Initializing chrono...")
 
 	db := db.NewDB("chrono.db")
 	defer db.Close()
@@ -45,4 +45,5 @@ const banner string = `
    / /   / __ \/ ___/ __ \/ __ \/ __ \
   / /___/ / / / /  / /_/ / / / / /_/ /
   \____/_/ /_/_/   \____/_/ /_/\____/ 
- ======================================`
+ ======================================
+ `

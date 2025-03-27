@@ -120,10 +120,18 @@ templ Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed fl
 			</div>
 		</div>
 		<div class="col-span-4 h-full text-lg">
-			<div class="flex h-full justify-between items-center space-x-2 pl-0 pr-6 rounded-xl bg-base-300">
-				@UserFilter(users, month)
-				@EventFilter(month)
-				@VacationCounter(user, vacRemaining, vacUsed, pendingEvents)
+			<div class="h-full items-center rounded-xl bg-base-300">
+				<div class="grid grid-cols-4 w-full h-full gap-2">
+					<div class="col-span-1 w-full justify-center ">
+						@UserFilter(users, month)
+					</div>
+					<div class="col-span-1 w-full justify-center ">
+						@EventFilter(month)
+					</div>
+					<div class="flex col-span-2 w-full items-center align-middle h-full ">
+						@VacationCounter(user, vacRemaining, vacUsed, pendingEvents)
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -136,7 +144,7 @@ templ Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed fl
 
 templ VacationCounter(user repo.User, vacationRemaining float64, vacUsed float64, pendingEvents int) {
 	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
-	<div id="vacation-counter" hx-swap-oob="true" class="flex">
+	<div id="vacation-counter" hx-swap-oob="true" class="flex w-full justify-center items-center align-middle h-full text-center">
 		<div class="text-info">{ fmt.Sprint(pendingEvents) } </div><span class="text-base-content pl-2">pending</span><span class="text-base-content opacity-50 px-3">|</span>
 		<div class="text-warning">{ fmt.Sprint(vacUsed) } </div> <span class="text-base-content pl-2">used</span><span class="text-base-content opacity-50 px-3">|</span>
 		<div class="text-success">{ fmt.Sprint(vacationRemaining) } </div> <span class="text-base-content pl-2">remaining</span>
@@ -149,12 +157,12 @@ templ UserFilter(users []repo.User, month schemas.Month) {
 		hx-get={ fmt.Sprintf("/%v/%v", month.Year, month.Number) }
 		hx-target="#calendar"
 		hx-swap="outerHTML"
-		class="col-span-1 select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl"
+		class="col-span-1  select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color w-full text-lg rounded-xl"
 		name="filter"
 		id="filter"
 		hx-push-url="true"
 	>
-		<option value="all">All</option>
+		<option value="all">All Users</option>
 		for _, user := range users {
 			<option value={ user.Username }>{ user.Username }</option>
 		}
@@ -166,12 +174,12 @@ templ EventFilter(month schemas.Month) {
 		hx-get={ fmt.Sprintf("/%v/%v", month.Year, month.Number) }
 		hx-target="#calendar"
 		hx-swap="outerHTML"
-		class="col-span-1 select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl"
+		class="col-span-1 select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color w-full text-lg rounded-xl"
 		name="event-filter"
 		id="event-filter"
 		hx-push-url="true"
 	>
-		<option value="all">All</option>
+		<option value="all">All Events</option>
 		<option value="urlaub">Urlaub</option>
 		<option value="urlaub halbtags">Urlaub Halbtags</option>
 		<option value="workation">Workation</option>

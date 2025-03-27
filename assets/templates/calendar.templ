@@ -111,10 +111,10 @@ templ Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed fl
 		<div class="flex justify-start col-span-2 space-x-2 bg-base-300 p-3 rounded-xl gap-4">
 			<div class="flex items-center justify-center gap-3">
 				<div class="w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
-					<a href={ templ.URL(urlPrevMonth) } class="text-lg icon-outlined">arrow_back</a>
+					<button type="button" hx-swap="outerHTML" hx-target="#calendar" hx-get={ urlPrevMonth } class="btn text-lg icon-outlined">arrow_back</button>
 				</div>
 				<div class="w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
-					<a href={ templ.URL(urlNextMonth) } class="text-lg icon-outlined">arrow_forward</a>
+					<button type="button" hx-swap="outerHTML" hx-target="#calendar" hx-get={ urlNextMonth } class="btn text-lg icon-outlined">arrow_forward</button>
 				</div>
 				<div class="pl-4 text-lg">{ month.Name } { strYear }</div>
 			</div>
@@ -122,6 +122,7 @@ templ Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed fl
 		<div class="col-span-4 h-full text-lg">
 			<div class="flex h-full justify-between items-center space-x-2 pl-0 pr-6 rounded-xl bg-base-300">
 				@UserFilter(users, month)
+				@EventFilter(month)
 				@VacationCounter(user, vacRemaining, vacUsed, pendingEvents)
 			</div>
 		</div>
@@ -157,5 +158,24 @@ templ UserFilter(users []repo.User, month schemas.Month) {
 		for _, user := range users {
 			<option value={ user.Username }>{ user.Username }</option>
 		}
+	</select>
+}
+
+templ EventFilter(month schemas.Month) {
+	<select
+		hx-get={ fmt.Sprintf("/%v/%v", month.Year, month.Number) }
+		hx-target="#calendar"
+		hx-swap="outerHTML"
+		class="col-span-1 select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl"
+		name="event-filter"
+		id="event-filter"
+		hx-push-url="true"
+	>
+		<option value="all">All</option>
+		<option value="urlaub">Urlaub</option>
+		<option value="urlaub halbtags">Urlaub Halbtags</option>
+		<option value="workation">Workation</option>
+		<option value="krank">Krank</option>
+		<option value="home office">Home Office</option>
 	</select>
 }

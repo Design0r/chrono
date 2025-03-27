@@ -310,25 +310,33 @@ func Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed flo
 
 		urlPrevMonth := fmt.Sprintf("/%v/%v", year, prevStrMonth)
 		urlNextMonth := fmt.Sprintf("/%v/%v", nextYear, nextStrMonth)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"col-span-7 grid grid-cols-7 items-center gap-x-2 mt-2 mb-10\"><select class=\"col-span-1 select focus:border-0 h-full border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl\" name=\"eventName\" id=\"eventName\"><option value=\"urlaub\">Urlaub</option> <option value=\"urlaub halbtags\">Urlaub Halbtags</option> <option value=\"workation\">Workation</option> <option value=\"krank\">Krank</option> <option value=\"home office\">Home Office</option></select><div class=\"flex justify-start col-span-2 space-x-2 bg-base-300 p-3 rounded-xl gap-4\"><div class=\"flex items-center justify-center gap-3\"><div class=\"w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors\"><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"col-span-7 grid grid-cols-7 items-center gap-x-2 mt-2 mb-10\"><select class=\"col-span-1 select focus:border-0 h-full border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl\" name=\"eventName\" id=\"eventName\"><option value=\"urlaub\">Urlaub</option> <option value=\"urlaub halbtags\">Urlaub Halbtags</option> <option value=\"workation\">Workation</option> <option value=\"krank\">Krank</option> <option value=\"home office\">Home Office</option></select><div class=\"flex justify-start col-span-2 space-x-2 bg-base-300 p-3 rounded-xl gap-4\"><div class=\"flex items-center justify-center gap-3\"><div class=\"w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors\"><button type=\"button\" hx-swap=\"outerHTML\" hx-target=\"#calendar\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var14 templ.SafeURL = templ.URL(urlPrevMonth)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var14)))
+		var templ_7745c5c3_Var14 string
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(urlPrevMonth)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 114, Col: 90}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"text-lg icon-outlined\">arrow_back</a></div><div class=\"w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors\"><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"btn text-lg icon-outlined\">arrow_back</button></div><div class=\"w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors\"><button type=\"button\" hx-swap=\"outerHTML\" hx-target=\"#calendar\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var15 templ.SafeURL = templ.URL(urlNextMonth)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var15)))
+		var templ_7745c5c3_Var15 string
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(urlNextMonth)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 117, Col: 90}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" class=\"text-lg icon-outlined\">arrow_forward</a></div><div class=\"pl-4 text-lg\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" class=\"btn text-lg icon-outlined\">arrow_forward</button></div><div class=\"pl-4 text-lg\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -359,6 +367,10 @@ func Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed flo
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = UserFilter(users, month).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = EventFilter(month).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -403,7 +415,7 @@ func VacationCounter(user repo.User, vacationRemaining float64, vacUsed float64,
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(pendingEvents))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 139, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 140, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -416,7 +428,7 @@ func VacationCounter(user repo.User, vacationRemaining float64, vacUsed float64,
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(vacUsed))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 140, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 141, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -429,7 +441,7 @@ func VacationCounter(user repo.User, vacationRemaining float64, vacUsed float64,
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(vacationRemaining))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 141, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 142, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -442,7 +454,7 @@ func VacationCounter(user repo.User, vacationRemaining float64, vacUsed float64,
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(strNum)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 142, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 143, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -484,7 +496,7 @@ func UserFilter(users []repo.User, month schemas.Month) templ.Component {
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/%v/%v", month.Year, month.Number))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 148, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 149, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -502,7 +514,7 @@ func UserFilter(users []repo.User, month schemas.Month) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 158, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 159, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -515,7 +527,7 @@ func UserFilter(users []repo.User, month schemas.Month) templ.Component {
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 158, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 159, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -527,6 +539,48 @@ func UserFilter(users []repo.User, month schemas.Month) templ.Component {
 			}
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</select>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func EventFilter(month schemas.Month) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var27 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var27 == nil {
+			templ_7745c5c3_Var27 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<select hx-get=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var28 string
+		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/%v/%v", month.Year, month.Number))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 166, Col: 58}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" hx-target=\"#calendar\" hx-swap=\"outerHTML\" class=\"col-span-1 select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl\" name=\"event-filter\" id=\"event-filter\" hx-push-url=\"true\"><option value=\"all\">All</option> <option value=\"urlaub\">Urlaub</option> <option value=\"urlaub halbtags\">Urlaub Halbtags</option> <option value=\"workation\">Workation</option> <option value=\"krank\">Krank</option> <option value=\"home office\">Home Office</option></select>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

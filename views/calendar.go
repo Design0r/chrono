@@ -43,7 +43,8 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 	service.InitYearlyTokens(r, currUser, date.Year)
 
 	month := calendar.GetDaysOfMonth(time.Month(date.Month), date.Year)
-	err = service.GetEventsForMonth(r, &month, filtered)
+	eventFilter := c.QueryParam("event-filter")
+	err = service.GetEventsForMonth(r, &month, filtered, eventFilter)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}

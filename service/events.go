@@ -123,6 +123,7 @@ func GetEventsForMonth(
 	r *repo.Queries,
 	month *schemas.Month,
 	filter *repo.User,
+	eventFilter string,
 ) error {
 	date := time.Date(
 		month.Year,
@@ -153,9 +154,12 @@ func GetEventsForMonth(
 			user.Username != os.Getenv("BOT_NAME") {
 			continue
 		}
+		if eventFilter != "" && event.Name != eventFilter && eventFilter != "all" {
+			continue
+		}
 		newEvent := schemas.Event{
 			Username: user.Username,
-			Color: user.Color,
+			Color:    user.Color,
 			Event: repo.Event{
 				Name:        event.Name,
 				ID:          event.ID,

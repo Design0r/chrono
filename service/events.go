@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"slices"
+	"strings"
 	"time"
 
 	"chrono/db/repo"
@@ -153,8 +154,9 @@ func GetEventsForMonth(
 		if filter != nil && user.Username != filter.Username &&
 			user.Username != os.Getenv("BOT_NAME") {
 			continue
+
 		}
-		if eventFilter != "" && event.Name != eventFilter && eventFilter != "all" {
+		if eventFilter != "" && !strings.Contains(event.Name, eventFilter) && eventFilter != "all" {
 			continue
 		}
 		newEvent := schemas.Event{

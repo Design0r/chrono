@@ -588,7 +588,7 @@ func EventFilter(month schemas.Month) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" hx-target=\"#calendar\" hx-swap=\"outerHTML\" class=\"col-span-1 select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color w-full text-lg rounded-xl\" name=\"event-filter\" id=\"event-filter\" hx-push-url=\"true\" hx-include=\"#filter\"><option value=\"all\">All Events</option> <option value=\"urlaub\">Urlaub</option> <option value=\"urlaub halbtags\">Urlaub Halbtags</option> <option value=\"workation\">Workation</option> <option value=\"krank\">Krank</option> <option value=\"home office\">Home Office</option></select>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" hx-target=\"#calendar\" hx-swap=\"outerHTML\" class=\"col-span-1 select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color w-full text-lg rounded-xl\" name=\"event-filter\" id=\"event-filter\" hx-push-url=\"true\" hx-include=\"#filter\"><option value=\"all\">All Events</option> <option value=\"urlaub\">Urlaub</option> <option value=\"workation\">Workation</option> <option value=\"krank\">Krank</option> <option value=\"home office\">Home Office</option></select>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

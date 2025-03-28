@@ -510,7 +510,7 @@ func UserFilter(users []repo.User, month schemas.Month) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" hx-target=\"#calendar\" hx-swap=\"outerHTML\" class=\"col-span-1  select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color w-full text-lg rounded-xl\" name=\"filter\" id=\"filter\" hx-push-url=\"true\"><option value=\"all\">All Users</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" hx-target=\"#calendar\" hx-swap=\"outerHTML\" class=\"col-span-1  select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color w-full text-lg rounded-xl\" name=\"filter\" id=\"filter\" hx-push-url=\"true\" hx-include=\"#event-filter\"><option value=\"all\">All Users</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -522,7 +522,7 @@ func UserFilter(users []repo.User, month schemas.Month) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 167, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 168, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -535,7 +535,7 @@ func UserFilter(users []repo.User, month schemas.Month) templ.Component {
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 167, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 168, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -582,13 +582,13 @@ func EventFilter(month schemas.Month) templ.Component {
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/%v/%v", month.Year, month.Number))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 174, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/calendar.templ`, Line: 175, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" hx-target=\"#calendar\" hx-swap=\"outerHTML\" class=\"col-span-1 select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color w-full text-lg rounded-xl\" name=\"event-filter\" id=\"event-filter\" hx-push-url=\"true\"><option value=\"all\">All Events</option> <option value=\"urlaub\">Urlaub</option> <option value=\"urlaub halbtags\">Urlaub Halbtags</option> <option value=\"workation\">Workation</option> <option value=\"krank\">Krank</option> <option value=\"home office\">Home Office</option></select>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" hx-target=\"#calendar\" hx-swap=\"outerHTML\" class=\"col-span-1 select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color w-full text-lg rounded-xl\" name=\"event-filter\" id=\"event-filter\" hx-push-url=\"true\" hx-include=\"#filter\"><option value=\"all\">All Events</option> <option value=\"urlaub\">Urlaub</option> <option value=\"urlaub halbtags\">Urlaub Halbtags</option> <option value=\"workation\">Workation</option> <option value=\"krank\">Krank</option> <option value=\"home office\">Home Office</option></select>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

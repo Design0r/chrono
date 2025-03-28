@@ -161,6 +161,7 @@ templ UserFilter(users []repo.User, month schemas.Month) {
 		name="filter"
 		id="filter"
 		hx-push-url="true"
+		hx-include="#event-filter"
 	>
 		<option value="all">All Users</option>
 		for _, user := range users {
@@ -178,6 +179,7 @@ templ EventFilter(month schemas.Month) {
 		name="event-filter"
 		id="event-filter"
 		hx-push-url="true"
+		hx-include="#filter"
 	>
 		<option value="all">All Events</option>
 		<option value="urlaub">Urlaub</option>

@@ -154,11 +154,13 @@ func GetEventsForMonth(
 		if filter != nil && user.Username != filter.Username &&
 			user.Username != os.Getenv("BOT_NAME") {
 			continue
-
 		}
-		if eventFilter != "" && !strings.Contains(event.Name, eventFilter) && eventFilter != "all" {
+		if eventFilter != "" && !strings.Contains(event.Name, eventFilter) &&
+			eventFilter != "all" &&
+			user.Username != os.Getenv("BOT_NAME") {
 			continue
 		}
+
 		newEvent := schemas.Event{
 			Username: user.Username,
 			Color:    user.Color,

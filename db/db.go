@@ -46,6 +46,11 @@ func NewDB(name string) *sql.DB {
 	return db
 }
 
+func CloseDB(db *sql.DB) {
+	log.Println("Closing Database")
+	db.Close()
+}
+
 func RunMigrations(db *sql.DB) {
 	dir, err := fs.Sub(MigrationFS, "migrations")
 	if err != nil {

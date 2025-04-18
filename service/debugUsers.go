@@ -5,16 +5,17 @@ import (
 	"log"
 	"os"
 
+	"chrono/config"
 	"chrono/db/repo"
 	"chrono/schemas"
 )
 
-func LoadDebugUsers(r *repo.Queries, path string) (schemas.DebugUsers, error) {
-	if os.Getenv("DEBUG") == "0" {
+func LoadDebugUsers(r *repo.Queries, cfg *config.Config) (schemas.DebugUsers, error) {
+	if !cfg.Debug {
 		return schemas.DebugUsers{}, nil
 	}
 
-	file, err := os.ReadFile(path)
+	file, err := os.ReadFile(cfg.DebugUsers)
 	if err != nil {
 		log.Printf("Failed loading debug user file: %v", err)
 		return schemas.DebugUsers{}, err

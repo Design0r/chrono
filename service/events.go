@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 	"log"
-	"os"
 	"slices"
 	"strings"
 	"time"
 
+	"chrono/config"
 	"chrono/db/repo"
 	"chrono/schemas"
 )
@@ -126,6 +126,7 @@ func GetEventsForMonth(
 	filter *repo.User,
 	eventFilter string,
 ) error {
+	cfg := config.GetConfig()
 	date := time.Date(
 		month.Year,
 		time.Month(month.Number),
@@ -152,12 +153,12 @@ func GetEventsForMonth(
 			continue
 		}
 		if filter != nil && user.Username != filter.Username &&
-			user.Username != os.Getenv("BOT_NAME") {
+			user.Username != cfg.BotName {
 			continue
 		}
 		if eventFilter != "" && !strings.Contains(event.Name, eventFilter) &&
 			eventFilter != "all" &&
-			user.Username != os.Getenv("BOT_NAME") {
+			user.Username != cfg.BotName {
 			continue
 		}
 

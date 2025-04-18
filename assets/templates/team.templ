@@ -3,8 +3,8 @@ package templates
 import (
 	"chrono/db/repo"
 	"fmt"
-	"os"
 	"chrono/service"
+	"chrono/config"
 )
 
 templ Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) {
@@ -87,8 +87,9 @@ templ TeamTable(users []repo.GetUsersWithVacationCountRow, currUser repo.User, n
 
 templ TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bool) {
 	{{
+	cfg := config.GetConfig()
 	css := "hover:bg-base-300 pt-8 border-b-2 border-base-100 opacity-80 border-opacity-50"
-	if user.VacationDays == 0 && user.Username != os.Getenv("BOT_NAME") {
+	if user.VacationDays == 0 && user.Username != cfg.BotName {
 		css = "hover:bg-error hover:bg-opacity-85 bg-error text-white "
 	}
 	vacTaken := 0.0

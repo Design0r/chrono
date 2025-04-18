@@ -5,19 +5,20 @@ import (
 	"chrono/schemas"
 	"chrono/service"
 	"fmt"
-	"os"
 	"strings"
 	"time"
+	"chrono/config"
 )
 
 templ Event(event schemas.Event, user repo.User) {
 	{{
-			bgColor := service.HSLToString(service.HexToHSL(event.Color))
-			if !service.IsVacation(event.Name) && event.Username != os.Getenv("BOT_NAME") {
-				bgColor = service.GenerateHSLDarkFromHex(event.Color)
-			}
-			eventId := fmt.Sprintf("event-%v", event.ID)
-			deleteUrl := fmt.Sprintf("#%v", eventId)
+	cfg := config.GetConfig()
+	bgColor := service.HSLToString(service.HexToHSL(event.Color))
+	if !service.IsVacation(event.Name) && event.Username != cfg.BotName {
+		bgColor = service.GenerateHSLDarkFromHex(event.Color)
+	}
+	eventId := fmt.Sprintf("event-%v", event.ID)
+	deleteUrl := fmt.Sprintf("#%v", eventId)
 	}}
 	<div
 		id={ eventId }

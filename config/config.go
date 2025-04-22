@@ -23,22 +23,14 @@ func GetConfig() *Config {
 }
 
 func NewConfigFromEnv() *Config {
-	debug := loadDefault("DEBUG", "0") != "0"
-	debugUsers := loadDefault("DEBUG_USERS", "debug_users.json")
-	port := loadDefault("PORT", "8080")
-	dbName := loadDefault("DB_NAME", "chrono.db")
-	botName := loadStrict("BOT_NAME")
-	botEmail := loadStrict("BOT_EMAIL")
-	botPassword := loadStrict("BOT_PASSWORD")
-
 	config = &Config{
-		Debug:       debug,
-		DebugUsers:  debugUsers,
-		DbName:      dbName,
-		Port:        port,
-		BotName:     botName,
-		BotEmail:    botEmail,
-		BotPassword: botPassword,
+		Debug:       loadDefault("DEBUG", "0") != "0",
+		DebugUsers:  loadDefault("DEBUG_USERS", "debug_users.json"),
+		DbName:      loadDefault("DB_NAME", "chrono.db"),
+		Port:        loadDefault("PORT", "8080"),
+		BotName:     loadStrict("BOT_NAME"),
+		BotEmail:    loadStrict("BOT_EMAIL"),
+		BotPassword: loadStrict("BOT_PASSWORD"),
 	}
 
 	log.Println("Config loaded")

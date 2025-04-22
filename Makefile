@@ -41,7 +41,7 @@ build:
 	npm run build
 
 	templ generate
-	go build -o ./build/Chrono$(BIN_SUFFIX) -ldflags="-s -w" ./cmd/main.go
+	go build -o ./build/chrono$(BIN_SUFFIX) -ldflags='-s -w -extldflags "-static"' ./cmd/main.go
 
 docker-install:
 	@go install github.com/a-h/templ/cmd/templ@latest

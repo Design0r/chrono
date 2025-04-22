@@ -1,8 +1,15 @@
-FROM golang:1.23-bookworm AS build
+FROM golang:1.24-alpine AS build
 
-RUN apt update && apt install -y make
-RUN apt install nodejs -y
-RUN apt install npm -y
+ENV CGO_ENABLED=1
+RUN apk add --no-cache \
+    # Important: required for go-sqlite3
+    gcc \
+    # Required for Alpine
+    musl-dev \
+    make \
+    nodejs \
+    npm
+
 
 WORKDIR /app
 
@@ -15,11 +22,10 @@ RUN make docker-install
 RUN make build
 
 
-FROM ubuntu:latest
+FROM scratch
 
 WORKDIR /app
-COPY --from=build /app/build/Chrono .
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /app/build/chrono .
 COPY .env .
 
-ENTRYPOINT ["./Chrono"]
+ENTRYPOINT ["./chrono"]

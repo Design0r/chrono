@@ -29,8 +29,9 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
+	userFilter := c.QueryParam("filter")
 	var filtered *repo.User
-	filteredUser, err := service.GetUserByName(r, c.QueryParam("filter"))
+	filteredUser, err := service.GetUserByName(r, userFilter)
 	if err != nil {
 		filtered = nil
 	} else {
@@ -80,7 +81,11 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 	}
 
 	if htmx.IsHTMXRequest(c) {
-		return Render(c, http.StatusOK, templates.CalendarCore(month, currUser))
+		return Render(
+			c,
+			http.StatusOK,
+			templates.CalendarCoreResponse(month, currUser, userFilter, eventFilter),
+		)
 	}
 
 	return Render(
@@ -94,6 +99,8 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 			pendingEvents,
 			notifications,
 			allUsers,
+			userFilter,
+			eventFilter,
 		),
 	)
 }

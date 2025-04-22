@@ -9,13 +9,13 @@ import (
 	"time"
 )
 
-templ Calendar(user repo.User, month schemas.Month, vacRemaining float64, vacUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User) {
+templ Calendar(user repo.User, month schemas.Month, vacRemaining float64, vacUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User, userFilter, eventFilter string) {
 	@Index(&user, notifications) {
 		<div class="pt-2">
 			<div class="grid grid-cols-7">
-				@Info(month, user, vacRemaining, vacUsed, pendingEvents, users)
+				@Info(month, user, vacRemaining, vacUsed, pendingEvents, users, userFilter, eventFilter)
 			</div>
-			@CalendarCore(month, user)
+			@CalendarCore(month, user, userFilter, eventFilter)
 		</div>
 		<div class="h-16"></div>
 	}
@@ -76,30 +76,50 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 	</div>
 }
 
-templ Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed float64, pendingEvents int, users []repo.User) {
+templ MonthNavigation(month schemas.Month, userFilter, eventFilter string) {
 	{{
 	strYear := strconv.Itoa(month.Year)
 	year := month.Year
 	nextYear := year
-	prevMNum := month.Number - 1
-	nextMNum := month.Number + 1
-	if prevMNum <= 0 {
-		prevMNum = 12
+	prevMonth := month.Number - 1
+	nextMonth := month.Number + 1
+	if prevMonth <= 0 {
+		prevMonth = 12
 		year--
 	}
-	if nextMNum > 12 {
-		nextMNum = nextMNum % 12
+	if nextMonth > 12 {
+		nextMonth = nextMonth % 12
 		nextYear++
-		if nextMNum == 0 {
-			nextMNum = 1
+		if nextMonth == 0 {
+			nextMonth = 1
 		}
 	}
-	prevStrMonth := strconv.Itoa(prevMNum)
-	nextStrMonth := strconv.Itoa(nextMNum)
 
-	urlPrevMonth := fmt.Sprintf("/%v/%v", year, prevStrMonth)
-	urlNextMonth := fmt.Sprintf("/%v/%v", nextYear, nextStrMonth)
+	urlPrev := fmt.Sprintf(
+		"/%d/%d?filter=%s&event-filter=%s",
+		year, prevMonth,
+		userFilter, eventFilter,
+	)
+	urlNext := fmt.Sprintf(
+		"/%d/%d?filter=%s&event-filter=%s",
+		nextYear, nextMonth,
+		userFilter, eventFilter,
+	)
 	}}
+	<div hx-swap-oob="true" id="month-navigation" class="flex justify-start col-span-2 space-x-2 bg-base-300 p-3 rounded-xl gap-4">
+		<div class="flex items-center justify-center gap-3">
+			<div class="w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
+				<a href={ templ.SafeURL(urlPrev) } class="btn text-lg icon-outlined">arrow_back</a>
+			</div>
+			<div class="w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
+				<a href={ templ.SafeURL(urlNext) } class="btn text-lg icon-outlined">arrow_forward</a>
+			</div>
+			<div class="pl-4 text-lg">{ month.Name } { strYear }</div>
+		</div>
+	</div>
+}
+
+templ Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed float64, pendingEvents int, users []repo.User, userFilter, eventFilter string) {
 	<div class="col-span-7 grid grid-cols-7 items-center gap-x-2 mt-2 mb-10">
 		<select class="col-span-1 select focus:border-0 h-full border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl" name="eventName" id="eventName">
 			<option value="urlaub">Urlaub</option>
@@ -108,25 +128,15 @@ templ Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed fl
 			<option value="krank">Krank</option>
 			<option value="home office">Home Office</option>
 		</select>
-		<div class="flex justify-start col-span-2 space-x-2 bg-base-300 p-3 rounded-xl gap-4">
-			<div class="flex items-center justify-center gap-3">
-				<div class="w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
-					<a href={ templ.SafeURL(urlPrevMonth) } class="btn text-lg icon-outlined">arrow_back</a>
-				</div>
-				<div class="w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
-					<a href={ templ.SafeURL(urlNextMonth) } class="btn text-lg icon-outlined">arrow_forward</a>
-				</div>
-				<div class="pl-4 text-lg">{ month.Name } { strYear }</div>
-			</div>
-		</div>
+		@MonthNavigation(month, userFilter, eventFilter)
 		<div class="col-span-4 h-full text-lg">
 			<div class="h-full items-center rounded-xl bg-base-300">
 				<div class="grid grid-cols-4 w-full h-full gap-2">
 					<div class="col-span-1 w-full justify-center ">
-						@UserFilter(users, month)
+						@UserFilter(users, month, userFilter, eventFilter)
 					</div>
 					<div class="col-span-1 w-full justify-center ">
-						@EventFilter(month)
+						@EventFilter(month, eventFilter, userFilter)
 					</div>
 					<div class="flex col-span-2 w-full items-center align-middle h-full ">
 						@VacationCounter(user, vacRemaining, vacUsed, pendingEvents)
@@ -152,7 +162,7 @@ templ VacationCounter(user repo.User, vacationRemaining float64, vacUsed float64
 	</div>
 }
 
-templ UserFilter(users []repo.User, month schemas.Month) {
+templ UserFilter(users []repo.User, month schemas.Month, userFilter, eventFilter string) {
 	<select
 		hx-get={ fmt.Sprintf("/%v/%v", month.Year, month.Number) }
 		hx-target="#calendar"
@@ -165,12 +175,19 @@ templ UserFilter(users []repo.User, month schemas.Month) {
 	>
 		<option value="all">All Users</option>
 		for _, user := range users {
-			<option value={ user.Username }>{ user.Username }</option>
+			if user.Username == userFilter {
+				<option selected value={ user.Username }>{ user.Username }</option>
+			} else {
+				<option value={ user.Username }>{ user.Username }</option>
+			}
 		}
 	</select>
 }
 
-templ EventFilter(month schemas.Month) {
+templ EventFilter(month schemas.Month, eventFilter, userFilter string) {
+	{{
+	events := map[string]string{"all": "All Events", "urlaub": "Urlaub", "workation": "Workation", "krank": "Krank", "home office": "Home Office"}
+	}}
 	<select
 		hx-get={ fmt.Sprintf("/%v/%v", month.Year, month.Number) }
 		hx-target="#calendar"
@@ -181,10 +198,12 @@ templ EventFilter(month schemas.Month) {
 		hx-push-url="true"
 		hx-include="#filter"
 	>
-		<option value="all">All Events</option>
-		<option value="urlaub">Urlaub</option>
-		<option value="workation">Workation</option>
-		<option value="krank">Krank</option>
-		<option value="home office">Home Office</option>
+		for k,v := range events {
+			if eventFilter == k {
+				<option selected value={ k }>{ v }</option>
+			} else {
+				<option value={ k }>{ v }</option>
+			}
+		}
 	</select>
 }

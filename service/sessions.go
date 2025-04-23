@@ -42,6 +42,16 @@ func DeleteSession(r *repo.Queries, id string) error {
 	return nil
 }
 
+func DeleteAllSessions(r *repo.Queries) error {
+	err := r.DeleteAllSessions(context.Background())
+	if err != nil {
+		log.Printf("Failed deleting all sessions: %v", err)
+		return err
+	}
+
+	return nil
+}
+
 func IsValidSession(r *repo.Queries, id string) bool {
 	_, err := r.GetValidSession(
 		context.Background(),

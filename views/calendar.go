@@ -31,11 +31,11 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 
 	userFilter := c.QueryParam("filter")
 	var filtered *repo.User
-	filteredUser, err := service.GetUserByName(r, userFilter)
-	if err != nil {
-		filtered = nil
-	} else {
-		filtered = &filteredUser
+	if userFilter != "" {
+		filteredUser, err := service.GetUserByName(r, userFilter)
+		if err == nil {
+			filtered = &filteredUser
+		}
 	}
 
 	if date.Year >= 1900 {
@@ -45,7 +45,7 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 
 	month := calendar.GetDaysOfMonth(time.Month(date.Month), date.Year)
 	eventFilter := c.QueryParam("event-filter")
-	err = service.GetEventsForMonth(r, &month, filtered, eventFilter)
+	err := service.GetEventsForMonth(r, &month, filtered, eventFilter)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}

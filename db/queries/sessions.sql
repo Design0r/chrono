@@ -20,3 +20,6 @@ WHERE s.id = ?;
 -- name: DeleteSession :exec
 DELETE from sessions 
 WHERE id = ?;
+
+-- name: DeleteAllSessions :exec
+DELETE from sessions;

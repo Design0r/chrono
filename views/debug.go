@@ -17,6 +17,10 @@ func InitDebugRoutes(group *echo.Group, r *repo.Queries) {
 		"/debug/tokens",
 		func(c echo.Context) error { return HandleCreateTokensForAcceptedEvents(c, r) },
 	)
+	group.DELETE(
+		"/debug/sessions",
+		func(c echo.Context) error { return HandleDeleteSessions(c, r) },
+	)
 	group.PATCH("/debug/color", func(c echo.Context) error { return HandleUserColor(c, r) })
 }
 
@@ -47,6 +51,15 @@ func HandleDeleteTokens(c echo.Context, r *repo.Queries) error {
 	}
 
 	return Render(c, http.StatusOK, templates.Message("Reset token table", "success"))
+}
+
+func HandleDeleteSessions(c echo.Context, r *repo.Queries) error {
+	err := service.DeleteAllSessions(r)
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return Render(c, http.StatusOK, templates.Message("Reset session table", "success"))
 }
 
 func HandleCreateTokensForAcceptedEvents(c echo.Context, r *repo.Queries) error {

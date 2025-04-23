@@ -21,6 +21,7 @@ func SessionMiddleware(r *repo.Queries) MiddlewareFunc {
 			}
 			ok := service.IsValidSession(r, cookie.Value)
 			if !ok {
+				service.DeleteSession(r, cookie.Value)
 				return c.Redirect(http.StatusFound, "/login")
 			}
 

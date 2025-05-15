@@ -207,3 +207,40 @@ templ EventFilter(month schemas.Month, eventFilter, userFilter string) {
 		}
 	</select>
 }
+
+templ OverviewDay(num int) {
+	<div class="w-2 h-2 bg-green-500">{ fmt.Sprint(num) }</div>
+}
+
+templ YearOverview() {
+	<div class="grid grid-cols-10">
+		<div class="col-span-1"></div>
+		<div class="col-span-9 grid grid-rows-1 grid-flow-col h-20">
+			for i, monthGap := range calendar.GetMonthGaps(calendar.CurrentYear()) {
+				for range monthGap {
+					<p class="w-2 h-2 bg-red-300"></p>
+				}
+				<p class="w-2 h-2 bg-green-500">{ fmt.Sprint(i+1) }</p>
+			}
+		</div>
+		<div class="col-span-1 grid grid-rows-7 ">
+			<p>Mon</p>
+			<p>Tue</p>
+			<p>Wed</p>
+			<p>Thu</p>
+			<p>Fri</p>
+			<p>Sat</p>
+			<p>Sun</p>
+		</div>
+		<div class="col-span-9 grid grid-rows-7 h-80 grid-flow-col">
+			for range calendar.GetYearOffset(calendar.CurrentYear()) {
+				<p></p>
+			}
+			for _, d := range calendar.MonthDays {
+				for i:= range d {
+					@OverviewDay(i + 1)
+				}
+			}
+		</div>
+	</div>
+}

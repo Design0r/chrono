@@ -1,12 +1,13 @@
 package calendar
 
 import (
+	"fmt"
 	"time"
 
 	"chrono/schemas"
 )
 
-var monthDays map[time.Month]int = map[time.Month]int{
+var MonthDays map[time.Month]int = map[time.Month]int{
 	time.January:   31,
 	time.February:  28,
 	time.March:     31,
@@ -38,7 +39,7 @@ func GetNumDaysOfMonth(month time.Month, year int) int {
 		}
 	}
 
-	return monthDays[month]
+	return MonthDays[month]
 }
 
 func GetDaysOfMonth(month time.Month, year int) schemas.Month {
@@ -61,6 +62,41 @@ func GetDaysOfMonth(month time.Month, year int) schemas.Month {
 
 func getMonthOffset(weekday time.Weekday) int {
 	return int(weekday) % 7
+}
+
+func GetYearOffset(year int) int {
+	firstDay := time.Date(year, 1, 1, 0, 0, 0, 0, time.Now().Local().Location())
+	offset := int(firstDay.Weekday()) - 1
+	if offset < 0 {
+		offset = 6
+	}
+
+	return offset
+}
+
+func GetMonthGaps(year int) []int {
+	list := make([]int, 12)
+	for i := range 12 {
+		month := time.Month(i)
+		firstDay := time.Date(year, month, 1, 0, 0, 0, 0, time.Now().Local().Location())
+		offset := getMonthOffset(firstDay.Weekday())
+		numDays := GetNumDaysOfMonth(month, year)
+
+		numCols, remainder := int((offset+numDays)/7), (offset+numDays)%7
+
+		result := numCols
+		if remainder == 0 {
+			result = numCols - 1
+		} else {
+			result = numCols
+		}
+
+		list[i] = result
+
+	}
+
+	fmt.Println(list)
+	return list
 }
 
 func IsLeapYear(year int) bool {
@@ -95,7 +131,7 @@ func CurrentYearDay(year int) int {
 func NumWorkDays(year int) int {
 	counter := 0
 	start := time.Date(year, 1, 1, 0, 0, 0, 0, time.Now().Location())
-	for i := 0; i < NumDaysInYear(year); i++ {
+	for range NumDaysInYear(year) {
 		if start.Weekday() == time.Saturday || start.Weekday() == time.Sunday {
 			counter++
 		}

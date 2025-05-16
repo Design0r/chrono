@@ -49,7 +49,7 @@ func GetDaysOfMonth(month time.Month, year int) schemas.Month {
 	numDays := GetNumDaysOfMonth(month, year)
 	days := make([]schemas.Day, numDays)
 	for i := 0; i < numDays; i++ {
-		date := time.Date(year, month, i+1, 0, 0, 0, 0, time.Now().Local().Location())
+		date := time.Date(year, month, i+1, 0, 0, 0, 0, time.UTC)
 		day := schemas.Day{Number: i + 1, Name: weekdays[date.Weekday()], Date: date}
 		days[i] = day
 	}
@@ -68,7 +68,7 @@ func getMonthOffset(weekday time.Weekday) int {
 }
 
 func GetYearOffset(year int) int {
-	firstDay := time.Date(year, 1, 1, 0, 0, 0, 0, time.Now().Local().Location())
+	firstDay := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
 	offset := int(firstDay.Weekday()) - 1
 	if offset < 0 {
 		offset = 6
@@ -82,7 +82,7 @@ func GetMonthGaps(year int) []int {
 
 	for i := range 12 {
 		month := time.Month(i + 1)
-		firstDay := time.Date(year, month, 1, 0, 0, 0, 0, time.Now().Local().Location())
+		firstDay := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
 		offset := getMonthOffset(firstDay.Weekday())
 		numDays := GetNumDaysOfMonth(month, year)
 

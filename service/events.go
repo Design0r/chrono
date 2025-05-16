@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"slices"
 	"strings"
@@ -51,7 +52,7 @@ func createEvent(
 		0,
 		0,
 		0,
-		time.Now().Local().Location(),
+		time.UTC,
 	)
 
 	state := "pending"
@@ -109,7 +110,7 @@ func GetEventsForDay(r *repo.Queries, data schemas.YMDDate) ([]repo.Event, error
 		0,
 		0,
 		0,
-		time.Now().Local().Location(),
+		time.UTC,
 	)
 
 	events, err := r.GetEventsForDay(context.Background(), date)
@@ -136,7 +137,7 @@ func GetEventsForMonth(
 		0,
 		0,
 		0,
-		time.Now().Local().Location(),
+		time.UTC,
 	)
 	events, err := r.GetEventsForMonth(
 		context.Background(),
@@ -176,6 +177,7 @@ func GetEventsForMonth(
 				UserID:      event.UserID,
 			},
 		}
+		fmt.Println(newEvent.Event.Name, newEvent.Event.ScheduledAt)
 		month.Days[idx].Events = append(month.Days[idx].Events, newEvent)
 	}
 

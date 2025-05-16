@@ -108,11 +108,11 @@ templ MonthNavigation(month schemas.Month, userFilter, eventFilter string) {
 	}}
 	<div hx-swap-oob="true" id="month-navigation" class="flex justify-start col-span-2 space-x-2 bg-base-300 p-3 rounded-xl gap-4">
 		<div class="flex items-center justify-center gap-3">
-			<div class="w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
-				<a href={ templ.SafeURL(urlPrev) } class="btn text-lg icon-outlined">arrow_back</a>
+			<div class=" flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
+				<a href={ templ.SafeURL(urlPrev) } class="btn btn-sm text-lg icon-outlined">arrow_back</a>
 			</div>
-			<div class="w-7 h-7 flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
-				<a href={ templ.SafeURL(urlNext) } class="btn text-lg icon-outlined">arrow_forward</a>
+			<div class=" flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
+				<a href={ templ.SafeURL(urlNext) } class="btn btn-sm text-lg icon-outlined">arrow_forward</a>
 			</div>
 			<div class="pl-4 text-lg">{ month.Name } { strYear }</div>
 		</div>

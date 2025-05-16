@@ -12,6 +12,7 @@ SELECT * FROM events
 WHERE scheduled_at >= ? 
   AND scheduled_at < ?
   AND state = "accepted"
+  AND name IN ('urlaub', 'urlaub halbtags')
 
 ORDER BY scheduled_at;
 

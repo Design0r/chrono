@@ -223,7 +223,7 @@ templ YearOverview(histogram []int) {
 			for i, monthGap := range calendar.GetMonthGaps(calendar.CurrentYear()) {
 				<p class="w-2 h-2 bg-green-500">{ fmt.Sprint(i+1) }</p>
 				for range monthGap {
-					<p class="w-2 h-2 bg-red-300 hidden"></p>
+					<p class="w-2 h-2 bg-base-100 "></p>
 				}
 			}
 		</div>

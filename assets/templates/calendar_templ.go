@@ -815,7 +815,7 @@ func YearOverview(histogram []int) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for range monthGap {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<p class=\"w-2 h-2 bg-red-300 hidden\"></p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<p class=\"w-2 h-2 bg-base-100 \"></p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

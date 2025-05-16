@@ -46,9 +46,22 @@ func HandleHome(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
+	count, err := service.GetEventCountForYear(r, calendar.CurrentYear())
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
+	}
+
 	return Render(
 		c,
 		http.StatusOK,
-		templates.Home(currUser, remainingDays, vacTaken, pendingEvents, stats, notifications),
+		templates.Home(
+			currUser,
+			remainingDays,
+			vacTaken,
+			pendingEvents,
+			stats,
+			notifications,
+			count,
+		),
 	)
 }

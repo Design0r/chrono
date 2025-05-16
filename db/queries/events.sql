@@ -7,6 +7,14 @@ RETURNING *;
 SELECT * FROM events 
 WHERE Date(scheduled_at) = ?;
 
+-- name: GetEventsForYear :many
+SELECT * FROM events
+WHERE scheduled_at >= ? 
+  AND scheduled_at < ?
+  AND state = "accepted"
+
+ORDER BY scheduled_at;
+
 -- name: DeleteEvent :one
 DELETE from events
 WHERE id = ?

@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress schemas.YearProgress, notifications []repo.Notification) {
+templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress schemas.YearProgress, notifications []repo.Notification, eventHistogram []int) {
 	@Index(&user, notifications) {
 		<div class="flex flex-col container mx-auto justify-center align-middle gap-10 p-4">
 			<div class="text-[48px] pl-2 font-black">{ fmt.Sprintf("> hey %v ", user.Username) }</div>
@@ -66,6 +66,7 @@ templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingE
 					</div>
 				</div>
 			}
+			@YearOverview(eventHistogram)
 		</div>
 	}
 }

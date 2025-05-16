@@ -1,16 +1,15 @@
 package views
 
 import (
-	"net/http"
-	"strconv"
-
-	"github.com/labstack/echo/v4"
-
 	"chrono/assets/templates"
 	"chrono/calendar"
 	"chrono/db/repo"
 	"chrono/htmx"
 	"chrono/service"
+	"net/http"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
 )
 
 func InitTeamRoutes(group *echo.Group, r *repo.Queries) {

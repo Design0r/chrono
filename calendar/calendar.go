@@ -1,36 +1,39 @@
 package calendar
 
 import (
-	"fmt"
 	"time"
 
 	"chrono/schemas"
 )
 
-var MonthDays map[time.Month]int = map[time.Month]int{
-	time.January:   31,
-	time.February:  28,
-	time.March:     31,
-	time.April:     30,
-	time.May:       31,
-	time.June:      30,
-	time.July:      31,
-	time.August:    31,
-	time.September: 30,
-	time.October:   31,
-	time.November:  30,
-	time.December:  31,
-}
+var (
+	monthDays map[time.Month]int = map[time.Month]int{
+		time.January:   31,
+		time.February:  28,
+		time.March:     31,
+		time.April:     30,
+		time.May:       31,
+		time.June:      30,
+		time.July:      31,
+		time.August:    31,
+		time.September: 30,
+		time.October:   31,
+		time.November:  30,
+		time.December:  31,
+	}
 
-var weekdays map[time.Weekday]string = map[time.Weekday]string{
-	time.Monday:    "Monday",
-	time.Tuesday:   "Tuesday",
-	time.Wednesday: "Wednesday",
-	time.Thursday:  "Thursday",
-	time.Friday:    "Friday",
-	time.Saturday:  "Saturday",
-	time.Sunday:    "Sunday",
-}
+	MonthDaysList [12]int = [12]int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+
+	weekdays map[time.Weekday]string = map[time.Weekday]string{
+		time.Monday:    "Monday",
+		time.Tuesday:   "Tuesday",
+		time.Wednesday: "Wednesday",
+		time.Thursday:  "Thursday",
+		time.Friday:    "Friday",
+		time.Saturday:  "Saturday",
+		time.Sunday:    "Sunday",
+	}
+)
 
 func GetNumDaysOfMonth(month time.Month, year int) int {
 	if month == time.February {
@@ -39,7 +42,7 @@ func GetNumDaysOfMonth(month time.Month, year int) int {
 		}
 	}
 
-	return MonthDays[month]
+	return monthDays[month]
 }
 
 func GetDaysOfMonth(month time.Month, year int) schemas.Month {
@@ -76,26 +79,26 @@ func GetYearOffset(year int) int {
 
 func GetMonthGaps(year int) []int {
 	list := make([]int, 12)
+
 	for i := range 12 {
-		month := time.Month(i)
+		month := time.Month(i + 1)
 		firstDay := time.Date(year, month, 1, 0, 0, 0, 0, time.Now().Local().Location())
 		offset := getMonthOffset(firstDay.Weekday())
 		numDays := GetNumDaysOfMonth(month, year)
 
-		numCols, remainder := int((offset+numDays)/7), (offset+numDays)%7
+		cols := int((offset + numDays) / 7)
+		rem := (offset + numDays) % 7
 
-		result := numCols
-		if remainder == 0 {
-			result = numCols - 1
-		} else {
-			result = numCols
+		if offset != 0 && i > 0 {
+			cols--
+		}
+		if rem == 0 {
+			cols--
 		}
 
-		list[i] = result
-
+		list[i] = cols
 	}
 
-	fmt.Println(list)
 	return list
 }
 

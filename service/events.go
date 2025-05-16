@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"chrono/calendar"
 	"chrono/config"
 	"chrono/db/repo"
 	"chrono/schemas"
@@ -179,6 +180,40 @@ func GetEventsForMonth(
 	}
 
 	return nil
+}
+
+func GetEventsForYear(r *repo.Queries, year int) ([]repo.Event, error) {
+	yearStart := time.Date(year, time.January, 1, 0, 0, 0, 0, time.Now().Location())
+
+	params := repo.GetEventsForYearParams{
+		ScheduledAt:   yearStart,
+		ScheduledAt_2: yearStart.AddDate(1, 0, 0),
+	}
+
+	events, err := r.GetEventsForYear(context.Background(), params)
+	if err != nil {
+		log.Printf("Failed to get events for year: %v", err)
+		return nil, err
+	}
+
+	return events, err
+}
+
+func GetEventCountForYear(r *repo.Queries, year int) ([]int, error) {
+	events, err := GetEventsForYear(r, year)
+	if err != nil {
+		return nil, err
+	}
+
+	numDays := calendar.NumDaysInYear(year)
+	eventList := make([]int, numDays)
+
+	for _, event := range events {
+		i := event.ScheduledAt.YearDay() - 1
+		eventList[i] = eventList[i] + 1
+	}
+
+	return eventList, err
 }
 
 func GetRemainingVacation(r *repo.Queries, userId int64, year int, month int) (float64, error) {

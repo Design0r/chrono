@@ -295,7 +295,7 @@ SELECT id, scheduled_at, name, state, created_at, edited_at, user_id FROM events
 WHERE scheduled_at >= ? 
   AND scheduled_at < ?
   AND state = "accepted"
-  AND name IN ('urlaub', 'urlaub halbtags')
+  AND (name IN ('urlaub', 'urlaub halbtags') OR user_id = 1)
 
 ORDER BY scheduled_at
 `

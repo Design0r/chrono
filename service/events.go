@@ -201,18 +201,26 @@ func GetEventsForYear(r *repo.Queries, year int) ([]repo.Event, error) {
 	return events, err
 }
 
-func GetEventCountForYear(r *repo.Queries, year int) ([]int, error) {
+func GetEventCountForYear(r *repo.Queries, year int) ([]schemas.YearHistogram, error) {
 	events, err := GetEventsForYear(r, year)
 	if err != nil {
 		return nil, err
 	}
 
 	numDays := calendar.NumDaysInYear(year)
-	eventList := make([]int, numDays)
+	eventList := make([]schemas.YearHistogram, numDays)
 
 	for _, event := range events {
 		i := event.ScheduledAt.YearDay() - 1
-		eventList[i] = eventList[i] + 1
+		date := event.ScheduledAt
+		days := calendar.GetNumDaysOfMonth(date.Month(), date.Year())
+
+		eventList[i].Count += 1
+		eventList[i].IsHoliday = event.UserID == 1
+		eventList[i].LastDayOfMonth = date.Day() == days
+		_, dateWeek := date.ISOWeek()
+		_, currWeek := time.Now().ISOWeek()
+		eventList[i].IsCurrentWeek = dateWeek == currWeek
 	}
 
 	return eventList, err

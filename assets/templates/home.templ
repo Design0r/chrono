@@ -1,12 +1,14 @@
 package templates
 
 import (
+	"chrono/calendar"
 	"chrono/db/repo"
 	"chrono/schemas"
 	"fmt"
+	"time"
 )
 
-templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress schemas.YearProgress, notifications []repo.Notification, eventHistogram []int) {
+templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress schemas.YearProgress, notifications []repo.Notification, eventHistogram []schemas.YearHistogram) {
 	@Index(&user, notifications) {
 		<div class="flex flex-col container mx-auto justify-center align-middle gap-10 p-4">
 			<div class="text-[48px] pl-2 font-black">{ fmt.Sprintf("> hey %v ", user.Username) }</div>
@@ -66,7 +68,9 @@ templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingE
 					</div>
 				</div>
 			}
-			@YearOverview(eventHistogram)
+			@Card("Team Vacation") {
+				@YearOverview(eventHistogram)
+			}
 		</div>
 	}
 }
@@ -85,4 +89,95 @@ templ YearProgress(progress schemas.YearProgress) {
 	<progress class="progress progress-success mb-3 mt-2 h-6" { templ.Attributes{"value":fmt.Sprintf("%.1f", progress.DaysPassedPercent)}... } max="100" role="progressbar">
 		{ fmt.Sprintf("%.1f %%", progress.DaysPassedPercent) }
 	</progress>
+}
+
+templ OverviewDay(day schemas.YearHistogram) {
+	{{
+	baseStyle := "width:1rem; height:1rem; border-radius:9999px;"
+
+	var hex string
+	if day.IsHoliday {
+		hex = "#fd9a00"
+	} else {
+		c := day.Count
+		if c < 1 {
+			c = 1
+		}
+		if c > 9 {
+			c = 9
+		}
+		greens := []string{
+			"#555555", "#a7f3d0", "#6ee7b7",
+			"#34d399", "#10b981", "#059669",
+			"#047857", "#065f46", "#064e3b",
+		}
+		hex = greens[c-1]
+	}
+
+	shadow := ""
+	if day.LastDayOfMonth {
+		shadow = " box-shadow:0 1.5rem 0 -0.25rem white;"
+	}
+
+	styleAttr := fmt.Sprintf(
+		"%s background-color:%s;%s",
+		baseStyle, hex, shadow,
+	)
+	}}
+	<div style={ styleAttr }></div>
+}
+
+templ YearOverview(histogram []schemas.YearHistogram) {
+	{{
+		totalWeeks := 1
+		gaps := calendar.GetMonthGaps(calendar.CurrentYear())
+		_, currWeek := time.Now().ISOWeek()
+	}}
+	<div class="grid grid-cols-12 p-5 bg-base-200  rounded-3xl">
+		<div class="col-span-1"></div>
+		<div class="col-span-11 grid grid-rows-1 grid-flow-col h-10 gap-1">
+			for i, monthGap := range gaps {
+				<p class="w-4 h-4">{ time.Month(i+1).String() }</p>
+				for  range monthGap {
+					<p class="w-4 h-4 -z-10"></p>
+				}
+			}
+		</div>
+		<div class="col-span-1"></div>
+		<div class="col-span-11 grid grid-rows-1 grid-flow-col h-10 gap-1">
+			for _, monthGap := range gaps {
+				if currWeek == totalWeeks {
+					<p class="w-4 h-4 text-red-400 text-lg text-center">{ fmt.Sprint(totalWeeks) }</p>
+				} else {
+					<p class="w-4 h-4 text-purple-500 text-center">{ fmt.Sprint(totalWeeks) }</p>
+				}
+				{{ totalWeeks++ }}
+				for range monthGap {
+					if currWeek == totalWeeks {
+						<p class="w-4 h-4 text-center text-red-400 text-lg">{ fmt.Sprint(totalWeeks) }</p>
+					} else {
+						<p class="w-4 h-4 text-center ">{ fmt.Sprint(totalWeeks) }</p>
+					}
+					{{ totalWeeks++ }}
+				}
+			}
+		</div>
+		<div class="col-span-1 grid grid-rows-7">
+			<p>Mon</p>
+			<p>Tue</p>
+			<p>Wed</p>
+			<p>Thu</p>
+			<p>Fri</p>
+			<p>Sat</p>
+			<p>Sun</p>
+		</div>
+		<div class="col-span-11 grid grid-rows-7 h-80 grid-flow-col gap-1">
+			for range calendar.GetYearOffset(calendar.CurrentYear()) {
+				<p></p>
+			}
+			for _, d := range histogram {
+				@OverviewDay(d)
+			}
+		</div>
+	</div>
 }

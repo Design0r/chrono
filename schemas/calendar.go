@@ -35,3 +35,10 @@ type YearProgress struct {
 	NumHolidays       int
 	NumWastedHolidays int
 }
+
+type YearHistogram struct {
+	IsHoliday      bool
+	Count          int
+	LastDayOfMonth bool
+	IsCurrentWeek  bool
+}

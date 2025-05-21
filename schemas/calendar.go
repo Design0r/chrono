@@ -41,4 +41,6 @@ type YearHistogram struct {
 	Count          int
 	LastDayOfMonth bool
 	IsCurrentWeek  bool
+	Usernames      []string
+	Date           string
 }

@@ -184,7 +184,7 @@ func GetEventsForMonth(
 	return nil
 }
 
-func GetEventsForYear(r *repo.Queries, year int) ([]repo.Event, error) {
+func GetEventsForYear(r *repo.Queries, year int) ([]repo.GetEventsForYearRow, error) {
 	yearStart := time.Date(year, time.January, 1, 0, 0, 0, 0, time.Now().Location())
 
 	params := repo.GetEventsForYearParams{
@@ -221,6 +221,10 @@ func GetEventCountForYear(r *repo.Queries, year int) ([]schemas.YearHistogram, e
 		_, dateWeek := date.ISOWeek()
 		_, currWeek := time.Now().ISOWeek()
 		eventList[i].IsCurrentWeek = dateWeek == currWeek
+		eventList[i].Usernames = append(eventList[i].Usernames, event.Username)
+		s := strings.Split(date.Format(time.DateOnly), "-")
+		slices.Reverse(s)
+		eventList[i].Date = strings.Join(s, ".")
 	}
 
 	return eventList, err

@@ -28,7 +28,6 @@ live/server:
 	air
 
 live/tailwind:
-	cd node && \
 	npm install && \
 	npm run dev
 
@@ -36,7 +35,6 @@ dev:
 	make -j3 live/templ live/server live/tailwind
 
 build:
-	@cd node && \
 	npm install && \
 	npm run build
 

@@ -1,0 +1,19 @@
+{
+  "name": "apic-calendar",
+  "version": "1.0.0",
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "scripts": {
+    "build": "npx --yes @tailwindcss/cli -i ./asstes/css/input.css -o ./assets/static/css/output.css --minify",
+    "dev": "npx --yes @tailwindcss/cli -i ./assets/css/input.css -o ./assets/static/css/output.css --minify --watch"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.7",
+    "tailwindcss": "^4.1.7"
+  },
+  "devDependencies": {
+    "daisyui": "^5.0.35"
+  }
+}

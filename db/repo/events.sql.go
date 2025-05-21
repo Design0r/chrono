@@ -291,11 +291,12 @@ func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthPa
 }
 
 const GetEventsForYear = `-- name: GetEventsForYear :many
-SELECT id, scheduled_at, name, state, created_at, edited_at, user_id FROM events
-WHERE scheduled_at >= ? 
-  AND scheduled_at < ?
-  AND state = "accepted"
-  AND (name IN ('urlaub', 'urlaub halbtags') OR user_id = 1)
+SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color FROM events e
+JOIN users u ON e.user_id = u.id
+WHERE e.scheduled_at >= ? 
+  AND e.scheduled_at < ?
+  AND e.state = "accepted"
+  AND (e.name IN ('urlaub', 'urlaub halbtags') OR e.user_id = 1)
 
 ORDER BY scheduled_at
 `
@@ -305,15 +306,34 @@ type GetEventsForYearParams struct {
 	ScheduledAt_2 time.Time `json:"scheduled_at_2"`
 }
 
-func (q *Queries) GetEventsForYear(ctx context.Context, arg GetEventsForYearParams) ([]Event, error) {
+type GetEventsForYearRow struct {
+	ID           int64     `json:"id"`
+	ScheduledAt  time.Time `json:"scheduled_at"`
+	Name         string    `json:"name"`
+	State        string    `json:"state"`
+	CreatedAt    time.Time `json:"created_at"`
+	EditedAt     time.Time `json:"edited_at"`
+	UserID       int64     `json:"user_id"`
+	ID_2         int64     `json:"id_2"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	Password     string    `json:"password"`
+	VacationDays int64     `json:"vacation_days"`
+	IsSuperuser  bool      `json:"is_superuser"`
+	CreatedAt_2  time.Time `json:"created_at_2"`
+	EditedAt_2   time.Time `json:"edited_at_2"`
+	Color        string    `json:"color"`
+}
+
+func (q *Queries) GetEventsForYear(ctx context.Context, arg GetEventsForYearParams) ([]GetEventsForYearRow, error) {
 	rows, err := q.db.QueryContext(ctx, GetEventsForYear, arg.ScheduledAt, arg.ScheduledAt_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Event
+	var items []GetEventsForYearRow
 	for rows.Next() {
-		var i Event
+		var i GetEventsForYearRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.ScheduledAt,
@@ -322,6 +342,15 @@ func (q *Queries) GetEventsForYear(ctx context.Context, arg GetEventsForYearPara
 			&i.CreatedAt,
 			&i.EditedAt,
 			&i.UserID,
+			&i.ID_2,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.VacationDays,
+			&i.IsSuperuser,
+			&i.CreatedAt_2,
+			&i.EditedAt_2,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}

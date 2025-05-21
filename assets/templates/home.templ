@@ -10,7 +10,7 @@ import (
 
 templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress schemas.YearProgress, notifications []repo.Notification, eventHistogram []schemas.YearHistogram) {
 	@Index(&user, notifications) {
-		<div class="flex flex-col container mx-auto justify-center align-middle gap-10 p-4">
+		<div class="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
 			<div class="text-[48px] pl-2 font-black">{ fmt.Sprintf("> hey %v ", user.Username) }</div>
 			@Card("Your vacation stats") {
 				<div class="stats grid grid-cols-4 bg-base-200 w-full">
@@ -78,7 +78,7 @@ templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingE
 templ Card(title string) {
 	<div class="space-y-2 p-3 rounded-xl flex flex-col items-left justify-center">
 		<h1 class="text-xl">{ title }</h1>
-		<div class="divider"></div>
+		<div class="divider m-2"></div>
 		<div>
 			{ children... }
 		</div>
@@ -100,18 +100,18 @@ templ OverviewDay(day schemas.YearHistogram) {
 		hex = "#fd9a00"
 	} else {
 		c := day.Count
-		if c < 1 {
-			c = 1
+		if c < 0 {
+			c = 0
 		}
-		if c > 9 {
-			c = 9
+		if c > 8 {
+			c = 8
 		}
 		greens := []string{
 			"#555555", "#a7f3d0", "#6ee7b7",
 			"#34d399", "#10b981", "#059669",
 			"#047857", "#065f46", "#064e3b",
 		}
-		hex = greens[c-1]
+		hex = greens[c]
 	}
 
 	shadow := ""
@@ -124,7 +124,16 @@ templ OverviewDay(day schemas.YearHistogram) {
 		baseStyle, hex, shadow,
 	)
 	}}
-	<div style={ styleAttr }></div>
+	<div class="tooltip">
+		<div class="tooltip-content">
+			<div>{ day.Date }</div>
+			<div>Count: { fmt.Sprint(day.Count) }</div>
+			for _, name := range day.Usernames {
+				<p>{ name }</p>
+			}
+		</div>
+		<div style={ styleAttr }></div>
+	</div>
 }
 
 templ YearOverview(histogram []schemas.YearHistogram) {

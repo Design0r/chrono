@@ -8,11 +8,12 @@ SELECT * FROM events
 WHERE Date(scheduled_at) = ?;
 
 -- name: GetEventsForYear :many
-SELECT * FROM events
-WHERE scheduled_at >= ? 
-  AND scheduled_at < ?
-  AND state = "accepted"
-  AND (name IN ('urlaub', 'urlaub halbtags') OR user_id = 1)
+SELECT * FROM events e
+JOIN users u ON e.user_id = u.id
+WHERE e.scheduled_at >= ? 
+  AND e.scheduled_at < ?
+  AND e.state = "accepted"
+  AND (e.name IN ('urlaub', 'urlaub halbtags') OR e.user_id = 1)
 
 ORDER BY scheduled_at;
 

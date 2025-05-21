@@ -9,3 +9,5 @@ build
 .gitignore
 .air.toml
 *.json
+!/package.json
+!/package-lock.json

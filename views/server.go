@@ -64,7 +64,8 @@ func (self *Server) InitRoutes() {
 	InitTokenRoutes(admin, self.Repo)
 	InitDebugRoutes(admin, self.Repo)
 
-	InitLoginRoutes(self.Router.Group(""), self.Repo)
+	honeyot := self.Router.Group("", mw.HoneypotMiddleware(self.Repo))
+	InitLoginRoutes(honeyot, self.Repo)
 }
 
 func (self *Server) Start(address string) error {

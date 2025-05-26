@@ -10,30 +10,31 @@ templ Login() {
 					<h1 class="font-bold text-xl">Log in</h1>
 					<br/>
 					<form class="w-max" hx-post="/login" hx-swap="none">
-						<div>
-							<label for="email">Email</label>
+						<div class="w-lg">
+							<label for="qweemailasd">Email</label>
 							<br/>
 							<input
 								class="input w-full input-bordered"
 								type="email"
-								name="email"
+								name="qweemailasd"
 								required
 							/>
 							<br/>
 							<br/>
 						</div>
 						<div>
-							<label for="password">Password</label>
+							<label for="qwepasswordasd">Password</label>
 							<br/>
 							<input
 								class="input w-full input-bordered"
 								type="password"
-								name="password"
+								name="qwepasswordasd"
 								required
 							/>
 							<br/>
 							<br/>
 						</div>
+						@Honeypot("login")
 						<button
 							class="btn btn-primary"
 							type="submit"
@@ -45,50 +46,83 @@ templ Login() {
 	}
 }
 
+templ Honeypot(htype string) {
+	if htype == "signup" {
+		<label
+			class="opacity-0 absolute top-0 left-0 h-0 w-0 -z-1"
+			for="name"
+		>Name</label>
+		<input
+			class="opacity-0 absolute top-0 left-0 h-0 w-0 -z-1"
+			type="text"
+			name="name"
+		/>
+	}
+	<label
+		class="opacity-0 absolute top-0 left-0 h-0 w-0 -z-1"
+		for="email"
+	>Email</label>
+	<input
+		class="opacity-0 absolute top-0 left-0 h-0 w-0 -z-1"
+		type="email"
+		name="email"
+	/>
+	<label
+		class="opacity-0 absolute top-0 left-0 h-0 w-0 -z-1"
+		for="password"
+	>Password</label>
+	<input
+		class="opacity-0 absolute top-0 left-0 h-0 w-0 -z-1"
+		type="password"
+		name="password"
+	/>
+}
+
 templ Signup() {
 	@Index(nil, []repo.Notification{}) {
 		<div class="flex my-10">
 			<div class="align-middle flex m-auto">
-				<div>
+				<div class="w-lg">
 					<h1 class="font-bold text-xl">Sign up</h1>
 					<br/>
 					<form class="w-max" hx-post="/signup" hx-swap="none">
 						<div>
-							<label for="name">Name</label>
+							<label for="qwenameasd">Name</label>
 							<br/>
 							<input
 								class="input w-full input-bordered"
 								type="text"
-								name="name"
+								name="qwenameasd"
 								required
 							/>
 							<br/>
 							<br/>
 						</div>
 						<div>
-							<label for="email">Email</label>
+							<label for="qweemailasd">Email</label>
 							<br/>
 							<input
 								class="input w-full input-bordered"
 								type="email"
-								name="email"
+								name="qweemailasd"
 								required
 							/>
 							<br/>
 							<br/>
 						</div>
 						<div>
-							<label for="password">Password</label>
+							<label for="qwepasswordasd">Password</label>
 							<br/>
 							<input
 								class="input w-full input-bordered"
 								type="password"
-								name="password"
+								name="qwepasswordasd"
 								required
 							/>
 							<br/>
 							<br/>
 						</div>
+						@Honeypot("signup")
 						<button
 							class="btn btn-primary"
 							type="submit"

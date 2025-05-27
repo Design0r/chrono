@@ -26,6 +26,7 @@ func main() {
 	log.Println("Initializing chrono...")
 
 	cfg := config.NewConfigFromEnv()
+	fmt.Println(cfg)
 
 	if err := sentry.Init(sentry.ClientOptions{
 		Dsn: cfg.SentryUrl,

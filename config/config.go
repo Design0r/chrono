@@ -32,7 +32,7 @@ func NewConfigFromEnv() *Config {
 		BotName:     loadStrict("BOT_NAME"),
 		BotEmail:    loadStrict("BOT_EMAIL"),
 		BotPassword: loadStrict("BOT_PASSWORD"),
-		SentryUrl:   loadIf("SENTRY_URL", func() bool { return loadDefault("DEBUG", "0") == "1" }),
+		SentryUrl:   loadIf("SENTRY_URL", func() bool { return loadDefault("DEBUG", "0") == "0" }),
 	}
 
 	log.Println("Config loaded")

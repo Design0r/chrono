@@ -6,7 +6,7 @@
   "license": "ISC",
   "description": "",
   "scripts": {
-    "build": "npx --yes @tailwindcss/cli -i ./asstes/css/input.css -o ./assets/static/css/output.css --minify",
+    "build": "npx --yes @tailwindcss/cli -i ./assets/css/input.css -o ./assets/static/css/output.css --minify",
     "dev": "npx --yes @tailwindcss/cli -i ./assets/css/input.css -o ./assets/static/css/output.css --minify --watch"
   },
   "dependencies": {

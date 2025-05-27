@@ -7,6 +7,7 @@ import (
 
 	"chrono/db/repo"
 	"chrono/htmx"
+	"chrono/schemas"
 	"chrono/service"
 )
 
@@ -54,6 +55,22 @@ func AdminMiddleware(r *repo.Queries) MiddlewareFunc {
 					http.StatusForbidden,
 					"Forbidden action, only available for admins",
 				)
+			}
+
+			return next(c)
+		}
+	}
+}
+
+func HoneypotMiddleware(r *repo.Queries) MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			var honey schemas.Honeypot
+			if err := c.Bind(&honey); err != nil {
+				return htmx.RenderError(c, http.StatusBadRequest, "Invalid inputs")
+			}
+			if honey.IsFilled() {
+				return htmx.RenderError(c, http.StatusBadRequest, "Invalid inputs")
 			}
 
 			return next(c)

@@ -14,6 +14,7 @@ type Config struct {
 	BotEmail    string
 	BotName     string
 	Banner      string
+	SentryUrl   string
 }
 
 var config *Config
@@ -24,18 +25,27 @@ func GetConfig() *Config {
 
 func NewConfigFromEnv() *Config {
 	config = &Config{
-		Debug:       loadDefault("DEBUG", "0") != "0",
+		Debug:       loadDefault("DEBUG", "0") == "1",
 		DebugUsers:  loadDefault("DEBUG_USERS", "debug_users.json"),
 		DbName:      loadDefault("DB_NAME", "chrono.db"),
 		Port:        loadDefault("PORT", "8080"),
 		BotName:     loadStrict("BOT_NAME"),
 		BotEmail:    loadStrict("BOT_EMAIL"),
 		BotPassword: loadStrict("BOT_PASSWORD"),
+		SentryUrl:   loadIf("SENTRY_URL", func() bool { return loadDefault("DEBUG", "0") == "0" }),
 	}
 
 	log.Println("Config loaded")
 
 	return config
+}
+
+func loadIf(val string, fn func() bool) string {
+	if fn() {
+		return loadDefault(val, "")
+	}
+
+	return ""
 }
 
 func loadStrict(envVar string) string {

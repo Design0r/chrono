@@ -209,7 +209,7 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div><div class=\"justify-end space-x-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div><div class=\"flex items-center justify-end space-x-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -262,8 +262,13 @@ func Avatar(user repo.User) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 
+		// Make sure slicing never panics
+		initial := "?"
+		if len(user.Username) > 0 {
+			initial = strings.ToUpper(user.Username[:1])
+		}
 		bgColor := service.HSLToString(service.HexToHSL(user.Color))
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"dropdown dropdown-end pr-2 items-center align-center justify-center\"><div tabindex=\"0\" role=\"button\" class=\"avatar placeholder\"><div")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"dropdown dropdown-end pr-2\"><!-- Trigger --><div tabindex=\"0\" role=\"button\" class=\"avatar avatar-placeholder cursor-pointer\"><div class=\"w-10 rounded-full text-neutral-content\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -271,20 +276,20 @@ func Avatar(user repo.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " class=\"text-neutral-content w-10 rounded-full\"><span class=\"text-xl\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "><span class=\"text-xl\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Title(user.Username[:1]))
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(initial)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 118, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 120, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span></div></div><!-- Menu --><ul tabindex=\"0\" class=\"dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mt-2\"><li><a href=\"/profile\">Profile</a></li><li><a href=\"/settings\">Settings</a></li><li><form method=\"POST\" action=\"/logout\"><button type=\"submit\" class=\"w-full text-left\">Logout</button></form></li></ul></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

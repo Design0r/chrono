@@ -43,13 +43,56 @@ func Login() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex my-10\"><div class=\"align-middle flex m-auto\"><div><h1 class=\"font-bold text-xl\">Log in</h1><br><form class=\"w-max\" hx-post=\"/login\" hx-swap=\"none\"><div><label for=\"email\">Email</label><br><input class=\"input w-full input-bordered\" type=\"email\" name=\"email\" required><br><br></div><div><label for=\"password\">Password</label><br><input class=\"input w-full input-bordered\" type=\"password\" name=\"password\" required><br><br></div><button class=\"btn btn-primary\" type=\"submit\">Log in</button></form></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex my-10\"><div class=\"align-middle flex m-auto\"><div><h1 class=\"font-bold text-xl\">Log in</h1><br><form class=\"w-max\" hx-post=\"/login\" hx-swap=\"none\"><div class=\"w-lg\"><label for=\"qweemailasd\">Email</label><br><input class=\"input w-full input-bordered\" type=\"email\" name=\"qweemailasd\" required><br><br></div><div><label for=\"qwepasswordasd\">Password</label><br><input class=\"input w-full input-bordered\" type=\"password\" name=\"qwepasswordasd\" required><br><br></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = Honeypot("login").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<button class=\"btn btn-primary\" type=\"submit\">Log in</button></form></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
 		templ_7745c5c3_Err = Index(nil, []repo.Notification{}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func Honeypot(htype string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		if htype == "signup" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<label class=\"opacity-0 absolute top-0 left-0 h-0 w-0 -z-1\" for=\"name\">Name</label> <input class=\"opacity-0 absolute top-0 left-0 h-0 w-0 -z-1\" type=\"text\" name=\"name\"> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<label class=\"opacity-0 absolute top-0 left-0 h-0 w-0 -z-1\" for=\"email\">Email</label> <input class=\"opacity-0 absolute top-0 left-0 h-0 w-0 -z-1\" type=\"email\" name=\"email\"> <label class=\"opacity-0 absolute top-0 left-0 h-0 w-0 -z-1\" for=\"password\">Password</label> <input class=\"opacity-0 absolute top-0 left-0 h-0 w-0 -z-1\" type=\"password\" name=\"password\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -73,12 +116,12 @@ func Signup() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var4 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -90,13 +133,21 @@ func Signup() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"flex my-10\"><div class=\"align-middle flex m-auto\"><div><h1 class=\"font-bold text-xl\">Sign up</h1><br><form class=\"w-max\" hx-post=\"/signup\" hx-swap=\"none\"><div><label for=\"name\">Name</label><br><input class=\"input w-full input-bordered\" type=\"text\" name=\"name\" required><br><br></div><div><label for=\"email\">Email</label><br><input class=\"input w-full input-bordered\" type=\"email\" name=\"email\" required><br><br></div><div><label for=\"password\">Password</label><br><input class=\"input w-full input-bordered\" type=\"password\" name=\"password\" required><br><br></div><button class=\"btn btn-primary\" type=\"submit\">Sign up</button></form></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"flex my-10\"><div class=\"align-middle flex m-auto\"><div class=\"w-lg\"><h1 class=\"font-bold text-xl\">Sign up</h1><br><form class=\"w-max\" hx-post=\"/signup\" hx-swap=\"none\"><div><label for=\"qwenameasd\">Name</label><br><input class=\"input w-full input-bordered\" type=\"text\" name=\"qwenameasd\" required><br><br></div><div><label for=\"qweemailasd\">Email</label><br><input class=\"input w-full input-bordered\" type=\"email\" name=\"qweemailasd\" required><br><br></div><div><label for=\"qwepasswordasd\">Password</label><br><input class=\"input w-full input-bordered\" type=\"password\" name=\"qwepasswordasd\" required><br><br></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = Honeypot("signup").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<button class=\"btn btn-primary\" type=\"submit\">Sign up</button></form></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Index(nil, []repo.Notification{}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Index(nil, []repo.Notification{}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

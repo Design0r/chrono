@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/a-h/templ"
+	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -44,6 +45,7 @@ func (self *Server) InitMiddleware() {
 	self.Router.GET("/static/*", staticHandler)
 	self.Router.Use(middleware.Recover())
 	self.Router.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
+	self.Router.Use(sentryecho.New(sentryecho.Options{}))
 }
 
 func (self *Server) InitRoutes() {

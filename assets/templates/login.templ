@@ -82,11 +82,11 @@ templ Signup() {
 	@Index(nil, []repo.Notification{}) {
 		<div class="flex my-10">
 			<div class="align-middle flex m-auto">
-				<div class="w-lg">
+				<div>
 					<h1 class="font-bold text-xl">Sign up</h1>
 					<br/>
 					<form class="w-max" hx-post="/signup" hx-swap="none">
-						<div>
+						<div class="w-lg">
 							<label for="qwenameasd">Name</label>
 							<br/>
 							<input

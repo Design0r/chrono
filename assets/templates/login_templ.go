@@ -133,7 +133,7 @@ func Signup() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"flex my-10\"><div class=\"align-middle flex m-auto\"><div class=\"w-lg\"><h1 class=\"font-bold text-xl\">Sign up</h1><br><form class=\"w-max\" hx-post=\"/signup\" hx-swap=\"none\"><div><label for=\"qwenameasd\">Name</label><br><input class=\"input w-full input-bordered\" type=\"text\" name=\"qwenameasd\" required><br><br></div><div><label for=\"qweemailasd\">Email</label><br><input class=\"input w-full input-bordered\" type=\"email\" name=\"qweemailasd\" required><br><br></div><div><label for=\"qwepasswordasd\">Password</label><br><input class=\"input w-full input-bordered\" type=\"password\" name=\"qwepasswordasd\" required><br><br></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"flex my-10\"><div class=\"align-middle flex m-auto\"><div><h1 class=\"font-bold text-xl\">Sign up</h1><br><form class=\"w-max\" hx-post=\"/signup\" hx-swap=\"none\"><div class=\"w-lg\"><label for=\"qwenameasd\">Name</label><br><input class=\"input w-full input-bordered\" type=\"text\" name=\"qwenameasd\" required><br><br></div><div><label for=\"qweemailasd\">Email</label><br><input class=\"input w-full input-bordered\" type=\"email\" name=\"qweemailasd\" required><br><br></div><div><label for=\"qwepasswordasd\">Password</label><br><input class=\"input w-full input-bordered\" type=\"password\" name=\"qwepasswordasd\" required><br><br></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

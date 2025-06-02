@@ -1,9 +1,7 @@
 {
   auto_https off
 }
-:8080 {
-    redir http://{host}{uri}
-}
-:80 {
+
+http://0.0.0.0:8000 {
   reverse_proxy chrono:8080
 }

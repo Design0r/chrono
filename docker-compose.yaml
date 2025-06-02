@@ -1,5 +1,5 @@
 services:
-  caddy:
+  chrono-caddy:
     image: caddy:2.8-alpine
     restart: unless-stopped
     expose:
@@ -21,6 +21,8 @@ services:
       context: .
     expose:
       - 8080
+    networks:
+      - caddy_shared
 
 volumes:
   db:

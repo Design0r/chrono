@@ -2,12 +2,14 @@ services:
   caddy:
     image: caddy:2.8-alpine
     restart: unless-stopped
-    ports:
-      - "8000:8000"
+    expose:
+      - 8000
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
+    networks:
+      - caddy_shared
 
   chrono:
     restart: unless-stopped
@@ -24,3 +26,7 @@ volumes:
   db:
   caddy_data:
   caddy_config:
+
+networks:
+  caddy_shared:
+    external: true

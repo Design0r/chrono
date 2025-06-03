@@ -1,0 +1,14 @@
+package templates
+
+import (
+	"chrono/db/repo"
+	"chrono/internal/domain"
+	"fmt"
+)
+
+templ Settings(s domain.Settings, user *repo.User, notifications []repo.Notification) {
+	@Index(user, notifications) {
+		<p>Signup enabled:</p>
+		<p>{ fmt.Sprint(s.SignupEnabled) }</p>
+	}
+}

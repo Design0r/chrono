@@ -55,6 +55,11 @@ type Session struct {
 	UserID     int64     `json:"user_id"`
 }
 
+type Setting struct {
+	ID            int64 `json:"id"`
+	SignupEnabled bool  `json:"signup_enabled"`
+}
+
 type TokenRefresh struct {
 	ID        int64     `json:"id"`
 	Year      int64     `json:"year"`

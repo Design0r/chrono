@@ -12,6 +12,9 @@ import (
 	"chrono/assets"
 	"chrono/db/repo"
 	"chrono/htmx"
+	"chrono/internal/adapter/db"
+	"chrono/internal/adapter/handler"
+	"chrono/internal/service"
 	mw "chrono/middleware"
 )
 
@@ -66,8 +69,13 @@ func (self *Server) InitRoutes() {
 	InitTokenRoutes(admin, self.Repo)
 	InitDebugRoutes(admin, self.Repo)
 
-	honeyot := self.Router.Group("", mw.HoneypotMiddleware(self.Repo))
-	InitLoginRoutes(honeyot, self.Repo)
+	sr := db.NewSQLSettingsRepo(self.Repo)
+	ss := service.NewSettingsService(&sr)
+	sh := handler.NewSettingsHandler(&ss)
+	handler.RegisterSettingsRoutes(admin, &sh)
+
+	honeypot := self.Router.Group("", mw.HoneypotMiddleware(self.Repo))
+	InitLoginRoutes(honeypot, self.Repo)
 }
 
 func (self *Server) Start(address string) error {

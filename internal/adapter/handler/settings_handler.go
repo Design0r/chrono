@@ -1,13 +1,14 @@
-package http
+package handler
 
 import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+
 	"chrono/assets/templates"
 	"chrono/db/repo"
 	"chrono/htmx"
 	"chrono/internal/service"
-	"net/http"
-
-	"github.com/labstack/echo/v4"
 )
 
 type SettingsHandler struct {
@@ -16,6 +17,11 @@ type SettingsHandler struct {
 
 func NewSettingsHandler(s service.SettingsService) SettingsHandler {
 	return SettingsHandler{s: s}
+}
+
+func RegisterSettingsRoutes(group *echo.Group, handler *SettingsHandler) {
+	g := group.Group("/settings")
+	g.GET("", handler.Settings)
 }
 
 func (h *SettingsHandler) Settings(c echo.Context) error {

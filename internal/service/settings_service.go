@@ -1,8 +1,9 @@
 package service
 
 import (
-	"chrono/internal/domain"
 	"context"
+
+	"chrono/internal/domain"
 )
 
 type SettingsService interface {
@@ -21,11 +22,17 @@ func NewSettingsService(r domain.SettingsRepository) settingsService {
 	return settingsService{r: r}
 }
 
-func (s *settingsService) Create(ctx context.Context, settings domain.Settings) (domain.Settings, error) {
+func (s *settingsService) Create(
+	ctx context.Context,
+	settings domain.Settings,
+) (domain.Settings, error) {
 	return s.r.Create(ctx, settings)
 }
 
-func (s *settingsService) Update(ctx context.Context, settings domain.Settings) (domain.Settings, error) {
+func (s *settingsService) Update(
+	ctx context.Context,
+	settings domain.Settings,
+) (domain.Settings, error) {
 	return s.r.Update(ctx, settings)
 }
 

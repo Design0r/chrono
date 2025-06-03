@@ -1,10 +1,11 @@
 package db
 
 import (
-	"chrono/db/repo"
-	"chrono/internal/domain"
 	"context"
 	"log/slog"
+
+	"chrono/db/repo"
+	"chrono/internal/domain"
 )
 
 type SQLSettingsRepo struct {
@@ -26,7 +27,6 @@ func (r *SQLSettingsRepo) GetById(ctx context.Context, id int64) (domain.Setting
 	return domain.Settings{
 		SignupEnabled: s.SignupEnabled,
 	}, nil
-
 }
 
 func (r *SQLSettingsRepo) Delete(ctx context.Context, id int64) error {
@@ -37,31 +37,31 @@ func (r *SQLSettingsRepo) Delete(ctx context.Context, id int64) error {
 	}
 
 	return nil
-
 }
 
 func (r *SQLSettingsRepo) Create(ctx context.Context, s domain.Settings) (domain.Settings, error) {
-	s, err := r.q.CreateSettings(ctx, s.SignupEnabled)
+	settings, err := r.q.CreateSettings(ctx, s.SignupEnabled)
 	if err != nil {
 		r.log.Error("repo.GetSettingsById failed:", slog.String("error", err.Error()))
 		return domain.Settings{}, nil
 	}
 
 	return domain.Settings{
-		SignupEnabled: s.SignupEnabled,
+		SignupEnabled: settings.SignupEnabled,
 	}, nil
-
 }
 
 func (r *SQLSettingsRepo) Update(ctx context.Context, s domain.Settings) (domain.Settings, error) {
-	s, err := r.q.UpdateSettings(ctx, repo.UpdateSettingsParams{ID: s.ID, SignupEnabled: s.SignupEnabled})
+	settings, err := r.q.UpdateSettings(
+		ctx,
+		repo.UpdateSettingsParams{ID: s.ID, SignupEnabled: s.SignupEnabled},
+	)
 	if err != nil {
 		r.log.Error("repo.GetSettingsById failed:", slog.String("error", err.Error()))
 		return domain.Settings{}, nil
 	}
 
 	return domain.Settings{
-		SignupEnabled: s.SignupEnabled,
+		SignupEnabled: settings.SignupEnabled,
 	}, nil
-
 }

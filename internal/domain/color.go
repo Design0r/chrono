@@ -1,4 +1,4 @@
-package service
+package domain
 
 import (
 	"fmt"
@@ -8,28 +8,32 @@ import (
 	"time"
 )
 
-func GenerateHSL(seed int) string {
+type color struct{}
+
+var Color = color{}
+
+func (color) HSL(seed int) string {
 	hue := (seed * 12345) % 360
 	saturation := 50
 	lightness := 40
 	return fmt.Sprintf("hsl(%d, %d%%, %d%%)", hue, saturation, lightness)
 }
 
-func GenerateHSLDark(seed int) string {
+func (color) HSLDark(seed int) string {
 	hue := (seed * 12345) % 360
 	saturation := 30
 	lightness := 30
 	return fmt.Sprintf("hsl(%d, %d%%, %d%%)", hue, saturation, lightness)
 }
 
-func GenerateHSLFloat(seed int) (float64, float64, float64) {
+func (color) HSLFloat(seed int) (float64, float64, float64) {
 	hue := float64((seed * 12345) % 360)
 	saturation := 0.5
 	lightness := 0.5
 	return hue, saturation, lightness
 }
 
-func RandomHSL() (float64, float64, float64) {
+func (color) RandomHSL() (float64, float64, float64) {
 	hue := float64((time.Now().UnixNano() * 12345) % 360)
 	saturation := 0.5
 	lightness := 0.5
@@ -37,18 +41,18 @@ func RandomHSL() (float64, float64, float64) {
 	return hue, saturation, lightness
 }
 
-func GenerateHSLDarkFromHex(hex string) string {
-	h, s, l := HexToHSL(hex)
-	s = 0.3
-	l = 0.3
-	return HSLToString(h, s, l)
+func (color) HSLDarkFromHex(hex string) string {
+	h, _, _ := Color.HexToHSL(hex)
+	s := 0.3
+	l := 0.3
+	return Color.HSLToString(h, s, l)
 }
 
-func RandomHexColor() string {
-	return HSLToHex(RandomHSL())
+func (color) RandomHexColor() string {
+	return Color.HSLToHex(Color.RandomHSL())
 }
 
-func HSLToHex(h float64, s float64, l float64) string {
+func (color) HSLToHex(h float64, s float64, l float64) string {
 	// 1. Normalize the hue to [0..1]
 	//    H (in degrees) / 360 => range [0..1]
 	h = math.Mod(h, 360) / 360
@@ -60,8 +64,7 @@ func HSLToHex(h float64, s float64, l float64) string {
 		r, g, b = l, l, l
 	} else {
 		// For HSL-to-RGB, we define some helpers:
-		var hueToRGB func(p, q, t float64) float64
-		hueToRGB = func(p, q, t float64) float64 {
+		var hueToRGB = func(p, q, t float64) float64 {
 			// Wrap t around if it goes out of bounds
 			if t < 0 {
 				t += 1
@@ -105,11 +108,9 @@ func HSLToHex(h float64, s float64, l float64) string {
 	return fmt.Sprintf("#%02X%02X%02X", R, G, B)
 }
 
-func HexToHSL(hex string) (float64, float64, float64) {
+func (color) HexToHSL(hex string) (float64, float64, float64) {
 	// Remove leading "#" if present.
-	if strings.HasPrefix(hex, "#") {
-		hex = hex[1:]
-	}
+	hex = strings.TrimPrefix(hex, "#")
 
 	// Check for valid length (must be 6 characters: RRGGBB).
 	if len(hex) != 6 {
@@ -170,6 +171,6 @@ func HexToHSL(hex string) (float64, float64, float64) {
 	return hDegrees, s, l
 }
 
-func HSLToString(h float64, s float64, l float64) string {
+func (color) HSLToString(h float64, s float64, l float64) string {
 	return fmt.Sprintf("hsl(%v, %v%%, %v%%)", h, s*100, l*100)
 }

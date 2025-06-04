@@ -54,20 +54,6 @@ func DeleteToken(r *repo.Queries, id int64) error {
 	return nil
 }
 
-func GetValidUserTokens(r *repo.Queries, userId int64,
-	startDate time.Time,
-	endDate time.Time,
-) ([]repo.VacationToken, error) {
-	params := repo.GetValidUserTokensParams{UserID: userId, StartDate: startDate, EndDate: endDate}
-	tokens, err := r.GetValidUserTokens(context.Background(), params)
-	if err != nil {
-		log.Printf("Failed to get valid vacation tokens: %v", err)
-		return nil, err
-	}
-
-	return tokens, nil
-}
-
 func GetValidUserTokenSum(r *repo.Queries, userId int64,
 	startDate time.Time,
 ) (float64, error) {

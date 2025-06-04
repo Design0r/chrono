@@ -13,8 +13,8 @@ type SQLSettingsRepo struct {
 	log *slog.Logger
 }
 
-func NewSQLSettingsRepo(q *repo.Queries) SQLSettingsRepo {
-	return SQLSettingsRepo{q: q}
+func NewSQLSettingsRepo(q *repo.Queries, log *slog.Logger) SQLSettingsRepo {
+	return SQLSettingsRepo{q: q, log: log}
 }
 
 func (r *SQLSettingsRepo) GetById(ctx context.Context, id int64) (domain.Settings, error) {

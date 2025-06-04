@@ -1,12 +1,12 @@
--- name: CreateTokenRefresh :one
+-- name: CreateRefreshToken :one
 INSERT INTO token_refresh (user_id, year)
 VALUES (?,?)
 RETURNING *;
 
--- name: GetTokenRefresh :one
+-- name: GetRefreshToken :one
 SELECT Count(*) FROM token_refresh
 WHERE user_id = ?
 AND year = ?;
 
--- name: ResetTokenRefresh :exec
+-- name: DeleteAllRefreshTokens :exec
 DELETE FROM token_refresh;

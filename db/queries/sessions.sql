@@ -3,7 +3,7 @@ INSERT INTO sessions (id, valid_until, user_id)
 VALUES (?, ?, ?)
 RETURNING *;
 
--- name: GetSessionByID :one
+-- name: GetSessionById :one
 SELECT * FROM sessions
 WHERE id = ?;
 

@@ -17,6 +17,12 @@ type User struct {
 	Color        string    `json:"color"`
 }
 
+type UserWithVacation struct {
+	User
+	VacationRemaining float64
+	VacationUsed      float64
+}
+
 type CreateUser struct {
 	Username     string `json:"username"`
 	Color        string `json:"color"`

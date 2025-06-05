@@ -14,7 +14,7 @@ type Session struct {
 }
 
 type SessionRepository interface {
-	Create(ctx context.Context, userId int64, secureRand string, validUntil time.Time) (*Session, error)
+	Create(ctx context.Context, userId int64, secureRand string, duration time.Duration) (*Session, error)
 	Delete(ctx context.Context, cookie string) error
 	DeleteAll(ctx context.Context) error
 	IsValidSession(ctx context.Context, cookie string, timestamp time.Time) bool

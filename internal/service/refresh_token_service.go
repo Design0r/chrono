@@ -14,32 +14,32 @@ type RefreshTokenService interface {
 }
 
 type refreshTokenService struct {
-	r   domain.RefreshTokenRepository
-	log *slog.Logger
+	refresh domain.RefreshTokenRepository
+	log     *slog.Logger
 }
 
 func NewRefreshTokenService(
 	r domain.RefreshTokenRepository,
 	log *slog.Logger,
 ) refreshTokenService {
-	return refreshTokenService{r: r, log: log}
+	return refreshTokenService{refresh: r, log: log}
 }
 
-func (s *refreshTokenService) Create(
+func (svc *refreshTokenService) Create(
 	ctx context.Context,
 	t domain.CreateVacationToken,
 ) (*domain.VacationToken, error) {
-	return s.r.Create(ctx, t)
+	return svc.refresh.Create(ctx, t)
 }
 
-func (s *refreshTokenService) DeleteAll(ctx context.Context) error {
-	return s.r.DeleteAll(ctx)
+func (svc *refreshTokenService) DeleteAll(ctx context.Context) error {
+	return svc.refresh.DeleteAll(ctx)
 }
 
-func (s *refreshTokenService) ExistsForUser(
+func (svc *refreshTokenService) ExistsForUser(
 	ctx context.Context,
 	userId int64,
 	year int,
 ) (bool, error) {
-	return s.r.ExistsForUser(ctx, userId, year)
+	return svc.refresh.ExistsForUser(ctx, userId, year)
 }

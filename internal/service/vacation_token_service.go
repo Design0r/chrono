@@ -21,37 +21,37 @@ type VacationTokenService interface {
 }
 
 type vacationTokenService struct {
-	r   domain.VacationTokenRepository
-	log *slog.Logger
+	vacation domain.VacationTokenRepository
+	log      *slog.Logger
 }
 
 func NewVacationTokenService(
 	r domain.VacationTokenRepository,
 	log *slog.Logger,
 ) vacationTokenService {
-	return vacationTokenService{r: r, log: log}
+	return vacationTokenService{vacation: r, log: log}
 }
 
-func (s *vacationTokenService) Create(
+func (svc *vacationTokenService) Create(
 	ctx context.Context,
 	t domain.CreateVacationToken,
 ) (*domain.VacationToken, error) {
-	return s.r.Create(ctx, t)
+	return svc.vacation.Create(ctx, t)
 }
 
-func (s *vacationTokenService) Delete(ctx context.Context, id int64) error {
-	return s.r.Delete(ctx, id)
+func (svc *vacationTokenService) Delete(ctx context.Context, id int64) error {
+	return svc.vacation.Delete(ctx, id)
 }
 
-func (s *vacationTokenService) DeleteAll(ctx context.Context) error {
-	return s.r.DeleteAll(ctx)
+func (svc *vacationTokenService) DeleteAll(ctx context.Context) error {
+	return svc.vacation.DeleteAll(ctx)
 }
 
-func (s *vacationTokenService) GetRemainingVacationForUser(
+func (svc *vacationTokenService) GetRemainingVacationForUser(
 	ctx context.Context,
 	userId int64,
 	start time.Time,
 	end time.Time,
 ) (float64, error) {
-	return s.r.GetRemainingVacationForUser(ctx, userId, start, end)
+	return svc.vacation.GetRemainingVacationForUser(ctx, userId, start, end)
 }

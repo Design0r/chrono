@@ -16,27 +16,27 @@ type SessionService interface {
 }
 
 type sessionService struct {
-	r domain.SessionRepository
+	session domain.SessionRepository
 }
 
 func NewSessionService(r domain.SessionRepository) sessionService {
-	return sessionService{r: r}
+	return sessionService{session: r}
 }
 
-func (s *sessionService) Create(ctx context.Context, userId int64, secureRand string, validUntil time.Time) (*domain.Session, error) {
-	return s.r.Create(ctx, userId, secureRand, validUntil)
+func (svc *sessionService) Create(ctx context.Context, userId int64, secureRand string, duration time.Duration) (*domain.Session, error) {
+	return svc.session.Create(ctx, userId, secureRand, duration)
 }
 
-func (s *sessionService) Delete(ctx context.Context, cookie string) error {
-	return s.r.Delete(ctx, cookie)
+func (svc *sessionService) Delete(ctx context.Context, cookie string) error {
+	return svc.session.Delete(ctx, cookie)
 }
 
-func (s *sessionService) DeleteAll(ctx context.Context) error {
-	return s.r.DeleteAll(ctx)
+func (svc *sessionService) DeleteAll(ctx context.Context) error {
+	return svc.session.DeleteAll(ctx)
 }
 
-func (s *sessionService) IsValidSession(ctx context.Context, cookie string, timestamp time.Time) bool {
-	session, err := s.r.GetById(ctx, cookie)
+func (svc *sessionService) IsValidSession(ctx context.Context, cookie string, timestamp time.Time) bool {
+	session, err := svc.session.GetById(ctx, cookie)
 	if err != nil {
 		return false
 	}
@@ -46,6 +46,6 @@ func (s *sessionService) IsValidSession(ctx context.Context, cookie string, time
 
 }
 
-func (s *sessionService) GetUserFromSession(ctx context.Context, cookie string) (*domain.User, error) {
-	return s.r.GetUserFromSession(ctx, cookie)
+func (svc *sessionService) GetUserFromSession(ctx context.Context, cookie string) (*domain.User, error) {
+	return svc.session.GetUserFromSession(ctx, cookie)
 }

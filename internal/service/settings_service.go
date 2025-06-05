@@ -15,35 +15,35 @@ type SettingsService interface {
 }
 
 type settingsService struct {
-	r domain.SettingsRepository
+	settings domain.SettingsRepository
 }
 
 func NewSettingsService(r domain.SettingsRepository) settingsService {
-	return settingsService{r: r}
+	return settingsService{settings: r}
 }
 
-func (s *settingsService) Create(
+func (svc *settingsService) Create(
 	ctx context.Context,
 	settings domain.Settings,
 ) (domain.Settings, error) {
-	return s.r.Create(ctx, settings)
+	return svc.settings.Create(ctx, settings)
 }
 
-func (s *settingsService) Update(
+func (svc *settingsService) Update(
 	ctx context.Context,
 	settings domain.Settings,
 ) (domain.Settings, error) {
-	return s.r.Update(ctx, settings)
+	return svc.settings.Update(ctx, settings)
 }
 
-func (s *settingsService) Delete(ctx context.Context, id int64) error {
-	return s.r.Delete(ctx, id)
+func (svc *settingsService) Delete(ctx context.Context, id int64) error {
+	return svc.settings.Delete(ctx, id)
 }
 
-func (s *settingsService) GetById(ctx context.Context, id int64) (domain.Settings, error) {
-	return s.r.GetById(ctx, id)
+func (svc *settingsService) GetById(ctx context.Context, id int64) (domain.Settings, error) {
+	return svc.settings.GetById(ctx, id)
 }
 
-func (s *settingsService) GetFirst(ctx context.Context) (domain.Settings, error) {
-	return s.r.GetById(ctx, 1)
+func (svc *settingsService) GetFirst(ctx context.Context) (domain.Settings, error) {
+	return svc.settings.GetById(ctx, 1)
 }

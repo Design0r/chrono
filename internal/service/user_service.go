@@ -18,39 +18,39 @@ type UserService interface {
 }
 
 type userService struct {
-	r domain.UserRepository
+	user domain.UserRepository
 }
 
 func NewUserService(r domain.UserRepository) userService {
-	return userService{r: r}
+	return userService{user: r}
 }
 
 func (svc *userService) Create(ctx context.Context, user *domain.CreateUser) (*domain.User, error) {
-	return svc.r.Create(ctx, user)
+	return svc.user.Create(ctx, user)
 }
 
 func (svc *userService) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
-	return svc.r.Update(ctx, user)
+	return svc.user.Update(ctx, user)
 }
 
 func (svc *userService) Delete(ctx context.Context, id int64) error {
-	return svc.r.Delete(ctx, id)
+	return svc.user.Delete(ctx, id)
 }
 
 func (svc *userService) GetById(ctx context.Context, id int64) (*domain.User, error) {
-	return svc.r.GetById(ctx, id)
+	return svc.user.GetById(ctx, id)
 }
 
 func (svc *userService) GetByName(ctx context.Context, name string) (*domain.User, error) {
-	return svc.r.GetByName(ctx, name)
+	return svc.user.GetByName(ctx, name)
 }
 
 func (svc *userService) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
-	return svc.r.GetByName(ctx, email)
+	return svc.user.GetByName(ctx, email)
 }
 
 func (svc *userService) GetAll(ctx context.Context) ([]*domain.User, error) {
-	return svc.r.GetAll(ctx)
+	return svc.user.GetAll(ctx)
 }
 
 func (svc *userService) GetUsersWithVacation(ctx context.Context) ([]*domain.UserWithVacation, error) {

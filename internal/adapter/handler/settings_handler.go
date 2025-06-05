@@ -7,7 +7,7 @@ import (
 
 	"chrono/assets/templates"
 	"chrono/db/repo"
-	"chrono/htmx"
+	"chrono/internal/adapter/htmx"
 	"chrono/internal/service"
 )
 

@@ -24,8 +24,8 @@ func repoSessionToDomain(s *repo.Session) *domain.Session {
 	return &domain.Session{ID: s.ID, ValidUntil: s.ValidUntil, CreatedAt: s.CreatedAt, EditedAt: s.EditedAt, UserID: s.UserID}
 }
 
-func (r *SQLSessionRepo) Create(ctx context.Context, userId int64, secureRand string, validUntil time.Time) (*domain.Session, error) {
-	data := repo.CreateSessionParams{ID: secureRand, ValidUntil: validUntil, UserID: userId}
+func (r *SQLSessionRepo) Create(ctx context.Context, userId int64, secureRand string, duration time.Duration) (*domain.Session, error) {
+	data := repo.CreateSessionParams{ID: secureRand, ValidUntil: time.Now().Add(duration), UserID: userId}
 	session, err := r.q.CreateSession(ctx, data)
 	if err != nil {
 		log.Error("CreateSession failed", slog.String("error", err.Error()))

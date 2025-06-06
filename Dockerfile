@@ -8,7 +8,8 @@ RUN apk add --no-cache \
     musl-dev \
     make \
     nodejs \
-    npm
+    npm \
+    ca-certificates
 
 
 WORKDIR /app
@@ -26,6 +27,7 @@ FROM scratch
 
 WORKDIR /app
 COPY --from=build /app/build/chrono .
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY .env .
 
 ENTRYPOINT ["./chrono"]

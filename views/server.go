@@ -36,13 +36,20 @@ func (self *Server) InitMiddleware() {
 	}))
 	self.Router.Use(middleware.Secure())
 
+	cacheStatic := func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Response().Header().Set("Cache-Control", "public, max-age=86400") // 1 day
+			return next(c)
+		}
+	}
+
 	staticHandler := echo.WrapHandler(
 		http.StripPrefix(
 			"/",
 			http.FileServer(http.FS(assets.StaticFS)),
 		),
 	)
-	self.Router.GET("/static/*", staticHandler)
+	self.Router.GET("/static/*", staticHandler, cacheStatic)
 	self.Router.Use(middleware.Recover())
 	self.Router.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
 	self.Router.Use(sentryecho.New(sentryecho.Options{}))

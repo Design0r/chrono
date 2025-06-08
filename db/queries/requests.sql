@@ -3,6 +3,16 @@ INSERT INTO requests (message, state, user_id, event_id)
 VALUES (?, ?, ?, ?)
 RETURNING *;
 
+-- name: UpdateRequest :one
+UPDATE requests
+SET message = ?,
+state = ?,
+edited_by = ?,
+event_id = ?,
+edited_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING *;
+
 -- name: GetUserRequests :many
 SELECT * FROM requests
 WHERE user_id = ?;

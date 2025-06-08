@@ -268,6 +268,47 @@ func (q *Queries) GetUserRequests(ctx context.Context, userID int64) ([]Request,
 	return items, nil
 }
 
+const UpdateRequest = `-- name: UpdateRequest :one
+UPDATE requests
+SET message = ?,
+state = ?,
+edited_by = ?,
+event_id = ?,
+edited_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING id, message, state, created_at, edited_at, user_id, edited_by, event_id
+`
+
+type UpdateRequestParams struct {
+	Message  *string `json:"message"`
+	State    string  `json:"state"`
+	EditedBy *int64  `json:"edited_by"`
+	EventID  int64   `json:"event_id"`
+	ID       int64   `json:"id"`
+}
+
+func (q *Queries) UpdateRequest(ctx context.Context, arg UpdateRequestParams) (Request, error) {
+	row := q.db.QueryRowContext(ctx, UpdateRequest,
+		arg.Message,
+		arg.State,
+		arg.EditedBy,
+		arg.EventID,
+		arg.ID,
+	)
+	var i Request
+	err := row.Scan(
+		&i.ID,
+		&i.Message,
+		&i.State,
+		&i.CreatedAt,
+		&i.EditedAt,
+		&i.UserID,
+		&i.EditedBy,
+		&i.EventID,
+	)
+	return i, err
+}
+
 const UpdateRequestState = `-- name: UpdateRequestState :one
 UPDATE requests
 SET state = ?,

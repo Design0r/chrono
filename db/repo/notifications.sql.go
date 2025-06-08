@@ -37,3 +37,22 @@ func (q *Queries) CreateNotification(ctx context.Context, message string) (Notif
 	)
 	return i, err
 }
+
+const UpdateNotification = `-- name: UpdateNotification :one
+update notifications
+SET viewed_at = CURRENT_TIMESTAMP,
+message = ?
+RETURNING id, message, created_at, viewed_at
+`
+
+func (q *Queries) UpdateNotification(ctx context.Context, message string) (Notification, error) {
+	row := q.db.QueryRowContext(ctx, UpdateNotification, message)
+	var i Notification
+	err := row.Scan(
+		&i.ID,
+		&i.Message,
+		&i.CreatedAt,
+		&i.ViewedAt,
+	)
+	return i, err
+}

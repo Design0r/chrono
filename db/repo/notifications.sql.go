@@ -9,17 +9,6 @@ import (
 	"context"
 )
 
-const ClearNotification = `-- name: ClearNotification :exec
-UPDATE notifications
-SET viewed_at = CURRENT_TIMESTAMP
-WHERE id = ?
-`
-
-func (q *Queries) ClearNotification(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, ClearNotification, id)
-	return err
-}
-
 const CreateNotification = `-- name: CreateNotification :one
 INSERT INTO notifications (message)
 VALUES (?)

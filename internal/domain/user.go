@@ -32,6 +32,11 @@ type CreateUser struct {
 	IsSuperuser  bool   `json:"is_superuser"`
 }
 
+type Login struct {
+	Email    string `form:"qweemailasd"`
+	Password string `form:"qwepasswordasd"`
+}
+
 type UserRepository interface {
 	Create(ctx context.Context, user *CreateUser) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)

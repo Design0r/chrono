@@ -13,7 +13,7 @@ type RefreshToken struct {
 }
 
 type RefreshTokenRepository interface {
-	Create(ctx context.Context, t CreateVacationToken) (*VacationToken, error)
+	Create(ctx context.Context, year int, userId int64) (*RefreshToken, error)
 	DeleteAll(ctx context.Context) error
 	ExistsForUser(ctx context.Context, userId int64, year int) (bool, error)
 }

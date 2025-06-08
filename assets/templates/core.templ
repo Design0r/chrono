@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"chrono/internal/domain"
 )
 
-templ Index(user *repo.User, notifications []repo.Notification) {
+templ Index(user *domain.User, notifications []domain.Notification) {
 	@Static() {
 		@Header(user, notifications)
 		<div class="container h-full justify-center mx-auto ">
@@ -67,7 +68,7 @@ templ Notifications(notifications []repo.Notification) {
 	</div>
 }
 
-templ Header(user *repo.User, notifications []repo.Notification) {
+templ Header(user *domain.User, notifications []domain.Notification) {
 	{{
 	now := time.Now()
 	month := strconv.Itoa(int(now.Month()))

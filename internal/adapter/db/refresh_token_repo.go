@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"log/slog"
-	"time"
 
 	"chrono/db/repo"
 	"chrono/internal/domain"

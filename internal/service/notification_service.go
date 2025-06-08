@@ -12,6 +12,7 @@ type NotificationService interface {
 	CreateAndNotify(ctx context.Context, msg string, users []domain.User) error
 	NotifyUser(ctx context.Context, user *domain.User, notif domain.Notification) error
 	NotifyUsers(ctx context.Context, users []domain.User, notif domain.Notification) error
+	GetByUserId(ctx context.Context, userId int64) ([]domain.Notification, error)
 }
 
 type notificationService struct {
@@ -76,4 +77,11 @@ func (svc *notificationService) NotifyUsers(
 	}
 
 	return nil
+}
+
+func (svc *notificationService) GetByUserId(
+	ctx context.Context,
+	userId int64,
+) ([]domain.Notification, error) {
+	return svc.userNotif.GetByUserId(ctx, userId)
 }

@@ -1,18 +1,19 @@
 package service
 
 import (
-	"chrono/internal/domain"
-	"chrono/internal/service/auth"
 	"context"
 	"errors"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"chrono/internal/domain"
+	"chrono/internal/service/auth"
 )
 
 type AuthService interface {
 	Login(ctx context.Context, email, password string) (*http.Cookie, error)
-	Logout(ctx context.Context) (*http.Cookie, error)
+	Logout(ctx context.Context, cookie string) (*http.Cookie, error)
 	Signup(ctx context.Context, userParams domain.CreateUser) (*http.Cookie, error)
 }
 
@@ -24,7 +25,13 @@ type authService struct {
 	log             *slog.Logger
 }
 
-func (svc *authService) NewAuthService(u domain.UserRepository, s domain.SessionRepository, sessionDuration time.Duration, pw auth.PasswordHasher, log *slog.Logger) authService {
+func (svc *authService) NewAuthService(
+	u domain.UserRepository,
+	s domain.SessionRepository,
+	sessionDuration time.Duration,
+	pw auth.PasswordHasher,
+	log *slog.Logger,
+) authService {
 	return authService{user: u, session: s, log: log, sessionDuration: sessionDuration, pw: pw}
 }
 
@@ -56,7 +63,11 @@ func (svc *authService) deleteSessionCookie() *http.Cookie {
 func (svc *authService) Login(ctx context.Context, email, pw string) (*http.Cookie, error) {
 	user, err := svc.user.GetByEmail(ctx, email)
 	if err != nil {
-		svc.log.Error("Login failed", slog.String("email", email), slog.String("error", err.Error()))
+		svc.log.Error(
+			"Login failed",
+			slog.String("email", email),
+			slog.String("error", err.Error()),
+		)
 		return nil, err
 	}
 
@@ -68,7 +79,11 @@ func (svc *authService) Login(ctx context.Context, email, pw string) (*http.Cook
 
 	session, err := svc.session.Create(ctx, user.ID, svc.pw.SecureRandom64(), svc.sessionDuration)
 	if err != nil {
-		svc.log.Error("Login failed", slog.String("email", email), slog.String("error", err.Error()))
+		svc.log.Error(
+			"Login failed",
+			slog.String("email", email),
+			slog.String("error", err.Error()),
+		)
 		return nil, err
 	}
 
@@ -84,7 +99,10 @@ func (svc *authService) Logout(ctx context.Context, cookie string) (*http.Cookie
 	return svc.deleteSessionCookie(), nil
 }
 
-func (svc *authService) Signup(ctx context.Context, userParams domain.CreateUser) (*http.Cookie, error) {
+func (svc *authService) Signup(
+	ctx context.Context,
+	userParams domain.CreateUser,
+) (*http.Cookie, error) {
 	_, err := svc.user.GetByEmail(ctx, userParams.Email)
 	if err == nil {
 		svc.log.Error("User with this email already exists", slog.String("email", userParams.Email))
@@ -93,7 +111,11 @@ func (svc *authService) Signup(ctx context.Context, userParams domain.CreateUser
 
 	hashedPw, err := svc.pw.Hash(userParams.Password)
 	if err != nil {
-		svc.log.Error("Signup failed", slog.String("email", userParams.Email), slog.String("error", err.Error()))
+		svc.log.Error(
+			"Signup failed",
+			slog.String("email", userParams.Email),
+			slog.String("error", err.Error()),
+		)
 		return nil, err
 	}
 	userParams.Password = hashedPw
@@ -101,16 +123,23 @@ func (svc *authService) Signup(ctx context.Context, userParams domain.CreateUser
 
 	user, err := svc.user.Create(ctx, &userParams)
 	if err != nil {
-		svc.log.Error("Signup Failed", slog.String("email", userParams.Email), slog.String("error", err.Error()))
+		svc.log.Error(
+			"Signup Failed",
+			slog.String("email", userParams.Email),
+			slog.String("error", err.Error()),
+		)
 		return nil, err
 	}
 
 	session, err := svc.session.Create(ctx, user.ID, svc.pw.SecureRandom64(), svc.sessionDuration)
 	if err != nil {
-		svc.log.Error("Login failed", slog.String("email", userParams.Email), slog.String("error", err.Error()))
+		svc.log.Error(
+			"Login failed",
+			slog.String("email", userParams.Email),
+			slog.String("error", err.Error()),
+		)
 		return nil, err
 	}
 
 	return svc.createSessionCookie(*session), nil
-
 }

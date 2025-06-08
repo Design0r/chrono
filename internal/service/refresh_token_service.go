@@ -5,10 +5,15 @@ import (
 	"log/slog"
 
 	"chrono/internal/domain"
+	"chrono/internal/domain/calendar"
 )
 
 type RefreshTokenService interface {
 	Create(ctx context.Context, t domain.CreateVacationToken) (*domain.VacationToken, error)
+	CreateIfNotExists(
+		ctx context.Context,
+		userId int64,
+	) (bool, error)
 	DeleteAll(ctx context.Context) error
 	ExistsForUser(ctx context.Context, userId int64, year int) (bool, error)
 }
@@ -27,9 +32,10 @@ func NewRefreshTokenService(
 
 func (svc *refreshTokenService) Create(
 	ctx context.Context,
-	t domain.CreateVacationToken,
-) (*domain.VacationToken, error) {
-	return svc.refresh.Create(ctx, t)
+	year int,
+	userId int64,
+) (*domain.RefreshToken, error) {
+	return svc.refresh.Create(ctx, year, userId)
 }
 
 func (svc *refreshTokenService) DeleteAll(ctx context.Context) error {
@@ -42,4 +48,23 @@ func (svc *refreshTokenService) ExistsForUser(
 	year int,
 ) (bool, error) {
 	return svc.refresh.ExistsForUser(ctx, userId, year)
+}
+
+func (svc *refreshTokenService) CreateIfNotExists(ctx context.Context, userId int64) (bool, error) {
+	currYear := calendar.CurrentYear()
+	exists, err := svc.refresh.ExistsForUser(ctx, userId, currYear)
+	if err != nil {
+		return false, err
+	}
+
+	if exists {
+		return true, nil
+	}
+
+	_, err = svc.Create(ctx, currYear, userId)
+	if err != nil {
+		return true, err
+	}
+
+	return true, nil
 }

@@ -153,3 +153,21 @@ func (r *SQLUserRepo) GetAll(ctx context.Context) ([]*domain.User, error) {
 
 	return users, nil
 }
+
+func (r *SQLUserRepo) GetAdmins(ctx context.Context) ([]domain.User, error) {
+	u, err := r.q.GetAdmins(ctx)
+	if err != nil {
+		r.log.Error(
+			"GetAdmins failed:",
+			slog.String("error", err.Error()),
+		)
+		return []domain.User{}, err
+	}
+
+	admins := make([]domain.User, len(u))
+	for i := 0; i <= len(u); i++ {
+		admins[i] = (domain.User)(u[i])
+	}
+
+	return admins, nil
+}

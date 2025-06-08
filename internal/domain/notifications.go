@@ -23,7 +23,7 @@ type NotificationRepository interface {
 }
 
 type NotificationUserRepository interface {
-	Create(ctx context.Context, msg string) (Notification, error)
+	Create(ctx context.Context, userId int64, notifId int64) error
 	GetByUserId(ctx context.Context, userId int64) ([]Notification, error)
 	UpdateByUserId(ctx context.Context, userId int64) error
 }

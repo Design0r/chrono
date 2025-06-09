@@ -2,13 +2,14 @@ package service
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"chrono/internal/domain"
 )
 
 type SessionService interface {
-	Create(ctx context.Context, userId int64, secureRand string, validUntil time.Time) (*domain.Session, error)
+	Create(ctx context.Context, userId int64, secureRand string, duration time.Duration) (*domain.Session, error)
 	Delete(ctx context.Context, cookie string) error
 	DeleteAll(ctx context.Context) error
 	IsValidSession(ctx context.Context, cookie string, timestamp time.Time) bool
@@ -17,10 +18,11 @@ type SessionService interface {
 
 type sessionService struct {
 	session domain.SessionRepository
+	log     *slog.Logger
 }
 
-func NewSessionService(r domain.SessionRepository) sessionService {
-	return sessionService{session: r}
+func NewSessionService(r domain.SessionRepository, log *slog.Logger) sessionService {
+	return sessionService{session: r, log: log}
 }
 
 func (svc *sessionService) Create(ctx context.Context, userId int64, secureRand string, duration time.Duration) (*domain.Session, error) {
@@ -47,5 +49,5 @@ func (svc *sessionService) IsValidSession(ctx context.Context, cookie string, ti
 }
 
 func (svc *sessionService) GetUserFromSession(ctx context.Context, cookie string) (*domain.User, error) {
-	return svc.session.GetUserFromSession(ctx, cookie)
+	return svc.session.GetSessionUser(ctx, cookie)
 }

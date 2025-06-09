@@ -2,27 +2,28 @@ package middleware
 
 import (
 	"net/http"
+	"time"
+
+	"chrono/internal/adapter/htmx"
+	"chrono/internal/domain"
+	"chrono/internal/service"
+	"chrono/schemas"
 
 	"github.com/labstack/echo/v4"
-
-	"chrono/db/repo"
-	"chrono/htmx"
-	"chrono/schemas"
-	"chrono/service"
 )
 
 type MiddlewareFunc = func(echo.HandlerFunc) echo.HandlerFunc
 
-func SessionMiddleware(r *repo.Queries) MiddlewareFunc {
+func SessionMiddleware(svc service.SessionService) MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			cookie, err := c.Cookie("session")
 			if err != nil {
 				return c.Redirect(http.StatusFound, "/login")
 			}
-			ok := service.IsValidSession(r, cookie.Value)
+			ok := svc.IsValidSession(c.Request().Context(), cookie.Value, time.Now())
 			if !ok {
-				service.DeleteSession(r, cookie.Value)
+				svc.Delete(c.Request().Context(), cookie.Value)
 				return c.Redirect(http.StatusFound, "/login")
 			}
 
@@ -31,10 +32,14 @@ func SessionMiddleware(r *repo.Queries) MiddlewareFunc {
 	}
 }
 
-func AuthenticationMiddleware(r *repo.Queries) MiddlewareFunc {
+func AuthenticationMiddleware(svc service.AuthService) MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			user, err := service.GetCurrentUser(r, c)
+			cookie, err := c.Cookie("session")
+			if err != nil {
+				return c.Redirect(http.StatusFound, "/login")
+			}
+			user, err := svc.GetCurrentUser(c.Request().Context(), cookie.Value)
 			if err != nil {
 				return c.Redirect(http.StatusFound, "/login")
 			}
@@ -45,10 +50,10 @@ func AuthenticationMiddleware(r *repo.Queries) MiddlewareFunc {
 	}
 }
 
-func AdminMiddleware(r *repo.Queries) MiddlewareFunc {
+func AdminMiddleware() MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			user := c.Get("user").(repo.User)
+			user := c.Get("user").(domain.User)
 			if !user.IsSuperuser {
 				return htmx.RenderError(
 					c,
@@ -62,7 +67,7 @@ func AdminMiddleware(r *repo.Queries) MiddlewareFunc {
 	}
 }
 
-func HoneypotMiddleware(r *repo.Queries) MiddlewareFunc {
+func HoneypotMiddleware() MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			var honey schemas.Honeypot

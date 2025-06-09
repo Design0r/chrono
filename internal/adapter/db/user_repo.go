@@ -31,7 +31,7 @@ func NewSQLUserRepo(q *repo.Queries, l *slog.Logger) SQLUserRepo {
 	return SQLUserRepo{q: q, log: l}
 }
 
-func (r *SQLUserRepo) Create(ctx context.Context, user domain.CreateUser) (*domain.User, error) {
+func (r *SQLUserRepo) Create(ctx context.Context, user *domain.CreateUser) (*domain.User, error) {
 	u, err := r.q.CreateUser(
 		ctx,
 		repo.CreateUserParams{
@@ -55,7 +55,7 @@ func (r *SQLUserRepo) Create(ctx context.Context, user domain.CreateUser) (*doma
 	return repoUserToDomain(&u), nil
 }
 
-func (r *SQLUserRepo) Update(ctx context.Context, user domain.User) (*domain.User, error) {
+func (r *SQLUserRepo) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
 	u, err := r.q.UpdateUser(
 		ctx,
 		repo.UpdateUserParams{

@@ -17,8 +17,7 @@ import (
 
 	"chrono/config"
 	"chrono/db"
-	"chrono/service"
-	"chrono/views"
+	"chrono/internal"
 )
 
 func main() {
@@ -29,15 +28,12 @@ func main() {
 	fmt.Println(cfg)
 
 	if err := sentry.Init(sentry.ClientOptions{
-		Dsn: cfg.SentryUrl,
-		// Set TracesSampleRate to 1.0 to capture 100%
-		// of transactions for tracing.
-		// We recommend adjusting this value in production,
+		Dsn:              cfg.SentryUrl,
+		Debug:            cfg.Debug,
+		AttachStacktrace: true,
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
-		// Adds request headers and IP for users,
-		// visit: https://docs.sentry.io/platforms/go/data-management/data-collected/ for more info
-		SendDefaultPII: true,
+		SendDefaultPII:   true,
 	}); err != nil {
 		fmt.Printf("Sentry initialization failed: %v\n", err)
 	}
@@ -48,17 +44,9 @@ func main() {
 	e := echo.New()
 	e.HideBanner = true
 
-	server := views.NewServer(e, dbConn)
+	server := internal.NewServer(e, dbConn)
 	server.InitMiddleware()
 	server.InitRoutes()
-
-	bot := service.NewAPIBotFromEnv()
-	err := bot.Register(server.Repo)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	service.LoadDebugUsers(server.Repo, cfg)
 
 	go server.Start(fmt.Sprintf(":%v", cfg.Port))
 

@@ -36,14 +36,14 @@ func (r *SQLNotificationRepo) Create(ctx context.Context, msg string) (domain.No
 	return (domain.Notification)(notif), nil
 }
 
-func (r *SQLNotificationRepo) Update(ctx context.Context, msg string) (domain.Notification, error) {
-	notif, err := r.r.UpdateNotification(ctx, msg)
+func (r *SQLNotificationRepo) Update(ctx context.Context, n domain.Notification) error {
+	_, err := r.r.UpdateNotification(ctx, n.Message)
 	if err != nil {
 		r.log.Error("UpdateNotification failed", slog.String("error", err.Error()))
-		return domain.Notification{}, err
+		return err
 	}
 
-	return (domain.Notification)(notif), nil
+	return nil
 }
 
 func (r *SQLUserNotificationRepo) Create(

@@ -9,11 +9,8 @@ import (
 )
 
 type RefreshTokenService interface {
-	Create(ctx context.Context, t domain.CreateVacationToken) (*domain.VacationToken, error)
-	CreateIfNotExists(
-		ctx context.Context,
-		userId int64,
-	) (bool, error)
+	Create(ctx context.Context, year int, userId int64) (*domain.RefreshToken, error)
+	CreateIfNotExists(ctx context.Context, userId int64) (bool, error)
 	DeleteAll(ctx context.Context) error
 	ExistsForUser(ctx context.Context, userId int64, year int) (bool, error)
 }

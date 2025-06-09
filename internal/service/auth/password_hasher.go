@@ -35,7 +35,7 @@ func (svc *bcryptHasher) SecureRandom64() string {
 	return svc.SecureRandom(64)
 }
 
-func (svc *bcryptHasher) HashPassword(password string) (string, error) {
+func (svc *bcryptHasher) Hash(password string) (string, error) {
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), svc.cost)
 	if err != nil {
 		return "", err
@@ -43,7 +43,7 @@ func (svc *bcryptHasher) HashPassword(password string) (string, error) {
 	return string(hashedBytes), nil
 }
 
-func (svc *bcryptHasher) ComparePasswords(hashedPw, pw string) bool {
+func (svc *bcryptHasher) Compare(hashedPw, pw string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPw), []byte(pw))
 	return err == nil // Returns true if the password matches
 }

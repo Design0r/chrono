@@ -17,9 +17,7 @@ func NewSQLRefreshTokenRepo(q *repo.Queries, log *slog.Logger) SQLRefreshTokenRe
 	return SQLRefreshTokenRepo{q: q, log: log}
 }
 
-func (r *SQLRefreshTokenRepo) Create(
-	ctx context.Context, userId int64, year int,
-) (*domain.RefreshToken, error) {
+func (r *SQLRefreshTokenRepo) Create(ctx context.Context, year int, userId int64) (*domain.RefreshToken, error) {
 	params := repo.CreateRefreshTokenParams{UserID: userId, Year: int64(year)}
 	token, err := r.q.CreateRefreshToken(ctx, params)
 	if err != nil {

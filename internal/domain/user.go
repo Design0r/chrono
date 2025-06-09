@@ -23,6 +23,12 @@ type UserWithVacation struct {
 	VacationUsed      float64
 }
 
+type PatchUser struct {
+	Name  string `form:"name"`
+	Email string `form:"email"`
+	Color string `form:"color"`
+}
+
 type CreateUser struct {
 	Username     string `json:"username"`
 	Color        string `json:"color"`

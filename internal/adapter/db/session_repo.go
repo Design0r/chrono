@@ -16,8 +16,8 @@ type SQLSessionRepo struct {
 	log *slog.Logger
 }
 
-func NewSQLSessionRepo(q *repo.Queries) SQLSessionRepo {
-	return SQLSessionRepo{q: q}
+func NewSQLSessionRepo(q *repo.Queries, log *slog.Logger) SQLSessionRepo {
+	return SQLSessionRepo{q: q, log: log}
 }
 
 func repoSessionToDomain(s *repo.Session) *domain.Session {
@@ -28,7 +28,7 @@ func (r *SQLSessionRepo) Create(ctx context.Context, userId int64, secureRand st
 	data := repo.CreateSessionParams{ID: secureRand, ValidUntil: time.Now().Add(duration), UserID: userId}
 	session, err := r.q.CreateSession(ctx, data)
 	if err != nil {
-		log.Error("CreateSession failed", slog.String("error", err.Error()))
+		r.log.Error("CreateSession failed", slog.String("error", err.Error()))
 		return &domain.Session{}, err
 	}
 
@@ -38,7 +38,7 @@ func (r *SQLSessionRepo) Create(ctx context.Context, userId int64, secureRand st
 func (r *SQLSessionRepo) Delete(ctx context.Context, cookie string) error {
 	err := r.q.DeleteSession(ctx, cookie)
 	if err != nil {
-		log.Error("DeleteSession failed", slog.String("error", err.Error()))
+		r.log.Error("DeleteSession failed", slog.String("error", err.Error()))
 		return err
 	}
 
@@ -48,7 +48,7 @@ func (r *SQLSessionRepo) Delete(ctx context.Context, cookie string) error {
 func (r *SQLSessionRepo) DeleteAll(ctx context.Context) error {
 	err := r.q.DeleteAllSessions(ctx)
 	if err != nil {
-		log.Error("DeleteAllSessions failed", slog.String("error", err.Error()))
+		r.log.Error("DeleteAllSessions failed", slog.String("error", err.Error()))
 		return err
 	}
 
@@ -58,7 +58,7 @@ func (r *SQLSessionRepo) DeleteAll(ctx context.Context) error {
 func (r *SQLSessionRepo) GetById(ctx context.Context, cookie string) (*domain.Session, error) {
 	session, err := r.q.GetSessionById(ctx, cookie)
 	if err != nil {
-		log.Error("GetSessionById failed", slog.String("error", err.Error()))
+		r.log.Error("GetSessionById failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 

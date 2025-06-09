@@ -45,7 +45,7 @@ type RequestEventUser struct {
 
 type RequestRepository interface {
 	Create(ctx context.Context, msg string, user *User, event *Event) (*Request, error)
-	Update(ctx context.Context, req *Request) error
+	Update(ctx context.Context, editor *User, req *Request) (*Request, error)
 	GetPending(ctx context.Context) ([]RequestEventUser, error)
 	GetEventNameFrom(ctx context.Context, req *Request) (string, error)
 }

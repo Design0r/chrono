@@ -15,6 +15,7 @@ type AuthService interface {
 	Login(ctx context.Context, email, password string) (*http.Cookie, error)
 	Logout(ctx context.Context, cookie string) (*http.Cookie, error)
 	Signup(ctx context.Context, userParams domain.CreateUser) (*http.Cookie, error)
+	GetCurrentUser(ctx context.Context, cookie string) (*domain.User, error)
 }
 
 type authService struct {
@@ -25,7 +26,7 @@ type authService struct {
 	log             *slog.Logger
 }
 
-func (svc *authService) NewAuthService(
+func NewAuthService(
 	u domain.UserRepository,
 	s domain.SessionRepository,
 	sessionDuration time.Duration,
@@ -142,4 +143,8 @@ func (svc *authService) Signup(
 	}
 
 	return svc.createSessionCookie(*session), nil
+}
+
+func (svc *authService) GetCurrentUser(ctx context.Context, cookie string) (*domain.User, error) {
+	return svc.session.GetSessionUser(ctx, cookie)
 }

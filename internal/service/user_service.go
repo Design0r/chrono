@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"chrono/internal/domain"
 )
@@ -15,10 +16,16 @@ type UserService interface {
 	GetAll(ctx context.Context) ([]*domain.User, error)
 	Delete(ctx context.Context, id int64) error
 	GetUsersWithVacation(ctx context.Context) ([]*domain.UserWithVacation, error)
+	ToggleAdmin(
+		ctx context.Context,
+		userToUpdate int64,
+		currUser *domain.User,
+	) (*domain.User, error)
 }
 
 type userService struct {
-	user domain.UserRepository
+	user  domain.UserRepository
+	notif NotificationService
 }
 
 func NewUserService(r domain.UserRepository) userService {
@@ -53,6 +60,36 @@ func (svc *userService) GetAll(ctx context.Context) ([]*domain.User, error) {
 	return svc.user.GetAll(ctx)
 }
 
-func (svc *userService) GetUsersWithVacation(ctx context.Context) ([]*domain.UserWithVacation, error) {
+func (svc *userService) GetUsersWithVacation(
+	ctx context.Context,
+) ([]*domain.UserWithVacation, error) {
 	return nil, nil
+}
+
+func (svc *userService) ToggleAdmin(
+	ctx context.Context,
+	userToChange int64,
+	currUser *domain.User,
+) (*domain.User, error) {
+	if !currUser.IsSuperuser {
+		return nil, nil
+	}
+	user, err := svc.GetById(ctx, userToChange)
+	if err != nil {
+		return nil, err
+	}
+	user.IsSuperuser = true
+
+	updatedUser, err := svc.Update(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	msg := fmt.Sprintf("%v changed your admin status to %v", currUser.Username, user.IsSuperuser)
+	err = svc.notif.CreateAndNotify(ctx, msg, []domain.User{*user})
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedUser, nil
 }

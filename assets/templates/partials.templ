@@ -5,15 +5,13 @@ import (
 	"chrono/internal/domain"
 	"chrono/internal/domain/calendar"
 	"fmt"
-	"go.lsp.dev/pkg/event"
 	"strings"
 	"time"
 )
 
 templ Event(event domain.EventUser, user domain.User) {
 	{{
-		event.Event.
-			cfg := config.GetConfig()
+		cfg := config.GetConfig()
 		bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(event.User.Color))
 		if !event.Event.IsVacation() && event.User.Username != cfg.BotName {
 			bgColor = domain.Color.HSLDarkFromHex(event.User.Color)

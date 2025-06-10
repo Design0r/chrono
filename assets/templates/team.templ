@@ -3,7 +3,6 @@ package templates
 import (
 	"chrono/config"
 	"chrono/internal/domain"
-	"chrono/service"
 	"fmt"
 )
 
@@ -58,7 +57,7 @@ templ TeamForm(users []domain.UserWithVacation, currUser domain.User, notificati
 	</form>
 }
 
-templ TeamTable(users []domain.GetUsersWithVacationCountRow, currUser domain.User, notifications []domain.Notification, form bool) {
+templ TeamTable(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification, form bool) {
 	<div id="team-table" class="p-2">
 		<div class="pt-2 bg-base-200 rounded-xl">
 			<table class="table rounded-xl">
@@ -92,16 +91,8 @@ templ TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) {
 	if user.VacationDays == 0 && user.Username != cfg.BotName {
 		css = "hover:bg-error hover:bg-opacity-85 bg-error text-white "
 	}
-	vacTaken := 0.0
-	vacRemaining := 0.0
-	if user.VacRemaining != nil {
-		vacRemaining = (user.VacRemaining).(float64)
-	}
-	if user.VacUsed != nil {
-		vacTaken = *(user.VacUsed).(*float64)
-	}
 
-	bgColor := service.HSLToString(service.HexToHSL(user.Color))
+	bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(user.Color))
 	}}
 	<tr class={ css }>
 		<th>{ fmt.Sprint(user.ID) }</th>
@@ -125,7 +116,7 @@ templ TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) {
 		} else {
 			<td>{ fmt.Sprint(user.VacationDays) }</td>
 		}
-		<td>{ fmt.Sprint(vacTaken) }</td>
-		<td>{ fmt.Sprint(vacRemaining) }</td>
+		<td>{ fmt.Sprint(user.VacationUsed) }</td>
+		<td>{ fmt.Sprint(user.VacationRemaining) }</td>
 	</tr>
 }

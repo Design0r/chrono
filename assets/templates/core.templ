@@ -1,9 +1,7 @@
 package templates
 
 import (
-	"chrono/db/repo"
 	"chrono/internal/domain"
-	"chrono/service"
 	"fmt"
 	"strconv"
 	"strings"
@@ -63,7 +61,7 @@ templ Notifications(notifications []domain.Notification) {
 				role="button"
 				class="btn btn-ghost text-xl icon-outlined"
 			>notifications</div>
-			@NotificationContainer([]repo.Notification{})
+			@NotificationContainer([]domain.Notification{})
 		</div>
 	</div>
 }
@@ -107,7 +105,7 @@ templ Avatar(user domain.User) {
 	if len(user.Username) > 0 {
 		initial = strings.ToUpper(user.Username[:1])
 	}
-	bgColor := service.HSLToString(service.HexToHSL(user.Color))
+	bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(user.Color))
 	}}
 	<div class="dropdown dropdown-end pr-2">
 		<!-- Trigger -->

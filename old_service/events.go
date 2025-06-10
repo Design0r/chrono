@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"chrono/calendar"
 	"chrono/config"
 	"chrono/db/repo"
+	"chrono/internal/domain/calendar"
 	"chrono/schemas"
 )
 

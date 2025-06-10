@@ -9,9 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"chrono/db/repo"
 	"chrono/internal/domain"
-	"chrono/service"
 	"fmt"
 	"strconv"
 	"strings"
@@ -147,7 +145,7 @@ func Notifications(notifications []domain.Notification) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NotificationContainer([]repo.Notification{}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NotificationContainer([]domain.Notification{}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -267,7 +265,7 @@ func Avatar(user domain.User) templ.Component {
 		if len(user.Username) > 0 {
 			initial = strings.ToUpper(user.Username[:1])
 		}
-		bgColor := service.HSLToString(service.HexToHSL(user.Color))
+		bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(user.Color))
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"dropdown dropdown-end pr-2\"><!-- Trigger --><div tabindex=\"0\" role=\"button\" class=\"avatar avatar-placeholder cursor-pointer\"><div class=\"w-10 rounded-full text-neutral-content\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -283,7 +281,7 @@ func Avatar(user domain.User) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(initial)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 120, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 118, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {

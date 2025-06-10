@@ -74,7 +74,7 @@ func (h *ProfileHandler) ProfileEdit(c echo.Context) error {
 		return RenderError(c, http.StatusInternalServerError, "Failed to get user notifications.")
 	}
 
-	return Render(c, http.StatusOK, templates.UpdateProfileWithMessage(updatedUser, notifications))
+	return Render(c, http.StatusOK, templates.UpdateProfileWithMessage(*updatedUser, notifications))
 }
 
 func (h *ProfileHandler) ToggleAdmin(c echo.Context) error {
@@ -91,5 +91,5 @@ func (h *ProfileHandler) ToggleAdmin(c echo.Context) error {
 		return RenderError(c, http.StatusInternalServerError, "Failed to change admin status")
 	}
 
-	return Render(c, http.StatusOK, templates.AdminCheckbox(currUser, updatedUser, true))
+	return Render(c, http.StatusOK, templates.AdminCheckbox(currUser, updatedUser.ID, updatedUser.IsSuperuser, true))
 }

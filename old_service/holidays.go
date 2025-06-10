@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"chrono/db/repo"
-	"chrono/schemas"
+	"chrono/internal/domain"
 )
 
 type Holidays = map[string]map[string]string
@@ -37,7 +37,7 @@ func UpdateHolidays(r *repo.Queries, year int) error {
 		}
 		CreateEvent(
 			r,
-			schemas.YMDDate{Year: date.Year(), Month: int(date.Month()), Day: date.Day()},
+			domain.YMDDate{Year: date.Year(), Month: int(date.Month()), Day: date.Day()},
 			bot,
 			name,
 		)

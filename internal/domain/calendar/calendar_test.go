@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"chrono/calendar"
+	"chrono/internal/domain/calendar"
 )
 
 // TestIsLeapYear checks the IsLeapYear function for multiple cases.

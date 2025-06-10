@@ -1,7 +1,6 @@
 package templates
 
 import (
-	"chrono/db/repo"
 	"chrono/internal/domain"
 	"chrono/internal/domain/calendar"
 	"fmt"
@@ -9,7 +8,7 @@ import (
 	"time"
 )
 
-templ Calendar(user domain.User, month calendar.Month, vacRemaining float64, vacUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User, userFilter, eventFilter string) {
+templ Calendar(user domain.User, month calendar.Month, vacRemaining float64, vacUsed float64, pendingEvents int, notifications []domain.Notification, users []domain.User, userFilter, eventFilter string) {
 	@Index(&user, notifications) {
 		<div class="pt-2">
 			<div class="grid grid-cols-7">

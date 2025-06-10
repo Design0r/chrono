@@ -6,8 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"chrono/assets/templates"
-	"chrono/db/repo"
-	"chrono/internal/adapter/htmx"
+	"chrono/internal/domain"
 	"chrono/internal/service"
 )
 
@@ -25,12 +24,12 @@ func RegisterSettingsRoutes(group *echo.Group, handler *SettingsHandler) {
 }
 
 func (h *SettingsHandler) Settings(c echo.Context) error {
-	currUser := c.Get("user").(repo.User)
+	currUser := c.Get("user").(domain.User)
 
 	s, err := h.s.GetFirst(c.Request().Context())
 	if err != nil {
-		htmx.RenderError(c, http.StatusInternalServerError, err.Error())
+		RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
-	return htmx.Render(c, http.StatusOK, templates.Settings(s, &currUser, []repo.Notification{}))
+	return Render(c, http.StatusOK, templates.Settings(s, &currUser, []domain.Notification{}))
 }

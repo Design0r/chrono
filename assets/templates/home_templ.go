@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"chrono/calendar"
 	"chrono/internal/domain"
+	"chrono/internal/domain/calendar"
 	"fmt"
 	"time"
 )

@@ -1,10 +1,8 @@
 package handler
 
 import (
-	"chrono/internal/domain"
 	"chrono/internal/service"
 	"log/slog"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
@@ -23,26 +21,26 @@ func (h *CalendarHandler) RegisterRoutes(group *echo.Group) {
 }
 
 func (h *CalendarHandler) HandleCalendar(c echo.Context) error {
-	currUser := c.Get("user").(domain.User)
+	/* 	currUser := c.Get("user").(domain.User)
 
-	var date domain.YMDate
-	if err := c.Bind(&date); err != nil {
-		return RenderError(c, http.StatusBadRequest, "Invalid date")
-	}
+	   	var date domain.YMDate
+	   	if err := c.Bind(&date); err != nil {
+	   		return RenderError(c, http.StatusBadRequest, "Invalid date")
+	   	}
 
-	userFilter := c.QueryParam("filter")
-	var filtered *domain.User
-	if userFilter != "" {
-		filteredUser, err := h.user.GetByName(c.Request().Context(), userFilter)
-		if err == nil {
-			filtered = filteredUser
-		}
-	}
+	   	userFilter := c.QueryParam("filter")
+	   	var filtered *domain.User
+	   	if userFilter != "" {
+	   		filteredUser, err := h.user.GetByName(c.Request().Context(), userFilter)
+	   		if err == nil {
+	   			filtered = filteredUser
+	   		}
+	   	}
 
-	month, err := service.GetMonth(date.Year, date.Month)
-	if err != nil {
-		return RenderError(c, http.StatusInternalServerError, "Failed to get month")
-	}
+	   	month, err := service.GetMonth(date.Year, date.Month)
+	   	if err != nil {
+	   		return RenderError(c, http.StatusInternalServerError, "Failed to get month")
+	   	} */
 
 	return nil
 }

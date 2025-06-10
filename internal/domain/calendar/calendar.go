@@ -3,6 +3,7 @@ package calendar
 import (
 	"time"
 
+	"chrono/internal/domain"
 	"chrono/schemas"
 )
 
@@ -34,6 +35,39 @@ var (
 		time.Sunday:    "Sunday",
 	}
 )
+
+type Month struct {
+	Name   string
+	Number int
+	Year   int
+	Days   []Day
+	Offset int
+}
+
+type Day struct {
+	Number int
+	Name   string
+	Events []domain.EventUser
+	Date   time.Time
+}
+
+type YearProgress struct {
+	NumDays           int
+	NumWorkDays       int
+	NumDaysPassed     int
+	DaysPassedPercent float32
+	NumHolidays       int
+	NumWastedHolidays int
+}
+
+type YearHistogram struct {
+	IsHoliday      bool
+	Count          int
+	LastDayOfMonth bool
+	IsCurrentWeek  bool
+	Usernames      []string
+	Date           string
+}
 
 func GetNumDaysOfMonth(month time.Month, year int) int {
 	if month == time.February {

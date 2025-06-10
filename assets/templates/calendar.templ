@@ -2,14 +2,14 @@ package templates
 
 import (
 	"chrono/db/repo"
+	"chrono/internal/domain"
 	"chrono/internal/domain/calendar"
-	"chrono/schemas"
 	"fmt"
 	"strconv"
 	"time"
 )
 
-templ Calendar(user repo.User, month schemas.Month, vacRemaining float64, vacUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User, userFilter, eventFilter string) {
+templ Calendar(user domain.User, month calendar.Month, vacRemaining float64, vacUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User, userFilter, eventFilter string) {
 	@Index(&user, notifications) {
 		<div class="pt-2">
 			<div class="grid grid-cols-7">
@@ -21,7 +21,7 @@ templ Calendar(user repo.User, month schemas.Month, vacRemaining float64, vacUse
 	}
 }
 
-templ WeekdayHeader(name string, month schemas.Month) {
+templ WeekdayHeader(name string, month calendar.Month) {
 	{{
 		currWeekday := time.Now().Weekday()
 		strWeekday := calendar.GetStrWeekday(currWeekday)
@@ -34,7 +34,7 @@ templ WeekdayHeader(name string, month schemas.Month) {
 	}
 }
 
-templ Day(year int, month int, day schemas.Day, user repo.User) {
+templ Day(year int, month int, day calendar.Day, user domain.User) {
 	{{
 	url := fmt.Sprintf("/%d/%d/%d", year, month, day.Number)
 	strDay := strconv.Itoa(day.Number)
@@ -76,7 +76,7 @@ templ Day(year int, month int, day schemas.Day, user repo.User) {
 	</div>
 }
 
-templ MonthNavigation(month schemas.Month, userFilter, eventFilter string) {
+templ MonthNavigation(month calendar.Month, userFilter, eventFilter string) {
 	{{
 	strYear := strconv.Itoa(month.Year)
 	year := month.Year
@@ -119,7 +119,7 @@ templ MonthNavigation(month schemas.Month, userFilter, eventFilter string) {
 	</div>
 }
 
-templ Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed float64, pendingEvents int, users []repo.User, userFilter, eventFilter string) {
+templ Info(month calendar.Month, user domain.User, vacRemaining float64, vacUsed float64, pendingEvents int, users []domain.User, userFilter, eventFilter string) {
 	<div class="col-span-7 grid grid-cols-7 items-center gap-x-2 mt-2 mb-10">
 		<select class="col-span-1 select focus:border-0 h-full border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl" name="eventName" id="eventName">
 			<option value="urlaub">Urlaub</option>
@@ -152,7 +152,7 @@ templ Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed fl
 	</script>
 }
 
-templ VacationCounter(user repo.User, vacationRemaining float64, vacUsed float64, pendingEvents int) {
+templ VacationCounter(user domain.User, vacationRemaining float64, vacUsed float64, pendingEvents int) {
 	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
 	<div id="vacation-counter" hx-swap-oob="true" class="flex w-full justify-center items-center align-middle h-full text-center">
 		<div class="text-info">{ fmt.Sprint(pendingEvents) } </div><span class="text-base-content pl-2">pending</span><span class="text-base-content opacity-50 px-3">|</span>
@@ -162,7 +162,7 @@ templ VacationCounter(user repo.User, vacationRemaining float64, vacUsed float64
 	</div>
 }
 
-templ UserFilter(users []repo.User, month schemas.Month, userFilter, eventFilter string) {
+templ UserFilter(users []domain.User, month calendar.Month, userFilter, eventFilter string) {
 	<select
 		hx-get={ fmt.Sprintf("/%v/%v", month.Year, month.Number) }
 		hx-target="#calendar"
@@ -184,7 +184,7 @@ templ UserFilter(users []repo.User, month schemas.Month, userFilter, eventFilter
 	</select>
 }
 
-templ EventFilter(month schemas.Month, eventFilter, userFilter string) {
+templ EventFilter(month calendar.Month, eventFilter, userFilter string) {
 	{{
 	events := map[string]string{"all": "All Events", "urlaub": "Urlaub", "workation": "Workation", "krank": "Krank", "home office": "Home Office"}
 	}}

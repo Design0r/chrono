@@ -1,13 +1,12 @@
 package templates
 
 import (
-	"chrono/db/repo"
-	"chrono/schemas"
+	"chrono/internal/domain"
 	"fmt"
 	"time"
 )
 
-templ Requests(user *repo.User, requests []schemas.BatchRequest, notifications []repo.Notification) {
+templ Requests(user *domain.User, requests []domain.BatchRequest, notifications []domain.Notification) {
 	@Index(user, notifications) {
 		<div id="reject-modal"></div>
 		<div class="p-2">
@@ -38,7 +37,7 @@ templ Requests(user *repo.User, requests []schemas.BatchRequest, notifications [
 	}
 }
 
-templ RequestRow(request schemas.BatchRequest) {
+templ RequestRow(request domain.BatchRequest) {
 	{{
 	msg := ""
 	if request.Request.Message != nil {

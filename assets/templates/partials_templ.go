@@ -10,11 +10,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"chrono/config"
-	"chrono/db/repo"
 	"chrono/internal/domain"
-	"chrono/schemas"
-	"chrono/service"
+	"chrono/internal/domain/calendar"
 	"fmt"
+	"go.lsp.dev/pkg/event"
 	"strings"
 	"time"
 )
@@ -41,9 +40,10 @@ func Event(event domain.EventUser, user domain.User) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 
-		cfg := config.GetConfig()
+		event.Event.
+			cfg := config.GetConfig()
 		bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(event.User.Color))
-		if !service.IsVacation(event.Event.Name) && event.User.Username != cfg.BotName {
+		if !event.Event.IsVacation() && event.User.Username != cfg.BotName {
 			bgColor = domain.Color.HSLDarkFromHex(event.User.Color)
 		}
 		eventId := fmt.Sprintf("event-%v", event.Event.ID)
@@ -89,7 +89,7 @@ func Event(event domain.EventUser, user domain.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if (event.User.ID == user.ID && (event.Event.State != "accepted" || event.Event.ScheduledAt.Compare(time.Now()) == 1 || !service.IsVacation(event.Event.Name))) || user.IsSuperuser {
+		if (event.User.ID == user.ID && (event.Event.State != "accepted" || event.Event.ScheduledAt.Compare(time.Now()) == 1 || !event.Event.IsVacation())) || user.IsSuperuser {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<span><button hx-swap=\"delete\" hx-target=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -264,7 +264,7 @@ func Message(message string, mtype string) templ.Component {
 	})
 }
 
-func UpdateNotifications(notifications []repo.Notification) templ.Component {
+func UpdateNotifications(notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -346,7 +346,7 @@ func NotificationIndicator(num int) templ.Component {
 	})
 }
 
-func NotificationContainer(notifications []repo.Notification) templ.Component {
+func NotificationContainer(notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -437,7 +437,7 @@ func NotificationContainer(notifications []repo.Notification) templ.Component {
 	})
 }
 
-func UpdateProfileWithMessage(user repo.User, notifications []repo.Notification) templ.Component {
+func UpdateProfileWithMessage(user domain.User, notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -470,7 +470,7 @@ func UpdateProfileWithMessage(user repo.User, notifications []repo.Notification)
 	})
 }
 
-func AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form bool) templ.Component {
+func AdminCheckbox(currUser domain.User, userId int64, isSuperuser bool, form bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -576,7 +576,7 @@ func AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form bool
 	})
 }
 
-func CalendarCore(month schemas.Month, user repo.User, userFilter, eventFilter string) templ.Component {
+func CalendarCore(month calendar.Month, user domain.User, userFilter, eventFilter string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -649,7 +649,7 @@ func CalendarCore(month schemas.Month, user repo.User, userFilter, eventFilter s
 	})
 }
 
-func CalendarCoreResponse(month schemas.Month, user repo.User, userFilter, eventFilter string) templ.Component {
+func CalendarCoreResponse(month calendar.Month, user domain.User, userFilter, eventFilter string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

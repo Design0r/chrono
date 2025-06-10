@@ -1,8 +1,8 @@
 package templates
 
-import "chrono/db/repo"
+import "chrono/internal/domain"
 
-templ Tokens(currUser *repo.User, notifications []repo.Notification, users []repo.User) {
+templ Tokens(currUser *domain.User, notifications []domain.Notification, users []domain.User) {
 	@Index(currUser, notifications) {
 		<div class="flex my-10">
 			<div class="align-middle flex m-auto">

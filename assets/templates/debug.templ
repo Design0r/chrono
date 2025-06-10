@@ -1,8 +1,8 @@
 package templates
 
-import "chrono/db/repo"
+import "chrono/internal/domain"
 
-templ Debug(user *repo.User, notifications []repo.Notification) {
+templ Debug(user *domain.User, notifications []domain.Notification) {
 	@Index(user, notifications) {
 		<div class="container max-w-xs space-y-2 mt-6 justify-center items m-auto flex flex-col">
 			<button hx-delete="/debug/tokens" hx-swap="none" class="btn btn-warning">Clear token table</button>

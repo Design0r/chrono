@@ -2,12 +2,12 @@ package templates
 
 import (
 	"chrono/db/repo"
+	"chrono/internal/domain"
 	"chrono/service"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
-	"chrono/internal/domain"
 )
 
 templ Index(user *domain.User, notifications []domain.Notification) {
@@ -51,7 +51,7 @@ templ Static() {
 	</html>
 }
 
-templ Notifications(notifications []repo.Notification) {
+templ Notifications(notifications []domain.Notification) {
 	<div class="indicator">
 		@NotificationIndicator(len(notifications))
 		<div class="dropdown dropdown-end">
@@ -101,9 +101,8 @@ templ Header(user *domain.User, notifications []domain.Notification) {
 	</div>
 }
 
-templ Avatar(user repo.User) {
+templ Avatar(user domain.User) {
 	{{
-	// Make sure slicing never panics
 	initial := "?"
 	if len(user.Username) > 0 {
 		initial = strings.ToUpper(user.Username[:1])

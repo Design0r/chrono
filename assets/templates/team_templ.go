@@ -10,12 +10,12 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"chrono/config"
-	"chrono/db/repo"
+	"chrono/internal/domain"
 	"chrono/service"
 	"fmt"
 )
 
-func Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) templ.Component {
+func Team(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -82,7 +82,7 @@ func Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notific
 	})
 }
 
-func TeamHTMX(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) templ.Component {
+func TeamHTMX(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -135,7 +135,7 @@ func TeamHTMX(users []repo.GetUsersWithVacationCountRow, currUser repo.User, not
 	})
 }
 
-func TeamForm(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) templ.Component {
+func TeamForm(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -192,7 +192,7 @@ func TeamForm(users []repo.GetUsersWithVacationCountRow, currUser repo.User, not
 	})
 }
 
-func TeamTable(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification, form bool) templ.Component {
+func TeamTable(users []domain.GetUsersWithVacationCountRow, currUser domain.User, notifications []domain.Notification, form bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -239,7 +239,7 @@ func TeamTable(users []repo.GetUsersWithVacationCountRow, currUser repo.User, no
 	})
 }
 
-func TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bool) templ.Component {
+func TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

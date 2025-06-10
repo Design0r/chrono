@@ -43,6 +43,14 @@ type RequestEventUser struct {
 	UserID_2     int64     `json:"user_id_2"`
 }
 
+type BatchRequest struct {
+	StartDate  time.Time
+	EndDate    time.Time
+	EventCount int
+	Request    *RequestEventUser
+	Conflicts  *[]User
+}
+
 type RequestRepository interface {
 	Create(ctx context.Context, msg string, user *User, event *Event) (*Request, error)
 	Update(ctx context.Context, editor *User, req *Request) (*Request, error)

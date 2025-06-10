@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"slices"
+	"time"
+)
 
 type Event struct {
 	ID          int64     `json:"id"`
@@ -10,6 +13,12 @@ type Event struct {
 	CreatedAt   time.Time `json:"created_at"`
 	EditedAt    time.Time `json:"edited_at"`
 	UserID      int64     `json:"user_id"`
+}
+
+var vacationNames []string = []string{"urlaub", "urlaub halbtags"}
+
+func (e *Event) IsVacation() bool {
+	return slices.Contains(vacationNames, e.Name)
 }
 
 type EventUser struct {

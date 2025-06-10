@@ -9,15 +9,15 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"chrono/calendar"
 	"chrono/db/repo"
-	"chrono/schemas"
+	"chrono/internal/domain"
+	"chrono/internal/domain/calendar"
 	"fmt"
 	"strconv"
 	"time"
 )
 
-func Calendar(user repo.User, month schemas.Month, vacRemaining float64, vacUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User, userFilter, eventFilter string) templ.Component {
+func Calendar(user domain.User, month calendar.Month, vacRemaining float64, vacUsed float64, pendingEvents int, notifications []repo.Notification, users []repo.User, userFilter, eventFilter string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -80,7 +80,7 @@ func Calendar(user repo.User, month schemas.Month, vacRemaining float64, vacUsed
 	})
 }
 
-func WeekdayHeader(name string, month schemas.Month) templ.Component {
+func WeekdayHeader(name string, month calendar.Month) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -146,7 +146,7 @@ func WeekdayHeader(name string, month schemas.Month) templ.Component {
 	})
 }
 
-func Day(year int, month int, day schemas.Day, user repo.User) templ.Component {
+func Day(year int, month int, day calendar.Day, user domain.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -267,7 +267,7 @@ func Day(year int, month int, day schemas.Day, user repo.User) templ.Component {
 	})
 }
 
-func MonthNavigation(month schemas.Month, userFilter, eventFilter string) templ.Component {
+func MonthNavigation(month calendar.Month, userFilter, eventFilter string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -368,7 +368,7 @@ func MonthNavigation(month schemas.Month, userFilter, eventFilter string) templ.
 	})
 }
 
-func Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed float64, pendingEvents int, users []repo.User, userFilter, eventFilter string) templ.Component {
+func Info(month calendar.Month, user domain.User, vacRemaining float64, vacUsed float64, pendingEvents int, users []domain.User, userFilter, eventFilter string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -429,7 +429,7 @@ func Info(month schemas.Month, user repo.User, vacRemaining float64, vacUsed flo
 	})
 }
 
-func VacationCounter(user repo.User, vacationRemaining float64, vacUsed float64, pendingEvents int) templ.Component {
+func VacationCounter(user domain.User, vacationRemaining float64, vacUsed float64, pendingEvents int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -511,7 +511,7 @@ func VacationCounter(user repo.User, vacationRemaining float64, vacUsed float64,
 	})
 }
 
-func UserFilter(users []repo.User, month schemas.Month, userFilter, eventFilter string) templ.Component {
+func UserFilter(users []domain.User, month calendar.Month, userFilter, eventFilter string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -622,7 +622,7 @@ func UserFilter(users []repo.User, month schemas.Month, userFilter, eventFilter 
 	})
 }
 
-func EventFilter(month schemas.Month, eventFilter, userFilter string) templ.Component {
+func EventFilter(month calendar.Month, eventFilter, userFilter string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

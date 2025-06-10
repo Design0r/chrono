@@ -1,13 +1,13 @@
 package templates
 
 import (
-	"chrono/db/repo"
-	"fmt"
-	"chrono/service"
 	"chrono/config"
+	"chrono/internal/domain"
+	"chrono/service"
+	"fmt"
 )
 
-templ Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) {
+templ Team(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification) {
 	@Index(&currUser, notifications) {
 		@TeamTable(users, currUser, notifications, false) {
 			if currUser.IsSuperuser {
@@ -24,7 +24,7 @@ templ Team(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifi
 	}
 }
 
-templ TeamHTMX(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) {
+templ TeamHTMX(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification) {
 	@TeamTable(users, currUser, notifications, false) {
 		if currUser.IsSuperuser {
 			<div class="mt-4">
@@ -40,7 +40,7 @@ templ TeamHTMX(users []repo.GetUsersWithVacationCountRow, currUser repo.User, no
 	@Message("Saved changes", "success")
 }
 
-templ TeamForm(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification) {
+templ TeamForm(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification) {
 	<form id="team-table" hx-patch="/team">
 		@TeamTable(users, currUser, notifications, true) {
 			if currUser.IsSuperuser {
@@ -58,7 +58,7 @@ templ TeamForm(users []repo.GetUsersWithVacationCountRow, currUser repo.User, no
 	</form>
 }
 
-templ TeamTable(users []repo.GetUsersWithVacationCountRow, currUser repo.User, notifications []repo.Notification, form bool) {
+templ TeamTable(users []domain.GetUsersWithVacationCountRow, currUser domain.User, notifications []domain.Notification, form bool) {
 	<div id="team-table" class="p-2">
 		<div class="pt-2 bg-base-200 rounded-xl">
 			<table class="table rounded-xl">
@@ -85,7 +85,7 @@ templ TeamTable(users []repo.GetUsersWithVacationCountRow, currUser repo.User, n
 	</div>
 }
 
-templ TeamRow(currUser repo.User, user repo.GetUsersWithVacationCountRow, form bool) {
+templ TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) {
 	{{
 	cfg := config.GetConfig()
 	css := "hover:bg-base-300 pt-8 border-b-2 border-base-100 opacity-80 border-opacity-50"

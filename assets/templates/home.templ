@@ -2,13 +2,12 @@ package templates
 
 import (
 	"chrono/calendar"
-	"chrono/db/repo"
-	"chrono/schemas"
+	"chrono/internal/domain"
 	"fmt"
 	"time"
 )
 
-templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress schemas.YearProgress, notifications []repo.Notification, eventHistogram []schemas.YearHistogram) {
+templ Home(user domain.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress calendar.YearProgress, notifications []domain.Notification, eventHistogram []calendar.YearHistogram) {
 	@Index(&user, notifications) {
 		<div class="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
 			<div class="text-[48px] pl-2 font-black">{ fmt.Sprintf("> hey %v ", user.Username) }</div>
@@ -85,13 +84,13 @@ templ Card(title string) {
 	</div>
 }
 
-templ YearProgress(progress schemas.YearProgress) {
+templ YearProgress(progress calendar.YearProgress) {
 	<progress class="progress progress-success mb-3 mt-2 h-6" { templ.Attributes{"value":fmt.Sprintf("%.1f", progress.DaysPassedPercent)}... } max="100" role="progressbar">
 		{ fmt.Sprintf("%.1f %%", progress.DaysPassedPercent) }
 	</progress>
 }
 
-templ OverviewDay(day schemas.YearHistogram) {
+templ OverviewDay(day calendar.YearHistogram) {
 	{{
 	baseStyle := "width:1rem; height:1rem; border-radius:9999px;"
 
@@ -136,7 +135,7 @@ templ OverviewDay(day schemas.YearHistogram) {
 	</div>
 }
 
-templ YearOverview(histogram []schemas.YearHistogram) {
+templ YearOverview(histogram []calendar.YearHistogram) {
 	{{
 		totalWeeks := 1
 		gaps := calendar.GetMonthGaps(calendar.CurrentYear())

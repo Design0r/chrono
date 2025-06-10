@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"slices"
 	"time"
 )
@@ -19,6 +20,13 @@ var vacationNames []string = []string{"urlaub", "urlaub halbtags"}
 
 func (e *Event) IsVacation() bool {
 	return slices.Contains(vacationNames, e.Name)
+}
+
+type EventRepository interface {
+	Create(ctx context.Context, data YMDate, eventType string, user *User) (*Event, error)
+	Delete(ctx context.Context, id int64) (*Event, error)
+	GetForDay(ctx context.Context, data YMDDate) ([]Event, error)
+	GetForMonth(ctx context.Context, data YMDDate) ([]Event, error)
 }
 
 type EventUser struct {

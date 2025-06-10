@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"chrono/assets"
 	"chrono/db/repo"
 	"chrono/htmx"
 	"chrono/schemas"
@@ -77,3 +78,17 @@ func HoneypotMiddleware(r *repo.Queries) MiddlewareFunc {
 		}
 	}
 }
+
+func CacheControl(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set("Cache-Control", "public, max-age=86400") // 1 day
+		return next(c)
+	}
+}
+
+var StaticHandler = echo.WrapHandler(
+	http.StripPrefix(
+		"/",
+		http.FileServer(http.FS(assets.StaticFS)),
+	),
+)

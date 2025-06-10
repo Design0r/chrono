@@ -453,6 +453,43 @@ func (q *Queries) GetVacationCountForUser(ctx context.Context, arg GetVacationCo
 	return sum, err
 }
 
+const UpdateEvent = `-- name: UpdateEvent :one
+UPDATE events 
+SET name = ?,
+scheduled_at = ?,
+state = ?,
+edited_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING id, scheduled_at, name, state, created_at, edited_at, user_id
+`
+
+type UpdateEventParams struct {
+	Name        string    `json:"name"`
+	ScheduledAt time.Time `json:"scheduled_at"`
+	State       string    `json:"state"`
+	ID          int64     `json:"id"`
+}
+
+func (q *Queries) UpdateEvent(ctx context.Context, arg UpdateEventParams) (Event, error) {
+	row := q.db.QueryRowContext(ctx, UpdateEvent,
+		arg.Name,
+		arg.ScheduledAt,
+		arg.State,
+		arg.ID,
+	)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.ScheduledAt,
+		&i.Name,
+		&i.State,
+		&i.CreatedAt,
+		&i.EditedAt,
+		&i.UserID,
+	)
+	return i, err
+}
+
 const UpdateEventState = `-- name: UpdateEventState :one
 UPDATE events
 SET state = ?,

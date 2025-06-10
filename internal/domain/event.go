@@ -4,6 +4,8 @@ import (
 	"context"
 	"slices"
 	"time"
+
+	"chrono/internal/domain/calendar"
 )
 
 type Event struct {
@@ -24,9 +26,13 @@ func (e *Event) IsVacation() bool {
 
 type EventRepository interface {
 	Create(ctx context.Context, data YMDate, eventType string, user *User) (*Event, error)
+	Update(ctx context.Context, event *Event) (*Event, error)
 	Delete(ctx context.Context, id int64) (*Event, error)
 	GetForDay(ctx context.Context, data YMDDate) ([]Event, error)
-	GetForMonth(ctx context.Context, data YMDDate) ([]Event, error)
+	GetForMonth(ctx context.Context, data YMDate) (calendar.Month, error)
+	GetForYear(ctx context.Context, year int) ([]EventUser, error)
+	GetPendingForUser(ctx context.Context, userId int64, year int) (int, error)
+	GetUsedVacationForUser(ctx context.Context, userId int64, year int) (float64, error)
 }
 
 type EventUser struct {

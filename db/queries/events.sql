@@ -3,6 +3,15 @@ INSERT INTO events (name, user_id, scheduled_at, state)
 VALUES (?, ?, ?, ?)
 RETURNING *;
 
+-- name: UpdateEvent :one
+UPDATE events 
+SET name = ?,
+scheduled_at = ?,
+state = ?,
+edited_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING *;
+
 -- name: GetEventsForDay :many
 SELECT * FROM events 
 WHERE Date(scheduled_at) = ?;

@@ -60,21 +60,20 @@ func (r *SQLEventRepo) Create(
 
 func (r *SQLEventRepo) Update(
 	ctx context.Context,
-	event *domain.Event,
+	eventId int64,
+	state string,
 ) (*domain.Event, error) {
-	e, err := r.r.UpdateEvent(
+	e, err := r.r.UpdateEventState(
 		ctx,
-		repo.UpdateEventParams{
-			Name:        event.Name,
-			ID:          event.ID,
-			ScheduledAt: event.ScheduledAt,
-			State:       event.State,
+		repo.UpdateEventStateParams{
+			ID:    eventId,
+			State: state,
 		},
 	)
 	if err != nil {
 		r.log.Error(
 			"UpdateEvent failed",
-			slog.String("eventType", event.Name),
+			slog.Int64("eventId", eventId),
 			slog.String("error", err.Error()),
 		)
 		return nil, err

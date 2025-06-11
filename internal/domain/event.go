@@ -2,11 +2,14 @@ package domain
 
 import (
 	"context"
+	"fmt"
 	"slices"
 	"time"
 
 	"chrono/internal/domain/calendar"
 )
+
+var vacationNames = []string{"urlaub", "urlaub halbtags"}
 
 type Event struct {
 	ID          int64     `json:"id"`
@@ -18,15 +21,29 @@ type Event struct {
 	UserID      int64     `json:"user_id"`
 }
 
-var vacationNames []string = []string{"urlaub", "urlaub halbtags"}
-
 func (e *Event) IsVacation() bool {
 	return slices.Contains(vacationNames, e.Name)
 }
 
+func (e *Event) RequestMsg(username string) string {
+	return fmt.Sprintf("%v sent a new request for %v.", username, e.Name)
+}
+
+func (e *Event) AcceptMsg(username string) string {
+	return fmt.Sprintf("%v accepted your %v request.", username, e.Name)
+}
+
+func (e *Event) RejectMsg(username string) string {
+	return fmt.Sprintf("%v rejected your %v request.", username, e.Name)
+}
+
+func (e *Event) UpdateMsg(username string, state string) string {
+	return fmt.Sprintf("%v %v your %v request.", username, state, e.Name)
+}
+
 type EventRepository interface {
-	Create(ctx context.Context, data YMDate, eventType string, user *User) (*Event, error)
-	Update(ctx context.Context, event *Event) (*Event, error)
+	Create(ctx context.Context, data YMDDate, eventType string, user *User) (*Event, error)
+	Update(ctx context.Context, eventId int64, state string) (*Event, error)
 	Delete(ctx context.Context, id int64) (*Event, error)
 	GetForDay(ctx context.Context, data YMDDate) ([]Event, error)
 	GetForMonth(ctx context.Context, data YMDate) (calendar.Month, error)

@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"log/slog"
+	"strings"
 	"time"
 
 	"chrono/db/repo"
@@ -114,7 +115,7 @@ func (r *SQLEventRepo) GetForDay(
 		time.UTC,
 	)
 
-	events, err := r.r.GetEventsForDay(context.Background(), date)
+	events, err := r.r.GetEventsForDay(ctx, date)
 	if err != nil {
 		r.log.Error("GetEventsForDay failed", slog.String("error", err.Error()))
 		return []domain.Event{}, err
@@ -126,4 +127,143 @@ func (r *SQLEventRepo) GetForDay(
 	}
 
 	return e, nil
+}
+
+func (r *SQLEventRepo) GetForMonth(
+	ctx context.Context,
+	data domain.YMDate,
+	botName string,
+	userFilter *domain.User,
+	eventFilter string,
+) ([]domain.EventUser, error) {
+	date := time.Date(
+		data.Year,
+		time.Month(data.Month),
+		1,
+		0,
+		0,
+		0,
+		0,
+		time.UTC,
+	)
+
+	events, err := r.r.GetEventsForMonth(ctx, repo.GetEventsForMonthParams{ScheduledAt: date, ScheduledAt_2: date.AddDate(0, 1, 0)})
+	if err != nil {
+		r.log.Error("GetEventsForMonth failed", slog.Int("year", data.Year), slog.String("month", time.Month(data.Month).String()), slog.String("error", err.Error()))
+		return nil, err
+	}
+
+	e := make([]domain.EventUser, len(events))
+
+	for _, event := range events {
+		idx := event.ScheduledAt.Day() - 1
+		if userFilter != nil && event.Username != userFilter.Username &&
+			event.Username != botName {
+			continue
+		}
+		if eventFilter != "" && !strings.Contains(event.Name, eventFilter) &&
+			eventFilter != "all" &&
+			event.Username != botName {
+			continue
+		}
+
+		newEvent := domain.EventUser{
+			User: domain.User{ID: event.ID_2, Username: event.Username, Email: event.Email, Password: event.Password, VacationDays: event.VacationDays, IsSuperuser: event.IsSuperuser, CreatedAt: event.CreatedAt_2, EditedAt: event.EditedAt_2, Color: event.Color},
+			Event: domain.Event{
+				Name:        event.Name,
+				ID:          event.ID,
+				State:       event.State,
+				ScheduledAt: event.ScheduledAt,
+				CreatedAt:   event.CreatedAt,
+				EditedAt:    event.EditedAt,
+				UserID:      event.UserID,
+			},
+		}
+		e[idx] = newEvent
+	}
+
+	return e, nil
+}
+
+func (r *SQLEventRepo) GetForYear(
+	ctx context.Context,
+	year int,
+) ([]domain.EventUser, error) {
+	yearStart := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
+
+	params := repo.GetEventsForYearParams{
+		ScheduledAt:   yearStart,
+		ScheduledAt_2: yearStart.AddDate(1, 0, 0),
+	}
+
+	events, err := r.r.GetEventsForYear(ctx, params)
+	if err != nil {
+		r.log.Error("GetEventsForYear failed", slog.Int("year", year), slog.String("error", err.Error()))
+		return nil, err
+	}
+
+	e := make([]domain.EventUser, len(events))
+	for i, event := range events {
+		e[i] = domain.EventUser{
+			User: domain.User{ID: event.ID_2, Username: event.Username, Email: event.Email, Password: event.Password, VacationDays: event.VacationDays, IsSuperuser: event.IsSuperuser, CreatedAt: event.CreatedAt_2, EditedAt: event.EditedAt_2, Color: event.Color},
+			Event: domain.Event{
+				Name:        event.Name,
+				ID:          event.ID,
+				State:       event.State,
+				ScheduledAt: event.ScheduledAt,
+				CreatedAt:   event.CreatedAt,
+				EditedAt:    event.EditedAt,
+				UserID:      event.UserID,
+			},
+		}
+	}
+
+	return e, nil
+}
+
+func (r *SQLEventRepo) GetPendingForUser(
+	ctx context.Context,
+	userId int64,
+	year int,
+) (int, error) {
+	start := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	params := repo.GetPendingEventsForYearParams{
+		ScheduledAt:   start,
+		ScheduledAt_2: start.AddDate(1, 0, 0),
+		UserID:        userId,
+	}
+	count, err := r.r.GetPendingEventsForYear(ctx, params)
+	if err != nil {
+		r.log.Error("GetPendingEventsForYear failed", slog.Int64("userId", userId), slog.Int("year", year), slog.String("error", err.Error()))
+		return 0, err
+	}
+
+	return int(count), nil
+}
+
+func (r *SQLEventRepo) GetUsedVacationForUser(
+	ctx context.Context,
+	userId int64,
+	year int,
+) (float64, error) {
+	start := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	params := repo.GetVacationCountForUserParams{
+		ScheduledAt:   start,
+		ScheduledAt_2: start.AddDate(1, 0, 0),
+		UserID:        userId,
+	}
+
+	count, err := r.r.GetVacationCountForUser(ctx, params)
+	if err != nil {
+		r.log.Error("GetVacationCountForUser failed", slog.Int64("userId", userId), slog.Int("year", year), slog.String("error", err.Error()))
+		return 0, err
+	}
+
+	if count == nil {
+		return 0.0, nil
+	}
+
+	return *count, nil
 }

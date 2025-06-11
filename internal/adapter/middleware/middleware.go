@@ -43,7 +43,7 @@ func AuthenticationMiddleware(svc service.AuthService) MiddlewareFunc {
 			if err != nil {
 				return c.Redirect(http.StatusFound, "/login")
 			}
-			c.Set("user", user)
+			c.Set("user", *user)
 
 			return next(c)
 		}

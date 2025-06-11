@@ -121,7 +121,7 @@ func (r *SQLEventRepo) GetForDay(
 	}
 
 	e := make([]domain.Event, len(events))
-	for i := 0; i <= len(events); i++ {
+	for i := 0; i < len(events); i++ {
 		e[i] = (domain.Event)(events[i])
 	}
 
@@ -134,7 +134,7 @@ func (r *SQLEventRepo) GetForMonth(
 	botName string,
 	userFilter *domain.User,
 	eventFilter string,
-) ([]domain.EventUser, error) {
+) (domain.Month, error) {
 	date := time.Date(
 		data.Year,
 		time.Month(data.Month),
@@ -149,10 +149,9 @@ func (r *SQLEventRepo) GetForMonth(
 	events, err := r.r.GetEventsForMonth(ctx, repo.GetEventsForMonthParams{ScheduledAt: date, ScheduledAt_2: date.AddDate(0, 1, 0)})
 	if err != nil {
 		r.log.Error("GetEventsForMonth failed", slog.Int("year", data.Year), slog.String("month", time.Month(data.Month).String()), slog.String("error", err.Error()))
-		return nil, err
+		return domain.Month{}, err
 	}
-
-	e := make([]domain.EventUser, len(events))
+	month := domain.GetDaysOfMonth(date.Month(), data.Year)
 
 	for _, event := range events {
 		idx := event.ScheduledAt.Day() - 1
@@ -178,10 +177,10 @@ func (r *SQLEventRepo) GetForMonth(
 				UserID:      event.UserID,
 			},
 		}
-		e[idx] = newEvent
+		month.Days[idx].Events = append(month.Days[idx].Events, newEvent)
 	}
 
-	return e, nil
+	return month, nil
 }
 
 func (r *SQLEventRepo) GetForYear(

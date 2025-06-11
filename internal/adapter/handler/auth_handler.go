@@ -22,13 +22,13 @@ func NewAuthHandler(u service.UserService, a service.AuthService, log *slog.Logg
 	return AuthHandler{user: u, auth: a, log: log}
 }
 
-func InitAuthRoutes(group *echo.Group, handler *AuthHandler) {
-	group.GET("/login", handler.LoginForm)
-	group.GET("/signup", handler.SignupForm)
+func (h *AuthHandler) RegisterRoutes(group *echo.Group) {
+	group.GET("/login", h.LoginForm)
+	group.GET("/signup", h.SignupForm)
 
-	group.POST("/login", handler.Login)
-	group.POST("/signup", handler.Signup)
-	group.POST("/logout", handler.Logout)
+	group.POST("/login", h.Login)
+	group.POST("/signup", h.Signup)
+	group.POST("/logout", h.Logout)
 }
 
 func (h *AuthHandler) LoginForm(c echo.Context) error {

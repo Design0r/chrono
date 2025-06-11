@@ -55,18 +55,3 @@ func (svc *vacationTokenService) GetRemainingVacationForUser(
 ) (float64, error) {
 	return svc.vacation.GetRemainingVacationForUser(ctx, userId, start, end)
 }
-
-func (svc *vacationTokenService) GetUserWithVacation(
-	ctx context.Context,
-	userId int64,
-	year int,
-) (domain.UserWithVacation, error) {
-	start := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
-	end := start.AddDate(1, 3, 0)
-	remaining, err := svc.vacation.GetRemainingVacationForUser(ctx, userId, start, end)
-	if err != nil {
-		return domain.UserWithVacation{}, err
-	}
-
-	return domain.UserWithVacation{VacationRemaining: remaining}, nil
-}

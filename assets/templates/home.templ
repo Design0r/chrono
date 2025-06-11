@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-templ Home(user domain.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress domain.YearProgress, notifications []domain.Notification, eventHistogram []domain.YearHistogram) {
-	@Index(&user, notifications) {
+templ Home(user domain.UserWithVacation, progress domain.YearProgress, notifications []domain.Notification, eventHistogram []domain.YearHistogram) {
+	@Index(&user.User, notifications) {
 		<div class="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
 			<div class="text-[48px] pl-2 font-black">{ fmt.Sprintf("> hey %v ", user.Username) }</div>
 			@Card("Your vacation stats") {
@@ -15,14 +15,14 @@ templ Home(user domain.User, vacationRemaining float64, vacTaken float64, pendin
 					<div class="stat">
 						<div class="stat-figure text-info"></div>
 						<div class="stat-title pb-1">Vacation remaining</div>
-						<div class="stat-value pb-[1px] text-success">{ fmt.Sprintf("%v days", vacationRemaining) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%.0f %% remaining", (float32(vacationRemaining) / float32(user.VacationDays)) * float32(100)) }</div>
+						<div class="stat-value pb-[1px] text-success">{ fmt.Sprintf("%v days", user.VacationRemaining) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%.0f %% remaining", (float32(user.VacationRemaining) / float32(user.VacationDays)) * float32(100)) }</div>
 					</div>
 					<div class="stat">
 						<div class="stat-figure icon-outlined"></div>
 						<div class="stat-title pb-1">Vacation taken</div>
-						<div class="stat-value pb-[1px] text-warning">{ fmt.Sprintf("%v days", vacTaken) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%.0f %% taken", (float32(user.VacationDays) - float32(vacationRemaining)) / float32(user.VacationDays) * float32(100)) }</div>
+						<div class="stat-value pb-[1px] text-warning">{ fmt.Sprintf("%v days", user.VacationUsed) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%.0f %% taken", (float32(user.VacationDays) - float32(user.VacationRemaining)) / float32(user.VacationDays) * float32(100)) }</div>
 					</div>
 					<div class="stat">
 						<div class="stat-figure text-info"></div>
@@ -33,8 +33,8 @@ templ Home(user domain.User, vacationRemaining float64, vacTaken float64, pendin
 					<div class="stat">
 						<div class="stat-figure text-info"></div>
 						<div class="stat-title pb-1">Vacation pending</div>
-						<div class="stat-value pb-[1px]">{ fmt.Sprintf("%v events",pendingEvents) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%v events pending",pendingEvents) }</div>
+						<div class="stat-value pb-[1px]">{ fmt.Sprintf("%v events",user.PendingEvents) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%v events pending",user.PendingEvents) }</div>
 					</div>
 				</div>
 			}

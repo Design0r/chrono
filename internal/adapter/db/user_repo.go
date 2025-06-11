@@ -147,7 +147,7 @@ func (r *SQLUserRepo) GetAll(ctx context.Context) ([]*domain.User, error) {
 	}
 
 	users := make([]*domain.User, len(u))
-	for i := 0; i <= len(u); i++ {
+	for i := 0; i < len(u); i++ {
 		users[i] = repoUserToDomain(&u[i])
 	}
 
@@ -165,7 +165,7 @@ func (r *SQLUserRepo) GetAdmins(ctx context.Context) ([]domain.User, error) {
 	}
 
 	admins := make([]domain.User, len(u))
-	for i := 0; i <= len(u); i++ {
+	for i := 0; i < len(u); i++ {
 		admins[i] = (domain.User)(u[i])
 	}
 

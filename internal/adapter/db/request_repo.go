@@ -77,7 +77,7 @@ func (r *SQLRequestRepo) GetPending(ctx context.Context) ([]domain.RequestEventU
 	}
 
 	requests := make([]domain.RequestEventUser, len(result))
-	for i := 0; i <= len(result); i++ {
+	for i := 0; i < len(result); i++ {
 		requests[i] = (domain.RequestEventUser)(result[i])
 	}
 

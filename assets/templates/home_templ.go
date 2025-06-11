@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func Home(user domain.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress domain.YearProgress, notifications []domain.Notification, eventHistogram []domain.YearHistogram) templ.Component {
+func Home(user domain.UserWithVacation, progress domain.YearProgress, notifications []domain.Notification, eventHistogram []domain.YearHistogram) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -81,9 +81,9 @@ func Home(user domain.User, vacationRemaining float64, vacTaken float64, pending
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days", vacationRemaining))
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days", user.VacationRemaining))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 18, Col: 95}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 18, Col: 100}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -94,9 +94,9 @@ func Home(user domain.User, vacationRemaining float64, vacTaken float64, pending
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.0f %% remaining", (float32(vacationRemaining)/float32(user.VacationDays))*float32(100)))
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.0f %% remaining", (float32(user.VacationRemaining)/float32(user.VacationDays))*float32(100)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 19, Col: 137}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 19, Col: 142}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -107,9 +107,9 @@ func Home(user domain.User, vacationRemaining float64, vacTaken float64, pending
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days", vacTaken))
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days", user.VacationUsed))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 24, Col: 86}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 24, Col: 95}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -120,9 +120,9 @@ func Home(user domain.User, vacationRemaining float64, vacTaken float64, pending
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.0f %% taken", (float32(user.VacationDays)-float32(vacationRemaining))/float32(user.VacationDays)*float32(100)))
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.0f %% taken", (float32(user.VacationDays)-float32(user.VacationRemaining))/float32(user.VacationDays)*float32(100)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 25, Col: 162}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 25, Col: 167}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -159,9 +159,9 @@ func Home(user domain.User, vacationRemaining float64, vacTaken float64, pending
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v events", pendingEvents))
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v events", user.PendingEvents))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 36, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 36, Col: 84}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -172,9 +172,9 @@ func Home(user domain.User, vacationRemaining float64, vacTaken float64, pending
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var12 string
-				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v events pending", pendingEvents))
+				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v events pending", user.PendingEvents))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 37, Col: 77}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 37, Col: 82}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -339,7 +339,7 @@ func Home(user domain.User, vacationRemaining float64, vacTaken float64, pending
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Index(&user, notifications).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Index(&user.User, notifications).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

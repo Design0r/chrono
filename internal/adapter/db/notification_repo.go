@@ -72,7 +72,7 @@ func (r *SQLUserNotificationRepo) GetByUserId(
 	}
 
 	n := make([]domain.Notification, len(notif))
-	for i := 0; i <= len(notif); i++ {
+	for i := 0; i < len(notif); i++ {
 		n[i] = (domain.Notification)(notif[i])
 	}
 

@@ -21,6 +21,7 @@ type UserWithVacation struct {
 	User
 	VacationRemaining float64
 	VacationUsed      float64
+	PendingEvents     int
 }
 
 type PatchUser struct {

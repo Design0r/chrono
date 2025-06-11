@@ -7,13 +7,13 @@ import (
 	"time"
 )
 
-templ Calendar(user domain.User, month domain.Month, vacRemaining float64, vacUsed float64, pendingEvents int, notifications []domain.Notification, users []domain.User, userFilter, eventFilter string) {
-	@Index(&user, notifications) {
+templ Calendar(user domain.UserWithVacation, month domain.Month, notifications []domain.Notification, users []domain.User, userFilter, eventFilter string) {
+	@Index(&user.User, notifications) {
 		<div class="pt-2">
 			<div class="grid grid-cols-7">
-				@Info(month, user, vacRemaining, vacUsed, pendingEvents, users, userFilter, eventFilter)
+				@Info(month, user, users, userFilter, eventFilter)
 			</div>
-			@CalendarCore(month, user, userFilter, eventFilter)
+			@CalendarCore(month, user.User, userFilter, eventFilter)
 		</div>
 		<div class="h-16"></div>
 	}
@@ -117,7 +117,7 @@ templ MonthNavigation(month domain.Month, userFilter, eventFilter string) {
 	</div>
 }
 
-templ Info(month domain.Month, user domain.User, vacRemaining float64, vacUsed float64, pendingEvents int, users []domain.User, userFilter, eventFilter string) {
+templ Info(month domain.Month, user domain.UserWithVacation, users []domain.User, userFilter, eventFilter string) {
 	<div class="col-span-7 grid grid-cols-7 items-center gap-x-2 mt-2 mb-10">
 		<select class="col-span-1 select focus:border-0 h-full border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl" name="eventName" id="eventName">
 			<option value="urlaub">Urlaub</option>
@@ -137,7 +137,7 @@ templ Info(month domain.Month, user domain.User, vacRemaining float64, vacUsed f
 						@EventFilter(month, eventFilter, userFilter)
 					</div>
 					<div class="flex col-span-2 w-full items-center align-middle h-full ">
-						@VacationCounter(user, vacRemaining, vacUsed, pendingEvents)
+						@VacationCounter(user)
 					</div>
 				</div>
 			</div>
@@ -150,12 +150,12 @@ templ Info(month domain.Month, user domain.User, vacRemaining float64, vacUsed f
 	</script>
 }
 
-templ VacationCounter(user domain.User, vacationRemaining float64, vacUsed float64, pendingEvents int) {
+templ VacationCounter(user domain.UserWithVacation) {
 	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
 	<div id="vacation-counter" hx-swap-oob="true" class="flex w-full justify-center items-center align-middle h-full text-center">
-		<div class="text-info">{ fmt.Sprint(pendingEvents) } </div><span class="text-base-content pl-2">pending</span><span class="text-base-content opacity-50 px-3">|</span>
-		<div class="text-warning">{ fmt.Sprint(vacUsed) } </div> <span class="text-base-content pl-2">used</span><span class="text-base-content opacity-50 px-3">|</span>
-		<div class="text-success">{ fmt.Sprint(vacationRemaining) } </div> <span class="text-base-content pl-2">remaining</span>
+		<div class="text-info">{ fmt.Sprint(user.PendingEvents) } </div><span class="text-base-content pl-2">pending</span><span class="text-base-content opacity-50 px-3">|</span>
+		<div class="text-warning">{ fmt.Sprint(user.VacationUsed) } </div> <span class="text-base-content pl-2">used</span><span class="text-base-content opacity-50 px-3">|</span>
+		<div class="text-success">{ fmt.Sprint(user.VacationRemaining) } </div> <span class="text-base-content pl-2">remaining</span>
 		<div class="text-info hidden">{ strNum } total</div>
 	</div>
 }

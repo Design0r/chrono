@@ -136,19 +136,19 @@ func (r *SQLUserRepo) GetByEmail(ctx context.Context, email string) (*domain.Use
 	return repoUserToDomain(&u), nil
 }
 
-func (r *SQLUserRepo) GetAll(ctx context.Context) ([]*domain.User, error) {
+func (r *SQLUserRepo) GetAll(ctx context.Context) ([]domain.User, error) {
 	u, err := r.q.GetAllUsers(ctx)
 	if err != nil {
 		r.log.Error(
 			"GetAllUsers failed:",
 			slog.String("error", err.Error()),
 		)
-		return []*domain.User{}, err
+		return []domain.User{}, err
 	}
 
-	users := make([]*domain.User, len(u))
+	users := make([]domain.User, len(u))
 	for i := 0; i < len(u); i++ {
-		users[i] = repoUserToDomain(&u[i])
+		users[i] = (domain.User)(u[i])
 	}
 
 	return users, nil

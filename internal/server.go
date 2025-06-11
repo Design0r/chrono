@@ -76,6 +76,7 @@ func (s *Server) InitRoutes() {
 
 	authHandler := handler.NewAuthHandler(&userService, &authService, slog.Default().WithGroup("auth"))
 	homeHandler := handler.NewHomeHandler(&tokenService, &eventService, &notificationService)
+	calendarHandler := handler.NewCalendarHandler(&userService, &notificationService, &eventService, &tokenService, slog.Default().WithGroup("calendar"))
 
 	authGrp := s.Router.Group(
 		"",
@@ -85,6 +86,7 @@ func (s *Server) InitRoutes() {
 	//adminGrp := authGrp.Group("", mw.AdminMiddleware())
 	honeypotGrp := s.Router.Group("", mw.HoneypotMiddleware())
 
+	calendarHandler.RegisterRoutes(authGrp)
 	homeHandler.RegisterRoutes(authGrp)
 	authHandler.RegisterRoutes(honeypotGrp)
 }

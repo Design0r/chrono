@@ -13,7 +13,7 @@ type UserService interface {
 	GetById(ctx context.Context, id int64) (*domain.User, error)
 	GetByName(ctx context.Context, name string) (*domain.User, error)
 	GetByEmail(ctx context.Context, email string) (*domain.User, error)
-	GetAll(ctx context.Context) ([]*domain.User, error)
+	GetAll(ctx context.Context) ([]domain.User, error)
 	Delete(ctx context.Context, id int64) error
 	GetUsersWithVacation(ctx context.Context) ([]*domain.UserWithVacation, error)
 	ToggleAdmin(
@@ -56,7 +56,7 @@ func (svc *userService) GetByEmail(ctx context.Context, email string) (*domain.U
 	return svc.user.GetByName(ctx, email)
 }
 
-func (svc *userService) GetAll(ctx context.Context) ([]*domain.User, error) {
+func (svc *userService) GetAll(ctx context.Context) ([]domain.User, error) {
 	return svc.user.GetAll(ctx)
 }
 

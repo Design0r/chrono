@@ -10,6 +10,7 @@ import (
 
 type TokenService interface {
 	InitYearlyTokens(ctx context.Context, user *domain.User) error
+	UpdateYearlyTokens(ctx context.Context, userId int64, vacation, year int) error
 }
 
 type tokenService struct {
@@ -49,6 +50,32 @@ func (svc *tokenService) InitYearlyTokens(ctx context.Context, user *domain.User
 			UserID:    user.ID,
 		},
 	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (svc *tokenService) UpdateYearlyTokens(
+	ctx context.Context,
+	userId int64,
+	vacation, year int,
+) error {
+	_, err := svc.refresh.CreateIfNotExists(ctx, userId)
+	if err != nil {
+		return err
+	}
+
+	start := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
+	end := start.AddDate(1, 3, 0)
+	params := domain.CreateVacationToken{
+		StartDate: start,
+		EndDate:   end,
+		UserID:    userId,
+		Value:     float64(vacation),
+	}
+	_, err = svc.vac.Create(ctx, params)
 	if err != nil {
 		return err
 	}

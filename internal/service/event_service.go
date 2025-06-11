@@ -1,25 +1,41 @@
 package service
 
 import (
-	"chrono/config"
-	"chrono/internal/domain"
 	"context"
 	"log/slog"
 	"slices"
 	"strings"
 	"time"
+
+	"chrono/config"
+	"chrono/internal/domain"
 )
 
 type EventService interface {
-	Create(ctx context.Context, data domain.YMDDate, eventType string, user *domain.User) (*domain.Event, error)
+	Create(
+		ctx context.Context,
+		data domain.YMDDate,
+		eventType string,
+		user *domain.User,
+	) (*domain.Event, error)
 	Update(ctx context.Context, eventId int64, state string) (*domain.Event, error)
 	Delete(ctx context.Context, id int64) (*domain.Event, error)
 	GetForDay(ctx context.Context, data domain.YMDDate) ([]domain.Event, error)
-	GetForMonth(ctx context.Context, data domain.YMDate, userFilter *domain.User, eventFilter string) (domain.Month, error)
+	GetForMonth(
+		ctx context.Context,
+		data domain.YMDate,
+		userFilter *domain.User,
+		eventFilter string,
+	) (domain.Month, error)
 	GetHistogramForYear(ctx context.Context, year int) ([]domain.YearHistogram, error)
 	GetPendingForUser(ctx context.Context, userId int64, year int) (int, error)
 	GetUsedVacationForUser(ctx context.Context, userId int64, year int) (float64, error)
-	GetUserWithVacation(ctx context.Context, userId int64, year int) (domain.UserWithVacation, error)
+	GetUserWithVacation(
+		ctx context.Context,
+		userId int64,
+		year int,
+	) (domain.UserWithVacation, error)
+	GetAllUsersWithVacation(ctx context.Context, year int) ([]domain.UserWithVacation, error)
 }
 
 type eventService struct {
@@ -30,18 +46,31 @@ type eventService struct {
 	user     UserService
 }
 
-func NewEventService(e domain.EventRepository, r RequestService, u UserService, v VacationTokenService, log *slog.Logger) eventService {
-
+func NewEventService(
+	e domain.EventRepository,
+	r RequestService,
+	u UserService,
+	v VacationTokenService,
+	log *slog.Logger,
+) eventService {
 	return eventService{log: log, event: e, request: r, user: u, vacation: v}
 }
 
-func (svc *eventService) Create(ctx context.Context, data domain.YMDDate, eventType string, user *domain.User) (*domain.Event, error) {
+func (svc *eventService) Create(
+	ctx context.Context,
+	data domain.YMDDate,
+	eventType string,
+	user *domain.User,
+) (*domain.Event, error) {
 	evt := domain.Event{Name: eventType}
 	start := time.Date(data.Year, 1, 1, 0, 0, 0, 0, time.UTC)
 	end := start.AddDate(1, 3, 0)
 
 	if evt.IsVacation() && user.IsSuperuser {
-		_, err := svc.vacation.Create(ctx, domain.CreateVacationToken{StartDate: start, EndDate: end, UserID: user.ID, Value: -1})
+		_, err := svc.vacation.Create(
+			ctx,
+			domain.CreateVacationToken{StartDate: start, EndDate: end, UserID: user.ID, Value: -1},
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -65,7 +94,11 @@ func (svc *eventService) Create(ctx context.Context, data domain.YMDDate, eventT
 	return event, nil
 }
 
-func (svc *eventService) Update(ctx context.Context, eventId int64, state string) (*domain.Event, error) {
+func (svc *eventService) Update(
+	ctx context.Context,
+	eventId int64,
+	state string,
+) (*domain.Event, error) {
 	return svc.event.Update(ctx, eventId, state)
 }
 
@@ -73,16 +106,27 @@ func (svc *eventService) Delete(ctx context.Context, eventId int64) (*domain.Eve
 	return svc.event.Delete(ctx, eventId)
 }
 
-func (svc *eventService) GetForDay(ctx context.Context, data domain.YMDDate) ([]domain.Event, error) {
+func (svc *eventService) GetForDay(
+	ctx context.Context,
+	data domain.YMDDate,
+) ([]domain.Event, error) {
 	return svc.event.GetForDay(ctx, data)
 }
 
-func (svc *eventService) GetForMonth(ctx context.Context, data domain.YMDate, userFilter *domain.User, eventFilter string) (domain.Month, error) {
+func (svc *eventService) GetForMonth(
+	ctx context.Context,
+	data domain.YMDate,
+	userFilter *domain.User,
+	eventFilter string,
+) (domain.Month, error) {
 	cfg := config.GetConfig()
 	return svc.event.GetForMonth(ctx, data, cfg.BotName, userFilter, eventFilter)
 }
 
-func (svc *eventService) GetHistogramForYear(ctx context.Context, year int) ([]domain.YearHistogram, error) {
+func (svc *eventService) GetHistogramForYear(
+	ctx context.Context,
+	year int,
+) ([]domain.YearHistogram, error) {
 	events, err := svc.event.GetForYear(ctx, year)
 	if err != nil {
 		return nil, nil
@@ -110,11 +154,19 @@ func (svc *eventService) GetHistogramForYear(ctx context.Context, year int) ([]d
 	return eventList, err
 }
 
-func (svc *eventService) GetPendingForUser(ctx context.Context, userId int64, year int) (int, error) {
+func (svc *eventService) GetPendingForUser(
+	ctx context.Context,
+	userId int64,
+	year int,
+) (int, error) {
 	return svc.event.GetPendingForUser(ctx, userId, year)
 }
 
-func (svc *eventService) GetUsedVacationForUser(ctx context.Context, userId int64, year int) (float64, error) {
+func (svc *eventService) GetUsedVacationForUser(
+	ctx context.Context,
+	userId int64,
+	year int,
+) (float64, error) {
 	return svc.event.GetUsedVacationForUser(ctx, userId, year)
 }
 
@@ -145,5 +197,36 @@ func (svc *eventService) GetUserWithVacation(
 		return domain.UserWithVacation{}, err
 	}
 
-	return domain.UserWithVacation{VacationRemaining: remaining, VacationUsed: used, User: *user, PendingEvents: pending}, nil
+	return domain.UserWithVacation{
+		VacationRemaining: remaining,
+		VacationUsed:      used,
+		User:              *user,
+		PendingEvents:     pending,
+	}, nil
+}
+
+func (svc *eventService) GetAllUsersWithVacation(
+	ctx context.Context,
+	year int,
+) ([]domain.UserWithVacation, error) {
+	allUsers, err := svc.user.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	allUsersWithVac := make([]domain.UserWithVacation, len(allUsers))
+	for i, user := range allUsers {
+		u, err := svc.GetUserWithVacation(ctx, user.ID, year)
+		if err != nil {
+			svc.log.Error(
+				"Unable to get user with vacation, skipping user.",
+				slog.String("username", user.Username),
+				slog.String("error", err.Error()),
+			)
+			continue
+		}
+		allUsersWithVac[i] = u
+	}
+
+	return allUsersWithVac, nil
 }

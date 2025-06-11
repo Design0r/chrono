@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"chrono/internal/domain"
 )
@@ -21,15 +22,23 @@ type UserService interface {
 		userToUpdate int64,
 		currUser *domain.User,
 	) (*domain.User, error)
+	SetVacation(ctx context.Context, userId int64, vacation, year int) error
 }
 
 type userService struct {
 	user  domain.UserRepository
 	notif NotificationService
+	token TokenService
+	log   *slog.Logger
 }
 
-func NewUserService(r domain.UserRepository) userService {
-	return userService{user: r}
+func NewUserService(
+	r domain.UserRepository,
+	n NotificationService,
+	t TokenService,
+	log *slog.Logger,
+) userService {
+	return userService{user: r, notif: n, token: t, log: log}
 }
 
 func (svc *userService) Create(ctx context.Context, user *domain.CreateUser) (*domain.User, error) {
@@ -92,4 +101,23 @@ func (svc *userService) ToggleAdmin(
 	}
 
 	return updatedUser, nil
+}
+
+func (svc *userService) SetVacation(ctx context.Context, userId int64, vacation, year int) error {
+	user, err := svc.GetById(ctx, userId)
+	if err != nil {
+		return err
+	}
+
+	if vacation < 0 {
+		svc.log.Error("negative vacation value is not supported", slog.Int("value", vacation))
+		return fmt.Errorf("negative vacation value is not supported %v", vacation)
+	}
+	user.VacationDays = int64(vacation)
+	_, err = svc.Update(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	return svc.token.UpdateYearlyTokens(ctx, userId, vacation, year)
 }

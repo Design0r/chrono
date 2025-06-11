@@ -53,42 +53,100 @@ func (s *Server) InitMiddleware() {
 }
 
 func (s *Server) InitRoutes() {
-
 	userRepo := db.NewSQLUserRepo(s.Repo, slog.Default().WithGroup("user"))
-	notificationUserRepo := db.NewSQLUserNotificationRepo(s.Repo, slog.Default().WithGroup("notification_user"))
+	notificationUserRepo := db.NewSQLUserNotificationRepo(
+		s.Repo,
+		slog.Default().WithGroup("notification_user"),
+	)
 	notificationRepo := db.NewSQLNotificationRepo(s.Repo, slog.Default().WithGroup("notification"))
 	eventRepo := db.NewSQLEventUserRepo(s.Repo, slog.Default().WithGroup("event"))
 	requestRepo := db.NewSQLRequestRepo(s.Repo, slog.Default().WithGroup("request"))
 	sessionRepo := db.NewSQLSessionRepo(s.Repo, slog.Default().WithGroup("session"))
 	refreshTokenRepo := db.NewSQLRefreshTokenRepo(s.Repo, slog.Default().WithGroup("refresh_token"))
-	vacationTokenRepo := db.NewSQLVacationTokenRepo(s.Repo, slog.Default().WithGroup("vacation_token"))
+	vacationTokenRepo := db.NewSQLVacationTokenRepo(
+		s.Repo,
+		slog.Default().WithGroup("vacation_token"),
+	)
 
-	userService := service.NewUserService(&userRepo)
-	notificationService := service.NewNotificationService(&notificationRepo, &notificationUserRepo, slog.Default().WithGroup("notification"))
-	requestService := service.NewRequestService(&requestRepo, &userRepo, &notificationService, slog.Default().WithGroup("request"))
+	refreshTokenService := service.NewRefreshTokenService(
+		&refreshTokenRepo,
+		slog.Default().WithGroup("refresh_token"),
+	)
+	vacationTokenService := service.NewVacationTokenService(
+		&vacationTokenRepo,
+		slog.Default().WithGroup("vacation_token"),
+	)
+	tokenService := service.NewTokenService(
+		&refreshTokenService,
+		&vacationTokenService,
+		slog.Default().WithGroup("token"),
+	)
+	notificationService := service.NewNotificationService(
+		&notificationRepo,
+		&notificationUserRepo,
+		slog.Default().WithGroup("notification"),
+	)
+	userService := service.NewUserService(
+		&userRepo,
+		&notificationService,
+		&tokenService,
+		slog.Default().WithGroup("user"),
+	)
+	requestService := service.NewRequestService(
+		&requestRepo,
+		&userRepo,
+		&notificationService,
+		slog.Default().WithGroup("request"),
+	)
 	sessionService := service.NewSessionService(&sessionRepo, slog.Default().WithGroup("session"))
-	refreshTokenService := service.NewRefreshTokenService(&refreshTokenRepo, slog.Default().WithGroup("refresh_token"))
-	vacationTokenService := service.NewVacationTokenService(&vacationTokenRepo, slog.Default().WithGroup("vacation_token"))
-	tokenService := service.NewTokenService(&refreshTokenService, &vacationTokenService, slog.Default().WithGroup("token"))
-	eventService := service.NewEventService(&eventRepo, &requestService, &userService, &vacationTokenService, slog.Default().WithGroup("event"))
+	eventService := service.NewEventService(
+		&eventRepo,
+		&requestService,
+		&userService,
+		&vacationTokenService,
+		slog.Default().WithGroup("event"),
+	)
 	passwordHasher := auth.NewBcryptHasher(10)
-	authService := service.NewAuthService(&userRepo, &sessionRepo, time.Hour*24*7, &passwordHasher, slog.Default().WithGroup("auth"))
+	authService := service.NewAuthService(
+		&userRepo,
+		&sessionRepo,
+		time.Hour*24*7,
+		&passwordHasher,
+		slog.Default().WithGroup("auth"),
+	)
 
-	authHandler := handler.NewAuthHandler(&userService, &authService, slog.Default().WithGroup("auth"))
+	authHandler := handler.NewAuthHandler(
+		&userService,
+		&authService,
+		slog.Default().WithGroup("auth"),
+	)
 	homeHandler := handler.NewHomeHandler(&tokenService, &eventService, &notificationService)
-	calendarHandler := handler.NewCalendarHandler(&userService, &notificationService, &eventService, &tokenService, slog.Default().WithGroup("calendar"))
+	calendarHandler := handler.NewCalendarHandler(
+		&userService,
+		&notificationService,
+		&eventService,
+		&tokenService,
+		slog.Default().WithGroup("calendar"),
+	)
+	teamHandler := handler.NewTeamHandler(
+		&eventService,
+		&notificationService,
+		&userService,
+		slog.Default().WithGroup("team"),
+	)
 
 	authGrp := s.Router.Group(
 		"",
 		mw.SessionMiddleware(&sessionService),
 		mw.AuthenticationMiddleware(&authService),
 	)
-	//adminGrp := authGrp.Group("", mw.AdminMiddleware())
+	adminGrp := authGrp.Group("", mw.AdminMiddleware())
 	honeypotGrp := s.Router.Group("", mw.HoneypotMiddleware())
 
 	calendarHandler.RegisterRoutes(authGrp)
 	homeHandler.RegisterRoutes(authGrp)
 	authHandler.RegisterRoutes(honeypotGrp)
+	teamHandler.RegisterRoutes(authGrp, adminGrp)
 }
 
 func (s *Server) Start(address string) error {

@@ -59,7 +59,7 @@ func (svc *refreshTokenService) CreateIfNotExists(ctx context.Context, userId in
 
 	_, err = svc.Create(ctx, currYear, userId)
 	if err != nil {
-		return true, err
+		return false, err
 	}
 
 	return true, nil

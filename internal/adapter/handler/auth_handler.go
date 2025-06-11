@@ -56,12 +56,12 @@ func (h *AuthHandler) SignupForm(c echo.Context) error {
 }
 
 func (h *AuthHandler) Signup(c echo.Context) error {
-	var loginData domain.Login
+	var loginData domain.CreateUser
 	if err := c.Bind(&loginData); err != nil {
 		return RenderError(c, http.StatusBadRequest, "Invalid inputs")
 	}
 
-	cookie, err := h.auth.Login(c.Request().Context(), loginData.Email, loginData.Password)
+	cookie, err := h.auth.Signup(c.Request().Context(), loginData)
 	if err != nil {
 		return RenderError(c, http.StatusNotFound, "Incorrect email or password")
 	}

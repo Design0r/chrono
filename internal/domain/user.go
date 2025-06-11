@@ -31,11 +31,11 @@ type PatchUser struct {
 }
 
 type CreateUser struct {
-	Username     string `json:"username"`
+	Username     string `json:"username"      form:"qwenameasd"`
 	Color        string `json:"color"`
 	VacationDays int64  `json:"vacation_days"`
-	Email        string `json:"email"`
-	Password     string `json:"password"`
+	Email        string `json:"email"         form:"qweemailasd"`
+	Password     string `json:"password"      form:"qwepasswordasd"`
 	IsSuperuser  bool   `json:"is_superuser"`
 }
 

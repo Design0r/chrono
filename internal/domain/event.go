@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"slices"
 	"time"
-
-	"chrono/internal/domain/calendar"
 )
 
 var vacationNames = []string{"urlaub", "urlaub halbtags"}
@@ -46,7 +44,7 @@ type EventRepository interface {
 	Update(ctx context.Context, eventId int64, state string) (*Event, error)
 	Delete(ctx context.Context, id int64) (*Event, error)
 	GetForDay(ctx context.Context, data YMDDate) ([]Event, error)
-	GetForMonth(ctx context.Context, data YMDate) (calendar.Month, error)
+	GetForMonth(ctx context.Context, data YMDate) (Month, error)
 	GetForYear(ctx context.Context, year int) ([]EventUser, error)
 	GetPendingForUser(ctx context.Context, userId int64, year int) (int, error)
 	GetUsedVacationForUser(ctx context.Context, userId int64, year int) (float64, error)

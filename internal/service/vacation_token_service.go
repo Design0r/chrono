@@ -67,4 +67,6 @@ func (svc *vacationTokenService) GetUserWithVacation(
 	if err != nil {
 		return domain.UserWithVacation{}, err
 	}
+
+	return domain.UserWithVacation{VacationRemaining: remaining}, nil
 }

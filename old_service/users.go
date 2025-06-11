@@ -8,8 +8,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"chrono/calendar"
 	"chrono/db/repo"
+	"chrono/internal/domain"
 )
 
 func CreateUser(r *repo.Queries, data repo.CreateUserParams) (repo.User, error) {
@@ -81,7 +81,7 @@ func GetCurrentUser(r *repo.Queries, c echo.Context) (repo.User, error) {
 }
 
 func GetAllVacUsers(r *repo.Queries) ([]repo.GetUsersWithVacationCountRow, error) {
-	start := time.Date(calendar.CurrentYear(), 1, 1, 0, 0, 0, 0, time.Now().Location())
+	start := time.Date(domain.CurrentYear(), 1, 1, 0, 0, 0, 0, time.Now().Location())
 
 	data := repo.GetUsersWithVacationCountParams{
 		StartDate: start,

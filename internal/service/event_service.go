@@ -2,7 +2,6 @@ package service
 
 import (
 	"chrono/internal/domain"
-	"chrono/internal/domain/calendar"
 	"context"
 	"log/slog"
 	"time"
@@ -13,7 +12,7 @@ type EventService interface {
 	Update(ctx context.Context, eventId int64, state string) (*domain.Event, error)
 	Delete(ctx context.Context, id int64) (*domain.Event, error)
 	GetForDay(ctx context.Context, data domain.YMDDate) ([]domain.Event, error)
-	GetForMonth(ctx context.Context, data domain.YMDate) (calendar.Month, error)
+	GetForMonth(ctx context.Context, data domain.YMDate) (domain.Month, error)
 	GetForYear(ctx context.Context, year int) ([]domain.EventUser, error)
 	GetPendingForUser(ctx context.Context, userId int64, year int) (int, error)
 	GetUsedVacationForUser(ctx context.Context, userId int64, year int) (float64, error)
@@ -68,7 +67,7 @@ func (svc *eventService) GetForDay(ctx context.Context, data domain.YMDDate) ([]
 	return svc.event.GetForDay(ctx, data)
 }
 
-func (svc *eventService) GetForMonth(ctx context.Context, data domain.YMDate) (calendar.Month, error) {
+func (svc *eventService) GetForMonth(ctx context.Context, data domain.YMDate) (domain.Month, error) {
 	return svc.event.GetForMonth(ctx, data)
 }
 

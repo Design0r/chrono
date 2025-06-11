@@ -7,8 +7,8 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"chrono/assets/templates"
-	"chrono/calendar"
 	"chrono/db/repo"
+	"chrono/internal/domain"
 	"chrono/schemas"
 	"chrono/service"
 )
@@ -50,7 +50,7 @@ func HandleCreateEvent(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
-	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, calendar.CurrentYear())
+	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, domain.CurrentYear())
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
@@ -115,7 +115,7 @@ func HandleDeleteEvent(c echo.Context, r *repo.Queries) error {
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
-	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, calendar.CurrentYear())
+	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, domain.CurrentYear())
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}

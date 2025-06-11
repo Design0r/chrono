@@ -5,7 +5,6 @@ import (
 	"log/slog"
 
 	"chrono/internal/domain"
-	"chrono/internal/domain/calendar"
 )
 
 type RefreshTokenService interface {
@@ -48,7 +47,7 @@ func (svc *refreshTokenService) ExistsForUser(
 }
 
 func (svc *refreshTokenService) CreateIfNotExists(ctx context.Context, userId int64) (bool, error) {
-	currYear := calendar.CurrentYear()
+	currYear := domain.CurrentYear()
 	exists, err := svc.refresh.ExistsForUser(ctx, userId, currYear)
 	if err != nil {
 		return false, err

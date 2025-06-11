@@ -7,8 +7,8 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"chrono/assets/templates"
-	"chrono/calendar"
 	"chrono/db/repo"
+	"chrono/internal/domain"
 	"chrono/service"
 )
 
@@ -22,31 +22,31 @@ func HandleHome(c echo.Context, r *repo.Queries) error {
 	remainingDays, err := service.GetRemainingVacation(
 		r,
 		currUser.ID,
-		calendar.CurrentYear(),
+		domain.CurrentYear(),
 		1,
 	)
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
-	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, calendar.CurrentYear())
+	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, domain.CurrentYear())
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
-	stats := calendar.GetCurrentYearProgress()
+	stats := domain.GetCurrentYearProgress()
 
 	notifications, err := service.GetUserNotifications(r, currUser.ID)
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}
 
-	pendingEvents, err := service.GetPendingEventsForYear(r, currUser.ID, calendar.CurrentYear())
+	pendingEvents, err := service.GetPendingEventsForYear(r, currUser.ID, domain.CurrentYear())
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
-	count, err := service.GetEventCountForYear(r, calendar.CurrentYear())
+	count, err := service.GetEventCountForYear(r, domain.CurrentYear())
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}

@@ -1,10 +1,7 @@
-package calendar
+package domain
 
 import (
 	"time"
-
-	"chrono/internal/domain"
-	"chrono/schemas"
 )
 
 var (
@@ -47,7 +44,7 @@ type Month struct {
 type Day struct {
 	Number int
 	Name   string
-	Events []domain.EventUser
+	Events []EventUser
 	Date   time.Time
 }
 
@@ -79,16 +76,16 @@ func GetNumDaysOfMonth(month time.Month, year int) int {
 	return monthDays[month]
 }
 
-func GetDaysOfMonth(month time.Month, year int) schemas.Month {
+func GetDaysOfMonth(month time.Month, year int) Month {
 	numDays := GetNumDaysOfMonth(month, year)
-	days := make([]schemas.Day, numDays)
+	days := make([]Day, numDays)
 	for i := 0; i < numDays; i++ {
 		date := time.Date(year, month, i+1, 0, 0, 0, 0, time.UTC)
-		day := schemas.Day{Number: i + 1, Name: weekdays[date.Weekday()], Date: date}
+		day := Day{Number: i + 1, Name: weekdays[date.Weekday()], Date: date}
 		days[i] = day
 	}
 
-	return schemas.Month{
+	return Month{
 		Name:   days[0].Date.Month().String(),
 		Days:   days,
 		Offset: getMonthOffset(days[0].Date.Weekday() + 6), // Weekday 0 = Sunday
@@ -177,9 +174,9 @@ func NumWorkDays(year int) int {
 	return counter
 }
 
-func GetCurrentYearProgress() schemas.YearProgress {
+func GetCurrentYearProgress() YearProgress {
 	currYear := CurrentYear()
-	return schemas.YearProgress{
+	return YearProgress{
 		NumDays:           NumDaysInYear(currYear),
 		NumWorkDays:       NumWorkDays(currYear),
 		NumDaysPassed:     CurrentYearDay(currYear),

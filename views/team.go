@@ -2,9 +2,9 @@ package views
 
 import (
 	"chrono/assets/templates"
-	"chrono/calendar"
 	"chrono/db/repo"
 	"chrono/htmx"
+	"chrono/internal/domain"
 	"chrono/service"
 	"net/http"
 	"strconv"
@@ -53,7 +53,7 @@ func HandleTeamPatch(c echo.Context, r *repo.Queries) error {
 			continue
 		}
 
-		err = service.SetUserVacation(r, userId, vacation, calendar.CurrentYear())
+		err = service.SetUserVacation(r, userId, vacation, domain.CurrentYear())
 		if err != nil {
 			continue
 		}

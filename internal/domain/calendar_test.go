@@ -1,11 +1,10 @@
-package calendar_test
+package domain_test
 
 import (
+	"chrono/internal/domain"
 	"fmt"
 	"testing"
 	"time"
-
-	"chrono/internal/domain/calendar"
 )
 
 // TestIsLeapYear checks the IsLeapYear function for multiple cases.
@@ -26,7 +25,7 @@ func TestIsLeapYear(t *testing.T) {
 		t.Run(
 			funcName(tc.year),
 			func(t *testing.T) {
-				got := calendar.IsLeapYear(tc.year)
+				got := domain.IsLeapYear(tc.year)
 				if got != tc.expected {
 					t.Errorf("IsLeapYear(%d) = %v, want %v", tc.year, got, tc.expected)
 				}
@@ -54,7 +53,7 @@ func TestGetNumDaysOfMonth(t *testing.T) {
 		t.Run(
 			funcName(tc.month.String(), tc.year),
 			func(t *testing.T) {
-				got := calendar.GetNumDaysOfMonth(tc.month, tc.year)
+				got := domain.GetNumDaysOfMonth(tc.month, tc.year)
 				if got != tc.expected {
 					t.Errorf("GetNumDaysOfMonth(%s, %d) = %d, want %d",
 						tc.month, tc.year, got, tc.expected)
@@ -78,7 +77,7 @@ func TestNumDaysInYear(t *testing.T) {
 		t.Run(
 			funcName(tc.year),
 			func(t *testing.T) {
-				got := calendar.NumDaysInYear(tc.year)
+				got := domain.NumDaysInYear(tc.year)
 				if got != tc.expected {
 					t.Errorf("NumDaysInYear(%d) = %d, want %d", tc.year, got, tc.expected)
 				}
@@ -89,7 +88,7 @@ func TestNumDaysInYear(t *testing.T) {
 
 // TestGetDaysOfMonth checks if we correctly build the Month struct.
 func TestGetDaysOfMonth(t *testing.T) {
-	monthData := calendar.GetDaysOfMonth(time.March, 2021)
+	monthData := domain.GetDaysOfMonth(time.March, 2021)
 	if monthData.Name != "March" {
 		t.Errorf("Expected month name to be March, got %s", monthData.Name)
 	}
@@ -107,7 +106,7 @@ func TestGetDaysOfMonth(t *testing.T) {
 // Typically you'd freeze time or mock time.Now() in advanced setups.
 func TestYearProgressPercent(t *testing.T) {
 	year := time.Now().Year()
-	got := calendar.YearProgressPercent(year)
+	got := domain.YearProgressPercent(year)
 
 	if got < 0 || got > 100 {
 		t.Errorf("YearProgressPercent(%d) = %f, expected between [0..100]", year, got)

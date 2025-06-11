@@ -3,7 +3,6 @@ package templates
 import (
 	"chrono/config"
 	"chrono/internal/domain"
-	"chrono/internal/domain/calendar"
 	"fmt"
 	"strings"
 	"time"
@@ -142,7 +141,7 @@ templ AdminCheckbox(currUser domain.User, userId int64, isSuperuser bool, form b
 	</td>
 }
 
-templ CalendarCore(month calendar.Month, user domain.User, userFilter, eventFilter string) {
+templ CalendarCore(month domain.Month, user domain.User, userFilter, eventFilter string) {
 	<div id="calendar" class="grid grid-cols-7 gap-x-2 gap-y-2">
 		@WeekdayHeader("Monday", month)
 		@WeekdayHeader("Tuesday", month)
@@ -160,7 +159,7 @@ templ CalendarCore(month calendar.Month, user domain.User, userFilter, eventFilt
 	</div>
 }
 
-templ CalendarCoreResponse(month calendar.Month, user domain.User, userFilter, eventFilter string) {
+templ CalendarCoreResponse(month domain.Month, user domain.User, userFilter, eventFilter string) {
 	<div id="calendar" class="grid grid-cols-7 gap-x-2 gap-y-2">
 		@WeekdayHeader("Monday", month)
 		@WeekdayHeader("Tuesday", month)

@@ -9,7 +9,7 @@ import (
 
 	"chrono/config"
 	"chrono/db/repo"
-	"chrono/internal/domain/calendar"
+	"chrono/internal/domain"
 	"chrono/schemas"
 )
 
@@ -205,13 +205,13 @@ func GetEventCountForYear(r *repo.Queries, year int) ([]schemas.YearHistogram, e
 		return nil, err
 	}
 
-	numDays := calendar.NumDaysInYear(year)
+	numDays := domain.NumDaysInYear(year)
 	eventList := make([]schemas.YearHistogram, numDays)
 
 	for _, event := range events {
 		i := event.ScheduledAt.YearDay() - 1
 		date := event.ScheduledAt
-		days := calendar.GetNumDaysOfMonth(date.Month(), date.Year())
+		days := domain.GetNumDaysOfMonth(date.Month(), date.Year())
 
 		eventList[i].Count += 1
 		eventList[i].IsHoliday = event.UserID == 1

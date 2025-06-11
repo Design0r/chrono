@@ -1,13 +1,12 @@
 package templates
 
 import (
-	"chrono/internal/domain/calendar"
 	"chrono/internal/domain"
 	"fmt"
 	"time"
 )
 
-templ Home(user domain.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress calendar.YearProgress, notifications []domain.Notification, eventHistogram []calendar.YearHistogram) {
+templ Home(user domain.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress domain.YearProgress, notifications []domain.Notification, eventHistogram []domain.YearHistogram) {
 	@Index(&user, notifications) {
 		<div class="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
 			<div class="text-[48px] pl-2 font-black">{ fmt.Sprintf("> hey %v ", user.Username) }</div>
@@ -84,13 +83,13 @@ templ Card(title string) {
 	</div>
 }
 
-templ YearProgress(progress calendar.YearProgress) {
+templ YearProgress(progress domain.YearProgress) {
 	<progress class="progress progress-success mb-3 mt-2 h-6" { templ.Attributes{"value":fmt.Sprintf("%.1f", progress.DaysPassedPercent)}... } max="100" role="progressbar">
 		{ fmt.Sprintf("%.1f %%", progress.DaysPassedPercent) }
 	</progress>
 }
 
-templ OverviewDay(day calendar.YearHistogram) {
+templ OverviewDay(day domain.YearHistogram) {
 	{{
 	baseStyle := "width:1rem; height:1rem; border-radius:9999px;"
 
@@ -135,10 +134,10 @@ templ OverviewDay(day calendar.YearHistogram) {
 	</div>
 }
 
-templ YearOverview(histogram []calendar.YearHistogram) {
+templ YearOverview(histogram []domain.YearHistogram) {
 	{{
 		totalWeeks := 1
-		gaps := calendar.GetMonthGaps(calendar.CurrentYear())
+		gaps := domain.GetMonthGaps(domain.CurrentYear())
 		_, currWeek := time.Now().ISOWeek()
 	}}
 	<div class="grid grid-cols-12 p-5 bg-base-200  rounded-3xl">
@@ -180,7 +179,7 @@ templ YearOverview(histogram []calendar.YearHistogram) {
 			<p>Sun</p>
 		</div>
 		<div class="col-span-11 grid grid-rows-7 h-80 grid-flow-col gap-1">
-			for range calendar.GetYearOffset(calendar.CurrentYear()) {
+			for range domain.GetYearOffset(domain.CurrentYear()) {
 				<p></p>
 			}
 			for _, d := range histogram {

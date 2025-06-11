@@ -7,9 +7,9 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"chrono/assets/templates"
-	"chrono/calendar"
 	"chrono/db/repo"
 	"chrono/htmx"
+	"chrono/internal/domain"
 	"chrono/schemas"
 	"chrono/service"
 )
@@ -43,7 +43,7 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 	}
 	service.InitYearlyTokens(r, currUser, date.Year)
 
-	month := calendar.GetDaysOfMonth(time.Month(date.Month), date.Year)
+	month := domain.GetDaysOfMonth(time.Month(date.Month), date.Year)
 	eventFilter := c.QueryParam("event-filter")
 	err := service.GetEventsForMonth(r, &month, filtered, eventFilter)
 	if err != nil {
@@ -60,7 +60,7 @@ func HandleCalendar(c echo.Context, r *repo.Queries) error {
 		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
-	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, calendar.CurrentYear())
+	vacTaken, err := service.GetVacationCountForUser(r, currUser.ID, domain.CurrentYear())
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, err.Error())
 	}

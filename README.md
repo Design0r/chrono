@@ -2,7 +2,8 @@
 
 A vacatation and event management tool
 
-![screenshot](./docs/chrono.jpg)
+![screenshot](./docs/chrono_home.png)
+![screenshot](./docs/chrono_calendar.png)
 
 ## Requirements
 
@@ -11,6 +12,7 @@ A vacatation and event management tool
 - Node.js
 
 ## Installation
+
 Make sure to have your ~/go/bin folder on PATH
 
 Run once to install the required tools and libraries
@@ -20,11 +22,13 @@ make install
 ```
 
 ## Start Dev Environment
+
 ```bash
 make dev
 ```
 
 ## Build Executable
+
 Output folder: /build
 
 ```bash

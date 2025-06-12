@@ -1,7 +1,0 @@
-{
-  auto_https off
-}
-
-http://0.0.0.0:8000 {
-  reverse_proxy chrono:8080
-}

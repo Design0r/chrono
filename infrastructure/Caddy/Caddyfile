@@ -1,0 +1,16 @@
+{
+  auto_https off
+}
+
+:8000 {
+
+    root * /
+
+    handle /static/*  {
+        file_server
+    }
+
+    handle {
+        reverse_proxy chrono:8080
+    }
+}

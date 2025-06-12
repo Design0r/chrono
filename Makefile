@@ -35,9 +35,6 @@ dev:
 	make -j3 live/templ live/server live/tailwind
 
 build:
-	npm install && \
-	npm run build
-
 	templ generate
 	go build -o ./build/chrono$(BIN_SUFFIX) -ldflags='-s -w -extldflags "-static"' ./cmd/main.go
 

@@ -6,7 +6,6 @@ RUN apk add --no-cache \
     gcc \
     # Required for Alpine
     musl-dev \
-    make \
     nodejs \
     npm
 
@@ -15,12 +14,12 @@ WORKDIR /app
 
 COPY go.mod go.sum ./
 RUN go mod download
+RUN	go install github.com/a-h/templ/cmd/templ@latest
 
 COPY . .
 
-RUN make docker-install
-RUN make build
-
+RUN	templ generate
+RUN	go build -o ./build/chrono -ldflags='-s -w -extldflags "-static"' ./cmd/main.go
 
 FROM scratch
 

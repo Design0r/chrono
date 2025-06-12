@@ -1,16 +1,17 @@
 services:
   caddy:
-    image: caddy:2.8-alpine
+    build:
+      context: .
+      dockerfile: infrastructure/Caddy/Dockerfile
     restart: unless-stopped
     expose:
       - 8000
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./infrastructure/Caddy/Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
     networks:
       - caddy_shared
-
   chrono:
     restart: unless-stopped
     volumes:
@@ -19,13 +20,17 @@ services:
       - .env
     build:
       context: .
+      dockerfile: infrastructure/Chrono/Dockerfile
     expose:
       - 8080
+    networks:
+      - caddy_shared
 
 volumes:
   db:
   caddy_data:
   caddy_config:
+
 
 networks:
   caddy_shared:

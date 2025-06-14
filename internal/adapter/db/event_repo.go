@@ -121,7 +121,7 @@ func (r *SQLEventRepo) GetForDay(
 	}
 
 	e := make([]domain.Event, len(events))
-	for i := 0; i < len(events); i++ {
+	for i := range events {
 		e[i] = (domain.Event)(events[i])
 	}
 
@@ -146,9 +146,17 @@ func (r *SQLEventRepo) GetForMonth(
 		time.UTC,
 	)
 
-	events, err := r.r.GetEventsForMonth(ctx, repo.GetEventsForMonthParams{ScheduledAt: date, ScheduledAt_2: date.AddDate(0, 1, 0)})
+	events, err := r.r.GetEventsForMonth(
+		ctx,
+		repo.GetEventsForMonthParams{ScheduledAt: date, ScheduledAt_2: date.AddDate(0, 1, 0)},
+	)
 	if err != nil {
-		r.log.Error("GetEventsForMonth failed", slog.Int("year", data.Year), slog.String("month", time.Month(data.Month).String()), slog.String("error", err.Error()))
+		r.log.Error(
+			"GetEventsForMonth failed",
+			slog.Int("year", data.Year),
+			slog.String("month", time.Month(data.Month).String()),
+			slog.String("error", err.Error()),
+		)
 		return domain.Month{}, err
 	}
 	month := domain.GetDaysOfMonth(date.Month(), data.Year)
@@ -166,7 +174,17 @@ func (r *SQLEventRepo) GetForMonth(
 		}
 
 		newEvent := domain.EventUser{
-			User: domain.User{ID: event.ID_2, Username: event.Username, Email: event.Email, Password: event.Password, VacationDays: event.VacationDays, IsSuperuser: event.IsSuperuser, CreatedAt: event.CreatedAt_2, EditedAt: event.EditedAt_2, Color: event.Color},
+			User: domain.User{
+				ID:           event.ID_2,
+				Username:     event.Username,
+				Email:        event.Email,
+				Password:     event.Password,
+				VacationDays: event.VacationDays,
+				IsSuperuser:  event.IsSuperuser,
+				CreatedAt:    event.CreatedAt_2,
+				EditedAt:     event.EditedAt_2,
+				Color:        event.Color,
+			},
 			Event: domain.Event{
 				Name:        event.Name,
 				ID:          event.ID,
@@ -196,14 +214,28 @@ func (r *SQLEventRepo) GetForYear(
 
 	events, err := r.r.GetEventsForYear(ctx, params)
 	if err != nil {
-		r.log.Error("GetEventsForYear failed", slog.Int("year", year), slog.String("error", err.Error()))
+		r.log.Error(
+			"GetEventsForYear failed",
+			slog.Int("year", year),
+			slog.String("error", err.Error()),
+		)
 		return nil, err
 	}
 
 	e := make([]domain.EventUser, len(events))
 	for i, event := range events {
 		e[i] = domain.EventUser{
-			User: domain.User{ID: event.ID_2, Username: event.Username, Email: event.Email, Password: event.Password, VacationDays: event.VacationDays, IsSuperuser: event.IsSuperuser, CreatedAt: event.CreatedAt_2, EditedAt: event.EditedAt_2, Color: event.Color},
+			User: domain.User{
+				ID:           event.ID_2,
+				Username:     event.Username,
+				Email:        event.Email,
+				Password:     event.Password,
+				VacationDays: event.VacationDays,
+				IsSuperuser:  event.IsSuperuser,
+				CreatedAt:    event.CreatedAt_2,
+				EditedAt:     event.EditedAt_2,
+				Color:        event.Color,
+			},
 			Event: domain.Event{
 				Name:        event.Name,
 				ID:          event.ID,
@@ -233,7 +265,12 @@ func (r *SQLEventRepo) GetPendingForUser(
 	}
 	count, err := r.r.GetPendingEventsForYear(ctx, params)
 	if err != nil {
-		r.log.Error("GetPendingEventsForYear failed", slog.Int64("userId", userId), slog.Int("year", year), slog.String("error", err.Error()))
+		r.log.Error(
+			"GetPendingEventsForYear failed",
+			slog.Int64("userId", userId),
+			slog.Int("year", year),
+			slog.String("error", err.Error()),
+		)
 		return 0, err
 	}
 
@@ -255,7 +292,12 @@ func (r *SQLEventRepo) GetUsedVacationForUser(
 
 	count, err := r.r.GetVacationCountForUser(ctx, params)
 	if err != nil {
-		r.log.Error("GetVacationCountForUser failed", slog.Int64("userId", userId), slog.Int("year", year), slog.String("error", err.Error()))
+		r.log.Error(
+			"GetVacationCountForUser failed",
+			slog.Int64("userId", userId),
+			slog.Int("year", year),
+			slog.String("error", err.Error()),
+		)
 		return 0, err
 	}
 
@@ -264,4 +306,20 @@ func (r *SQLEventRepo) GetUsedVacationForUser(
 	}
 
 	return *count, nil
+}
+
+func (r *SQLEventRepo) GetById(ctx context.Context, eventId int64) (*domain.Event, error) {
+	event, err := r.r.GetEventById(ctx, eventId)
+	if err != nil {
+		r.log.Error(
+			"GetEventById failed",
+			slog.Int64("eventId", eventId),
+			slog.String("error", err.Error()),
+		)
+
+		return nil, err
+
+	}
+
+	return (*domain.Event)(&event), nil
 }

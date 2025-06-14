@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -14,16 +15,22 @@ import (
 type ProfileHandler struct {
 	user  service.UserService
 	notif service.NotificationService
+	log   *slog.Logger
 }
 
-func NewProfileService(u service.UserService, n service.NotificationService) ProfileHandler {
-	return ProfileHandler{user: u, notif: n}
+func NewProfileHandler(
+	u service.UserService,
+	n service.NotificationService,
+	log *slog.Logger,
+) ProfileHandler {
+	return ProfileHandler{user: u, notif: n, log: log}
 }
 
-func RegisterProfileRoutes(group echo.Group, handler *ProfileHandler) {
-	group.GET("/profile", handler.Profile)
-	group.GET("/profile/edit", handler.ProfileEditForm)
-	group.PATCH("/profile", handler.ProfileEdit)
+func (h *ProfileHandler) RegisterRoutes(authGrp *echo.Group, adminGrp *echo.Group) {
+	authGrp.GET("/profile", h.Profile)
+	authGrp.GET("/profile/edit", h.ProfileEditForm)
+	authGrp.PATCH("/profile", h.ProfileEdit)
+	adminGrp.PATCH("/profile/:id/admin", h.ToggleAdmin)
 }
 
 func (h *ProfileHandler) Profile(c echo.Context) error {
@@ -91,5 +98,9 @@ func (h *ProfileHandler) ToggleAdmin(c echo.Context) error {
 		return RenderError(c, http.StatusInternalServerError, "Failed to change admin status")
 	}
 
-	return Render(c, http.StatusOK, templates.AdminCheckbox(currUser, updatedUser.ID, updatedUser.IsSuperuser, true))
+	return Render(
+		c,
+		http.StatusOK,
+		templates.AdminCheckbox(currUser, updatedUser.ID, updatedUser.IsSuperuser, true),
+	)
 }

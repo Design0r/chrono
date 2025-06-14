@@ -9,11 +9,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	_ "github.com/mattn/go-sqlite3"
-
-	"github.com/getsentry/sentry-go"
 
 	"chrono/config"
 	"chrono/db"
@@ -44,7 +43,7 @@ func main() {
 	e := echo.New()
 	e.HideBanner = true
 
-	server := internal.NewServer(e, dbConn)
+	server := internal.NewServer(e, dbConn, cfg)
 	server.InitMiddleware()
 	server.InitRoutes()
 

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"slices"
 	"strings"
@@ -19,7 +20,7 @@ type EventService interface {
 		user *domain.User,
 	) (*domain.Event, error)
 	Update(ctx context.Context, eventId int64, state string) (*domain.Event, error)
-	Delete(ctx context.Context, id int64) (*domain.Event, error)
+	Delete(ctx context.Context, id int64, currUser *domain.User) (*domain.Event, error)
 	GetForDay(ctx context.Context, data domain.YMDDate) ([]domain.Event, error)
 	GetForMonth(
 		ctx context.Context,
@@ -63,14 +64,9 @@ func (svc *eventService) Create(
 	user *domain.User,
 ) (*domain.Event, error) {
 	evt := domain.Event{Name: eventType}
-	start := time.Date(data.Year, 1, 1, 0, 0, 0, 0, time.UTC)
-	end := start.AddDate(1, 3, 0)
 
 	if evt.IsVacation() && user.IsSuperuser {
-		_, err := svc.vacation.Create(
-			ctx,
-			domain.CreateVacationToken{StartDate: start, EndDate: end, UserID: user.ID, Value: -1},
-		)
+		_, err := svc.vacation.Create(ctx, -1, data.Year, user.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -102,8 +98,33 @@ func (svc *eventService) Update(
 	return svc.event.Update(ctx, eventId, state)
 }
 
-func (svc *eventService) Delete(ctx context.Context, eventId int64) (*domain.Event, error) {
-	return svc.event.Delete(ctx, eventId)
+func (svc *eventService) Delete(
+	ctx context.Context,
+	eventId int64,
+	currUser *domain.User,
+) (*domain.Event, error) {
+	event, err := svc.event.GetById(ctx, eventId)
+	if err != nil {
+		return nil, err
+	}
+
+	if !currUser.IsAdmin() && currUser.ID != eventId {
+		return nil, fmt.Errorf("User: %v has no permission to delete the event.", currUser.ID)
+	}
+
+	_, err = svc.event.Delete(ctx, eventId)
+	if err != nil {
+		return nil, err
+	}
+
+	if event.IsVacation() && event.IsAccepted() {
+		_, err := svc.vacation.Create(ctx, 1.0, event.ScheduledAt.Year(), event.UserID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return event, nil
 }
 
 func (svc *eventService) GetForDay(

@@ -3,6 +3,10 @@ INSERT INTO events (name, user_id, scheduled_at, state)
 VALUES (?, ?, ?, ?)
 RETURNING *;
 
+-- name: GetEventById :one
+SELECT * FROM events
+WHERE id = ?;
+
 -- name: UpdateEvent :one
 UPDATE events 
 SET name = ?,

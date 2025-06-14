@@ -9,7 +9,12 @@ import (
 )
 
 type VacationTokenService interface {
-	Create(ctx context.Context, t domain.CreateVacationToken) (*domain.VacationToken, error)
+	Create(
+		ctx context.Context,
+		value float64,
+		year int,
+		userId int64,
+	) (*domain.VacationToken, error)
 	Delete(ctx context.Context, id int64) error
 	DeleteAll(ctx context.Context) error
 	GetRemainingVacationForUser(
@@ -33,10 +38,23 @@ func NewVacationTokenService(
 }
 
 func (svc *vacationTokenService) Create(
-	ctx context.Context,
-	t domain.CreateVacationToken,
+	ctx context.Context, value float64, year int, userId int64,
 ) (*domain.VacationToken, error) {
-	return svc.vacation.Create(ctx, t)
+	start := time.Date(
+		year,
+		time.January,
+		1,
+		0,
+		0,
+		0,
+		0,
+		time.UTC,
+	)
+	end := time.Now().AddDate(1, 3, 0)
+	return svc.vacation.Create(
+		ctx,
+		domain.CreateVacationToken{StartDate: start, EndDate: end, UserID: userId, Value: value},
+	)
 }
 
 func (svc *vacationTokenService) Delete(ctx context.Context, id int64) error {

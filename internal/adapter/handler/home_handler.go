@@ -18,7 +18,11 @@ type HomeHandler struct {
 	notifs service.NotificationService
 }
 
-func NewHomeHandler(t service.TokenService, e service.EventService, n service.NotificationService) HomeHandler {
+func NewHomeHandler(
+	t service.TokenService,
+	e service.EventService,
+	n service.NotificationService,
+) HomeHandler {
 	return HomeHandler{token: t, event: e, notifs: n}
 }
 
@@ -29,9 +33,13 @@ func (h *HomeHandler) RegisterRoutes(group *echo.Group) {
 func (h *HomeHandler) Home(c echo.Context) error {
 	ctx := c.Request().Context()
 	currUser := c.Get("user").(domain.User)
-	err := h.token.InitYearlyTokens(ctx, &currUser)
+	err := h.token.InitYearlyTokens(ctx, &currUser, domain.CurrentYear())
 	if err != nil {
-		return RenderError(c, http.StatusInternalServerError, "Failed to initialize vacation tokens")
+		return RenderError(
+			c,
+			http.StatusInternalServerError,
+			"Failed to initialize vacation tokens",
+		)
 	}
 
 	userWithVac, err := h.event.GetUserWithVacation(ctx, currUser.ID, time.Now().Year())

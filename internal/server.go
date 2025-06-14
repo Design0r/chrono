@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
+	"chrono/config"
 	"chrono/db/repo"
 	"chrono/internal/adapter/db"
 	"chrono/internal/adapter/handler"
@@ -22,14 +23,16 @@ type Server struct {
 	Db     *sql.DB
 	Repo   *repo.Queries
 	log    *slog.Logger
+	cfg    *config.Config
 }
 
-func NewServer(router *echo.Echo, db *sql.DB) *Server {
+func NewServer(router *echo.Echo, db *sql.DB, cfg *config.Config) *Server {
 	return &Server{
 		Router: router,
 		Db:     db,
 		Repo:   repo.New(db),
 		log:    slog.Default(),
+		cfg:    cfg,
 	}
 }
 
@@ -38,6 +41,11 @@ func (s *Server) InitMiddleware() {
 		Format:           "${time_custom} ${method} ${status} ${uri} ${error} ${latency_human}\n",
 		CustomTimeFormat: "2006/01/02 15:04:05",
 	}))
+
+	if s.cfg.Debug == true {
+		s.Router.GET("/static/*", mw.StaticHandler, mw.CacheControl)
+	}
+
 	s.Router.Use(middleware.Secure())
 	s.Router.Use(middleware.Recover())
 	s.Router.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
@@ -59,7 +67,11 @@ func (s *Server) InitRoutes() {
 	refreshTokenSvc := service.NewRefreshTokenService(&refreshTokenRepo, s.log)
 	vacationTokenSvc := service.NewVacationTokenService(&vacationTokenRepo, s.log)
 	tokenSvc := service.NewTokenService(&refreshTokenSvc, &vacationTokenSvc, s.log)
-	notificationSvc := service.NewNotificationService(&notificationRepo, &notificationUserRepo, s.log)
+	notificationSvc := service.NewNotificationService(
+		&notificationRepo,
+		&notificationUserRepo,
+		s.log,
+	)
 	userSvc := service.NewUserService(&userRepo, &notificationSvc, &tokenSvc, s.log)
 	requestSvc := service.NewRequestService(&requestRepo, &userRepo, &notificationSvc, s.log)
 	sessionSvc := service.NewSessionService(&sessionRepo, s.log)
@@ -99,6 +111,8 @@ func (s *Server) InitRoutes() {
 		s.log,
 	)
 
+	profileHandler := handler.NewProfileHandler(&userSvc, &notificationSvc, s.log)
+
 	authGrp := s.Router.Group(
 		"",
 		mw.SessionMiddleware(&sessionSvc),
@@ -111,6 +125,7 @@ func (s *Server) InitRoutes() {
 	homeHandler.RegisterRoutes(authGrp)
 	authHandler.RegisterRoutes(honeypotGrp)
 	teamHandler.RegisterRoutes(authGrp, adminGrp)
+	profileHandler.RegisterRoutes(authGrp, adminGrp)
 	s.log.Info("Initialized routes.")
 }
 
@@ -120,5 +135,4 @@ func (s *Server) Start(address string) error {
 }
 
 func (s *Server) PreStart() {
-
 }

@@ -20,6 +20,8 @@ type NotificationUser struct {
 type NotificationRepository interface {
 	Create(ctx context.Context, msg string) (Notification, error)
 	Update(ctx context.Context, n Notification) error
+	Clear(ctx context.Context, notifId int64) error
+	ClearAll(ctx context.Context, userId int64) error
 }
 
 type NotificationUserRepository interface {

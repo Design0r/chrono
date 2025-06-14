@@ -46,6 +46,26 @@ func (r *SQLNotificationRepo) Update(ctx context.Context, n domain.Notification)
 	return nil
 }
 
+func (r *SQLNotificationRepo) Clear(ctx context.Context, notifId int64) error {
+	_, err := r.r.ClearNotification(ctx, notifId)
+	if err != nil {
+		r.log.Error("ClearNotification failed", slog.String("error", err.Error()))
+		return err
+	}
+
+	return nil
+}
+
+func (r *SQLNotificationRepo) ClearAll(ctx context.Context, userId int64) error {
+	err := r.r.ClearAllUserNotifications(ctx, userId)
+	if err != nil {
+		r.log.Error("ClearAllUserNotifications failed", slog.String("error", err.Error()))
+		return err
+	}
+
+	return nil
+}
+
 func (r *SQLUserNotificationRepo) Create(
 	ctx context.Context,
 	userId int64,
@@ -72,7 +92,7 @@ func (r *SQLUserNotificationRepo) GetByUserId(
 	}
 
 	n := make([]domain.Notification, len(notif))
-	for i := 0; i < len(notif); i++ {
+	for i := range notif {
 		n[i] = (domain.Notification)(notif[i])
 	}
 

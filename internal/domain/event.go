@@ -23,6 +23,10 @@ func (e *Event) IsVacation() bool {
 	return slices.Contains(vacationNames, e.Name)
 }
 
+func (e *Event) IsAccepted() bool {
+	return e.State == "accepted"
+}
+
 func (e *Event) RequestMsg(username string) string {
 	return fmt.Sprintf("%v sent a new request for %v.", username, e.Name)
 }
@@ -44,10 +48,17 @@ type EventRepository interface {
 	Update(ctx context.Context, eventId int64, state string) (*Event, error)
 	Delete(ctx context.Context, id int64) (*Event, error)
 	GetForDay(ctx context.Context, data YMDDate) ([]Event, error)
-	GetForMonth(ctx context.Context, data YMDate, botName string, userFiler *User, eventFilter string) (Month, error)
+	GetForMonth(
+		ctx context.Context,
+		data YMDate,
+		botName string,
+		userFiler *User,
+		eventFilter string,
+	) (Month, error)
 	GetForYear(ctx context.Context, year int) ([]EventUser, error)
 	GetPendingForUser(ctx context.Context, userId int64, year int) (int, error)
 	GetUsedVacationForUser(ctx context.Context, userId int64, year int) (float64, error)
+	GetById(ctx context.Context, eventId int64) (*Event, error)
 }
 
 type EventUser struct {

@@ -17,6 +17,10 @@ type User struct {
 	Color        string    `json:"color"`
 }
 
+func (u *User) IsAdmin() bool {
+	return u.IsSuperuser == true
+}
+
 type UserWithVacation struct {
 	User
 	VacationRemaining float64

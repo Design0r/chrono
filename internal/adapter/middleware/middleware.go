@@ -4,12 +4,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/labstack/echo/v4"
+
+	"chrono/assets"
 	"chrono/internal/adapter/htmx"
 	"chrono/internal/domain"
 	"chrono/internal/service"
 	"chrono/schemas"
-
-	"github.com/labstack/echo/v4"
 )
 
 type MiddlewareFunc = func(echo.HandlerFunc) echo.HandlerFunc
@@ -82,3 +83,17 @@ func HoneypotMiddleware() MiddlewareFunc {
 		}
 	}
 }
+
+func CacheControl(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set("Cache-Control", "public, max-age=86400") // 1 day
+		return next(c)
+	}
+}
+
+var StaticHandler = echo.WrapHandler(
+	http.StripPrefix(
+		"/",
+		http.FileServer(http.FS(assets.StaticFS)),
+	),
+)

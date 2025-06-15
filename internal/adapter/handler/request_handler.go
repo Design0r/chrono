@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -92,6 +94,17 @@ func (h *RequestHandler) PatchRequests(c echo.Context) error {
 	if err := c.Bind(&form); err == nil {
 		return RenderError(c, http.StatusBadRequest, "Invalid parameter.")
 	}
+	start, err := strconv.ParseInt(c.FormValue("start_date"), 10, 64)
+	if err != nil {
+		return RenderError(c, http.StatusBadRequest, "Invalid date parameter.")
+	}
+	end, err := strconv.ParseInt(c.FormValue("end_date"), 10, 64)
+	if err != nil {
+		return RenderError(c, http.StatusBadRequest, "Invalid date parameter.")
+	}
+	form.StartDate = time.Unix(start, 0).UTC()
+	form.EndDate = time.Unix(end, 0).UTC()
+	fmt.Println(form)
 
 	reqId, err := h.request.UpdateInRange(ctx, currUser.ID, form)
 	if err != nil {

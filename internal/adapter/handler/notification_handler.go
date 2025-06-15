@@ -21,7 +21,7 @@ func NewNotificationHandler(n service.NotificationService, log *slog.Logger) Not
 	return NotificationHandler{notif: n, log: log}
 }
 
-func (h *NotificationHandler) InitRoutes(group echo.Group) {
+func (h *NotificationHandler) RegisterRoutes(group *echo.Group) {
 	group.GET("/notifications", h.Notifications)
 	group.PATCH("/notifications/:id", h.ClearNotification)
 	group.PATCH("/notifications", h.ClearAllNotifications)

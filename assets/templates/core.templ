@@ -53,14 +53,15 @@ templ Notifications(notifications []domain.Notification) {
 	<div class="indicator">
 		@NotificationIndicator(len(notifications))
 		<div class="dropdown dropdown-end">
-			<div
+			<button
 				tabindex="0"
 				hx-get="/notifications"
+				hx-trigger="click"
 				hx-swap="outerHTML"
 				hx-target="#notification-container"
 				role="button"
 				class="btn btn-ghost text-xl icon-outlined"
-			>notifications</div>
+			>notifications</button>
 			@NotificationContainer([]domain.Notification{})
 		</div>
 	</div>

@@ -10,6 +10,7 @@ import (
 type TokenService interface {
 	InitYearlyTokens(ctx context.Context, user *domain.User, year int) error
 	UpdateYearlyTokens(ctx context.Context, userId int64, vacation, year int) error
+	DeleteAll(ctx context.Context) error
 }
 
 type tokenService struct {
@@ -55,6 +56,20 @@ func (svc *tokenService) UpdateYearlyTokens(
 	}
 
 	_, err = svc.vac.Create(ctx, float64(vacation), year, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (svc *tokenService) DeleteAll(ctx context.Context) error {
+	err := svc.vac.DeleteAll(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = svc.refresh.DeleteAll(ctx)
 	if err != nil {
 		return err
 	}

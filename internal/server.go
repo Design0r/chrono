@@ -14,16 +14,48 @@ import (
 	"chrono/internal/adapter/db"
 	"chrono/internal/adapter/handler"
 	mw "chrono/internal/adapter/middleware"
+	"chrono/internal/domain"
 	"chrono/internal/service"
 	"chrono/internal/service/auth"
 )
 
+type repos struct {
+	apiCache  domain.ApiCacheRepository
+	event     domain.EventRepository
+	notif     domain.NotificationRepository
+	notifUser domain.NotificationUserRepository
+	refresh   domain.RefreshTokenRepository
+	request   domain.RequestRepository
+	session   domain.SessionRepository
+	settings  domain.SettingsRepository
+	user      domain.UserRepository
+	vac       domain.VacationTokenRepository
+}
+
+type services struct {
+	apiBot   service.APIBot
+	auth     service.AuthService
+	event    service.EventService
+	holiday  service.HolidayService
+	notif    service.NotificationService
+	refresh  service.RefreshTokenService
+	request  service.RequestService
+	session  service.SessionService
+	settings service.SettingsService
+	token    service.TokenService
+	user     service.UserService
+	vac      service.VacationTokenService
+	pwHasher auth.PasswordHasher
+}
+
 type Server struct {
-	Router *echo.Echo
-	Db     *sql.DB
-	Repo   *repo.Queries
-	log    *slog.Logger
-	cfg    *config.Config
+	Router   *echo.Echo
+	Db       *sql.DB
+	Repo     *repo.Queries
+	log      *slog.Logger
+	cfg      *config.Config
+	repos    repos
+	services services
 }
 
 func NewServer(router *echo.Echo, db *sql.DB, cfg *config.Config) *Server {
@@ -54,7 +86,7 @@ func (s *Server) InitMiddleware() {
 	s.log.Info("Initialized middleware.")
 }
 
-func (s *Server) InitRoutes() {
+func (s *Server) InitRepos() {
 	userRepo := db.NewSQLUserRepo(s.Repo, s.log)
 	notificationUserRepo := db.NewSQLUserNotificationRepo(s.Repo, s.log)
 	notificationRepo := db.NewSQLNotificationRepo(s.Repo, s.log)
@@ -64,19 +96,34 @@ func (s *Server) InitRoutes() {
 	refreshTokenRepo := db.NewSQLRefreshTokenRepo(s.Repo, s.log)
 	vacationTokenRepo := db.NewSQLVacationTokenRepo(s.Repo, s.log)
 
-	refreshTokenSvc := service.NewRefreshTokenService(&refreshTokenRepo, s.log)
-	vacationTokenSvc := service.NewVacationTokenService(&vacationTokenRepo, s.log)
+	s.repos = repos{
+		user:      &userRepo,
+		notifUser: &notificationUserRepo,
+		notif:     &notificationRepo,
+		event:     &eventRepo,
+		request:   &requestRepo,
+		session:   &sessionRepo,
+		refresh:   &refreshTokenRepo,
+		vac:       &vacationTokenRepo,
+	}
+
+	s.log.Info("Initialized repositories.")
+}
+
+func (s *Server) InitServices() {
+	refreshTokenSvc := service.NewRefreshTokenService(s.repos.refresh, s.log)
+	vacationTokenSvc := service.NewVacationTokenService(s.repos.vac, s.log)
 	tokenSvc := service.NewTokenService(&refreshTokenSvc, &vacationTokenSvc, s.log)
 	notificationSvc := service.NewNotificationService(
-		&notificationRepo,
-		&notificationUserRepo,
+		s.repos.notif,
+		s.repos.notifUser,
 		s.log,
 	)
-	userSvc := service.NewUserService(&userRepo, &notificationSvc, &tokenSvc, s.log)
-	requestSvc := service.NewRequestService(&requestRepo, &userRepo, &notificationSvc, s.log)
-	sessionSvc := service.NewSessionService(&sessionRepo, s.log)
+	userSvc := service.NewUserService(s.repos.user, &notificationSvc, &tokenSvc, s.log)
+	requestSvc := service.NewRequestService(s.repos.request, s.repos.user, &notificationSvc, s.log)
+	sessionSvc := service.NewSessionService(s.repos.session, s.log)
 	eventSvc := service.NewEventService(
-		&eventRepo,
+		s.repos.event,
 		&requestSvc,
 		&userSvc,
 		&vacationTokenSvc,
@@ -84,64 +131,94 @@ func (s *Server) InitRoutes() {
 	)
 	passwordHasher := auth.NewBcryptHasher(10)
 	authSvc := service.NewAuthService(
-		&userRepo,
-		&sessionRepo,
+		s.repos.user,
+		s.repos.session,
 		time.Hour*24*7,
 		&passwordHasher,
 		s.log,
 	)
 
+	s.services = services{
+		refresh:  &refreshTokenSvc,
+		vac:      &vacationTokenSvc,
+		token:    &tokenSvc,
+		notif:    &notificationSvc,
+		user:     &userSvc,
+		request:  &requestSvc,
+		session:  &sessionSvc,
+		event:    &eventSvc,
+		pwHasher: &passwordHasher,
+		auth:     &authSvc,
+	}
+
+	s.log.Info("Initialized services.")
+}
+
+func (s *Server) InitRoutes() {
 	authHandler := handler.NewAuthHandler(
-		&userSvc,
-		&authSvc,
+		s.services.user,
+		s.services.auth,
 		s.log,
 	)
-	homeHandler := handler.NewHomeHandler(&tokenSvc, &eventSvc, &notificationSvc)
+	homeHandler := handler.NewHomeHandler(s.services.token, s.services.event, s.services.notif)
 	calendarHandler := handler.NewCalendarHandler(
-		&userSvc,
-		&notificationSvc,
-		&eventSvc,
-		&tokenSvc,
+		s.services.user,
+		s.services.notif,
+		s.services.event,
+		s.services.token,
 		s.log,
 	)
 	teamHandler := handler.NewTeamHandler(
-		&eventSvc,
-		&notificationSvc,
-		&userSvc,
+		s.services.event,
+		s.services.notif,
+		s.services.user,
 		s.log,
 	)
-	profileHandler := handler.NewProfileHandler(&userSvc, &notificationSvc, s.log)
+	profileHandler := handler.NewProfileHandler(s.services.user, s.services.notif, s.log)
 	requestHandler := handler.NewRequestHandler(
-		&requestSvc,
-		&notificationSvc,
-		&eventSvc,
-		&vacationTokenSvc,
+		s.services.request,
+		s.services.notif,
+		s.services.event,
+		s.services.vac,
 		s.log,
 	)
-	notificationHandler := handler.NewNotificationHandler(&notificationSvc, s.log)
-	tokenHandler := handler.NewTokenHandler(&vacationTokenSvc, &userSvc, &notificationSvc, s.log)
+	notificationHandler := handler.NewNotificationHandler(s.services.notif, s.log)
+	tokenHandler := handler.NewTokenHandler(
+		s.services.vac,
+		s.services.user,
+		s.services.notif,
+		s.log,
+	)
+	debugHandler := handler.NewDebugHandler(
+		s.services.user,
+		s.services.notif,
+		s.services.token,
+		s.services.session,
+		s.log,
+	)
 
 	authGrp := s.Router.Group(
 		"",
-		mw.SessionMiddleware(&sessionSvc),
-		mw.AuthenticationMiddleware(&authSvc),
+		mw.SessionMiddleware(s.services.session),
+		mw.AuthenticationMiddleware(s.services.auth),
 	)
 	adminGrp := authGrp.Group("", mw.AdminMiddleware())
 	honeypotGrp := s.Router.Group("", mw.HoneypotMiddleware())
 
 	calendarHandler.RegisterRoutes(authGrp)
 	homeHandler.RegisterRoutes(authGrp)
-	authHandler.RegisterRoutes(honeypotGrp)
+	notificationHandler.RegisterRoutes(authGrp)
+
 	teamHandler.RegisterRoutes(authGrp, adminGrp)
 	profileHandler.RegisterRoutes(authGrp, adminGrp)
+
 	requestHandler.RegisterRoutes(adminGrp)
-	notificationHandler.RegisterRoutes(authGrp)
 	tokenHandler.RegisterRoutes(adminGrp)
+	debugHandler.RegisterRoutes(adminGrp)
+
+	authHandler.RegisterRoutes(honeypotGrp)
 
 	s.log.Info("Initialized routes.")
-
-	bot := service.NewAPIBotFromEnv(s.log)
-	bot.Register(&userSvc, &passwordHasher)
 }
 
 func (s *Server) Start(address string) error {
@@ -150,4 +227,11 @@ func (s *Server) Start(address string) error {
 }
 
 func (s *Server) PreStart() {
+	s.InitMiddleware()
+	s.InitRepos()
+	s.InitServices()
+	s.InitRoutes()
+
+	bot := service.NewAPIBotFromEnv(s.log)
+	bot.Register(s.services.user, s.services.pwHasher)
 }

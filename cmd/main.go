@@ -44,9 +44,6 @@ func main() {
 	e.HideBanner = true
 
 	server := internal.NewServer(e, dbConn, cfg)
-	server.InitMiddleware()
-	server.InitRoutes()
-
 	go server.Start(fmt.Sprintf(":%v", cfg.Port))
 
 	quit := make(chan os.Signal, 1)

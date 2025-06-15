@@ -10,7 +10,6 @@ import (
 	"chrono/internal/adapter/htmx"
 	"chrono/internal/domain"
 	"chrono/internal/service"
-	"chrono/schemas"
 )
 
 type MiddlewareFunc = func(echo.HandlerFunc) echo.HandlerFunc
@@ -71,7 +70,7 @@ func AdminMiddleware() MiddlewareFunc {
 func HoneypotMiddleware() MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			var honey schemas.Honeypot
+			honey := domain.Honeypot{}
 			if err := c.Bind(&honey); err != nil {
 				return htmx.RenderError(c, http.StatusBadRequest, "Invalid inputs")
 			}

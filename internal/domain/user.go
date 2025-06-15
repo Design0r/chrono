@@ -48,6 +48,16 @@ type Login struct {
 	Password string `form:"qwepasswordasd"`
 }
 
+type Honeypot struct {
+	Name     string `form:"name"     json:"name"`
+	Email    string `form:"email"    json:"email"`
+	Password string `form:"password" json:"password"`
+}
+
+func (h *Honeypot) IsFilled() bool {
+	return h.Name != "" || h.Email != "" || h.Password != ""
+}
+
 type UserRepository interface {
 	Create(ctx context.Context, user *CreateUser) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)

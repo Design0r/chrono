@@ -37,6 +37,7 @@ type EventService interface {
 		year int,
 	) (domain.UserWithVacation, error)
 	GetAllUsersWithVacation(ctx context.Context, year int) ([]domain.UserWithVacation, error)
+	UpdateInRange(ctx context.Context, userId int64, state string, start, end time.Time) error
 }
 
 type eventService struct {
@@ -250,4 +251,13 @@ func (svc *eventService) GetAllUsersWithVacation(
 	}
 
 	return allUsersWithVac, nil
+}
+
+func (svc *eventService) UpdateInRange(
+	ctx context.Context,
+	userId int64,
+	state string,
+	start, end time.Time,
+) error {
+	return svc.event.UpdateInRange(ctx, userId, state, start, end)
 }

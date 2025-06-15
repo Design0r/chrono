@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"chrono/internal/domain"
 )
@@ -23,6 +24,12 @@ type UserService interface {
 		currUser *domain.User,
 	) (*domain.User, error)
 	SetVacation(ctx context.Context, userId int64, vacation, year int) error
+	GetConflicting(
+		ctx context.Context,
+		userId int64,
+		start time.Time,
+		end time.Time,
+	) ([]domain.User, error)
 }
 
 type userService struct {
@@ -120,4 +127,13 @@ func (svc *userService) SetVacation(ctx context.Context, userId int64, vacation,
 	}
 
 	return svc.token.UpdateYearlyTokens(ctx, userId, vacation, year)
+}
+
+func (svc *userService) GetConflicting(
+	ctx context.Context,
+	userId int64,
+	start time.Time,
+	end time.Time,
+) ([]domain.User, error) {
+	return svc.user.GetConflicting(ctx, userId, start, end)
 }

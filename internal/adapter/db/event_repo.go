@@ -323,3 +323,29 @@ func (r *SQLEventRepo) GetById(ctx context.Context, eventId int64) (*domain.Even
 
 	return (*domain.Event)(&event), nil
 }
+
+func (r *SQLEventRepo) UpdateInRange(
+	ctx context.Context,
+	userId int64,
+	state string,
+	start, end time.Time,
+) error {
+	err := r.r.UpdateEventsRange(
+		ctx,
+		repo.UpdateEventsRangeParams{
+			UserID:        userId,
+			State:         state,
+			ScheduledAt:   start,
+			ScheduledAt_2: end,
+		},
+	)
+	if err != nil {
+		r.log.Error(
+			"UpdateEventsRange failed",
+			slog.String("error", err.Error()),
+		)
+		return err
+	}
+
+	return nil
+}

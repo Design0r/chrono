@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"chrono/db/repo"
 	"chrono/internal/domain"
@@ -147,7 +148,7 @@ func (r *SQLUserRepo) GetAll(ctx context.Context) ([]domain.User, error) {
 	}
 
 	users := make([]domain.User, len(u))
-	for i := 0; i < len(u); i++ {
+	for i := range u {
 		users[i] = (domain.User)(u[i])
 	}
 
@@ -165,9 +166,35 @@ func (r *SQLUserRepo) GetAdmins(ctx context.Context) ([]domain.User, error) {
 	}
 
 	admins := make([]domain.User, len(u))
-	for i := 0; i < len(u); i++ {
+	for i := range u {
 		admins[i] = (domain.User)(u[i])
 	}
 
 	return admins, nil
+}
+
+func (r *SQLUserRepo) GetConflicting(
+	ctx context.Context,
+	userId int64,
+	start time.Time,
+	end time.Time,
+) ([]domain.User, error) {
+	users, err := r.q.GetConflictingEventUsers(
+		ctx,
+		repo.GetConflictingEventUsersParams{ID: userId, ScheduledAt: start, ScheduledAt_2: end},
+	)
+	if err != nil {
+		r.log.Error(
+			"GetConflictingEventUsers failed",
+			slog.String("error", err.Error()),
+		)
+		return nil, err
+	}
+
+	u := make([]domain.User, len(users))
+	for i := range u {
+		u[i] = (domain.User)(u[i])
+	}
+
+	return u, nil
 }

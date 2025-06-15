@@ -141,7 +141,7 @@ func (q *Queries) GetPendingRequests(ctx context.Context) ([]GetPendingRequestsR
 }
 
 const GetRequestRange = `-- name: GetRequestRange :many
-SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color, e.id, scheduled_at, name, e.state, e.created_at, e.edited_at, e.user_id FROM requests r
+SELECT r.id, r.message, r.state, r.created_at, r.edited_at, r.user_id, r.edited_by, r.event_id FROM requests r
 JOIN users u ON r.user_id = u.id
 JOIN events e ON r.event_id = e.id
 WHERE r.user_id = ?
@@ -156,42 +156,15 @@ type GetRequestRangeParams struct {
 	ScheduledAt_2 time.Time `json:"scheduled_at_2"`
 }
 
-type GetRequestRangeRow struct {
-	ID           int64     `json:"id"`
-	Message      *string   `json:"message"`
-	State        string    `json:"state"`
-	CreatedAt    time.Time `json:"created_at"`
-	EditedAt     time.Time `json:"edited_at"`
-	UserID       int64     `json:"user_id"`
-	EditedBy     *int64    `json:"edited_by"`
-	EventID      int64     `json:"event_id"`
-	ID_2         int64     `json:"id_2"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	Password     string    `json:"password"`
-	VacationDays int64     `json:"vacation_days"`
-	IsSuperuser  bool      `json:"is_superuser"`
-	CreatedAt_2  time.Time `json:"created_at_2"`
-	EditedAt_2   time.Time `json:"edited_at_2"`
-	Color        string    `json:"color"`
-	ID_3         int64     `json:"id_3"`
-	ScheduledAt  time.Time `json:"scheduled_at"`
-	Name         string    `json:"name"`
-	State_2      string    `json:"state_2"`
-	CreatedAt_3  time.Time `json:"created_at_3"`
-	EditedAt_3   time.Time `json:"edited_at_3"`
-	UserID_2     int64     `json:"user_id_2"`
-}
-
-func (q *Queries) GetRequestRange(ctx context.Context, arg GetRequestRangeParams) ([]GetRequestRangeRow, error) {
+func (q *Queries) GetRequestRange(ctx context.Context, arg GetRequestRangeParams) ([]Request, error) {
 	rows, err := q.db.QueryContext(ctx, GetRequestRange, arg.UserID, arg.ScheduledAt, arg.ScheduledAt_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetRequestRangeRow
+	var items []Request
 	for rows.Next() {
-		var i GetRequestRangeRow
+		var i Request
 		if err := rows.Scan(
 			&i.ID,
 			&i.Message,
@@ -201,22 +174,6 @@ func (q *Queries) GetRequestRange(ctx context.Context, arg GetRequestRangeParams
 			&i.UserID,
 			&i.EditedBy,
 			&i.EventID,
-			&i.ID_2,
-			&i.Username,
-			&i.Email,
-			&i.Password,
-			&i.VacationDays,
-			&i.IsSuperuser,
-			&i.CreatedAt_2,
-			&i.EditedAt_2,
-			&i.Color,
-			&i.ID_3,
-			&i.ScheduledAt,
-			&i.Name,
-			&i.State_2,
-			&i.CreatedAt_3,
-			&i.EditedAt_3,
-			&i.UserID_2,
 		); err != nil {
 			return nil, err
 		}

@@ -10,7 +10,7 @@ import (
 type NotificationService interface {
 	Create(ctx context.Context, msg string) (domain.Notification, error)
 	CreateAndNotify(ctx context.Context, msg string, users []domain.User) error
-	NotifyUser(ctx context.Context, user *domain.User, notif domain.Notification) error
+	NotifyUser(ctx context.Context, user int64, notif domain.Notification) error
 	NotifyUsers(ctx context.Context, users []domain.User, notif domain.Notification) error
 	GetByUserId(ctx context.Context, userId int64) ([]domain.Notification, error)
 	Clear(ctx context.Context, notifId int64) error
@@ -49,7 +49,7 @@ func (svc *notificationService) CreateAndNotify(
 	}
 
 	for _, u := range users {
-		err = svc.NotifyUser(ctx, &u, notif)
+		err = svc.NotifyUser(ctx, u.ID, notif)
 		if err != nil {
 			return err
 		}
@@ -60,10 +60,10 @@ func (svc *notificationService) CreateAndNotify(
 
 func (svc *notificationService) NotifyUser(
 	ctx context.Context,
-	user *domain.User,
+	user int64,
 	notif domain.Notification,
 ) error {
-	return svc.userNotif.Create(ctx, user.ID, notif.ID)
+	return svc.userNotif.Create(ctx, user, notif.ID)
 }
 
 func (svc *notificationService) NotifyUsers(
@@ -72,7 +72,7 @@ func (svc *notificationService) NotifyUsers(
 	notif domain.Notification,
 ) error {
 	for _, u := range users {
-		err := svc.NotifyUser(ctx, &u, notif)
+		err := svc.NotifyUser(ctx, u.ID, notif)
 		if err != nil {
 			return err
 		}

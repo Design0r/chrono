@@ -47,7 +47,7 @@ AND event_id IN (
 RETURNING requests.id;
 
 -- name: GetRequestRange :many
-SELECT * FROM requests r
+SELECT r.* FROM requests r
 JOIN users u ON r.user_id = u.id
 JOIN events e ON r.event_id = e.id
 WHERE r.user_id = ?

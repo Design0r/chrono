@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"chrono/db/repo"
 	"chrono/internal/domain"
@@ -77,18 +78,15 @@ func (r *SQLRequestRepo) GetPending(ctx context.Context) ([]domain.RequestEventU
 	}
 
 	requests := make([]domain.RequestEventUser, len(result))
-	for i := 0; i < len(result); i++ {
+	for i := range result {
 		requests[i] = (domain.RequestEventUser)(result[i])
 	}
 
 	return requests, nil
 }
 
-func (r *SQLRequestRepo) GetEventNameFrom(
-	ctx context.Context,
-	req *domain.Request,
-) (string, error) {
-	result, err := r.r.GetEventNameFromRequest(ctx, req.ID)
+func (r *SQLRequestRepo) GetEventNameFrom(ctx context.Context, reqId int64) (string, error) {
+	result, err := r.r.GetEventNameFromRequest(ctx, reqId)
 	if err != nil {
 		r.log.Error(
 			"GetPendingRequests failed",
@@ -98,4 +96,52 @@ func (r *SQLRequestRepo) GetEventNameFrom(
 	}
 
 	return result, nil
+}
+
+func (r *SQLRequestRepo) GetInRange(
+	ctx context.Context,
+	userId int64,
+	start, end time.Time,
+) ([]domain.Request, error) {
+	params := repo.GetRequestRangeParams{UserID: userId, ScheduledAt: start, ScheduledAt_2: end}
+	e, err := r.r.GetRequestRange(ctx, params)
+	if err != nil {
+		r.log.Error(
+			"GetRequestRange failed",
+			slog.String("error", err.Error()),
+		)
+		return nil, err
+	}
+
+	events := make([]domain.Request, len(e))
+	for i := range e {
+		events[i] = (domain.Request)(e[i])
+	}
+
+	return events, nil
+}
+
+func (r *SQLRequestRepo) UpdateInRange(
+	ctx context.Context,
+	state string,
+	editor, reqUserId int64,
+	start, end time.Time,
+) (int64, error) {
+	params := repo.UpdateRequestStateRangeParams{
+		UserID:        reqUserId,
+		EditedBy:      &editor,
+		State:         state,
+		ScheduledAt:   start,
+		ScheduledAt_2: end,
+	}
+
+	reqId, err := r.r.UpdateRequestStateRange(context.Background(), params)
+	if err != nil {
+		r.log.Error(
+			"UpdateRequestStateRange failed",
+			slog.String("error", err.Error()),
+		)
+	}
+
+	return reqId, nil
 }

@@ -51,9 +51,31 @@ type BatchRequest struct {
 	Conflicts  *[]User
 }
 
+type RejectModalForm struct {
+	UserID    int64     `form:"user_id"`
+	StartDate time.Time `form:"start_date"`
+	EndDate   time.Time `form:"end_date"`
+	RequestID int64     `form:"request_id"`
+}
+
+type PatchRequestForm struct {
+	UserID    int64     `form:"user_id"`
+	State     string    `form:"state"`
+	Reason    string    `form:"reason"`
+	StartDate time.Time `form:"start_date"`
+	EndDate   time.Time `form:"end_date"`
+}
+
 type RequestRepository interface {
 	Create(ctx context.Context, msg string, user *User, event *Event) (*Request, error)
 	Update(ctx context.Context, editor *User, req *Request) (*Request, error)
 	GetPending(ctx context.Context) ([]RequestEventUser, error)
-	GetEventNameFrom(ctx context.Context, req *Request) (string, error)
+	GetEventNameFrom(ctx context.Context, reqId int64) (string, error)
+	GetInRange(ctx context.Context, userId int64, start, end time.Time) ([]Request, error)
+	UpdateInRange(
+		ctx context.Context,
+		state string,
+		editor, reqUserId int64,
+		start, end time.Time,
+	) (int64, error)
 }

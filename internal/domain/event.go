@@ -59,6 +59,8 @@ type EventRepository interface {
 	GetPendingForUser(ctx context.Context, userId int64, year int) (int, error)
 	GetUsedVacationForUser(ctx context.Context, userId int64, year int) (float64, error)
 	GetById(ctx context.Context, eventId int64) (*Event, error)
+	// GetInRange(ctx context.Context, userId int64, start, end time.Time) ([]Event, error)
+	UpdateInRange(ctx context.Context, userId int64, state string, start, end time.Time) error
 }
 
 type EventUser struct {

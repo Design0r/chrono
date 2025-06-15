@@ -110,8 +110,14 @@ func (s *Server) InitRoutes() {
 		&userSvc,
 		s.log,
 	)
-
 	profileHandler := handler.NewProfileHandler(&userSvc, &notificationSvc, s.log)
+	requestHandler := handler.NewRequestHandler(
+		&requestSvc,
+		&notificationSvc,
+		&eventSvc,
+		&vacationTokenSvc,
+		s.log,
+	)
 
 	authGrp := s.Router.Group(
 		"",
@@ -126,6 +132,7 @@ func (s *Server) InitRoutes() {
 	authHandler.RegisterRoutes(honeypotGrp)
 	teamHandler.RegisterRoutes(authGrp, adminGrp)
 	profileHandler.RegisterRoutes(authGrp, adminGrp)
+	requestHandler.RegisterRoutes(adminGrp)
 	s.log.Info("Initialized routes.")
 }
 

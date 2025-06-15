@@ -57,4 +57,10 @@ type UserRepository interface {
 	GetAll(ctx context.Context) ([]User, error)
 	GetAdmins(ctx context.Context) ([]User, error)
 	Delete(ctx context.Context, id int64) error
+	GetConflicting(
+		ctx context.Context,
+		userId int64,
+		start time.Time,
+		end time.Time,
+	) ([]User, error)
 }

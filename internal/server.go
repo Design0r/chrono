@@ -119,6 +119,7 @@ func (s *Server) InitRoutes() {
 		s.log,
 	)
 	notificationHandler := handler.NewNotificationHandler(&notificationSvc, s.log)
+	tokenHandler := handler.NewTokenHandler(&vacationTokenSvc, &userSvc, &notificationSvc, s.log)
 
 	authGrp := s.Router.Group(
 		"",
@@ -135,6 +136,8 @@ func (s *Server) InitRoutes() {
 	profileHandler.RegisterRoutes(authGrp, adminGrp)
 	requestHandler.RegisterRoutes(adminGrp)
 	notificationHandler.RegisterRoutes(authGrp)
+	tokenHandler.RegisterRoutes(adminGrp)
+
 	s.log.Info("Initialized routes.")
 
 	bot := service.NewAPIBotFromEnv(s.log)

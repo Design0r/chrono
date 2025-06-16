@@ -42,7 +42,12 @@ func (h *HomeHandler) Home(c echo.Context) error {
 		)
 	}
 
-	userWithVac, err := h.event.GetUserWithVacation(ctx, currUser.ID, time.Now().Year())
+	userWithVac, err := h.event.GetUserWithVacation(
+		ctx,
+		currUser.ID,
+		time.Now().Year(),
+		int(time.Now().Month()),
+	)
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, "Failed to get user data.")
 	}

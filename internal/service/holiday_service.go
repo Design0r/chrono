@@ -1,8 +1,6 @@
 package service
 
 import (
-	"chrono/config"
-	"chrono/internal/domain"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,6 +8,9 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+
+	"chrono/config"
+	"chrono/internal/domain"
 )
 
 type HolidayService interface {
@@ -23,11 +24,20 @@ type holidayService struct {
 	log   *slog.Logger
 }
 
-func NewHolidayService(user UserService, event EventService, api domain.ApiCacheRepository, log *slog.Logger) holidayService {
+func NewHolidayService(
+	user UserService,
+	event EventService,
+	api domain.ApiCacheRepository,
+	log *slog.Logger,
+) holidayService {
 	return holidayService{user: user, event: event, api: api, log: log}
 }
 
 func (svc *holidayService) Update(ctx context.Context, year int) error {
+	if year < 1900 {
+		return fmt.Errorf("Invalid year %v, must be 1900 and above", year)
+	}
+
 	cfg := config.GetConfig()
 	if svc.HolidayCacheExists(ctx, year) {
 		return nil
@@ -63,7 +73,11 @@ func (svc *holidayService) FetchHolidays(year int) (domain.Holidays, error) {
 	holidays := domain.Holidays{}
 	resp, err := http.Get(fmt.Sprintf("https://feiertage-api.de/api/?jahr=%v&nur_land=BW", year))
 	if err != nil {
-		svc.log.Error("Error fetching feiertage-api", slog.Int("year", year), slog.String("error", err.Error()))
+		svc.log.Error(
+			"Error fetching feiertage-api",
+			slog.Int("year", year),
+			slog.String("error", err.Error()),
+		)
 		return holidays, err
 	}
 	body, err := io.ReadAll(resp.Body)

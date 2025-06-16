@@ -12,7 +12,7 @@ templ Team(users []domain.UserWithVacation, currUser domain.User, notifications 
 			if currUser.IsSuperuser {
 				<div class="mt-4">
 					<button
-						hx-get="/team"
+						hx-get="/team/form"
 						hx-target="#team-table"
 						hx-swap="outerHTML"
 						class="btn btn-warning"
@@ -28,7 +28,7 @@ templ TeamHTMX(users []domain.UserWithVacation, currUser domain.User, notificati
 		if currUser.IsSuperuser {
 			<div class="mt-4">
 				<button
-					hx-get="/team"
+					hx-get="/team/form"
 					hx-target="#team-table"
 					hx-swap="outerHTML"
 					class="btn btn-warning"

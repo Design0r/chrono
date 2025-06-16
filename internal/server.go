@@ -95,6 +95,7 @@ func (s *Server) InitRepos() {
 	sessionRepo := db.NewSQLSessionRepo(s.Repo, s.log)
 	refreshTokenRepo := db.NewSQLRefreshTokenRepo(s.Repo, s.log)
 	vacationTokenRepo := db.NewSQLVacationTokenRepo(s.Repo, s.log)
+	apiCacheRepo := db.NewSQLAPICacheRepo(s.Repo, s.log)
 
 	s.repos = repos{
 		user:      &userRepo,
@@ -105,6 +106,7 @@ func (s *Server) InitRepos() {
 		session:   &sessionRepo,
 		refresh:   &refreshTokenRepo,
 		vac:       &vacationTokenRepo,
+		apiCache:  &apiCacheRepo,
 	}
 
 	s.log.Info("Initialized repositories.")
@@ -169,6 +171,7 @@ func (s *Server) InitRoutes() {
 		s.services.notif,
 		s.services.event,
 		s.services.token,
+		s.services.holiday,
 		s.log,
 	)
 	teamHandler := handler.NewTeamHandler(

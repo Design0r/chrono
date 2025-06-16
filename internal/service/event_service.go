@@ -35,6 +35,7 @@ type EventService interface {
 		ctx context.Context,
 		userId int64,
 		year int,
+		month int,
 	) (domain.UserWithVacation, error)
 	GetAllUsersWithVacation(ctx context.Context, year int) ([]domain.UserWithVacation, error)
 	UpdateInRange(ctx context.Context, userId int64, state string, start, end time.Time) error
@@ -196,10 +197,12 @@ func (svc *eventService) GetUserWithVacation(
 	ctx context.Context,
 	userId int64,
 	year int,
+	month int,
 ) (domain.UserWithVacation, error) {
-	start := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
-	end := start.AddDate(1, 3, 0)
-	remaining, err := svc.vacation.GetRemainingVacationForUser(ctx, userId, start, end)
+	start := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	end := start.AddDate(1, 2, 0)
+	fmt.Println(end)
+	remaining, err := svc.vacation.GetRemainingVacationForUser(ctx, userId, start, start)
 	if err != nil {
 		return domain.UserWithVacation{}, err
 	}
@@ -238,7 +241,7 @@ func (svc *eventService) GetAllUsersWithVacation(
 
 	allUsersWithVac := make([]domain.UserWithVacation, len(allUsers))
 	for i, user := range allUsers {
-		u, err := svc.GetUserWithVacation(ctx, user.ID, year)
+		u, err := svc.GetUserWithVacation(ctx, user.ID, year, 1)
 		if err != nil {
 			svc.log.Error(
 				"Unable to get user with vacation, skipping user.",

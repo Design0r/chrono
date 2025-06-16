@@ -9,7 +9,7 @@ import (
 
 type RefreshTokenService interface {
 	Create(ctx context.Context, year int, userId int64) (*domain.RefreshToken, error)
-	CreateIfNotExists(ctx context.Context, userId int64) (bool, error)
+	CreateIfNotExists(ctx context.Context, userId int64, year int) (bool, error)
 	DeleteAll(ctx context.Context) error
 	ExistsForUser(ctx context.Context, userId int64, year int) (bool, error)
 }
@@ -46,9 +46,12 @@ func (svc *refreshTokenService) ExistsForUser(
 	return svc.refresh.ExistsForUser(ctx, userId, year)
 }
 
-func (svc *refreshTokenService) CreateIfNotExists(ctx context.Context, userId int64) (bool, error) {
-	currYear := domain.CurrentYear()
-	exists, err := svc.refresh.ExistsForUser(ctx, userId, currYear)
+func (svc *refreshTokenService) CreateIfNotExists(
+	ctx context.Context,
+	userId int64,
+	year int,
+) (bool, error) {
+	exists, err := svc.refresh.ExistsForUser(ctx, userId, year)
 	if err != nil {
 		return false, err
 	}
@@ -57,10 +60,10 @@ func (svc *refreshTokenService) CreateIfNotExists(ctx context.Context, userId in
 		return true, nil
 	}
 
-	_, err = svc.Create(ctx, currYear, userId)
+	_, err = svc.Create(ctx, year, userId)
 	if err != nil {
 		return false, err
 	}
 
-	return true, nil
+	return false, nil
 }

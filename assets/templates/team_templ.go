@@ -60,7 +60,7 @@ func Team(users []domain.UserWithVacation, currUser domain.User, notifications [
 				}
 				ctx = templ.InitializeContext(ctx)
 				if currUser.IsSuperuser {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"mt-4\"><button hx-get=\"/team\" hx-target=\"#team-table\" hx-swap=\"outerHTML\" class=\"btn btn-warning\">Edit</button></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"mt-4\"><button hx-get=\"/team/form\" hx-target=\"#team-table\" hx-swap=\"outerHTML\" class=\"btn btn-warning\">Edit</button></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -115,7 +115,7 @@ func TeamHTMX(users []domain.UserWithVacation, currUser domain.User, notificatio
 			}
 			ctx = templ.InitializeContext(ctx)
 			if currUser.IsSuperuser {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"mt-4\"><button hx-get=\"/team\" hx-target=\"#team-table\" hx-swap=\"outerHTML\" class=\"btn btn-warning\">Edit</button></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"mt-4\"><button hx-get=\"/team/form\" hx-target=\"#team-table\" hx-swap=\"outerHTML\" class=\"btn btn-warning\">Edit</button></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

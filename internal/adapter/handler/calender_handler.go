@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -46,12 +47,19 @@ func (h *CalendarHandler) Calendar(c echo.Context) error {
 	if err := c.Bind(&date); err != nil {
 		return RenderError(c, http.StatusBadRequest, "Invalid date")
 	}
-	if date.Year >= 1900 {
-		h.holiday.Update(ctx, date.Year)
+
+	err := h.holiday.Update(ctx, date.Year)
+	if err != nil {
+		return RenderError(
+			c,
+			http.StatusInternalServerError,
+			"Failed to update holidays.",
+		)
 	}
 
-	err := h.token.InitYearlyTokens(ctx, &currUser, date.Year)
+	err = h.token.InitYearlyTokens(ctx, &currUser, date.Year)
 	if err != nil {
+		fmt.Println(err)
 		return RenderError(
 			c,
 			http.StatusInternalServerError,
@@ -74,7 +82,7 @@ func (h *CalendarHandler) Calendar(c echo.Context) error {
 		return RenderError(c, http.StatusInternalServerError, "Failed to get month")
 	}
 
-	userWithVac, err := h.event.GetUserWithVacation(ctx, currUser.ID, date.Year)
+	userWithVac, err := h.event.GetUserWithVacation(ctx, currUser.ID, date.Year, date.Month)
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, "Failed to get user data")
 	}
@@ -111,7 +119,7 @@ func (h *CalendarHandler) CreateEvent(c echo.Context) error {
 		return RenderError(c, http.StatusBadRequest, "Failed to create event.")
 	}
 
-	userWithVac, err := h.event.GetUserWithVacation(ctx, currUser.ID, date.Year)
+	userWithVac, err := h.event.GetUserWithVacation(ctx, currUser.ID, date.Year, date.Month)
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, "Failed to get user data.")
 	}
@@ -145,7 +153,12 @@ func (h *CalendarHandler) DeleteEvent(c echo.Context) error {
 		return RenderError(c, http.StatusBadRequest, "Failed to delete event.")
 	}
 
-	userWithVac, err := h.event.GetUserWithVacation(ctx, currUser.ID, event.ScheduledAt.Year())
+	userWithVac, err := h.event.GetUserWithVacation(
+		ctx,
+		currUser.ID,
+		event.ScheduledAt.Year(),
+		int(event.ScheduledAt.Month()),
+	)
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, "Failed to get user data.")
 	}

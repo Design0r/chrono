@@ -1,19 +1,95 @@
 package service
 
 import (
+	"chrono/config"
 	"chrono/internal/domain"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log/slog"
+	"net/http"
+	"time"
 )
 
-type HolidayService struct {
+type HolidayService interface {
+	Update(ctx context.Context, year int) error
+}
+
+type holidayService struct {
 	user  UserService
 	event EventService
 	api   domain.ApiCacheRepository
+	log   *slog.Logger
 }
 
-func NewHolidayService(user UserService, event EventService, api domain.ApiCacheRepository) *HolidayService {
-	return &HolidayService{user: user, event: event, api: api}
+func NewHolidayService(user UserService, event EventService, api domain.ApiCacheRepository, log *slog.Logger) holidayService {
+	return holidayService{user: user, event: event, api: api, log: log}
 }
 
-/* func (h *HolidayService) GetHolidays(ctx context.Context, year int) (domain.Holidays, error) {
-	return h.api.GetHolidays(ctx, year)
-} */
+func (svc *holidayService) Update(ctx context.Context, year int) error {
+	cfg := config.GetConfig()
+	if svc.HolidayCacheExists(ctx, year) {
+		return nil
+	}
+	bot, err := svc.user.GetByName(ctx, cfg.BotName)
+	if err != nil {
+		return err
+	}
+
+	holidays, err := svc.FetchHolidays(year)
+	if err != nil {
+		return err
+	}
+
+	for name, data := range holidays {
+		date, err := time.Parse(time.DateOnly, data["datum"])
+		if err != nil {
+			svc.log.Error("Failed parsing date", slog.String("error", err.Error()))
+			continue
+		}
+		svc.event.Create(
+			ctx,
+			domain.YMDDate{Year: date.Year(), Month: int(date.Month()), Day: date.Day()},
+			name,
+			bot,
+		)
+	}
+
+	return svc.CreateCache(ctx, year)
+}
+
+func (svc *holidayService) FetchHolidays(year int) (domain.Holidays, error) {
+	holidays := domain.Holidays{}
+	resp, err := http.Get(fmt.Sprintf("https://feiertage-api.de/api/?jahr=%v&nur_land=BW", year))
+	if err != nil {
+		svc.log.Error("Error fetching feiertage-api", slog.Int("year", year), slog.String("error", err.Error()))
+		return holidays, err
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return holidays, err
+	}
+	err = json.Unmarshal(body, &holidays)
+	if err != nil {
+		return holidays, err
+	}
+
+	return holidays, nil
+}
+
+func (svc *holidayService) HolidayCacheExists(ctx context.Context, year int) bool {
+	count, err := svc.api.Exists(ctx, int64(year))
+	if err != nil {
+		return false
+	}
+	return count > 0
+}
+
+func (svc *holidayService) CreateCache(ctx context.Context, year int) error {
+	return svc.api.Create(ctx, int64(year))
+}
+
+func (svc *holidayService) GetAPICacheYears(ctx context.Context) ([]int64, error) {
+	return svc.api.GetAll(context.Background())
+}

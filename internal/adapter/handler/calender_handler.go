@@ -13,11 +13,12 @@ import (
 )
 
 type CalendarHandler struct {
-	log   *slog.Logger
-	user  service.UserService
-	notif service.NotificationService
-	event service.EventService
-	token service.TokenService
+	log     *slog.Logger
+	user    service.UserService
+	notif   service.NotificationService
+	event   service.EventService
+	token   service.TokenService
+	holiday service.HolidayService
 }
 
 func NewCalendarHandler(
@@ -25,9 +26,10 @@ func NewCalendarHandler(
 	n service.NotificationService,
 	e service.EventService,
 	t service.TokenService,
+	h service.HolidayService,
 	log *slog.Logger,
 ) CalendarHandler {
-	return CalendarHandler{log: log, user: user, notif: n, event: e, token: t}
+	return CalendarHandler{log: log, user: user, notif: n, event: e, token: t, holiday: h}
 }
 
 func (h *CalendarHandler) RegisterRoutes(group *echo.Group) {
@@ -45,7 +47,7 @@ func (h *CalendarHandler) Calendar(c echo.Context) error {
 		return RenderError(c, http.StatusBadRequest, "Invalid date")
 	}
 	if date.Year >= 1900 {
-		// TODO update holidays
+		h.holiday.Update(ctx, date.Year)
 	}
 
 	err := h.token.InitYearlyTokens(ctx, &currUser, date.Year)

@@ -138,6 +138,8 @@ func (s *Server) InitServices() {
 		s.log,
 	)
 
+	holidaySvc := service.NewHolidayService(&userSvc, &eventSvc, s.repos.apiCache, s.log)
+
 	s.services = services{
 		refresh:  &refreshTokenSvc,
 		vac:      &vacationTokenSvc,
@@ -149,6 +151,7 @@ func (s *Server) InitServices() {
 		event:    &eventSvc,
 		pwHasher: &passwordHasher,
 		auth:     &authSvc,
+		holiday:  &holidaySvc,
 	}
 
 	s.log.Info("Initialized services.")

@@ -18,9 +18,9 @@ func NewSettingsHandler(s service.SettingsService) SettingsHandler {
 	return SettingsHandler{s: s}
 }
 
-func RegisterSettingsRoutes(group *echo.Group, handler *SettingsHandler) {
+func (s *SettingsHandler) RegisterRoutes(group *echo.Group) {
 	g := group.Group("/settings")
-	g.GET("", handler.Settings)
+	g.GET("", s.Settings)
 }
 
 func (h *SettingsHandler) Settings(c echo.Context) error {

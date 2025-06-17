@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"database/sql"
 	"log/slog"
 	"time"
@@ -96,6 +97,7 @@ func (s *Server) InitRepos() {
 	refreshTokenRepo := db.NewSQLRefreshTokenRepo(s.Repo, s.log)
 	vacationTokenRepo := db.NewSQLVacationTokenRepo(s.Repo, s.log)
 	apiCacheRepo := db.NewSQLAPICacheRepo(s.Repo, s.log)
+	settingsRepo := db.NewSQLSettingsRepo(s.Repo, s.log)
 
 	s.repos = repos{
 		user:      userRepo,
@@ -107,6 +109,7 @@ func (s *Server) InitRepos() {
 		refresh:   refreshTokenRepo,
 		vac:       vacationTokenRepo,
 		apiCache:  apiCacheRepo,
+		settings:  settingsRepo,
 	}
 
 	s.log.Info("Initialized repositories.")
@@ -141,6 +144,7 @@ func (s *Server) InitServices() {
 	)
 
 	holidaySvc := service.NewHolidayService(&userSvc, &eventSvc, s.repos.apiCache, s.log)
+	settingSvc := service.NewSettingsService(s.repos.settings, s.log)
 
 	s.services = services{
 		refresh:  &refreshTokenSvc,
@@ -154,6 +158,7 @@ func (s *Server) InitServices() {
 		pwHasher: &passwordHasher,
 		auth:     &authSvc,
 		holiday:  &holidaySvc,
+		settings: &settingSvc,
 	}
 
 	s.log.Info("Initialized services.")
@@ -202,14 +207,17 @@ func (s *Server) InitRoutes() {
 		s.services.session,
 		s.log,
 	)
+	settinsHandler := handler.NewSettingsHandler(s.services.settings)
 
-	authGrp := s.Router.Group(
+	settingsGrp := s.Router.Group("", mw.SettingsMiddleware(s.services.settings))
+
+	authGrp := settingsGrp.Group(
 		"",
 		mw.SessionMiddleware(s.services.session),
 		mw.AuthenticationMiddleware(s.services.auth),
 	)
 	adminGrp := authGrp.Group("", mw.AdminMiddleware())
-	honeypotGrp := s.Router.Group("", mw.HoneypotMiddleware())
+	honeypotGrp := settingsGrp.Group("", mw.HoneypotMiddleware())
 
 	calendarHandler.RegisterRoutes(authGrp)
 	homeHandler.RegisterRoutes(authGrp)
@@ -221,6 +229,7 @@ func (s *Server) InitRoutes() {
 	requestHandler.RegisterRoutes(adminGrp)
 	tokenHandler.RegisterRoutes(adminGrp)
 	debugHandler.RegisterRoutes(adminGrp)
+	settinsHandler.RegisterRoutes(adminGrp)
 
 	authHandler.RegisterRoutes(honeypotGrp)
 
@@ -228,16 +237,29 @@ func (s *Server) InitRoutes() {
 }
 
 func (s *Server) Start(address string) error {
-	s.PreStart()
+	err := s.PreStart()
+	if err != nil {
+		s.log.Error("Failed to run PreStart.", "error", err.Error())
+		return err
+	}
 	return s.Router.Start(address)
 }
 
-func (s *Server) PreStart() {
+func (s *Server) PreStart() error {
 	s.InitMiddleware()
 	s.InitRepos()
 	s.InitServices()
 	s.InitRoutes()
 
+	settings := domain.Settings{SignupEnabled: false}
+	_, err := s.services.settings.Init(context.Background(), settings)
+	if err != nil {
+		s.log.Error("Failed to init settings.")
+		return err
+	}
+
 	bot := service.NewAPIBotFromEnv(s.log)
 	bot.Register(s.services.user, s.services.pwHasher)
+
+	return nil
 }

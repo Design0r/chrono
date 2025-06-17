@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -96,3 +97,24 @@ var StaticHandler = echo.WrapHandler(
 		http.FileServer(http.FS(assets.StaticFS)),
 	),
 )
+
+func SettingsMiddleware(svc service.SettingsService) MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			settings, err := svc.GetFirst(c.Request().Context())
+			if err != nil {
+				return htmx.RenderError(
+					c,
+					http.StatusForbidden,
+					"Failed to load settings.",
+				)
+			}
+
+			ctx := context.WithValue(c.Request().Context(), "settings", settings)
+			req := c.Request().WithContext(ctx)
+			c.SetRequest(req)
+			c.Set("settings", settings)
+			return next(c)
+		}
+	}
+}

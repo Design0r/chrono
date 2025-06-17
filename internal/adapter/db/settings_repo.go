@@ -21,12 +21,10 @@ func (r *SQLSettingsRepo) GetById(ctx context.Context, id int64) (domain.Setting
 	s, err := r.q.GetSettingsById(ctx, id)
 	if err != nil {
 		r.log.Error("repo.GetSettingsById failed:", slog.String("error", err.Error()))
-		return domain.Settings{}, nil
+		return domain.Settings{}, err
 	}
 
-	return domain.Settings{
-		SignupEnabled: s.SignupEnabled,
-	}, nil
+	return (domain.Settings)(s), nil
 }
 
 func (r *SQLSettingsRepo) Delete(ctx context.Context, id int64) error {
@@ -43,12 +41,10 @@ func (r *SQLSettingsRepo) Create(ctx context.Context, s domain.Settings) (domain
 	settings, err := r.q.CreateSettings(ctx, s.SignupEnabled)
 	if err != nil {
 		r.log.Error("repo.GetSettingsById failed:", slog.String("error", err.Error()))
-		return domain.Settings{}, nil
+		return domain.Settings{}, err
 	}
 
-	return domain.Settings{
-		SignupEnabled: settings.SignupEnabled,
-	}, nil
+	return (domain.Settings)(settings), nil
 }
 
 func (r *SQLSettingsRepo) Update(ctx context.Context, s domain.Settings) (domain.Settings, error) {
@@ -58,10 +54,8 @@ func (r *SQLSettingsRepo) Update(ctx context.Context, s domain.Settings) (domain
 	)
 	if err != nil {
 		r.log.Error("repo.GetSettingsById failed:", slog.String("error", err.Error()))
-		return domain.Settings{}, nil
+		return domain.Settings{}, err
 	}
 
-	return domain.Settings{
-		SignupEnabled: settings.SignupEnabled,
-	}, nil
+	return (domain.Settings)(settings), nil
 }

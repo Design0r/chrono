@@ -179,6 +179,7 @@ func Header(user *domain.User, notifications []domain.Notification) templ.Compon
 		}
 		ctx = templ.ClearChildren(ctx)
 
+		settings := ctx.Value("settings").(domain.Settings)
 		now := time.Now()
 		month := strconv.Itoa(int(now.Month()))
 		year := strconv.Itoa(now.Year())
@@ -226,12 +227,18 @@ func Header(user *domain.User, notifications []domain.Notification) templ.Compon
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a href=\"/login\" class=\"btn btn-ghost\">Login</a> <a href=\"/signup\" class=\"btn btn-ghost\">Signup</a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a href=\"/login\" class=\"btn btn-ghost\">Login</a> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+			if settings.SignupEnabled {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<a href=\"/signup\" class=\"btn btn-ghost\">Signup</a>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -266,7 +273,7 @@ func Avatar(user domain.User) templ.Component {
 			initial = strings.ToUpper(user.Username[:1])
 		}
 		bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(user.Color))
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"dropdown dropdown-end pr-2\"><!-- Trigger --><div tabindex=\"0\" role=\"button\" class=\"avatar avatar-placeholder cursor-pointer\"><div class=\"w-10 rounded-full text-neutral-content\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"dropdown dropdown-end pr-2\"><!-- Trigger --><div tabindex=\"0\" role=\"button\" class=\"avatar avatar-placeholder cursor-pointer\"><div class=\"w-10 rounded-full text-neutral-content\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -274,20 +281,20 @@ func Avatar(user domain.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "><span class=\"text-xl\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "><span class=\"text-xl\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(initial)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 117, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 120, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span></div></div><!-- Menu --><ul tabindex=\"0\" class=\"dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mt-2\"><li><a href=\"/profile\">Profile</a></li><li><a href=\"/settings\">Settings</a></li><li><form method=\"POST\" action=\"/logout\"><button type=\"submit\" class=\"w-full text-left\">Logout</button></form></li></ul></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span></div></div><!-- Menu --><ul tabindex=\"0\" class=\"dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mt-2\"><li><a href=\"/profile\">Profile</a></li><li><a href=\"/settings\">Settings</a></li><li><form method=\"POST\" action=\"/logout\"><button type=\"submit\" class=\"w-full text-left\">Logout</button></form></li></ul></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

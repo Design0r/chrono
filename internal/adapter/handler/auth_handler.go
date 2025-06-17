@@ -52,10 +52,19 @@ func (h *AuthHandler) Login(c echo.Context) error {
 }
 
 func (h *AuthHandler) SignupForm(c echo.Context) error {
+	settings := c.Get("settings").(domain.Settings)
+	if !settings.SignupEnabled {
+		return RenderError(c, http.StatusBadRequest, "Signups are currently disabled.")
+	}
 	return Render(c, http.StatusOK, templates.Signup())
 }
 
 func (h *AuthHandler) Signup(c echo.Context) error {
+	settings := c.Get("settings").(domain.Settings)
+	if !settings.SignupEnabled {
+		return RenderError(c, http.StatusBadRequest, "Signups are currently disabled.")
+	}
+
 	var loginData domain.CreateUser
 	if err := c.Bind(&loginData); err != nil {
 		return RenderError(c, http.StatusBadRequest, "Invalid inputs")

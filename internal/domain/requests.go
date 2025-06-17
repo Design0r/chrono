@@ -52,18 +52,18 @@ type BatchRequest struct {
 }
 
 type RejectModalForm struct {
-	UserID    int64     `form:"user_id"`
-	StartDate time.Time `form:"start_date"`
-	EndDate   time.Time `form:"end_date"`
-	RequestID int64     `form:"request_id"`
+	UserID    int64 `query:"user_id"`
+	StartDate int64 `query:"start_date"`
+	EndDate   int64 `query:"end_date"`
+	RequestID int64 `query:"request_id"`
 }
 
 type PatchRequestForm struct {
-	UserID    int64     `form:"user_id"`
-	State     string    `form:"state"`
-	Reason    string    `form:"reason"`
-	StartDate time.Time `form:"start_date"`
-	EndDate   time.Time `form:"end_date"`
+	UserID    int64  `form:"user_id"`
+	State     string `form:"state"`
+	Reason    string `form:"reason"`
+	StartDate int64  `form:"start_date"`
+	EndDate   int64  `form:"end_date"`
 }
 
 type RequestRepository interface {

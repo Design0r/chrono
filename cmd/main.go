@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -21,10 +21,9 @@ import (
 
 func main() {
 	fmt.Println(banner)
-	log.Println("Initializing chrono...")
+	slog.Info("Initializing chrono...")
 
 	cfg := config.NewConfigFromEnv()
-	fmt.Println(cfg)
 
 	if err := sentry.Init(sentry.ClientOptions{
 		Dsn:              cfg.SentryUrl,
@@ -34,7 +33,7 @@ func main() {
 		TracesSampleRate: 1.0,
 		SendDefaultPII:   true,
 	}); err != nil {
-		fmt.Printf("Sentry initialization failed: %v\n", err)
+		slog.Error("Sentry initialization failed", "error", err)
 	}
 
 	dbConn := db.NewDB(cfg.DbName)
@@ -49,13 +48,13 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
-	fmt.Println()
-	log.Println("Received shutdown signal, shutting down…")
+	slog.Info("Received shutdown signal, shutting down…")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced to shutdown: %v", err)
+		slog.Error("Server forced to shutdown:", "error", err)
+		os.Exit(1)
 	}
 }
 

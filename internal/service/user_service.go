@@ -115,9 +115,10 @@ func (svc *userService) SetVacation(ctx context.Context, userId int64, vacation,
 	if err != nil {
 		return err
 	}
+	oldVacation := int(user.VacationDays)
 
 	if vacation < 0 {
-		svc.log.Error("negative vacation value is not supported", slog.Int("value", vacation))
+		svc.log.Error("negative vacation value is not supported", "value", vacation)
 		return fmt.Errorf("negative vacation value is not supported %v", vacation)
 	}
 	user.VacationDays = int64(vacation)
@@ -126,7 +127,7 @@ func (svc *userService) SetVacation(ctx context.Context, userId int64, vacation,
 		return err
 	}
 
-	return svc.token.UpdateYearlyTokens(ctx, userId, vacation, year)
+	return svc.token.UpdateYearlyTokens(ctx, userId, vacation-oldVacation, year)
 }
 
 func (svc *userService) GetConflicting(

@@ -35,7 +35,7 @@ func (svc *tokenService) InitYearlyTokens(ctx context.Context, user *domain.User
 	}
 
 	if exists || user.VacationDays <= 0 {
-		svc.log.Error("refresh token already exists", "exists", exists)
+		// svc.log.Error("refresh token already exists", "exists", exists)
 		return nil
 	}
 

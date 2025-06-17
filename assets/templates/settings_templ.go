@@ -10,7 +10,6 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"chrono/internal/domain"
-	"fmt"
 )
 
 func Settings(s domain.Settings, user *domain.User, notifications []domain.Notification) templ.Component {
@@ -46,20 +45,24 @@ func Settings(s domain.Settings, user *domain.User, notifications []domain.Notif
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<p>Signup enabled:</p><p>")
+
+			settings := ctx.Value("settings").(domain.Settings)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-2 bg-base-300 rounded m-2 p-5 \"><div class=\"grid grid-cols-2 justify-center m-auto bg-base-300 rounded\"><p>Signup enabled</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(s.SignupEnabled))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/settings.templ`, Line: 11, Col: 34}
+			if settings.SignupEnabled {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<input hx-patch=\"/settings\" type=\"checkbox\" checked hx-trigger=\"change\" name=\"signup_enabled\" class=\"toggle border-error text-error checked:border-success checked:text-success\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<input hx-patch=\"/settings\" type=\"checkbox\" hx-trigger=\"change\" name=\"signup_enabled\" class=\"toggle border-error text-error checked:border-success checked:text-success\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -48,6 +47,7 @@ func (h *RequestHandler) Requests(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, "Failed to get pending requests.")
 	}
+	fmt.Println(requests[1].Conflicts)
 
 	notifications, err := h.notif.GetByUserId(ctx, currUser.ID)
 	if err != nil {
@@ -58,16 +58,19 @@ func (h *RequestHandler) Requests(c echo.Context) error {
 }
 
 func (h *RequestHandler) RejectModal(c echo.Context) error {
-	form := domain.RejectModalForm{}
-	if err := c.Bind(&form); err == nil {
+	var form domain.RejectModalForm
+	if err := c.Bind(&form); err != nil {
 		return RenderError(c, http.StatusBadRequest, "Invalid parameter.")
 	}
+
+	startDate := time.Unix(form.StartDate, 0).UTC()
+	endDate := time.Unix(form.EndDate, 0).UTC()
 
 	requests, err := h.request.GetInRange(
 		c.Request().Context(),
 		form.UserID,
-		form.StartDate,
-		form.EndDate,
+		startDate,
+		endDate,
 	)
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, "Failed getting requests")
@@ -78,8 +81,8 @@ func (h *RequestHandler) RejectModal(c echo.Context) error {
 		http.StatusOK,
 		templates.RejectModal(
 			requests[0].Message,
-			form.StartDate,
-			form.EndDate,
+			startDate,
+			endDate,
 			form.UserID,
 			form.RequestID,
 		),
@@ -91,27 +94,19 @@ func (h *RequestHandler) PatchRequests(c echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 
 	form := domain.PatchRequestForm{}
-	if err := c.Bind(&form); err == nil {
+	if err := c.Bind(&form); err != nil {
 		return RenderError(c, http.StatusBadRequest, "Invalid parameter.")
 	}
-	start, err := strconv.ParseInt(c.FormValue("start_date"), 10, 64)
-	if err != nil {
-		return RenderError(c, http.StatusBadRequest, "Invalid date parameter.")
-	}
-	end, err := strconv.ParseInt(c.FormValue("end_date"), 10, 64)
-	if err != nil {
-		return RenderError(c, http.StatusBadRequest, "Invalid date parameter.")
-	}
-	form.StartDate = time.Unix(start, 0).UTC()
-	form.EndDate = time.Unix(end, 0).UTC()
-	fmt.Println(form)
+	startDate := time.Unix(form.StartDate, 0).UTC()
+	endDate := time.Unix(form.EndDate, 0).UTC()
+	fmt.Println(form, startDate, endDate)
 
 	reqId, err := h.request.UpdateInRange(ctx, currUser.ID, form)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, "Failed updating request")
 	}
 
-	err = h.event.UpdateInRange(ctx, form.UserID, form.State, form.StartDate, form.EndDate)
+	err = h.event.UpdateInRange(ctx, form.UserID, form.State, startDate, endDate)
 	if err != nil {
 		return RenderError(c, http.StatusBadRequest, "Failed updating events")
 	}
@@ -122,11 +117,11 @@ func (h *RequestHandler) PatchRequests(c echo.Context) error {
 	}
 
 	if form.State == "accepted" {
-		days := (form.StartDate.Sub(form.EndDate).Hours() / 24) - 1.0
+		days := (startDate.Sub(endDate).Hours() / 24) - 1.0
 		if eventName == "urlaub halbtags" {
 			days /= 2
 		}
-		h.vacation.Create(ctx, days, form.StartDate.Year(), form.UserID)
+		h.vacation.Create(ctx, days, startDate.Year(), form.UserID)
 	}
 
 	return Render(

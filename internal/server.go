@@ -98,15 +98,15 @@ func (s *Server) InitRepos() {
 	apiCacheRepo := db.NewSQLAPICacheRepo(s.Repo, s.log)
 
 	s.repos = repos{
-		user:      &userRepo,
-		notifUser: &notificationUserRepo,
-		notif:     &notificationRepo,
-		event:     &eventRepo,
-		request:   &requestRepo,
-		session:   &sessionRepo,
-		refresh:   &refreshTokenRepo,
-		vac:       &vacationTokenRepo,
-		apiCache:  &apiCacheRepo,
+		user:      userRepo,
+		notifUser: notificationUserRepo,
+		notif:     notificationRepo,
+		event:     eventRepo,
+		request:   requestRepo,
+		session:   sessionRepo,
+		refresh:   refreshTokenRepo,
+		vac:       vacationTokenRepo,
+		apiCache:  apiCacheRepo,
 	}
 
 	s.log.Info("Initialized repositories.")

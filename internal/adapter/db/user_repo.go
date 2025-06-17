@@ -14,22 +14,8 @@ type SQLUserRepo struct {
 	log *slog.Logger
 }
 
-func repoUserToDomain(u *repo.User) *domain.User {
-	return &domain.User{
-		ID:           u.ID,
-		Username:     u.Username,
-		Email:        u.Email,
-		Password:     u.Password,
-		VacationDays: u.VacationDays,
-		IsSuperuser:  u.IsSuperuser,
-		CreatedAt:    u.CreatedAt,
-		EditedAt:     u.EditedAt,
-		Color:        u.Color,
-	}
-}
-
-func NewSQLUserRepo(q *repo.Queries, l *slog.Logger) SQLUserRepo {
-	return SQLUserRepo{q: q, log: l}
+func NewSQLUserRepo(q *repo.Queries, l *slog.Logger) domain.UserRepository {
+	return &SQLUserRepo{q: q, log: l}
 }
 
 func (r *SQLUserRepo) Create(ctx context.Context, user *domain.CreateUser) (*domain.User, error) {
@@ -53,7 +39,7 @@ func (r *SQLUserRepo) Create(ctx context.Context, user *domain.CreateUser) (*dom
 		return &domain.User{}, err
 	}
 
-	return repoUserToDomain(&u), nil
+	return (*domain.User)(&u), nil
 }
 
 func (r *SQLUserRepo) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
@@ -78,7 +64,7 @@ func (r *SQLUserRepo) Update(ctx context.Context, user *domain.User) (*domain.Us
 		return &domain.User{}, err
 	}
 
-	return repoUserToDomain(&u), nil
+	return (*domain.User)(&u), nil
 }
 
 func (r *SQLUserRepo) Delete(ctx context.Context, id int64) error {
@@ -106,7 +92,7 @@ func (r *SQLUserRepo) GetById(ctx context.Context, id int64) (*domain.User, erro
 		return &domain.User{}, err
 	}
 
-	return repoUserToDomain(&u), nil
+	return (*domain.User)(&u), nil
 }
 
 func (r *SQLUserRepo) GetByName(ctx context.Context, name string) (*domain.User, error) {
@@ -120,7 +106,7 @@ func (r *SQLUserRepo) GetByName(ctx context.Context, name string) (*domain.User,
 		return &domain.User{}, err
 	}
 
-	return repoUserToDomain(&u), nil
+	return (*domain.User)(&u), nil
 }
 
 func (r *SQLUserRepo) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
@@ -134,7 +120,7 @@ func (r *SQLUserRepo) GetByEmail(ctx context.Context, email string) (*domain.Use
 		return &domain.User{}, err
 	}
 
-	return repoUserToDomain(&u), nil
+	return (*domain.User)(&u), nil
 }
 
 func (r *SQLUserRepo) GetAll(ctx context.Context) ([]domain.User, error) {

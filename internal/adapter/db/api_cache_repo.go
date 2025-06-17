@@ -2,6 +2,7 @@ package db
 
 import (
 	"chrono/db/repo"
+	"chrono/internal/domain"
 	"context"
 	"log/slog"
 )
@@ -11,8 +12,8 @@ type SQLAPICacheRepo struct {
 	log *slog.Logger
 }
 
-func NewSQLAPICacheRepo(r *repo.Queries, log *slog.Logger) SQLAPICacheRepo {
-	return SQLAPICacheRepo{r: r, log: log}
+func NewSQLAPICacheRepo(r *repo.Queries, log *slog.Logger) domain.ApiCacheRepository {
+	return &SQLAPICacheRepo{r: r, log: log}
 }
 
 func (r *SQLAPICacheRepo) Exists(ctx context.Context, year int64) (int64, error) {

@@ -18,12 +18,12 @@ type SQLUserNotificationRepo struct {
 	log *slog.Logger
 }
 
-func NewSQLNotificationRepo(r *repo.Queries, log *slog.Logger) SQLNotificationRepo {
-	return SQLNotificationRepo{r: r, log: log}
+func NewSQLNotificationRepo(r *repo.Queries, log *slog.Logger) domain.NotificationRepository {
+	return &SQLNotificationRepo{r: r, log: log}
 }
 
-func NewSQLUserNotificationRepo(r *repo.Queries, log *slog.Logger) SQLUserNotificationRepo {
-	return SQLUserNotificationRepo{r: r, log: log}
+func NewSQLUserNotificationRepo(r *repo.Queries, log *slog.Logger) domain.NotificationUserRepository {
+	return &SQLUserNotificationRepo{r: r, log: log}
 }
 
 func (r *SQLNotificationRepo) Create(ctx context.Context, msg string) (domain.Notification, error) {

@@ -14,8 +14,8 @@ type SQLVacationTokenRepo struct {
 	log *slog.Logger
 }
 
-func NewSQLVacationTokenRepo(q *repo.Queries, log *slog.Logger) SQLVacationTokenRepo {
-	return SQLVacationTokenRepo{q: q, log: log}
+func NewSQLVacationTokenRepo(q *repo.Queries, log *slog.Logger) domain.VacationTokenRepository {
+	return &SQLVacationTokenRepo{q: q, log: log}
 }
 
 func (r *SQLVacationTokenRepo) Create(

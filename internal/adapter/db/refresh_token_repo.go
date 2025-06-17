@@ -13,8 +13,8 @@ type SQLRefreshTokenRepo struct {
 	log *slog.Logger
 }
 
-func NewSQLRefreshTokenRepo(q *repo.Queries, log *slog.Logger) SQLRefreshTokenRepo {
-	return SQLRefreshTokenRepo{q: q, log: log}
+func NewSQLRefreshTokenRepo(q *repo.Queries, log *slog.Logger) domain.RefreshTokenRepository {
+	return &SQLRefreshTokenRepo{q: q, log: log}
 }
 
 func (r *SQLRefreshTokenRepo) Create(ctx context.Context, year int, userId int64) (*domain.RefreshToken, error) {

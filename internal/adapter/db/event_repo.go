@@ -15,8 +15,8 @@ type SQLEventRepo struct {
 	log *slog.Logger
 }
 
-func NewSQLEventUserRepo(r *repo.Queries, log *slog.Logger) SQLEventRepo {
-	return SQLEventRepo{r: r, log: log}
+func NewSQLEventUserRepo(r *repo.Queries, log *slog.Logger) domain.EventRepository {
+	return &SQLEventRepo{r: r, log: log}
 }
 
 func (r *SQLEventRepo) Create(

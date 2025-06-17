@@ -16,12 +16,8 @@ type SQLSessionRepo struct {
 	log *slog.Logger
 }
 
-func NewSQLSessionRepo(q *repo.Queries, log *slog.Logger) SQLSessionRepo {
-	return SQLSessionRepo{q: q, log: log}
-}
-
-func repoSessionToDomain(s *repo.Session) *domain.Session {
-	return &domain.Session{ID: s.ID, ValidUntil: s.ValidUntil, CreatedAt: s.CreatedAt, EditedAt: s.EditedAt, UserID: s.UserID}
+func NewSQLSessionRepo(q *repo.Queries, log *slog.Logger) domain.SessionRepository {
+	return &SQLSessionRepo{q: q, log: log}
 }
 
 func (r *SQLSessionRepo) Create(ctx context.Context, userId int64, secureRand string, duration time.Duration) (*domain.Session, error) {
@@ -32,7 +28,7 @@ func (r *SQLSessionRepo) Create(ctx context.Context, userId int64, secureRand st
 		return &domain.Session{}, err
 	}
 
-	return repoSessionToDomain(&session), nil
+	return (*domain.Session)(&session), nil
 }
 
 func (r *SQLSessionRepo) Delete(ctx context.Context, cookie string) error {
@@ -62,7 +58,7 @@ func (r *SQLSessionRepo) GetById(ctx context.Context, cookie string) (*domain.Se
 		return nil, err
 	}
 
-	return repoSessionToDomain(&session), nil
+	return (*domain.Session)(&session), nil
 }
 
 func (r *SQLSessionRepo) GetSessionUser(ctx context.Context, cookie string) (*domain.User, error) {
@@ -72,5 +68,5 @@ func (r *SQLSessionRepo) GetSessionUser(ctx context.Context, cookie string) (*do
 		return nil, err
 	}
 
-	return repoUserToDomain(&u), nil
+	return (*domain.User)(&u), nil
 }

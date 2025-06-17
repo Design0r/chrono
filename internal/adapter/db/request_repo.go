@@ -14,8 +14,8 @@ type SQLRequestRepo struct {
 	log *slog.Logger
 }
 
-func NewSQLRequestRepo(r *repo.Queries, log *slog.Logger) SQLRequestRepo {
-	return SQLRequestRepo{r: r, log: log}
+func NewSQLRequestRepo(r *repo.Queries, log *slog.Logger) domain.RequestRepository {
+	return &SQLRequestRepo{r: r, log: log}
 }
 
 func (r *SQLRequestRepo) Create(

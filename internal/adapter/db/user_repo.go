@@ -179,7 +179,7 @@ func (r *SQLUserRepo) GetConflicting(
 
 	u := make([]domain.User, len(users))
 	for i := range u {
-		u[i] = (domain.User)(u[i])
+		u[i] = (domain.User)(users[i])
 	}
 
 	return u, nil

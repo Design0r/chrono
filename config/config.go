@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"log/slog"
 	"os"
 )
 
@@ -35,7 +36,7 @@ func NewConfigFromEnv() *Config {
 		SentryUrl:   loadIf("SENTRY_URL", func() bool { return loadDefault("DEBUG", "0") == "0" }),
 	}
 
-	log.Println("Config loaded")
+	slog.Info("Config loaded")
 
 	return config
 }

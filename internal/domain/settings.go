@@ -4,7 +4,11 @@ import "context"
 
 type Settings struct {
 	ID            int64
-	SignupEnabled bool
+	SignupEnabled bool `form:"signup_enabled"`
+}
+
+type SettingsPatch struct {
+	SignupEnabled string `query:"signup_enabled"`
 }
 
 type SettingsRepository interface {

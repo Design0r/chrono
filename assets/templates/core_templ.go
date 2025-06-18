@@ -203,7 +203,7 @@ func Header(user *domain.User, notifications []domain.Notification) templ.Compon
 				return templ_7745c5c3_Err
 			}
 			if (*user).IsSuperuser {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a href=\"/requests\" class=\"btn btn-ghost font-medium text-[15px]\">Request<span class=\"icon-outlined\">mark_chat_unread</span></a> <a href=\"/tokens\" class=\"btn btn-ghost font-medium text-[15px]\">Tokens<span class=\"icon-outlined\">local_activity</span></a>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a href=\"/requests\" class=\"btn btn-ghost font-medium text-[15px]\">Request<span class=\"icon-outlined\">mark_chat_unread</span></a> <a href=\"/tokens\" class=\"btn btn-ghost font-medium text-[15px]\">Tokens<span class=\"icon-outlined\">local_activity</span></a> <a href=\"/settings\" class=\"btn btn-ghost font-medium text-[15px]\">Settings<span class=\"icon-outlined\">settings</span></a>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -288,7 +288,7 @@ func Avatar(user domain.User) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(initial)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 120, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 121, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {

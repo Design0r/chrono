@@ -304,7 +304,7 @@ func RejectModal(message *string, startDate time.Time, endDate time.Time, userId
 			templ_7745c5c3_Var16 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div id=\"reject-modal\"><div id=\"blur-bg\" class=\"fixed z-10 inset-0 bg-opacity-50 backdrop-blur-md flex items-center justify-center\"><div id=\"inner-modal\" class=\"modal-box\"><button id=\"close-modal\" class=\"absolute right-3 top-3 icon-outlined items-end text-xl justify-end\">close</button><h1 class=\"text-xl font-bold\">Reject Requeust</h1>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div id=\"reject-modal\"><div id=\"blur-bg\" class=\"fixed z-10 inset-0 bg-opacity-50 backdrop-blur-md flex items-center justify-center\"><dialog id=\"inner-modal\" class=\"modal modal-open\"><div class=\"modal-box\"><button id=\"close-modal\" class=\"absolute cursor-pointer right-3 top-3 icon-outlined items-end text-xl justify-end\">close</button><h1 class=\"text-xl font-bold\">Reject Requeust</h1>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -316,7 +316,7 @@ func RejectModal(message *string, startDate time.Time, endDate time.Time, userId
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(*message)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 100, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 101, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -334,7 +334,7 @@ func RejectModal(message *string, startDate time.Time, endDate time.Time, userId
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("js:{state:\"declined\", start_date:\"%v\", end_date:\"%v\", user_id:\"%v\", reason: getReason()}", startDate.Unix(), endDate.Unix(), userId))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 113, Col: 169}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 114, Col: 170}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -347,13 +347,13 @@ func RejectModal(message *string, startDate time.Time, endDate time.Time, userId
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#request-%v", requestId))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 115, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/requests.templ`, Line: 116, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" class=\"btn btn-error text-xl\">Reject</button></div></div></div></div><script>\n  {\n    function getReason() {return document.getElementById(\"modal-reason\").value}\n    const bg = document.querySelector('#blur-bg')\n    const modal = document.querySelector('#inner-modal')\n    const btn = document.querySelector('#reject-btn')\n    const closeBtn = document.querySelector('#close-modal')\n    \n    const closeModal = () => {bg.remove()}\n  \n    btn.addEventListener(\"click\", (event) => {bg.remove()})\n    closeBtn.addEventListener(\"click\", (event) => {bg.remove()})\n    bg.addEventListener(\"click\", (event) => {\n      if (event.target === bg) closeModal()\n    })\n  }\n  </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" hx-on::after-request=\"closeModal()\" class=\"btn btn-error text-xl\">Reject</button></div></div></dialog></div></div><script>\n  {\n    function getReason() {return document.getElementById(\"modal-reason\").value}\n    const bg = document.querySelector('#blur-bg')\n    const modal = document.querySelector('#inner-modal')\n    const btn = document.querySelector('#reject-btn')\n    const closeBtn = document.querySelector('#close-modal')\n    \n    function closeModal() {bg.remove()}\n  \n    // btn.addEventListener(\"click\", (event) => {bg.remove()})\n    closeBtn.addEventListener(\"click\", (event) => {bg.remove()})\n    bg.addEventListener(\"click\", (event) => {\n      if (event.target === bg) closeModal()\n    })\n  }\n  </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

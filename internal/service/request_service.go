@@ -98,6 +98,7 @@ func (svc *requestService) GetPending(ctx context.Context) ([]domain.BatchReques
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println(confilctingUsers)
 
 		requestsToShow = append(requestsToShow, domain.BatchRequest{
 			StartDate:  startDate,
@@ -133,13 +134,15 @@ func (svc *requestService) UpdateInRange(
 	editorId int64,
 	form domain.PatchRequestForm,
 ) (int64, error) {
+	startDate := time.Unix(form.StartDate, 0).UTC()
+	endDate := time.Unix(form.EndDate, 0).UTC()
 	reqId, err := svc.request.UpdateInRange(
 		ctx,
 		form.State,
 		editorId,
 		form.UserID,
-		form.StartDate,
-		form.EndDate,
+		startDate,
+		endDate,
 	)
 	if err != nil {
 		return 0, err

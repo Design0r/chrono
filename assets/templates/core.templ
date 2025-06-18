@@ -83,6 +83,7 @@ templ Header(user *domain.User, notifications []domain.Notification) {
 					if (*user).IsSuperuser {
 						<a href="/requests" class="btn btn-ghost font-medium text-[15px]">Request<span class="icon-outlined">mark_chat_unread</span></a>
 						<a href="/tokens" class="btn btn-ghost font-medium text-[15px]">Tokens<span class="icon-outlined">local_activity</span></a>
+						<a href="/settings" class="btn btn-ghost font-medium text-[15px]">Settings<span class="icon-outlined">settings</span></a>
 					}
 				}
 			</div>

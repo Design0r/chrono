@@ -57,7 +57,7 @@ backup:
 
 deploy: backup
 	@git pull origin main
-	@docker compose up --build -d
+	@COMPOSE_BAKE=true docker compose up --build -d
 
 test:
 	@go test ./... -v

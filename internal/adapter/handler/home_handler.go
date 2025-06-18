@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -64,7 +63,5 @@ func (h *HomeHandler) Home(c echo.Context) error {
 		return RenderError(c, http.StatusInternalServerError, "Failed to get event data.")
 	}
 
-	err = Render(c, http.StatusOK, templates.Home(userWithVac, yearProgress, notifs, yearOverview))
-	fmt.Println(err)
-	return err
+	return Render(c, http.StatusOK, templates.Home(userWithVac, yearProgress, notifs, yearOverview))
 }

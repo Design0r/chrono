@@ -98,7 +98,6 @@ func (svc *requestService) GetPending(ctx context.Context) ([]domain.BatchReques
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(confilctingUsers)
 
 		requestsToShow = append(requestsToShow, domain.BatchRequest{
 			StartDate:  startDate,

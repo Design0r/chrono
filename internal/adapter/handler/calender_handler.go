@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -59,7 +58,6 @@ func (h *CalendarHandler) Calendar(c echo.Context) error {
 
 	err = h.token.InitYearlyTokens(ctx, &currUser, date.Year)
 	if err != nil {
-		fmt.Println(err)
 		return RenderError(
 			c,
 			http.StatusInternalServerError,

@@ -200,8 +200,6 @@ func (svc *eventService) GetUserWithVacation(
 	month int,
 ) (domain.UserWithVacation, error) {
 	start := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
-	end := start.AddDate(1, 2, 0)
-	fmt.Println(end)
 	remaining, err := svc.vacation.GetRemainingVacationForUser(ctx, userId, start, start)
 	if err != nil {
 		return domain.UserWithVacation{}, err

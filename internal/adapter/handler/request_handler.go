@@ -47,7 +47,6 @@ func (h *RequestHandler) Requests(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, "Failed to get pending requests.")
 	}
-	fmt.Println(requests[1].Conflicts)
 
 	notifications, err := h.notif.GetByUserId(ctx, currUser.ID)
 	if err != nil {
@@ -99,7 +98,6 @@ func (h *RequestHandler) PatchRequests(c echo.Context) error {
 	}
 	startDate := time.Unix(form.StartDate, 0).UTC()
 	endDate := time.Unix(form.EndDate, 0).UTC()
-	fmt.Println(form, startDate, endDate)
 
 	reqId, err := h.request.UpdateInRange(ctx, currUser.ID, form)
 	if err != nil {

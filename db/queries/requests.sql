@@ -3,6 +3,16 @@ INSERT INTO requests (message, state, user_id, event_id)
 VALUES (?, ?, ?, ?)
 RETURNING *;
 
+-- name: UpdateRequest :one
+UPDATE requests
+SET message = ?,
+state = ?,
+edited_by = ?,
+event_id = ?,
+edited_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING *;
+
 -- name: GetUserRequests :many
 SELECT * FROM requests
 WHERE user_id = ?;
@@ -37,7 +47,7 @@ AND event_id IN (
 RETURNING requests.id;
 
 -- name: GetRequestRange :many
-SELECT * FROM requests r
+SELECT r.* FROM requests r
 JOIN users u ON r.user_id = u.id
 JOIN events e ON r.event_id = e.id
 WHERE r.user_id = ?

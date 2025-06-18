@@ -10,21 +10,21 @@ import (
 	"time"
 )
 
-const CreateToken = `-- name: CreateToken :one
+const CreateVacationToken = `-- name: CreateVacationToken :one
 INSERT INTO vacation_tokens (user_id, start_date, end_date, value)
 VALUES (?,?,?,?)
 RETURNING id, start_date, end_date, value, user_id
 `
 
-type CreateTokenParams struct {
+type CreateVacationTokenParams struct {
 	UserID    int64     `json:"user_id"`
 	StartDate time.Time `json:"start_date"`
 	EndDate   time.Time `json:"end_date"`
 	Value     float64   `json:"value"`
 }
 
-func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (VacationToken, error) {
-	row := q.db.QueryRowContext(ctx, CreateToken,
+func (q *Queries) CreateVacationToken(ctx context.Context, arg CreateVacationTokenParams) (VacationToken, error) {
+	row := q.db.QueryRowContext(ctx, CreateVacationToken,
 		arg.UserID,
 		arg.StartDate,
 		arg.EndDate,
@@ -41,108 +41,41 @@ func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Vacat
 	return i, err
 }
 
-const DebugResetTokens = `-- name: DebugResetTokens :exec
+const DeleteAllVacationTokens = `-- name: DeleteAllVacationTokens :exec
 DELETE FROM vacation_tokens
 `
 
-func (q *Queries) DebugResetTokens(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, DebugResetTokens)
+func (q *Queries) DeleteAllVacationTokens(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, DeleteAllVacationTokens)
 	return err
 }
 
-const DeleteToken = `-- name: DeleteToken :exec
+const DeleteVacationToken = `-- name: DeleteVacationToken :exec
 DELETE FROM vacation_tokens
 WHERE id = ?
 `
 
-func (q *Queries) DeleteToken(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, DeleteToken, id)
+func (q *Queries) DeleteVacationToken(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, DeleteVacationToken, id)
 	return err
 }
 
-const GetValidUserTokenSum = `-- name: GetValidUserTokenSum :one
+const GetRemainingVacationForUser = `-- name: GetRemainingVacationForUser :one
 SELECT SUM(value) FROM vacation_tokens
 WHERE user_id = ? 
 AND start_date <= ?
 AND end_date >= ?
 `
 
-type GetValidUserTokenSumParams struct {
+type GetRemainingVacationForUserParams struct {
 	UserID    int64     `json:"user_id"`
 	StartDate time.Time `json:"start_date"`
 	EndDate   time.Time `json:"end_date"`
 }
 
-func (q *Queries) GetValidUserTokenSum(ctx context.Context, arg GetValidUserTokenSumParams) (*float64, error) {
-	row := q.db.QueryRowContext(ctx, GetValidUserTokenSum, arg.UserID, arg.StartDate, arg.EndDate)
+func (q *Queries) GetRemainingVacationForUser(ctx context.Context, arg GetRemainingVacationForUserParams) (*float64, error) {
+	row := q.db.QueryRowContext(ctx, GetRemainingVacationForUser, arg.UserID, arg.StartDate, arg.EndDate)
 	var sum *float64
 	err := row.Scan(&sum)
 	return sum, err
-}
-
-const GetValidUserTokens = `-- name: GetValidUserTokens :many
-SELECT id, start_date, end_date, value, user_id from vacation_tokens
-WHERE user_id = ? 
-AND ? >= start_date
-AND ? <= end_date
-`
-
-type GetValidUserTokensParams struct {
-	UserID    int64     `json:"user_id"`
-	StartDate time.Time `json:"start_date"`
-	EndDate   time.Time `json:"end_date"`
-}
-
-func (q *Queries) GetValidUserTokens(ctx context.Context, arg GetValidUserTokensParams) ([]VacationToken, error) {
-	rows, err := q.db.QueryContext(ctx, GetValidUserTokens, arg.UserID, arg.StartDate, arg.EndDate)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []VacationToken
-	for rows.Next() {
-		var i VacationToken
-		if err := rows.Scan(
-			&i.ID,
-			&i.StartDate,
-			&i.EndDate,
-			&i.Value,
-			&i.UserID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const UpdateYearlyTokens = `-- name: UpdateYearlyTokens :exec
-UPDATE vacation_tokens
-SET value = ?
-WHERE user_id = ? 
-AND start_date <= ?
-AND end_date >= ?
-`
-
-type UpdateYearlyTokensParams struct {
-	Value     float64   `json:"value"`
-	UserID    int64     `json:"user_id"`
-	StartDate time.Time `json:"start_date"`
-	EndDate   time.Time `json:"end_date"`
-}
-
-func (q *Queries) UpdateYearlyTokens(ctx context.Context, arg UpdateYearlyTokensParams) error {
-	_, err := q.db.ExecContext(ctx, UpdateYearlyTokens,
-		arg.Value,
-		arg.UserID,
-		arg.StartDate,
-		arg.EndDate,
-	)
-	return err
 }

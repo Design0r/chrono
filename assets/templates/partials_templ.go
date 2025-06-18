@@ -10,15 +10,13 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"chrono/config"
-	"chrono/db/repo"
-	"chrono/schemas"
-	"chrono/service"
+	"chrono/internal/domain"
 	"fmt"
 	"strings"
 	"time"
 )
 
-func Event(event schemas.Event, user repo.User) templ.Component {
+func Event(event domain.EventUser, user domain.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -41,11 +39,11 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 
 		cfg := config.GetConfig()
-		bgColor := service.HSLToString(service.HexToHSL(event.Color))
-		if !service.IsVacation(event.Name) && event.Username != cfg.BotName {
-			bgColor = service.GenerateHSLDarkFromHex(event.Color)
+		bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(event.User.Color))
+		if !event.Event.IsVacation() && event.User.Username != cfg.BotName {
+			bgColor = domain.Color.HSLDarkFromHex(event.User.Color)
 		}
-		eventId := fmt.Sprintf("event-%v", event.ID)
+		eventId := fmt.Sprintf("event-%v", event.Event.ID)
 		deleteUrl := fmt.Sprintf("#%v", eventId)
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"")
 		if templ_7745c5c3_Err != nil {
@@ -54,7 +52,7 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(eventId)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 24, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 22, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -64,14 +62,14 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if event.State == "pending" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " class=\"indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 border-2 border-base-100 rounded-badge badge-info \"")
+		if event.Event.State == "pending" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " class=\"indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 rounded-full bg-neutral-600\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if event.State == "declined" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " class=\"indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 border-2 border-base-100 rounded-badge badge-error\"")
+		if event.Event.State == "declined" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " class=\"indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 rounded-full bg-error\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -88,7 +86,7 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if (event.UserID == user.ID && (event.State != "accepted" || event.ScheduledAt.Compare(time.Now()) == 1 || !service.IsVacation(event.Name))) || user.IsSuperuser {
+		if (event.User.ID == user.ID && (event.Event.State != "accepted" || event.Event.ScheduledAt.Compare(time.Now()) == 1 || !event.Event.IsVacation())) || user.IsSuperuser {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<span><button hx-swap=\"delete\" hx-target=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -96,7 +94,7 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(deleteUrl)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 43, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 41, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -107,9 +105,9 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/events/%v", event.ID))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/events/%v", event.Event.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 44, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 42, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -125,9 +123,9 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Title(event.Name))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Title(event.Event.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 49, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 47, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -138,9 +136,9 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(event.Username)
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(event.User.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 50, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 48, Col: 80}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -154,7 +152,7 @@ func Event(event schemas.Event, user repo.User) templ.Component {
 	})
 }
 
-func CreateEventUpdate(event schemas.Event, user repo.User, vacRemaining float64, vacUsed float64, pendingEvents int, notificationCount int) templ.Component {
+func CreateEventUpdate(event domain.EventUser, user domain.UserWithVacation, notificationCount int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -175,11 +173,11 @@ func CreateEventUpdate(event schemas.Event, user repo.User, vacRemaining float64
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Event(event, user).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Event(event, user.User).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = VacationCounter(user, vacRemaining, vacUsed, pendingEvents).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = VacationCounter(user).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -249,7 +247,7 @@ func Message(message string, mtype string) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 75, Col: 12}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 73, Col: 12}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -263,7 +261,7 @@ func Message(message string, mtype string) templ.Component {
 	})
 }
 
-func UpdateNotifications(notifications []repo.Notification) templ.Component {
+func UpdateNotifications(notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -325,7 +323,7 @@ func NotificationIndicator(num int) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(num))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 90, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 88, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -345,7 +343,7 @@ func NotificationIndicator(num int) templ.Component {
 	})
 }
 
-func NotificationContainer(notifications []repo.Notification) templ.Component {
+func NotificationContainer(notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -378,7 +376,7 @@ func NotificationContainer(notifications []repo.Notification) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("notification-%v", n.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 99, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 97, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -391,7 +389,7 @@ func NotificationContainer(notifications []repo.Notification) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(n.Message)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 101, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 99, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -404,7 +402,7 @@ func NotificationContainer(notifications []repo.Notification) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/notifications/%v", n.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 103, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 101, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -417,7 +415,7 @@ func NotificationContainer(notifications []repo.Notification) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#notification-%v", n.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 105, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 103, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -436,7 +434,7 @@ func NotificationContainer(notifications []repo.Notification) templ.Component {
 	})
 }
 
-func UpdateProfileWithMessage(user repo.User, notifications []repo.Notification) templ.Component {
+func UpdateProfileWithMessage(user domain.User, notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -469,7 +467,7 @@ func UpdateProfileWithMessage(user repo.User, notifications []repo.Notification)
 	})
 }
 
-func AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form bool) templ.Component {
+func AdminCheckbox(currUser domain.User, userId int64, isSuperuser bool, form bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -502,7 +500,7 @@ func AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form bool
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("admin-%v", userId))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 132, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 130, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -520,7 +518,7 @@ func AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form bool
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("profile/%v/admin", userId))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 135, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 133, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -533,7 +531,7 @@ func AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form bool
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#admin-%v", userId))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 137, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 135, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -546,7 +544,7 @@ func AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form bool
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(icon)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 139, Col: 10}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 137, Col: 10}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -560,7 +558,7 @@ func AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form bool
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(icon)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 141, Col: 9}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/partials.templ`, Line: 139, Col: 9}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -575,7 +573,7 @@ func AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form bool
 	})
 }
 
-func CalendarCore(month schemas.Month, user repo.User, userFilter, eventFilter string) templ.Component {
+func CalendarCore(month domain.Month, user domain.User, userFilter, eventFilter string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -648,7 +646,7 @@ func CalendarCore(month schemas.Month, user repo.User, userFilter, eventFilter s
 	})
 }
 
-func CalendarCoreResponse(month schemas.Month, user repo.User, userFilter, eventFilter string) templ.Component {
+func CalendarCoreResponse(month domain.Month, user domain.User, userFilter, eventFilter string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

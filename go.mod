@@ -1,6 +1,6 @@
 module chrono
 
-go 1.24.3
+go 1.24.4
 
 require (
 	github.com/getsentry/sentry-go v0.33.0
@@ -18,9 +18,8 @@ require (
 )
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/a-h/templ v0.3.898
-	github.com/labstack/gommon v0.4.2 // indirect
+	github.com/labstack/gommon v0.4.2
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-sqlite3 v1.14.28

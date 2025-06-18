@@ -9,15 +9,23 @@ import (
 	"context"
 )
 
-const ClearNotification = `-- name: ClearNotification :exec
+const ClearNotification = `-- name: ClearNotification :one
 UPDATE notifications
 SET viewed_at = CURRENT_TIMESTAMP
 WHERE id = ?
+RETURNING id, message, created_at, viewed_at
 `
 
-func (q *Queries) ClearNotification(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, ClearNotification, id)
-	return err
+func (q *Queries) ClearNotification(ctx context.Context, id int64) (Notification, error) {
+	row := q.db.QueryRowContext(ctx, ClearNotification, id)
+	var i Notification
+	err := row.Scan(
+		&i.ID,
+		&i.Message,
+		&i.CreatedAt,
+		&i.ViewedAt,
+	)
+	return i, err
 }
 
 const CreateNotification = `-- name: CreateNotification :one
@@ -28,6 +36,25 @@ RETURNING id, message, created_at, viewed_at
 
 func (q *Queries) CreateNotification(ctx context.Context, message string) (Notification, error) {
 	row := q.db.QueryRowContext(ctx, CreateNotification, message)
+	var i Notification
+	err := row.Scan(
+		&i.ID,
+		&i.Message,
+		&i.CreatedAt,
+		&i.ViewedAt,
+	)
+	return i, err
+}
+
+const UpdateNotification = `-- name: UpdateNotification :one
+update notifications
+SET viewed_at = CURRENT_TIMESTAMP,
+message = ?
+RETURNING id, message, created_at, viewed_at
+`
+
+func (q *Queries) UpdateNotification(ctx context.Context, message string) (Notification, error) {
+	row := q.db.QueryRowContext(ctx, UpdateNotification, message)
 	var i Notification
 	err := row.Scan(
 		&i.ID,

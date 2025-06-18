@@ -1,15 +1,13 @@
 package templates
 
 import (
-	"chrono/calendar"
-	"chrono/db/repo"
-	"chrono/schemas"
+	"chrono/internal/domain"
 	"fmt"
 	"time"
 )
 
-templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress schemas.YearProgress, notifications []repo.Notification, eventHistogram []schemas.YearHistogram) {
-	@Index(&user, notifications) {
+templ Home(user domain.UserWithVacation, progress domain.YearProgress, notifications []domain.Notification, eventHistogram []domain.YearHistogram) {
+	@Index(&user.User, notifications) {
 		<div class="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
 			<div class="text-[48px] pl-2 font-black">{ fmt.Sprintf("> hey %v ", user.Username) }</div>
 			@Card("Your vacation stats") {
@@ -17,14 +15,14 @@ templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingE
 					<div class="stat">
 						<div class="stat-figure text-info"></div>
 						<div class="stat-title pb-1">Vacation remaining</div>
-						<div class="stat-value pb-[1px] text-success">{ fmt.Sprintf("%v days", vacationRemaining) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%.0f %% remaining", (float32(vacationRemaining) / float32(user.VacationDays)) * float32(100)) }</div>
+						<div class="stat-value pb-[1px] text-success">{ fmt.Sprintf("%v days", user.VacationRemaining) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%.0f %% remaining", (float32(user.VacationRemaining) / float32(user.VacationDays)) * float32(100)) }</div>
 					</div>
 					<div class="stat">
 						<div class="stat-figure icon-outlined"></div>
 						<div class="stat-title pb-1">Vacation taken</div>
-						<div class="stat-value pb-[1px] text-warning">{ fmt.Sprintf("%v days", vacTaken) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%.0f %% taken", (float32(user.VacationDays) - float32(vacationRemaining)) / float32(user.VacationDays) * float32(100)) }</div>
+						<div class="stat-value pb-[1px] text-warning">{ fmt.Sprintf("%v days", user.VacationUsed) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%.0f %% taken", (float32(user.VacationDays) - float32(user.VacationRemaining)) / float32(user.VacationDays) * float32(100)) }</div>
 					</div>
 					<div class="stat">
 						<div class="stat-figure text-info"></div>
@@ -35,8 +33,8 @@ templ Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingE
 					<div class="stat">
 						<div class="stat-figure text-info"></div>
 						<div class="stat-title pb-1">Vacation pending</div>
-						<div class="stat-value pb-[1px]">{ fmt.Sprintf("%v events",pendingEvents) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%v events pending",pendingEvents) }</div>
+						<div class="stat-value pb-[1px]">{ fmt.Sprintf("%v events",user.PendingEvents) }</div>
+						<div class="stat-desc">{ fmt.Sprintf("%v events pending",user.PendingEvents) }</div>
 					</div>
 				</div>
 			}
@@ -85,13 +83,13 @@ templ Card(title string) {
 	</div>
 }
 
-templ YearProgress(progress schemas.YearProgress) {
+templ YearProgress(progress domain.YearProgress) {
 	<progress class="progress progress-success mb-3 mt-2 h-6" { templ.Attributes{"value":fmt.Sprintf("%.1f", progress.DaysPassedPercent)}... } max="100" role="progressbar">
 		{ fmt.Sprintf("%.1f %%", progress.DaysPassedPercent) }
 	</progress>
 }
 
-templ OverviewDay(day schemas.YearHistogram) {
+templ OverviewDay(day domain.YearHistogram) {
 	{{
 	baseStyle := "width:1rem; height:1rem; border-radius:9999px;"
 
@@ -136,10 +134,10 @@ templ OverviewDay(day schemas.YearHistogram) {
 	</div>
 }
 
-templ YearOverview(histogram []schemas.YearHistogram) {
+templ YearOverview(histogram []domain.YearHistogram) {
 	{{
 		totalWeeks := 1
-		gaps := calendar.GetMonthGaps(calendar.CurrentYear())
+		gaps := domain.GetMonthGaps(domain.CurrentYear())
 		_, currWeek := time.Now().ISOWeek()
 	}}
 	<div class="grid grid-cols-12 p-5 bg-base-200  rounded-3xl">
@@ -181,7 +179,7 @@ templ YearOverview(histogram []schemas.YearHistogram) {
 			<p>Sun</p>
 		</div>
 		<div class="col-span-11 grid grid-rows-7 h-80 grid-flow-col gap-1">
-			for range calendar.GetYearOffset(calendar.CurrentYear()) {
+			for range domain.GetYearOffset(domain.CurrentYear()) {
 				<p></p>
 			}
 			for _, d := range histogram {

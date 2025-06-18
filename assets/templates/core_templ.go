@@ -9,15 +9,14 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"chrono/db/repo"
-	"chrono/service"
+	"chrono/internal/domain"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func Index(user *repo.User, notifications []repo.Notification) templ.Component {
+func Index(user *domain.User, notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -113,7 +112,7 @@ func Static() templ.Component {
 	})
 }
 
-func Notifications(notifications []repo.Notification) templ.Component {
+func Notifications(notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -146,7 +145,7 @@ func Notifications(notifications []repo.Notification) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NotificationContainer([]repo.Notification{}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NotificationContainer([]domain.Notification{}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -158,7 +157,7 @@ func Notifications(notifications []repo.Notification) templ.Component {
 	})
 }
 
-func Header(user *repo.User, notifications []repo.Notification) templ.Component {
+func Header(user *domain.User, notifications []domain.Notification) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -180,6 +179,7 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 		}
 		ctx = templ.ClearChildren(ctx)
 
+		settings := ctx.Value("settings").(domain.Settings)
 		now := time.Now()
 		month := strconv.Itoa(int(now.Month()))
 		year := strconv.Itoa(now.Year())
@@ -203,7 +203,7 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 				return templ_7745c5c3_Err
 			}
 			if (*user).IsSuperuser {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a href=\"/requests\" class=\"btn btn-ghost font-medium text-[15px]\">Request<span class=\"icon-outlined\">mark_chat_unread</span></a> <a href=\"/tokens\" class=\"btn btn-ghost font-medium text-[15px]\">Tokens<span class=\"icon-outlined\">local_activity</span></a>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a href=\"/requests\" class=\"btn btn-ghost font-medium text-[15px]\">Request<span class=\"icon-outlined\">mark_chat_unread</span></a> <a href=\"/tokens\" class=\"btn btn-ghost font-medium text-[15px]\">Tokens<span class=\"icon-outlined\">local_activity</span></a> <a href=\"/settings\" class=\"btn btn-ghost font-medium text-[15px]\">Settings<span class=\"icon-outlined\">settings</span></a>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -227,12 +227,18 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a href=\"/login\" class=\"btn btn-ghost\">Login</a> <a href=\"/signup\" class=\"btn btn-ghost\">Signup</a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a href=\"/login\" class=\"btn btn-ghost\">Login</a> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+			if settings.SignupEnabled {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<a href=\"/signup\" class=\"btn btn-ghost\">Signup</a>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -240,7 +246,7 @@ func Header(user *repo.User, notifications []repo.Notification) templ.Component 
 	})
 }
 
-func Avatar(user repo.User) templ.Component {
+func Avatar(user domain.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -262,13 +268,12 @@ func Avatar(user repo.User) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 
-		// Make sure slicing never panics
 		initial := "?"
 		if len(user.Username) > 0 {
 			initial = strings.ToUpper(user.Username[:1])
 		}
-		bgColor := service.HSLToString(service.HexToHSL(user.Color))
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"dropdown dropdown-end pr-2\"><!-- Trigger --><div tabindex=\"0\" role=\"button\" class=\"avatar avatar-placeholder cursor-pointer\"><div class=\"w-10 rounded-full text-neutral-content\"")
+		bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(user.Color))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"dropdown dropdown-end pr-2\"><!-- Trigger --><div tabindex=\"0\" role=\"button\" class=\"avatar avatar-placeholder cursor-pointer\"><div class=\"w-10 rounded-full text-neutral-content\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -276,20 +281,20 @@ func Avatar(user repo.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "><span class=\"text-xl\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "><span class=\"text-xl\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(initial)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 119, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/core.templ`, Line: 121, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span></div></div><!-- Menu --><ul tabindex=\"0\" class=\"dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mt-2\"><li><a href=\"/profile\">Profile</a></li><li><a href=\"/settings\">Settings</a></li><li><form method=\"POST\" action=\"/logout\"><button type=\"submit\" class=\"w-full text-left\">Logout</button></form></li></ul></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span></div></div><!-- Menu --><ul tabindex=\"0\" class=\"dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mt-2\"><li><a href=\"/profile\">Profile</a></li><li><a href=\"/settings\">Settings</a></li><li><form method=\"POST\" action=\"/logout\"><button type=\"submit\" class=\"w-full text-left\">Logout</button></form></li></ul></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

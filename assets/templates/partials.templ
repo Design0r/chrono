@@ -1,60 +1,58 @@
 package templates
 
 import (
-	"chrono/db/repo"
-	"chrono/schemas"
-	"chrono/service"
+	"chrono/config"
+	"chrono/internal/domain"
 	"fmt"
 	"strings"
 	"time"
-	"chrono/config"
 )
 
-templ Event(event schemas.Event, user repo.User) {
+templ Event(event domain.EventUser, user domain.User) {
 	{{
-	cfg := config.GetConfig()
-	bgColor := service.HSLToString(service.HexToHSL(event.Color))
-	if !service.IsVacation(event.Name) && event.Username != cfg.BotName {
-		bgColor = service.GenerateHSLDarkFromHex(event.Color)
-	}
-	eventId := fmt.Sprintf("event-%v", event.ID)
-	deleteUrl := fmt.Sprintf("#%v", eventId)
+		cfg := config.GetConfig()
+		bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(event.User.Color))
+		if !event.Event.IsVacation() && event.User.Username != cfg.BotName {
+			bgColor = domain.Color.HSLDarkFromHex(event.User.Color)
+		}
+		eventId := fmt.Sprintf("event-%v", event.Event.ID)
+		deleteUrl := fmt.Sprintf("#%v", eventId)
 	}}
 	<div
 		id={ eventId }
 		class="indicator w-full"
 	>
 		<span
-			if event.State == "pending" {
-				class="indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 border-2 border-base-100 rounded-badge badge-info "
+			if event.Event.State == "pending" {
+				class="indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 rounded-full bg-neutral-600"
 			}
-			if event.State == "declined" {
-				class="indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 border-2 border-base-100 rounded-badge badge-error"
+			if event.Event.State == "declined" {
+				class="indicator-item indicator-start left-4 top-4 w-3.5 h-3.5 rounded-full bg-error"
 			}
 		></span>
 		<div
 			{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
 			class="text-center py-1 relative w-full rounded-lg"
 		>
-			if (event.UserID == user.ID && (event.State != "accepted" || event.ScheduledAt.Compare(time.Now()) == 1 || !service.IsVacation(event.Name))) || user.IsSuperuser {
+			if (event.User.ID == user.ID && (event.Event.State != "accepted" || event.Event.ScheduledAt.Compare(time.Now()) == 1 || !event.Event.IsVacation())) || user.IsSuperuser {
 				<span>
 					<button
 						hx-swap="delete"
 						hx-target={ deleteUrl }
-						hx-delete={ fmt.Sprintf("/events/%v", event.ID) }
+						hx-delete={ fmt.Sprintf("/events/%v", event.Event.ID) }
 						class="flex text-white text-opacity-80 hover:text-error transition-colors items-start rounded-xl text-lg p-0 icon-outlined absolute right-1 top-0.5"
 					>close</button>
 				</span>
 			}
-			<div class="text-md text-white text-opacity-80 ">{ strings.Title(event.Name) }</div>
-			<div class="text-sm text-base-content text-opacity-80 ">{ event.Username }</div>
+			<div class="text-md text-white text-opacity-80 ">{ strings.Title(event.Event.Name) }</div>
+			<div class="text-sm text-base-content text-opacity-80 ">{ event.User.Username }</div>
 		</div>
 	</div>
 }
 
-templ CreateEventUpdate(event schemas.Event, user repo.User, vacRemaining float64, vacUsed float64, pendingEvents int, notificationCount int) {
-	@Event(event, user)
-	@VacationCounter(user, vacRemaining, vacUsed, pendingEvents)
+templ CreateEventUpdate(event domain.EventUser, user domain.UserWithVacation, notificationCount int) {
+	@Event(event, user.User)
+	@VacationCounter(user)
 	@NotificationIndicator(notificationCount)
 }
 
@@ -76,7 +74,7 @@ templ Message(message string, mtype string) {
 	</div>
 }
 
-templ UpdateNotifications(notifications []repo.Notification) {
+templ UpdateNotifications(notifications []domain.Notification) {
 	@NotificationContainer(notifications)
 	@NotificationIndicator(len(notifications))
 }
@@ -93,7 +91,7 @@ templ NotificationIndicator(num int) {
 	}
 }
 
-templ NotificationContainer(notifications []repo.Notification) {
+templ NotificationContainer(notifications []domain.Notification) {
 	<ul id="notification-container" tabindex="0" class="dropdown-content menu bg-base-200 rounded-box z-[1] w-52 p-2 shadow">
 		for _, n := range notifications {
 			<li id={ fmt.Sprintf("notification-%v", n.ID) }>
@@ -117,12 +115,12 @@ templ NotificationContainer(notifications []repo.Notification) {
 	</ul>
 }
 
-templ UpdateProfileWithMessage(user repo.User, notifications []repo.Notification) {
+templ UpdateProfileWithMessage(user domain.User, notifications []domain.Notification) {
 	@Profile(user, notifications)
 	@Message("Successfully updated profile", "success")
 }
 
-templ AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form bool) {
+templ AdminCheckbox(currUser domain.User, userId int64, isSuperuser bool, form bool) {
 	{{
 	icon := "check_box_outline_blank"
 	if isSuperuser {
@@ -143,7 +141,7 @@ templ AdminCheckbox(currUser repo.User, userId int64, isSuperuser bool, form boo
 	</td>
 }
 
-templ CalendarCore(month schemas.Month, user repo.User, userFilter, eventFilter string) {
+templ CalendarCore(month domain.Month, user domain.User, userFilter, eventFilter string) {
 	<div id="calendar" class="grid grid-cols-7 gap-x-2 gap-y-2">
 		@WeekdayHeader("Monday", month)
 		@WeekdayHeader("Tuesday", month)
@@ -161,7 +159,7 @@ templ CalendarCore(month schemas.Month, user repo.User, userFilter, eventFilter 
 	</div>
 }
 
-templ CalendarCoreResponse(month schemas.Month, user repo.User, userFilter, eventFilter string) {
+templ CalendarCoreResponse(month domain.Month, user domain.User, userFilter, eventFilter string) {
 	<div id="calendar" class="grid grid-cols-7 gap-x-2 gap-y-2">
 		@WeekdayHeader("Monday", month)
 		@WeekdayHeader("Tuesday", month)

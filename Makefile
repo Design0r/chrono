@@ -11,6 +11,7 @@ endif
 
 MIGRATION_DIR = ./db/migrations/
 DB_DIR = ./db/chrono.db/
+TIMESTAMP := $(date +%Y-%m-%d_%H-%M-%S)
 
 generate:
 	@echo "Generating sqlc repositoy..."
@@ -35,9 +36,6 @@ dev:
 	make -j3 live/templ live/server live/tailwind
 
 build:
-	npm install && \
-	npm run build
-
 	templ generate
 	go build -o ./build/chrono$(BIN_SUFFIX) -ldflags='-s -w -extldflags "-static"' ./cmd/main.go
 
@@ -49,7 +47,15 @@ install:
 	@go install github.com/air-verse/air@latest
 	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
-deploy:
+backup:
+	@docker compose down
+	@mkdir -p /home/apic/backup
+	@bash -c 'timestamp=$$(date +%Y-%m-%d_%H-%M-%S); \
+		echo "Backing up to chrono_$$timestamp.db"; \
+		sudo cp /var/lib/docker/volumes/chrono_db/_data/chrono.db /home/apic/backup/chrono_$$timestamp.db'
+	@docker compose up -d
+
+deploy: backup
 	@git pull origin main
 	@docker compose up --build -d
 

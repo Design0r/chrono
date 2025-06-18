@@ -1,0 +1,23 @@
+package templates
+
+import (
+	"chrono/internal/domain"
+)
+
+templ Settings(s domain.Settings, user *domain.User, notifications []domain.Notification) {
+	@Index(user, notifications) {
+		{{
+settings := ctx.Value("settings").(domain.Settings)
+		}}
+		<div class="space-y-2 bg-base-300 rounded m-2 p-5 ">
+			<div class="grid grid-cols-2 justify-center m-auto bg-base-300 rounded">
+				<p>Signup enabled</p>
+				if settings.SignupEnabled {
+					<input hx-patch="/settings" type="checkbox" checked hx-trigger="change" name="signup_enabled" class="toggle border-error text-error checked:border-success checked:text-success"/>
+				} else {
+					<input hx-patch="/settings" type="checkbox" hx-trigger="change" name="signup_enabled" class="toggle border-error text-error checked:border-success checked:text-success"/>
+				}
+			</div>
+		</div>
+	}
+}

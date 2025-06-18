@@ -9,19 +9,19 @@ import (
 	"context"
 )
 
-const CreateTokenRefresh = `-- name: CreateTokenRefresh :one
+const CreateRefreshToken = `-- name: CreateRefreshToken :one
 INSERT INTO token_refresh (user_id, year)
 VALUES (?,?)
 RETURNING id, year, user_id, created_at
 `
 
-type CreateTokenRefreshParams struct {
+type CreateRefreshTokenParams struct {
 	UserID int64 `json:"user_id"`
 	Year   int64 `json:"year"`
 }
 
-func (q *Queries) CreateTokenRefresh(ctx context.Context, arg CreateTokenRefreshParams) (TokenRefresh, error) {
-	row := q.db.QueryRowContext(ctx, CreateTokenRefresh, arg.UserID, arg.Year)
+func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (TokenRefresh, error) {
+	row := q.db.QueryRowContext(ctx, CreateRefreshToken, arg.UserID, arg.Year)
 	var i TokenRefresh
 	err := row.Scan(
 		&i.ID,
@@ -32,29 +32,29 @@ func (q *Queries) CreateTokenRefresh(ctx context.Context, arg CreateTokenRefresh
 	return i, err
 }
 
-const GetTokenRefresh = `-- name: GetTokenRefresh :one
+const DeleteAllRefreshTokens = `-- name: DeleteAllRefreshTokens :exec
+DELETE FROM token_refresh
+`
+
+func (q *Queries) DeleteAllRefreshTokens(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, DeleteAllRefreshTokens)
+	return err
+}
+
+const GetRefreshToken = `-- name: GetRefreshToken :one
 SELECT Count(*) FROM token_refresh
 WHERE user_id = ?
 AND year = ?
 `
 
-type GetTokenRefreshParams struct {
+type GetRefreshTokenParams struct {
 	UserID int64 `json:"user_id"`
 	Year   int64 `json:"year"`
 }
 
-func (q *Queries) GetTokenRefresh(ctx context.Context, arg GetTokenRefreshParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, GetTokenRefresh, arg.UserID, arg.Year)
+func (q *Queries) GetRefreshToken(ctx context.Context, arg GetRefreshTokenParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, GetRefreshToken, arg.UserID, arg.Year)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
-}
-
-const ResetTokenRefresh = `-- name: ResetTokenRefresh :exec
-DELETE FROM token_refresh
-`
-
-func (q *Queries) ResetTokenRefresh(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, ResetTokenRefresh)
-	return err
 }

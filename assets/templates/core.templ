@@ -1,15 +1,14 @@
 package templates
 
 import (
-	"chrono/db/repo"
-	"chrono/service"
+	"chrono/internal/domain"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 )
 
-templ Index(user *repo.User, notifications []repo.Notification) {
+templ Index(user *domain.User, notifications []domain.Notification) {
 	@Static() {
 		@Header(user, notifications)
 		<div class="container h-full justify-center mx-auto ">
@@ -50,7 +49,7 @@ templ Static() {
 	</html>
 }
 
-templ Notifications(notifications []repo.Notification) {
+templ Notifications(notifications []domain.Notification) {
 	<div class="indicator">
 		@NotificationIndicator(len(notifications))
 		<details class="dropdown dropdown-end">
@@ -61,17 +60,18 @@ templ Notifications(notifications []repo.Notification) {
 				role="button"
 				class="btn btn-ghost text-xl icon-outlined"
 			>notifications</summary>
-			@NotificationContainer([]repo.Notification{})
+			@NotificationContainer([]domain.Notification{})
 		</details>
 	</div>
 }
 
-templ Header(user *repo.User, notifications []repo.Notification) {
+templ Header(user *domain.User, notifications []domain.Notification) {
 	{{
-	now := time.Now()
-	month := strconv.Itoa(int(now.Month()))
-	year := strconv.Itoa(now.Year())
-	url := fmt.Sprintf("/%v/%v", year, month)
+		settings := ctx.Value("settings").(domain.Settings)
+		now := time.Now()
+		month := strconv.Itoa(int(now.Month()))
+		year := strconv.Itoa(now.Year())
+		url := fmt.Sprintf("/%v/%v", year, month)
 	}}
 	<div class="px-4 pt-4 pb-0">
 		<div class="navbar flex justify-between rounded-xl bg-base-100 ">
@@ -83,6 +83,7 @@ templ Header(user *repo.User, notifications []repo.Notification) {
 					if (*user).IsSuperuser {
 						<a href="/requests" class="btn btn-ghost font-medium text-[15px]">Request<span class="icon-outlined">mark_chat_unread</span></a>
 						<a href="/tokens" class="btn btn-ghost font-medium text-[15px]">Tokens<span class="icon-outlined">local_activity</span></a>
+						<a href="/settings" class="btn btn-ghost font-medium text-[15px]">Settings<span class="icon-outlined">settings</span></a>
 					}
 				}
 			</div>
@@ -92,21 +93,22 @@ templ Header(user *repo.User, notifications []repo.Notification) {
 					@Avatar(*user)
 				} else {
 					<a href="/login" class="btn btn-ghost">Login</a>
-					<a href="/signup" class="btn btn-ghost">Signup</a>
+					if settings.SignupEnabled {
+						<a href="/signup" class="btn btn-ghost">Signup</a>
+					}
 				}
 			</div>
 		</div>
 	</div>
 }
 
-templ Avatar(user repo.User) {
+templ Avatar(user domain.User) {
 	{{
-	// Make sure slicing never panics
 	initial := "?"
 	if len(user.Username) > 0 {
 		initial = strings.ToUpper(user.Username[:1])
 	}
-	bgColor := service.HSLToString(service.HexToHSL(user.Color))
+	bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(user.Color))
 	}}
 	<div class="dropdown dropdown-end pr-2">
 		<!-- Trigger -->

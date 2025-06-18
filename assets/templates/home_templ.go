@@ -9,14 +9,12 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"chrono/calendar"
-	"chrono/db/repo"
-	"chrono/schemas"
+	"chrono/internal/domain"
 	"fmt"
 	"time"
 )
 
-func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEvents int, progress schemas.YearProgress, notifications []repo.Notification, eventHistogram []schemas.YearHistogram) templ.Component {
+func Home(user domain.UserWithVacation, progress domain.YearProgress, notifications []domain.Notification, eventHistogram []domain.YearHistogram) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -56,7 +54,7 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("> hey %v ", user.Username))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 14, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 12, Col: 85}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -83,9 +81,9 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days", vacationRemaining))
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days", user.VacationRemaining))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 20, Col: 95}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 18, Col: 100}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -96,9 +94,9 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.0f %% remaining", (float32(vacationRemaining)/float32(user.VacationDays))*float32(100)))
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.0f %% remaining", (float32(user.VacationRemaining)/float32(user.VacationDays))*float32(100)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 21, Col: 137}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 19, Col: 142}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -109,9 +107,9 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days", vacTaken))
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days", user.VacationUsed))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 26, Col: 86}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 24, Col: 95}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -122,9 +120,9 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.0f %% taken", (float32(user.VacationDays)-float32(vacationRemaining))/float32(user.VacationDays)*float32(100)))
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.0f %% taken", (float32(user.VacationDays)-float32(user.VacationRemaining))/float32(user.VacationDays)*float32(100)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 27, Col: 162}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 25, Col: 167}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -137,7 +135,7 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days", user.VacationDays))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 32, Col: 93}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 30, Col: 93}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -150,7 +148,7 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days total", user.VacationDays))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 33, Col: 78}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 31, Col: 78}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -161,9 +159,9 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v events", pendingEvents))
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v events", user.PendingEvents))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 38, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 36, Col: 84}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -174,9 +172,9 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var12 string
-				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v events pending", pendingEvents))
+				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v events pending", user.PendingEvents))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 39, Col: 77}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 37, Col: 82}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -211,7 +209,7 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days", progress.NumDays))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 48, Col: 94}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 46, Col: 94}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -224,7 +222,7 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(" %v days total", progress.NumDays))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 49, Col: 78}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 47, Col: 78}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -237,7 +235,7 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days", progress.NumDaysPassed))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 54, Col: 100}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 52, Col: 100}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {
@@ -250,7 +248,7 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v days passed ", progress.NumDaysPassed))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 55, Col: 85}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 53, Col: 85}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -263,7 +261,7 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.2f %%", progress.DaysPassedPercent))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 60, Col: 101}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 58, Col: 101}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -276,7 +274,7 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.2f %% remaining", float32(100)-progress.DaysPassedPercent))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 61, Col: 104}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 59, Col: 104}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -297,7 +295,7 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.2f %% days passed", progress.DaysPassedPercent))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 67, Col: 93}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 65, Col: 93}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -341,7 +339,7 @@ func Home(user repo.User, vacationRemaining float64, vacTaken float64, pendingEv
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Index(&user, notifications).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Index(&user.User, notifications).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -377,7 +375,7 @@ func Card(title string) templ.Component {
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 80, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 78, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -399,7 +397,7 @@ func Card(title string) templ.Component {
 	})
 }
 
-func YearProgress(progress schemas.YearProgress) templ.Component {
+func YearProgress(progress domain.YearProgress) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -435,7 +433,7 @@ func YearProgress(progress schemas.YearProgress) templ.Component {
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f %%", progress.DaysPassedPercent))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 90, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 88, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -449,7 +447,7 @@ func YearProgress(progress schemas.YearProgress) templ.Component {
 	})
 }
 
-func OverviewDay(day schemas.YearHistogram) templ.Component {
+func OverviewDay(day domain.YearHistogram) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -508,7 +506,7 @@ func OverviewDay(day schemas.YearHistogram) templ.Component {
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(day.Date)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 129, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 127, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -521,7 +519,7 @@ func OverviewDay(day schemas.YearHistogram) templ.Component {
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(day.Count))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 130, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 128, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
@@ -539,7 +537,7 @@ func OverviewDay(day schemas.YearHistogram) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 132, Col: 13}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 130, Col: 13}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -557,7 +555,7 @@ func OverviewDay(day schemas.YearHistogram) templ.Component {
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(styleAttr)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 135, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 133, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
@@ -571,7 +569,7 @@ func OverviewDay(day schemas.YearHistogram) templ.Component {
 	})
 }
 
-func YearOverview(histogram []schemas.YearHistogram) templ.Component {
+func YearOverview(histogram []domain.YearHistogram) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -594,7 +592,7 @@ func YearOverview(histogram []schemas.YearHistogram) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 
 		totalWeeks := 1
-		gaps := calendar.GetMonthGaps(calendar.CurrentYear())
+		gaps := domain.GetMonthGaps(domain.CurrentYear())
 		_, currWeek := time.Now().ISOWeek()
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<div class=\"grid grid-cols-12 p-5 bg-base-200  rounded-3xl\"><div class=\"col-span-1\"></div><div class=\"col-span-11 grid grid-rows-1 grid-flow-col h-10 gap-1\">")
 		if templ_7745c5c3_Err != nil {
@@ -608,7 +606,7 @@ func YearOverview(histogram []schemas.YearHistogram) templ.Component {
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(time.Month(i + 1).String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 149, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 147, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
@@ -638,7 +636,7 @@ func YearOverview(histogram []schemas.YearHistogram) templ.Component {
 				var templ_7745c5c3_Var33 string
 				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(totalWeeks))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 159, Col: 81}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 157, Col: 81}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 				if templ_7745c5c3_Err != nil {
@@ -656,7 +654,7 @@ func YearOverview(histogram []schemas.YearHistogram) templ.Component {
 				var templ_7745c5c3_Var34 string
 				templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(totalWeeks))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 161, Col: 76}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 159, Col: 76}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 				if templ_7745c5c3_Err != nil {
@@ -681,7 +679,7 @@ func YearOverview(histogram []schemas.YearHistogram) templ.Component {
 					var templ_7745c5c3_Var35 string
 					templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(totalWeeks))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 166, Col: 82}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 164, Col: 82}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 					if templ_7745c5c3_Err != nil {
@@ -699,7 +697,7 @@ func YearOverview(histogram []schemas.YearHistogram) templ.Component {
 					var templ_7745c5c3_Var36 string
 					templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(totalWeeks))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 168, Col: 62}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `assets/templates/home.templ`, Line: 166, Col: 62}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 					if templ_7745c5c3_Err != nil {
@@ -721,7 +719,7 @@ func YearOverview(histogram []schemas.YearHistogram) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for range calendar.GetYearOffset(calendar.CurrentYear()) {
+		for range domain.GetYearOffset(domain.CurrentYear()) {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "<p></p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

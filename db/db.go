@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -14,14 +14,14 @@ import (
 func NewDB(name string) *sql.DB {
 	err := os.MkdirAll("db", 0755)
 	if err != nil {
-		log.Fatalf("Failed to create directory: %v", err)
+		slog.Error("Failed to create directory", "error", err)
 	}
 
 	dbPath := filepath.Join("db", name)
 
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		log.Fatalf("Failed to open database: %v", err)
+		slog.Error("Failed to open database", "error", err)
 	}
 
 	pragmas := []string{
@@ -37,7 +37,7 @@ func NewDB(name string) *sql.DB {
 
 	for _, p := range pragmas {
 		if _, err := db.Exec(p); err != nil {
-			log.Printf("Failed to execute PRAGMA statement '%s': %v", p, err)
+			slog.Error("Failed to execute PRAGMA statement", "pragma", p, "error", err)
 		}
 	}
 
@@ -47,22 +47,25 @@ func NewDB(name string) *sql.DB {
 }
 
 func CloseDB(db *sql.DB) {
-	log.Println("Closing Database")
+	slog.Info("Closing Database")
 	db.Close()
 }
 
 func RunMigrations(db *sql.DB) {
 	dir, err := fs.Sub(MigrationFS, "migrations")
 	if err != nil {
-		log.Fatalf("Failed to find migrations: %v", err)
+		slog.Error("Failed to find migrations", "error", err)
+		os.Exit(1)
 	}
 	prov, err := goose.NewProvider(goose.DialectSQLite3, db, dir)
 	if err != nil {
-		log.Fatalf("Failed to create goose provider: %v", err)
+		slog.Error("Failed to create goose provider", "error", err)
+		os.Exit(1)
 	}
 	if _, err := prov.Up(context.Background()); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		slog.Error("Failed to run migrations", "error", err)
+		os.Exit(1)
 	}
 
-	log.Println("Migrations ran successfully!")
+	slog.Info("Migrations ran successfully!")
 }

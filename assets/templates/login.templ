@@ -1,9 +1,9 @@
 package templates
 
-import "chrono/db/repo"
+import "chrono/internal/domain"
 
 templ Login() {
-	@Index(nil, []repo.Notification{}) {
+	@Index(nil, []domain.Notification{}) {
 		<div class="flex my-10">
 			<div class="align-middle flex m-auto">
 				<div>
@@ -79,7 +79,7 @@ templ Honeypot(htype string) {
 }
 
 templ Signup() {
-	@Index(nil, []repo.Notification{}) {
+	@Index(nil, []domain.Notification{}) {
 		<div class="flex my-10">
 			<div class="align-middle flex m-auto">
 				<div>

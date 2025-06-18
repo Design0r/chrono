@@ -31,6 +31,9 @@ UPDATE users
 SET color = ?,
 username = ?,
 email = ?,
+password = ?,
+vacation_days = ?,
+is_superuser = ?,
 edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING *;

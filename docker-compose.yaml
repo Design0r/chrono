@@ -1,5 +1,5 @@
 services:
-  caddy:
+  chrono-caddy:
     build:
       context: .
       dockerfile: infrastructure/Caddy/Dockerfile

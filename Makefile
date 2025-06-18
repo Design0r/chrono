@@ -55,8 +55,7 @@ backup:
 		sudo cp /var/lib/docker/volumes/chrono_db/_data/chrono.db /home/apic/backup/chrono_$$timestamp.db'
 	@COMPOSE_BAKE=true docker compose up -d
 
-deploy: 
-	@backup
+deploy: backup
 	@git pull origin main
 	@docker compose up --build -d
 

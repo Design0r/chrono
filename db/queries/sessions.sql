@@ -7,11 +7,6 @@ RETURNING *;
 SELECT * FROM sessions
 WHERE id = ?;
 
--- name: GetValidSession :one
-SELECT * FROM sessions
-WHERE id = ?
-AND valid_until >= ?;
-
 -- name: GetUserFromSession :one
 SELECT u.* FROM sessions s
 JOIN users u ON s.user_id = u.id

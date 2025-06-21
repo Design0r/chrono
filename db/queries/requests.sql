@@ -13,10 +13,6 @@ edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING *;
 
--- name: GetUserRequests :many
-SELECT * FROM requests
-WHERE user_id = ?;
-
 -- name: GetPendingRequests :many
 SELECT * FROM requests r
 JOIN users u ON r.user_id = u.id
@@ -24,13 +20,6 @@ JOIN events e ON r.event_id = e.id
 WHERE r.state = "pending"
 ORDER BY r.user_id, e.scheduled_at;
 
--- name: UpdateRequestState :one
-UPDATE requests
-SET state = ?,
-edited_by = ?,
-edited_at = CURRENT_TIMESTAMP
-WHERE id = ?
-RETURNING *;
 
 -- name: UpdateRequestStateRange :one
 UPDATE requests

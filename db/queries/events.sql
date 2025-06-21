@@ -7,15 +7,6 @@ RETURNING *;
 SELECT * FROM events
 WHERE id = ?;
 
--- name: UpdateEvent :one
-UPDATE events 
-SET name = ?,
-scheduled_at = ?,
-state = ?,
-edited_at = CURRENT_TIMESTAMP
-WHERE id = ?
-RETURNING *;
-
 -- name: GetEventsForDay :many
 SELECT * FROM events 
 WHERE Date(scheduled_at) = ?;
@@ -35,23 +26,12 @@ DELETE from events
 WHERE id = ?
 RETURNING *;
 
--- name: GetUserPendingEvents :many
-SELECT * FROM events
-WHERE user_id = ?
-AND state = "pending";
 
 -- name: GetEventsForMonth :many
 SELECT *
 FROM events e
 JOIN users u ON e.user_id = u.id
 WHERE scheduled_at >= ? AND scheduled_at < ?;
-
--- name: GetAcceptedEventsForMonth :many
-SELECT *
-FROM events e
-JOIN users u ON e.user_id = u.id
-WHERE scheduled_at >= ? AND scheduled_at < ?
-AND state = "accepted";
 
 -- name: GetPendingEventsForYear :one
 SELECT Count(id) from events

@@ -34,6 +34,8 @@ type RequestEventUser struct {
 	CreatedAt_2  time.Time `json:"created_at_2"`
 	EditedAt_2   time.Time `json:"edited_at_2"`
 	Color        string    `json:"color"`
+	Role         string    `json:"role"`
+	Enabled      bool      `json:"enabled"`
 	ID_3         int64     `json:"id_3"`
 	ScheduledAt  time.Time `json:"scheduled_at"`
 	Name         string    `json:"name"`

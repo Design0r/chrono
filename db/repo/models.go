@@ -77,6 +77,8 @@ type User struct {
 	CreatedAt    time.Time `json:"created_at"`
 	EditedAt     time.Time `json:"edited_at"`
 	Color        string    `json:"color"`
+	Role         string    `json:"role"`
+	Enabled      bool      `json:"enabled"`
 }
 
 type VacationToken struct {

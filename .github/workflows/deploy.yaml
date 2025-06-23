@@ -65,6 +65,6 @@ jobs:
         name: chrono
         file: docker-compose.yaml
         host: theapic.com
-        user: apic
+        user: deploy
         ssh_key: ${{ secrets.SSH_DEPLOY_KEY }}
         env_file: ./envfile

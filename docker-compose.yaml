@@ -22,7 +22,7 @@ services:
       - caddy_shared
 
   chrono:
-    image: ghcr.io/The-Apic/chrono:prod
+    image: ghcr.io/The-Apic/chrono:${GIT_COMMIT_HASH:-latest}
     restart: unless-stopped
     volumes:
       - db:/app/db

@@ -35,7 +35,7 @@ func NewCalendarHandler(
 func (h *CalendarHandler) RegisterRoutes(group *echo.Group) {
 	group.GET("/:year/:month", h.Calendar)
 	group.POST("/:year/:month/:day", h.CreateEvent)
-	group.DELETE("/events/:id", h.CreateEvent)
+	group.DELETE("/events/:id", h.DeleteEvent)
 }
 
 func (h *CalendarHandler) Calendar(c echo.Context) error {
@@ -148,7 +148,7 @@ func (h *CalendarHandler) DeleteEvent(c echo.Context) error {
 
 	event, err := h.event.Delete(ctx, eventId, &currUser)
 	if err != nil {
-		return RenderError(c, http.StatusBadRequest, "Failed to delete event.")
+		return RenderError(c, http.StatusBadRequest, err.Error())
 	}
 
 	userWithVac, err := h.event.GetUserWithVacation(

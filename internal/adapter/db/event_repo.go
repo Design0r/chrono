@@ -85,18 +85,18 @@ func (r *SQLEventRepo) Update(
 func (r *SQLEventRepo) Delete(
 	ctx context.Context,
 	eventId int64,
-) (*domain.Event, error) {
-	e, err := r.r.DeleteEvent(ctx, eventId)
+) error {
+	err := r.r.DeleteEvent(ctx, eventId)
 	if err != nil {
 		r.log.Error(
 			"DeleteEvent failed",
 			slog.Int64("eventId", eventId),
 			slog.String("error", err.Error()),
 		)
-		return nil, err
+		return err
 	}
 
-	return (*domain.Event)(&e), nil
+	return nil
 }
 
 func (r *SQLEventRepo) GetForDay(

@@ -46,7 +46,7 @@ func (e *Event) UpdateMsg(username string, state string) string {
 type EventRepository interface {
 	Create(ctx context.Context, data YMDDate, eventType string, user *User) (*Event, error)
 	Update(ctx context.Context, eventId int64, state string) (*Event, error)
-	Delete(ctx context.Context, id int64) (*Event, error)
+	Delete(ctx context.Context, id int64) error
 	GetForDay(ctx context.Context, data YMDDate) ([]Event, error)
 	GetForMonth(
 		ctx context.Context,

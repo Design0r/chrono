@@ -30,10 +30,9 @@ WHERE e.scheduled_at >= ?
 
 ORDER BY scheduled_at;
 
--- name: DeleteEvent :one
-DELETE from events
-WHERE id = ?
-RETURNING *;
+-- name: DeleteEvent :exec
+DELETE FROM events
+WHERE id = ?;
 
 -- name: GetUserPendingEvents :many
 SELECT * FROM events

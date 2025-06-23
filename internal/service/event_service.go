@@ -114,7 +114,7 @@ func (svc *eventService) Delete(
 		return nil, fmt.Errorf("User: %v has no permission to delete the event.", currUser.ID)
 	}
 
-	_, err = svc.event.Delete(ctx, eventId)
+	err = svc.event.Delete(ctx, eventId)
 	if err != nil {
 		return nil, err
 	}

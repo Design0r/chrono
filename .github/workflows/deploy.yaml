@@ -59,6 +59,8 @@ jobs:
     - name: create env file
       run: |
         echo "GIT_COMMIT_HASH=${{ github.sha }}" >> envfile
+    - name: Make default .env
+      run: cp envfile .env
     - name: Docker Stack Deploy
       uses: cssnr/stack-deploy-action@v1
       with:

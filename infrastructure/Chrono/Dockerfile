@@ -33,6 +33,5 @@ FROM scratch
 WORKDIR /app
 COPY --from=build /app/build/chrono .
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY .env .
 
 ENTRYPOINT ["./chrono"]

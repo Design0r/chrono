@@ -66,5 +66,5 @@ jobs:
         file: docker-compose.yaml
         host: theapic.com
         user: apic
-        ssh_key: ${{ secrets.DEPLOY_SSH_KEY }}
+        ssh_key: ${{ secrets.SSH_DEPLOY_KEY }}
         env_file: ./envfile

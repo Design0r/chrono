@@ -20,6 +20,7 @@ RUN	go install github.com/a-h/templ/cmd/templ@latest
 
 # install nodejs dependnecies
 COPY package.json .
+COPY package-lock.json .
 RUN npm install
 
 COPY . .

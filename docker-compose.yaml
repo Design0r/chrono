@@ -22,7 +22,7 @@ services:
       - caddy_shared
 
   chrono:
-    image: ghcr.io/The-Apic/chrono:${GIT_COMMIT_HASH:-latest}
+    image: ghcr.io/the-apic/chrono:${GIT_COMMIT_HASH:-latest}
     restart: unless-stopped
     volumes:
       - db:/app/db
@@ -31,8 +31,6 @@ services:
     build:
       context: .
       dockerfile: infrastructure/Chrono/Dockerfile
-    expose:
-      - 8080
     networks:
       - caddy_shared
     labels:

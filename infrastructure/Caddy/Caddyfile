@@ -3,14 +3,5 @@
 }
 
 :8000 {
-
-    root * /
-
-    handle /static/*  {
-        file_server
-    }
-
-    handle {
-        reverse_proxy chrono:8080
-    }
+    reverse_proxy chrono:8080
 }

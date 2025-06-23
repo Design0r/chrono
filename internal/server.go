@@ -74,14 +74,10 @@ func (s *Server) InitMiddleware() {
 		Format:           "${time_custom} ${method} ${status} ${uri} ${error} ${latency_human}\n",
 		CustomTimeFormat: "2006/01/02 15:04:05",
 	}))
-
-	if s.cfg.Debug == true {
-		s.Router.GET("/static/*", mw.StaticHandler, mw.CacheControl)
-	}
-
 	s.Router.Use(middleware.Secure())
 	s.Router.Use(middleware.Recover())
 	s.Router.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
+	s.Router.GET("/static/*", mw.StaticHandler, mw.CacheControl)
 	s.Router.Use(sentryecho.New(sentryecho.Options{Repanic: true}))
 
 	s.log.Info("Initialized middleware.")

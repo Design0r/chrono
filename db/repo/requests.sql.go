@@ -58,7 +58,7 @@ func (q *Queries) GetEventNameFromRequest(ctx context.Context, id int64) (string
 }
 
 const GetPendingRequests = `-- name: GetPendingRequests :many
-SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color, e.id, scheduled_at, name, e.state, e.created_at, e.edited_at, e.user_id FROM requests r
+SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color, role, enabled, e.id, scheduled_at, name, e.state, e.created_at, e.edited_at, e.user_id FROM requests r
 JOIN users u ON r.user_id = u.id
 JOIN events e ON r.event_id = e.id
 WHERE r.state = "pending"
@@ -83,6 +83,8 @@ type GetPendingRequestsRow struct {
 	CreatedAt_2  time.Time `json:"created_at_2"`
 	EditedAt_2   time.Time `json:"edited_at_2"`
 	Color        string    `json:"color"`
+	Role         string    `json:"role"`
+	Enabled      bool      `json:"enabled"`
 	ID_3         int64     `json:"id_3"`
 	ScheduledAt  time.Time `json:"scheduled_at"`
 	Name         string    `json:"name"`
@@ -119,6 +121,8 @@ func (q *Queries) GetPendingRequests(ctx context.Context) ([]GetPendingRequestsR
 			&i.CreatedAt_2,
 			&i.EditedAt_2,
 			&i.Color,
+			&i.Role,
+			&i.Enabled,
 			&i.ID_3,
 			&i.ScheduledAt,
 			&i.Name,
@@ -188,43 +192,6 @@ func (q *Queries) GetRequestRange(ctx context.Context, arg GetRequestRangeParams
 	return items, nil
 }
 
-const GetUserRequests = `-- name: GetUserRequests :many
-SELECT id, message, state, created_at, edited_at, user_id, edited_by, event_id FROM requests
-WHERE user_id = ?
-`
-
-func (q *Queries) GetUserRequests(ctx context.Context, userID int64) ([]Request, error) {
-	rows, err := q.db.QueryContext(ctx, GetUserRequests, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Request
-	for rows.Next() {
-		var i Request
-		if err := rows.Scan(
-			&i.ID,
-			&i.Message,
-			&i.State,
-			&i.CreatedAt,
-			&i.EditedAt,
-			&i.UserID,
-			&i.EditedBy,
-			&i.EventID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const UpdateRequest = `-- name: UpdateRequest :one
 UPDATE requests
 SET message = ?,
@@ -252,37 +219,6 @@ func (q *Queries) UpdateRequest(ctx context.Context, arg UpdateRequestParams) (R
 		arg.EventID,
 		arg.ID,
 	)
-	var i Request
-	err := row.Scan(
-		&i.ID,
-		&i.Message,
-		&i.State,
-		&i.CreatedAt,
-		&i.EditedAt,
-		&i.UserID,
-		&i.EditedBy,
-		&i.EventID,
-	)
-	return i, err
-}
-
-const UpdateRequestState = `-- name: UpdateRequestState :one
-UPDATE requests
-SET state = ?,
-edited_by = ?,
-edited_at = CURRENT_TIMESTAMP
-WHERE id = ?
-RETURNING id, message, state, created_at, edited_at, user_id, edited_by, event_id
-`
-
-type UpdateRequestStateParams struct {
-	State    string `json:"state"`
-	EditedBy *int64 `json:"edited_by"`
-	ID       int64  `json:"id"`
-}
-
-func (q *Queries) UpdateRequestState(ctx context.Context, arg UpdateRequestStateParams) (Request, error) {
-	row := q.db.QueryRowContext(ctx, UpdateRequestState, arg.State, arg.EditedBy, arg.ID)
 	var i Request
 	err := row.Scan(
 		&i.ID,

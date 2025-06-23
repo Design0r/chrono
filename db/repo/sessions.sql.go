@@ -73,7 +73,7 @@ func (q *Queries) GetSessionById(ctx context.Context, id string) (Session, error
 }
 
 const GetUserFromSession = `-- name: GetUserFromSession :one
-SELECT u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at, u.color FROM sessions s
+SELECT u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at, u.color, u.role, u.enabled FROM sessions s
 JOIN users u ON s.user_id = u.id
 WHERE s.id = ?
 `
@@ -91,30 +91,8 @@ func (q *Queries) GetUserFromSession(ctx context.Context, id string) (User, erro
 		&i.CreatedAt,
 		&i.EditedAt,
 		&i.Color,
-	)
-	return i, err
-}
-
-const GetValidSession = `-- name: GetValidSession :one
-SELECT id, valid_until, created_at, edited_at, user_id FROM sessions
-WHERE id = ?
-AND valid_until >= ?
-`
-
-type GetValidSessionParams struct {
-	ID         string    `json:"id"`
-	ValidUntil time.Time `json:"valid_until"`
-}
-
-func (q *Queries) GetValidSession(ctx context.Context, arg GetValidSessionParams) (Session, error) {
-	row := q.db.QueryRowContext(ctx, GetValidSession, arg.ID, arg.ValidUntil)
-	var i Session
-	err := row.Scan(
-		&i.ID,
-		&i.ValidUntil,
-		&i.CreatedAt,
-		&i.EditedAt,
-		&i.UserID,
+		&i.Role,
+		&i.Enabled,
 	)
 	return i, err
 }

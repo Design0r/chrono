@@ -18,7 +18,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24.x'
+          go-version: "1.24.x"
       - name: Build
         run: go build -v ./...
       - name: Test
@@ -48,25 +48,3 @@ jobs:
           tags: |
             ghcr.io/the-apic/chrono:latest
             ghcr.io/the-apic/chrono:${{ github.sha }}
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs:
-      - build-and-push-image
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: create env file
-      run: |
-        echo "GIT_COMMIT_HASH=${{ github.sha }}" >> envfile
-    - name: Make default .env
-      run: cp envfile .env
-    - name: Docker Stack Deploy
-      uses: cssnr/stack-deploy-action@v1
-      with:
-        name: chrono
-        file: docker-compose.yaml
-        host: theapic.com
-        user: deploy
-        ssh_key: ${{ secrets.SSH_DEPLOY_KEY }}
-        env_file: ./envfile

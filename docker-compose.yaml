@@ -1,14 +1,4 @@
 services:
-  watchtower:
-    image: containrrr/watchtower
-    command:
-      - "--label-enable"
-      - "--interval"
-      - "30"
-      - "--rolling-restart"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-
   chrono-caddy:
     image: caddy:2.10-alpine
     restart: unless-stopped
@@ -28,17 +18,13 @@ services:
       - db:/app/db
     env_file:
       - .env
-    build:
-      context: .
-      dockerfile: infrastructure/Chrono/Dockerfile
     networks:
       - caddy_shared
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
-
-    #deploy:
-    #  mode: replicated
-    #  replicas: 3
+    deploy:
+      mode: replicated
+      replicas: 3
 
 volumes:
   db:

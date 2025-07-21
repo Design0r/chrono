@@ -1,8 +1,6 @@
 package templates
 
-import (
-	"chrono/internal/domain"
-)
+import "chrono/internal/domain"
 
 templ Settings(s domain.Settings, user *domain.User, notifications []domain.Notification) {
 	@Index(user, notifications) {

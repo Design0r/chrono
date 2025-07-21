@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -15,15 +16,17 @@ import (
 type ProfileHandler struct {
 	user  service.UserService
 	notif service.NotificationService
+	auth  service.AuthService
 	log   *slog.Logger
 }
 
 func NewProfileHandler(
 	u service.UserService,
 	n service.NotificationService,
+	auth service.AuthService,
 	log *slog.Logger,
 ) ProfileHandler {
-	return ProfileHandler{user: u, notif: n, log: log}
+	return ProfileHandler{user: u, notif: n, log: log, auth: auth}
 }
 
 func (h *ProfileHandler) RegisterRoutes(authGrp *echo.Group, adminGrp *echo.Group) {
@@ -60,18 +63,31 @@ func (h *ProfileHandler) ProfileEdit(c echo.Context) error {
 	if err := c.Bind(&patchedData); err != nil {
 		return RenderError(c, http.StatusBadRequest, "Invalid data")
 	}
+	fmt.Println(patchedData)
+
+	u := &domain.User{
+		ID:           currUser.ID,
+		Username:     patchedData.Name,
+		Email:        patchedData.Email,
+		Color:        patchedData.Color,
+		IsSuperuser:  currUser.IsSuperuser,
+		VacationDays: currUser.VacationDays,
+		Password:     currUser.Password,
+	}
+
+	if patchedData.Password != "" {
+		pw, err := h.auth.HashPassword(patchedData.Password)
+		if err != nil {
+			return RenderError(c, http.StatusInternalServerError, "Failed to update user information.")
+		}
+		u.Password = pw
+	}
 
 	updatedUser, err := h.user.Update(
 		c.Request().Context(),
-		&domain.User{
-			ID:           currUser.ID,
-			Username:     patchedData.Name,
-			Email:        patchedData.Email,
-			Color:        patchedData.Color,
-			IsSuperuser:  currUser.IsSuperuser,
-			VacationDays: currUser.VacationDays,
-		},
+		u,
 	)
+
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, "Failed to update user information.")
 	}

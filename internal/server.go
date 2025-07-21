@@ -181,7 +181,7 @@ func (s *Server) InitRoutes() {
 		s.services.user,
 		s.log,
 	)
-	profileHandler := handler.NewProfileHandler(s.services.user, s.services.notif, s.log)
+	profileHandler := handler.NewProfileHandler(s.services.user, s.services.notif, s.services.auth, s.log)
 	requestHandler := handler.NewRequestHandler(
 		s.services.request,
 		s.services.notif,
@@ -198,6 +198,7 @@ func (s *Server) InitRoutes() {
 	)
 	debugHandler := handler.NewDebugHandler(
 		s.services.user,
+		s.services.auth,
 		s.services.notif,
 		s.services.token,
 		s.services.session,

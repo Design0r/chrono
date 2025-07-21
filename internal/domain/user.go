@@ -31,9 +31,10 @@ type UserWithVacation struct {
 }
 
 type PatchUser struct {
-	Name  string `form:"name"`
-	Email string `form:"email"`
-	Color string `form:"color"`
+	Name     string `form:"name"`
+	Email    string `form:"email"`
+	Color    string `form:"color"`
+	Password string `form:"password"`
 }
 
 type CreateUser struct {

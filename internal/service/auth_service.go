@@ -16,6 +16,7 @@ type AuthService interface {
 	Logout(ctx context.Context, cookie string) (*http.Cookie, error)
 	Signup(ctx context.Context, userParams domain.CreateUser) (*http.Cookie, error)
 	GetCurrentUser(ctx context.Context, cookie string) (*domain.User, error)
+	HashPassword(passwrd string) (string, error)
 }
 
 type authService struct {
@@ -147,4 +148,8 @@ func (svc *authService) Signup(
 
 func (svc *authService) GetCurrentUser(ctx context.Context, cookie string) (*domain.User, error) {
 	return svc.session.GetSessionUser(ctx, cookie)
+}
+
+func (svc *authService) HashPassword(password string) (string, error) {
+	return svc.pw.Hash(password)
 }

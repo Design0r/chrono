@@ -71,6 +71,12 @@ templ ProfileEditForm(user domain.User, notifications []domain.Notification) {
 					value={ user.Color }
 					required
 				/>
+				<label for="password">New Password</label>
+				<input
+					class="input w-full input-bordered"
+					type="password"
+					name="password"
+				/>
 				<p>Joined</p>
 				<p>{ user.CreatedAt.Format("2. January 2006") }</p>
 				<p>Last Edit</p>

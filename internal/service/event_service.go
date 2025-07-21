@@ -111,7 +111,7 @@ func (svc *eventService) Delete(
 	}
 
 	if !currUser.IsAdmin() && currUser.ID != event.UserID {
-		return nil, fmt.Errorf("User: %v has no permission to delete the event.", currUser.ID)
+		return nil, fmt.Errorf("User: %v has no permission to delete the event.", currUser.Username)
 	}
 
 	err = svc.event.Delete(ctx, eventId)

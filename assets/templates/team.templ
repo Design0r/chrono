@@ -15,8 +15,8 @@ templ Team(users []domain.UserWithVacation, currUser domain.User, notifications 
 						hx-get="/team/form"
 						hx-target="#team-table"
 						hx-swap="outerHTML"
-						class="btn btn-warning"
-					>Edit</button>
+						class="btn btn-soft btn-primary animate-color"
+					><span class="icon-outlined pr-2">edit</span>Handle Team</button>
 				</div>
 			}
 		}
@@ -31,8 +31,8 @@ templ TeamHTMX(users []domain.UserWithVacation, currUser domain.User, notificati
 					hx-get="/team/form"
 					hx-target="#team-table"
 					hx-swap="outerHTML"
-					class="btn btn-warning"
-				>Edit</button>
+					class="btn btn-soft btn-primary animate-color"
+				><span class="icon-outlined pr-2">edit</span>Handle Team</button>
 			</div>
 		}
 	}
@@ -49,8 +49,8 @@ templ TeamForm(users []domain.UserWithVacation, currUser domain.User, notificati
 						hx-patch="/team"
 						hx-target="#team-table"
 						hx-swap="outerHTML"
-						class="btn btn-success"
-					>Save</button>
+						class="btn btn-primary animate-color"
+					><span class="icon-outlined pr-2">save</span>Save Team</button>
 				</div>
 			}
 		}
@@ -58,19 +58,18 @@ templ TeamForm(users []domain.UserWithVacation, currUser domain.User, notificati
 }
 
 templ TeamTable(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification, form bool) {
-	<div id="team-table" class="p-2">
-		<div class="pt-2 bg-base-200 rounded-xl">
-			<table class="table rounded-xl">
+	<div id="team-table" class="p-2 my-2">
+		<div class="overflow-x-auto bg-info/3">
+			<table class="table table-zebra table-md">
 				<thead>
-					<tr class="text-[15px] text-base-content border-b-2 border-base-content border-opacity-10">
+					<tr class="bg-base-200 text-base-content border-b-1.5 border-primary/65">
 						<th>ID</th>
-						<th>Color</th>
 						<th>Name</th>
+						<th class="text-center">Vacation Days</th>
+						<th class="text-center">Used</th>
+						<th class="text-center">Remaining</th>
 						<th>Email</th>
 						<th>Admin</th>
-						<th>Vacation days</th>
-						<th>Vacation days used</th>
-						<th>Vacation days remaining</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -87,36 +86,44 @@ templ TeamTable(users []domain.UserWithVacation, currUser domain.User, notificat
 templ TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) {
 	{{
 	cfg := config.GetConfig()
-	css := "hover:bg-base-300 pt-8 border-b-2 border-base-100 opacity-80 border-opacity-50"
+	css := "hover:bg-primary/10 pt-8 border-b-1 border-primary/25 text-base-content/80 hover:text-primary animate-color"
 	if user.VacationDays == 0 && user.Username != cfg.BotName {
-		css = "hover:bg-error hover:bg-opacity-85 bg-error text-white "
+		css = "bg-error/35 hover:bg-error/50 pt-8 border-2 border-error/70 text-base-content/80 animate-color"
 	}
-
-	bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(user.Color))
+	h, s, l := domain.Color.HexToHSL(user.Color)
+	borderColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.6)", h, s*100, l*100)
+	bgColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.20)", h, s*100, l*100)
+	textColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 1)", h, s*100, l*100)
 	}}
 	<tr class={ css }>
-		<th>{ fmt.Sprint(user.ID) }</th>
 		<th>
 			<div
 				tabindex="0"
 				role="button"
-				class="avatar placeholder p-0"
+				class="avatar placeholder p-0 "
 			>
 				<div
-					{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
-					class="w-10 rounded-full"
-				></div>
+					class="w-8 !flex items-center justify-center border rounded-full text-neutral-content"
+					{ templ.Attributes{"style":fmt.Sprintf("background-color: %v; border-color: %v;", bgColor, borderColor)}... }
+				>
+					<div
+						class="text-sm text-center"
+						{ templ.Attributes{"style":fmt.Sprintf("color: %v;", textColor)}... }
+					>
+						{ fmt.Sprint(user.ID) }
+					</div>
+				</div>
 			</div>
 		</th>
 		<th>{ user.Username }</th>
-		<td>{ user.Email }</td>
-		@AdminCheckbox(currUser, user.ID, user.IsSuperuser, form)
 		if form {
 			<td><input type="number" class="input input-bordered h-8" value={ fmt.Sprint(user.VacationDays) } name={ fmt.Sprint(user.ID) }/></td>
 		} else {
-			<td>{ fmt.Sprint(user.VacationDays) }</td>
+			<td class="text-center">{ fmt.Sprint(user.VacationDays) }</td>
 		}
-		<td>{ fmt.Sprint(user.VacationUsed) }</td>
-		<td>{ fmt.Sprint(user.VacationRemaining) }</td>
+		<td class="text-center">{ fmt.Sprint(user.VacationUsed) }</td>
+		<td class="text-center">{ fmt.Sprint(user.VacationRemaining) }</td>
+		<td>{ user.Email }</td>
+		@AdminCheckbox(currUser, user.ID, user.IsSuperuser, form)
 	</tr>
 }

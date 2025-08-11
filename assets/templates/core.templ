@@ -34,16 +34,21 @@ templ Index(user *domain.User, notifications []domain.Notification) {
 
 templ Static() {
 	<!DOCTYPE html>
-	<html data-theme="dim" lang="en">
+	<html data-theme="dim" lang="en" class=" bg-base-200">
 		<head>
 			<meta charset="UTF-8"/>
 			<link rel="stylesheet" href="/static/css/output.css"/>
 			<link rel="icon" href="/static/favicon.ico" sizes="any"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 			<script src="/static/js/htmx-min.js"></script>
 			<title>Chrono</title>
+			<style>
+				.max-lg\:dock::-webkit-scrollbar {
+					display: none;
+				}
+			</style>
 		</head>
-		<body class="h-screen flex flex-col">
+		<body class="overflow-x-hidden">
 			{ children... }
 		</body>
 	</html>
@@ -58,7 +63,7 @@ templ Notifications(notifications []domain.Notification) {
 				hx-swap="outerHTML"
 				hx-target="#notification-container"
 				role="button"
-				class="btn btn-ghost text-xl icon-outlined"
+				class="btn btn-ghost px-[1.25rem] border-1.5 border-white/2 py-1 hover:bg-info/20 rounded-full text-xl icon-outlined bg-base-100 animate-color"
 			>notifications</summary>
 			@NotificationContainer([]domain.Notification{})
 		</details>
@@ -72,22 +77,84 @@ templ Header(user *domain.User, notifications []domain.Notification) {
 		month := strconv.Itoa(int(now.Month()))
 		year := strconv.Itoa(now.Year())
 		url := fmt.Sprintf("/%v/%v", year, month)
+
+		// Aktuellen Pfad aus Context holen (wird durch Middleware gesetzt)
+		currentPath := ""
+		if pathValue := ctx.Value("currentPath"); pathValue != nil {
+			currentPath = pathValue.(string)
+		}
 	}}
-	<div class="px-4 pt-4 pb-0">
-		<div class="navbar flex justify-between rounded-xl bg-base-100 ">
-			<div class="flex gap-4">
-				<a href="/" class="btn btn-ghost text-xl text-white"><img class="w-28" alt="" src="/static/chrono.svg"/></a>
-				if user != nil {
-					<a href={ templ.URL(url) } class="btn btn-ghost font-medium text-[15px]">Calendar<span class="icon-outlined">calendar_today</span></a>
-					<a href="/team" class="btn btn-ghost font-medium text-[15px]">Team<span class="icon-outlined">group</span></a>
-					if (*user).IsSuperuser {
-						<a href="/requests" class="btn btn-ghost font-medium text-[15px]">Request<span class="icon-outlined">mark_chat_unread</span></a>
-						<a href="/tokens" class="btn btn-ghost font-medium text-[15px]">Tokens<span class="icon-outlined">local_activity</span></a>
-						<a href="/settings" class="btn btn-ghost font-medium text-[15px]">Settings<span class="icon-outlined">settings</span></a>
+	<div class="mb-4 mx-auto p-4 lg:px-4">
+		<div class="navbar flex justify-between">
+			<div class="flex items-center">
+				<div class="pr-14"><img class="w-40" alt="" src="/static/chrono.svg"/></div>
+				<div
+					class="!z-20 max-lg:dock max-lg:border-t max-lg:border-accent/15 max-lg:!bg-base-100/50 backdrop-blur-xl overflow-x-auto flex gap-4 lg:w-fit 
+						*:flex *:!flex-col *:lg:!flex-row *:lg:gap-2 *:lg:items-center"
+					{ templ.Attributes{"style": "scrollbar-width: none; -ms-overflow-style: none;"}... }
+				>
+					if user != nil {
+						{{
+							homeClasses := "btn btn-ghost py-6 hover:bg-accent/5 border-0 max-lg:min-w-24"
+							if currentPath == "/" {
+								homeClasses += " text-primary"
+							}
+
+							calendarClasses := "btn btn-ghost py-6 hover:bg-accent/5 border-0 max-lg:min-w-24"
+							if strings.Contains(currentPath, "/20") {
+								calendarClasses += " text-primary"
+							}
+
+							teamClasses := "btn btn-ghost py-6 hover:bg-accent/5 border-0 max-lg:min-w-24"
+							if strings.Contains(currentPath, "/team") {
+								teamClasses += " text-primary"
+							}
+
+							requestClasses := "btn btn-ghost py-6 hover:bg-accent/5 border-0 max-lg:min-w-24"
+							if strings.Contains(currentPath, "/requests") {
+								requestClasses += " text-primary"
+							}
+
+							tokenClasses := "btn btn-ghost py-6 hover:bg-accent/5 border-0 max-lg:min-w-24"
+							if strings.Contains(currentPath, "/tokens") {
+								tokenClasses += " text-primary"
+							}
+
+							settingsClasses := "btn btn-ghost py-6 hover:bg-accent/5 border-0 max-lg:min-w-24"
+							if strings.Contains(currentPath, "/settings") {
+								settingsClasses += " text-primary"
+							}
+						}}
+						<a href="/" class={ homeClasses }>
+							<span class="icon-outlined">home</span>
+							<span class="font-medium text-base">Home</span>
+						</a>
+						<a href={ templ.URL(url) } class={ calendarClasses }>
+							<span class="icon-outlined">calendar_today</span>
+							<span class="font-medium text-base">Calendar</span>
+						</a>
+						<a href="/team" class={ teamClasses }>
+							<span class="icon-outlined">group</span>
+							<span class="font-medium text-base">Team</span>
+						</a>
+						if (*user).IsSuperuser {
+							<a href="/requests" class={ requestClasses }>
+								<span class="icon-outlined">mark_chat_unread</span>
+								<span class="font-medium text-base">Request</span>
+							</a>
+							<a href="/tokens" class={ tokenClasses }>
+								<span class="icon-outlined">local_activity</span>
+								<span class="font-medium text-base">Tokens</span>
+							</a>
+							<a href="/settings" class={ settingsClasses }>
+								<span class="icon-outlined">settings</span>
+								<span class="font-medium text-base">Settings</span>
+							</a>
+						}
 					}
-				}
+				</div>
 			</div>
-			<div class="flex items-center justify-end space-x-6">
+			<div class="flex items-center justify-end gap-6">
 				if user != nil {
 					@Notifications(notifications)
 					@Avatar(*user)
@@ -108,16 +175,22 @@ templ Avatar(user domain.User) {
 	if len(user.Username) > 0 {
 		initial = strings.ToUpper(user.Username[:1])
 	}
-	bgColor := domain.Color.HSLToString(domain.Color.HexToHSL(user.Color))
+	h, s, l := domain.Color.HexToHSL(user.Color)
+	bgColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.25)", h, s*100, l*100)
+	borderColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.6)", h, s*100, l*100)
+	textColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 1)", h, s*100, l*100)
 	}}
 	<div class="dropdown dropdown-end pr-2">
 		<!-- Trigger -->
 		<div tabindex="0" role="button" class="avatar avatar-placeholder cursor-pointer">
 			<div
-				class="w-10 rounded-full text-neutral-content"
-				{ templ.Attributes{"style":fmt.Sprintf("background-color: %v;", bgColor)}... }
+				class="w-10 border rounded-full text-neutral-content"
+				{ templ.Attributes{"style":fmt.Sprintf("background-color: %v; border-color: %v;", bgColor, borderColor)}... }
 			>
-				<span class="text-xl">
+				<span
+					class="text-xl pt-px"
+					{ templ.Attributes{"style":fmt.Sprintf("color: %v;", textColor)}... }
+				>
 					{ initial }
 				</span>
 			</div>
@@ -125,13 +198,15 @@ templ Avatar(user domain.User) {
 		<!-- Menu -->
 		<ul
 			tabindex="0"
-			class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mt-2"
+			class="dropdown-content mt-1.5 min-w-40 pt-4 pb-3 px-3 menu bg-info/20 backdrop-blur-xl rounded-box z-10 drop-shadow-xl animate-color"
 		>
-			<li><a href="/profile">Profile</a></li>
-			<li><a href="/settings">Settings</a></li>
+			<li><a class="py-2.5" href="/profile">Profile</a></li>
+			if user.IsSuperuser {
+				<li><a class="py-2.5" href="/settings">Settings</a></li>
+			}
 			<li>
 				<form method="POST" action="/logout">
-					<button type="submit" class="w-full text-left">Logout</button>
+					<button type="submit" class="w-full text-left py-1">Logout</button>
 				</form>
 			</li>
 		</ul>

@@ -9,61 +9,63 @@ import (
 templ Home(user domain.UserWithVacation, progress domain.YearProgress, notifications []domain.Notification, eventHistogram []domain.YearHistogram) {
 	@Index(&user.User, notifications) {
 		<div class="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
-			<div class="text-[48px] pl-2 font-black">{ fmt.Sprintf("> hey %v ", user.Username) }</div>
+			<div class="text-[48px] pl-2 text-primary font-light mb-2"><span class="animate-pulse font-medium text-white pr-1">> Hej </span>{ fmt.Sprintf("%v ", user.Username) }</div>
 			@Card("Your vacation stats") {
-				<div class="stats grid grid-cols-4 bg-base-200 w-full">
+				<div class="stats bg-base-100 max-lg:stats-vertical grid grid-cols-2 grid-rows-2 lg:grid-rows-1 lg:grid-cols-4 w-full">
 					<div class="stat">
-						<div class="stat-figure text-info"></div>
-						<div class="stat-title pb-1">Vacation remaining</div>
-						<div class="stat-value pb-[1px] text-success">{ fmt.Sprintf("%v days", user.VacationRemaining) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%.0f %% remaining", (float32(user.VacationRemaining) / float32(user.VacationDays)) * float32(100)) }</div>
+						<div class="stat-figure"></div>
+						<div class="stat-title truncate text-accent/75 text-base ">Vacation remaining</div>
+						<div class="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-primary">{ fmt.Sprintf("%v ", user.VacationRemaining) }d</div>
+						<div class="stat-desc text-accent/30">{ fmt.Sprintf("%.0f %% remaining", (float32(user.VacationRemaining) / float32(user.VacationDays)) * float32(100)) }</div>
 					</div>
 					<div class="stat">
-						<div class="stat-figure icon-outlined"></div>
-						<div class="stat-title pb-1">Vacation taken</div>
-						<div class="stat-value pb-[1px] text-warning">{ fmt.Sprintf("%v days", user.VacationUsed) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%.0f %% taken", (float32(user.VacationDays) - float32(user.VacationRemaining)) / float32(user.VacationDays) * float32(100)) }</div>
+						<div class="stat-figure"></div>
+						<div class="stat-title text-accent/75 text-base ">Vacation taken</div>
+						<div class="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">{ fmt.Sprintf("%v d", user.VacationUsed) }</div>
+						<div class="stat-desc text-accent/30">{ fmt.Sprintf("%.0f %% taken", (float32(user.VacationDays) - float32(user.VacationRemaining)) / float32(user.VacationDays) * float32(100)) }</div>
 					</div>
 					<div class="stat">
-						<div class="stat-figure text-info"></div>
-						<div class="stat-title pb-1">Vacation total</div>
-						<div class="stat-value  pb-[1px] text-info">{ fmt.Sprintf("%v days", user.VacationDays) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%v days total", user.VacationDays) }</div>
+						<div class="stat-figure"></div>
+						<div class="stat-title text-accent/75 text-base ">Vacation total</div>
+						<div class="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">{ fmt.Sprintf("%v d", user.VacationDays) }</div>
+						<div class="stat-desc text-accent/30">{ fmt.Sprintf("%v days total", user.VacationDays) }</div>
 					</div>
-					<div class="stat">
-						<div class="stat-figure text-info"></div>
-						<div class="stat-title pb-1">Vacation pending</div>
-						<div class="stat-value pb-[1px]">{ fmt.Sprintf("%v events",user.PendingEvents) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%v events pending",user.PendingEvents) }</div>
+					<div class="stat min-lg:!border-0">
+						<div class="stat-figure"></div>
+						<div class="stat-title truncate text-accent/75 text-base ">Vacation pending</div>
+						<div class="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-accent"><span class="animate-pulse text-primary">{ fmt.Sprintf("%v",user.PendingEvents) }</span> events</div>
+						<div class="stat-desc text-accent/30">{ fmt.Sprintf("%v events pending",user.PendingEvents) }</div>
 					</div>
+					<div class="stat hidden"></div>
 				</div>
 			}
 			@Card("Your year stats") {
-				<div class="stats grid grid-cols-4 bg-base-200 w-full">
+				<div class="stats bg-base-100 max-lg:stats-vertical grid grid-cols-2 grid-rows-2 lg:grid-rows-1 lg:grid-cols-4 w-full">
 					<div class="stat">
-						<div class="stat-figure text-success"></div>
-						<div class="stat-title pb-1">Days this year</div>
-						<div class="stat-value pb-[1px] text-success">{ fmt.Sprintf("%v days", progress.NumDays) }</div>
-						<div class="stat-desc">{ fmt.Sprintf(" %v days total", progress.NumDays) }</div>
+						<div class="stat-figure"></div>
+						<div class="stat-title text-accent/75 text-base ">Days this year</div>
+						<div class="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">{ fmt.Sprintf("%v d", progress.NumDays) }</div>
+						<div class="stat-desc text-accent/30">{ fmt.Sprintf(" %v days total", progress.NumDays) }</div>
 					</div>
 					<div class="stat">
-						<div class="stat-figure text-warning"></div>
-						<div class="stat-title pb-1">Days passed</div>
-						<div class="stat-value pb-[1px] text-warning">{ fmt.Sprintf("%v days", progress.NumDaysPassed) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%v days passed ", progress.NumDaysPassed) }</div>
+						<div class="stat-figure "></div>
+						<div class="stat-title text-accent/75 text-base ">Days passed</div>
+						<div class="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-accent">{ fmt.Sprintf("%v d", progress.NumDaysPassed) }</div>
+						<div class="stat-desc text-accent/30">{ fmt.Sprintf("%v days passed ", progress.NumDaysPassed) }</div>
 					</div>
 					<div class="stat">
-						<div class="stat-figure text-info"></div>
-						<div class="stat-title pb-1">Days completed</div>
-						<div class="stat-value pb-[1px] text-info">{ fmt.Sprintf("%.2f %%", progress.DaysPassedPercent) }</div>
-						<div class="stat-desc">{ fmt.Sprintf("%.2f %% remaining", float32(100)-progress.DaysPassedPercent) }</div>
+						<div class="stat-figure "></div>
+						<div class="stat-title text-accent/75 text-base ">Days completed</div>
+						<div class="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-accent">{ fmt.Sprintf("%.2f %%", progress.DaysPassedPercent) }</div>
+						<div class="stat-desc text-accent/30">{ fmt.Sprintf("%.2f %% remaining", float32(100)-progress.DaysPassedPercent) }</div>
 					</div>
-					<div class="stat">
-						<div class="stat-figure text-info"></div>
-						<div class="stat-title pb-1">Days progress</div>
+					<div class="stat min-lg:!border-0">
+						<div class="stat-figure "></div>
+						<div class="pb-2.5 stat-title text-accent/75 text-base ">Days progress</div>
 						@YearProgress(progress)
-						<div class="stat-desc">{ fmt.Sprintf("%.2f %% days passed", progress.DaysPassedPercent) }</div>
+						<div class="stat-desc text-accent/30">{ fmt.Sprintf("%.2f %% days passed", progress.DaysPassedPercent) }</div>
 					</div>
+					<div class="stat hidden"></div>
 				</div>
 			}
 			@Card("Team Vacation") {
@@ -74,9 +76,9 @@ templ Home(user domain.UserWithVacation, progress domain.YearProgress, notificat
 }
 
 templ Card(title string) {
-	<div class="space-y-2 p-3 rounded-xl flex flex-col items-left justify-center">
+	<div class="overflow-hidden my-4 p-3 rounded-xl flex flex-col items-left justify-center">
 		<h1 class="text-xl">{ title }</h1>
-		<div class="divider m-2"></div>
+		<div class="border-b border-primary/25 mt-2 mb-8"></div>
 		<div>
 			{ children... }
 		</div>
@@ -84,18 +86,23 @@ templ Card(title string) {
 }
 
 templ YearProgress(progress domain.YearProgress) {
-	<progress class="progress progress-success mb-3 mt-2 h-6" { templ.Attributes{"value":fmt.Sprintf("%.1f", progress.DaysPassedPercent)}... } max="100" role="progressbar">
+	<progress class="progress progress-primary mb-3 mt-2 h-3.5" { templ.Attributes{"value":fmt.Sprintf("%.1f", progress.DaysPassedPercent)}... } max="100" role="progressbar">
 		{ fmt.Sprintf("%.1f %%", progress.DaysPassedPercent) }
 	</progress>
 }
 
-templ OverviewDay(day domain.YearHistogram) {
+templ OverviewDay(day domain.YearHistogram, index int) {
 	{{
 	baseStyle := "width:1rem; height:1rem; border-radius:9999px;"
 
+	// Position in der Woche (grid-flow-col)
+	weekPosition := index % 7
+	// Da Montag/Dienstag dunkel waren, verschieben wir um 4 Positionen
+	isWeekend := weekPosition == 3 || weekPosition == 4 // Samstag und Sonntag
+
 	var hex string
 	if day.IsHoliday {
-		hex = "#fd9a00"
+		hex = "#7C85FF"
 	} else {
 		c := day.Count
 		if c < 0 {
@@ -105,11 +112,17 @@ templ OverviewDay(day domain.YearHistogram) {
 			c = 8
 		}
 		greens := []string{
-			"#555555", "#a7f3d0", "#6ee7b7",
+			"#313745", "#a7f3d0", "#6ee7b7",
 			"#34d399", "#10b981", "#059669",
 			"#047857", "#065f46", "#064e3b",
 		}
+
 		hex = greens[c]
+
+		// Base-Farbe für Wochenenden abdunkeln
+		if isWeekend && c == 0 {
+			hex = "#7C85FF11"
+		}
 	}
 
 	shadow := ""
@@ -130,7 +143,7 @@ templ OverviewDay(day domain.YearHistogram) {
 				<p>{ name }</p>
 			}
 		</div>
-		<div style={ styleAttr }></div>
+		<div { templ.Attributes{"style": styleAttr}... }></div>
 	</div>
 }
 
@@ -140,50 +153,50 @@ templ YearOverview(histogram []domain.YearHistogram) {
 		gaps := domain.GetMonthGaps(domain.CurrentYear())
 		_, currWeek := time.Now().ISOWeek()
 	}}
-	<div class="grid grid-cols-12 p-5 bg-base-200  rounded-3xl">
+	<div class="grid grid-cols-12 p-5 bg-base-100 rounded-2xl overflow-x-auto mb-12">
 		<div class="col-span-1"></div>
-		<div class="col-span-11 grid grid-rows-1 grid-flow-col h-10 gap-1">
+		<div class="col-span-11 grid grid-rows-1 grid-flow-col h-10 gap-1 text-secondary/70">
 			for i, monthGap := range gaps {
-				<p class="w-4 h-4">{ time.Month(i+1).String() }</p>
+				<p class="h-4 w-4 text-center ">{ i+1 }.</p>
 				for  range monthGap {
 					<p class="w-4 h-4 -z-10"></p>
 				}
 			}
 		</div>
 		<div class="col-span-1"></div>
-		<div class="col-span-11 grid grid-rows-1 grid-flow-col h-10 gap-1">
+		<div class="col-span-11 grid grid-rows-1 grid-flow-col h-10 gap-1 text-sm text-base-content/40">
 			for _, monthGap := range gaps {
 				if currWeek == totalWeeks {
-					<p class="w-4 h-4 text-red-400 text-lg text-center">{ fmt.Sprint(totalWeeks) }</p>
+					<p class="w-4 h-4 text-primary text-center">{ fmt.Sprint(totalWeeks) }</p>
 				} else {
-					<p class="w-4 h-4 text-purple-500 text-center">{ fmt.Sprint(totalWeeks) }</p>
+					<p class="w-4 h-4 text-secondary/70 text-center">{ fmt.Sprint(totalWeeks) }</p>
 				}
 				{{ totalWeeks++ }}
 				for range monthGap {
 					if currWeek == totalWeeks {
-						<p class="w-4 h-4 text-center text-red-400 text-lg">{ fmt.Sprint(totalWeeks) }</p>
+						<p class="w-4 h-4 text-primary text-center">{ fmt.Sprint(totalWeeks) }</p>
 					} else {
-						<p class="w-4 h-4 text-center ">{ fmt.Sprint(totalWeeks) }</p>
+						<p class="w-4 h-4 text-center">{ fmt.Sprint(totalWeeks) }</p>
 					}
 					{{ totalWeeks++ }}
 				}
 			}
 		</div>
-		<div class="col-span-1 grid grid-rows-7">
-			<p>Mon</p>
-			<p>Tue</p>
-			<p>Wed</p>
-			<p>Thu</p>
-			<p>Fri</p>
-			<p>Sat</p>
-			<p>Sun</p>
+		<div class="col-span-1 grid grid-rows-7 text-secondary/60 text-sm">
+			<p class="truncate">Montag</p>
+			<p class="truncate">Dienstag</p>
+			<p class="truncate">Mittwoch</p>
+			<p class="truncate">Donnerstag</p>
+			<p class="truncate">Freitag</p>
+			<p class="opacity-50 truncate">Samstag</p>
+			<p class="opacity-50 truncate">Sonntag</p>
 		</div>
 		<div class="col-span-11 grid grid-rows-7 h-80 grid-flow-col gap-1">
 			for range domain.GetYearOffset(domain.CurrentYear()) {
 				<p></p>
 			}
-			for _, d := range histogram {
-				@OverviewDay(d)
+			for i, d := range histogram {
+				@OverviewDay(d, i)
 			}
 		</div>
 	</div>

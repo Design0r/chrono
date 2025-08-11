@@ -111,6 +111,8 @@ func SettingsMiddleware(svc service.SettingsService) MiddlewareFunc {
 			}
 
 			ctx := context.WithValue(c.Request().Context(), "settings", settings)
+			// Aktuellen Pfad auch in Context setzen
+			ctx = context.WithValue(ctx, "currentPath", c.Request().URL.Path)
 			req := c.Request().WithContext(ctx)
 			c.SetRequest(req)
 			c.Set("settings", settings)

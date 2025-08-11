@@ -9,7 +9,7 @@ import (
 
 templ Calendar(user domain.UserWithVacation, month domain.Month, notifications []domain.Notification, users []domain.User, userFilter, eventFilter string) {
 	@Index(&user.User, notifications) {
-		<div class="pt-2">
+		<div>
 			<div class="grid grid-cols-7">
 				@Info(month, user, users, userFilter, eventFilter)
 			</div>
@@ -26,9 +26,9 @@ templ WeekdayHeader(name string, month domain.Month) {
 		now := time.Now()
 	}}
 	if strWeekday == name && int(now.Month()) == month.Number && now.Year() == month.Year {
-		<div class="bg-base-200 text-base-content border-t-2 border-success rounded-xl p-2 text-center text-lg">{ name }</div>
+		<div class="lg:block hidden truncate text-sm text-primary rounded-xl p-1 text-center lg:text-lg">{ name }</div>
 	} else {
-		<div class="bg-base-200 rounded-xl border-accent-content p-2 text-center text-lg">{ name }</div>
+		<div class="lg:block hidden truncate text-sm p-1 rounded-xl text-center lg:text-lg">{ name }</div>
 	}
 }
 
@@ -41,20 +41,35 @@ templ Day(year int, month int, day domain.Day, user domain.User) {
 	dayId := fmt.Sprintf("day-%v", strDay)
 	dayTarget := fmt.Sprintf("#%v", dayId)
 
-	css := "bg-neutral rounded-xl border-accent-content flex flex-col"
+	// Datum für Wochentag-Berechnung erstellen
+	date := time.Date(year, time.Month(month), day.Number, 0, 0, 0, 0, time.UTC)
+	weekdayName := date.Weekday().String()
+	// Deutsche Wochentage
+	germanWeekdays := map[string]string{
+		"Monday": "Montag", "Tuesday": "Dienstag", "Wednesday": "Mittwoch",
+		"Thursday": "Donnerstag", "Friday": "Freitag", "Saturday": "Samstag", "Sunday": "Sonntag",
+	}
+	if german, exists := germanWeekdays[weekdayName]; exists {
+		weekdayName = german
+	}
+	dateStr := fmt.Sprintf("%d.", day.Number)
+	dayStr := fmt.Sprintf(" %s ", weekdayName)
+
+	css := "bg-base-100 rounded-xl border border-base-300 flex flex-col overflow-hidden"
 	if currDay == day.Number && int(now.Month()) == month && now.Year() == year {
-		css = "bg-neutral border-t-2 border-success text-base-content rounded-xl flex flex-col"
+		css = "border bg-primary/90 border-primary text-neutral rounded-xl flex flex-col overflow-hidden"
 	}
 	}}
 	<div class={ css }>
-		<div class="pt-2 pb-2 pl-2 text-lg">
-			{ strDay }
+		<div class="pt-2 pb-2 px-4 text-lg lg:text-center ">
+			<div class="lg:hidden text-base font-medium">{ dateStr } <span class="pl-1.5 opacity-40">{ dayStr }</span></div>
+			<div class="hidden lg:block">{ strDay }</div>
 		</div>
 		<div
-			class="card-body p-2 h-full bg-base-200 rounded-t-none rounded-b-xl"
+			class="flex flex-col px-2 h-full lg:bg-base-200/65 rounded-t-none rounded-b-[0.65rem]"
 		>
 			<div
-				class="card-body px-0 pb-2 pt-0 h-full bg-base-200 rounded-xl"
+				class="flex flex-col gap-2 h-fit rounded-[0.7rem] *:first:mt-2"
 				id={ dayId }
 			>
 				for _, event := range day.Events {
@@ -66,7 +81,7 @@ templ Day(year int, month int, day domain.Day, user domain.User) {
 				hx-vals="js:{name: getEventName()}"
 				hx-target={ dayTarget }
 				hx-swap="beforeend"
-				class="btn btn-sm bg-base-300 rounded-xl text-base-content opacity-10 hover:text-base-content hover:opacity-100 w-full hover:icon-filled"
+				class="my-2 btn btn-sm border border-dashed border-primary/30 hover:bg-primary/10 rounded-lg text-primary hover:text-base-content w-full hover:icon-filled"
 			>
 				<span class="icon-outlined hover:icon-filled text-2xl leading-5">add</span>
 			</button>
@@ -92,7 +107,6 @@ templ MonthNavigation(month domain.Month, userFilter, eventFilter string) {
 			nextMonth = 1
 		}
 	}
-
 	urlPrev := fmt.Sprintf(
 		"/%d/%d?filter=%s&event-filter=%s",
 		year, prevMonth,
@@ -104,22 +118,22 @@ templ MonthNavigation(month domain.Month, userFilter, eventFilter string) {
 		userFilter, eventFilter,
 	)
 	}}
-	<div hx-swap-oob="true" id="month-navigation" class="flex justify-start col-span-2 space-x-2 bg-base-300 p-3 rounded-xl gap-4">
-		<div class="flex items-center justify-center gap-3">
-			<div class=" flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
-				<a href={ templ.SafeURL(urlPrev) } class="btn btn-sm text-lg icon-outlined">arrow_back</a>
+	<div hx-swap-oob="true" id="month-navigation" class="col-span-2 flex justify-start space-x-2 bg-base-100 p-3 rounded-xl gap-4">
+		<div class="flex items-center gap-2 w-full">
+			<div class="flex justify-center items-center">
+				<a href={ templ.SafeURL(urlPrev) } class="btn btn-sm btn-soft btn-primary hover:text-neutral icon-outlined animate-color duration-500">arrow_back</a>
 			</div>
-			<div class=" flex justify-center items-center rounded-full bg-base-100 hover:bg-base-300 transition-colors">
-				<a href={ templ.SafeURL(urlNext) } class="btn btn-sm text-lg icon-outlined">arrow_forward</a>
+			<div class="flex justify-center items-center">
+				<a href={ templ.SafeURL(urlNext) } class="btn btn-sm btn-soft btn-primary hover:text-neutral icon-outlined animate-color duration-500">arrow_forward</a>
 			</div>
-			<div class="pl-4 text-lg">{ month.Name } { strYear }</div>
+			<div class="pl-4 text-lg"><p>{ month.Name } { strYear }</p></div>
 		</div>
 	</div>
 }
 
 templ Info(month domain.Month, user domain.UserWithVacation, users []domain.User, userFilter, eventFilter string) {
-	<div class="col-span-7 grid grid-cols-7 items-center gap-x-2 mt-2 mb-10">
-		<select class="col-span-1 select focus:border-0 h-full border-base-300 border-2 bg-base-300 hover:bg-base-300 transition-color max-w-xs text-lg rounded-xl" name="eventName" id="eventName">
+	<div class="px-6 col-span-7 grid grid-cols-1 grid-rows-4 lg:grid-rows-1 items-center gap-y-2 lg:gap-y-0 lg:gap-x-2 mt-2 lg:mb-16 lg:grid-cols-7 lg:px-4 ">
+		<select class=" col-span-1 lg:col-span-1 cursor-pointer bg-base-100 select hover:text-white border-0 hover:bg-[#6F78EA] text-center focus:outline-0 h-full w-full text-lg rounded-xl animate-color" name="eventName" id="eventName">
 			<option value="urlaub">Urlaub</option>
 			<option value="urlaub halbtags">Urlaub Halbtags</option>
 			<option value="workation">Workation</option>
@@ -127,9 +141,9 @@ templ Info(month domain.Month, user domain.UserWithVacation, users []domain.User
 			<option value="home office">Home Office</option>
 		</select>
 		@MonthNavigation(month, userFilter, eventFilter)
-		<div class="col-span-4 h-full text-lg">
-			<div class="h-full items-center rounded-xl bg-base-300">
-				<div class="grid grid-cols-4 w-full h-full gap-2">
+		<div class="row-span-2 col-span-2 lg:row-span-1 lg:col-span-4 h-full text-lg">
+			<div class="h-full items-center rounded-xl bg-base-200">
+				<div class="grid grid-cols-2 lg:grid-cols-4 w-full h-full gap-x-2 gap-y-2 lg:gap-y-0">
 					<div class="col-span-1 w-full justify-center ">
 						@UserFilter(users, month, userFilter, eventFilter)
 					</div>
@@ -152,11 +166,17 @@ templ Info(month domain.Month, user domain.UserWithVacation, users []domain.User
 
 templ VacationCounter(user domain.UserWithVacation) {
 	{{ strNum := strconv.Itoa(int(user.VacationDays)) }}
-	<div id="vacation-counter" hx-swap-oob="true" class="flex w-full justify-center items-center align-middle h-full text-center">
-		<div class="text-info">{ fmt.Sprint(user.PendingEvents) } </div><span class="text-base-content pl-2">pending</span><span class="text-base-content opacity-50 px-3">|</span>
-		<div class="text-warning">{ fmt.Sprint(user.VacationUsed) } </div> <span class="text-base-content pl-2">used</span><span class="text-base-content opacity-50 px-3">|</span>
-		<div class="text-success">{ fmt.Sprint(user.VacationRemaining) } </div> <span class="text-base-content pl-2">remaining</span>
-		<div class="text-info hidden">{ strNum } total</div>
+	<div id="vacation-counter" hx-swap-oob="true" class="flex px-3 w-full justify-center bg-base-100 items-center rounded-xl align-middle h-full text-center">
+		<div class="flex flex-wrap justify-center tooltip text-primary cursor-help" data-tip="pending">
+			{ fmt.Sprint(user.PendingEvents) }
+			<span class="text-info/80 px-2">
+				pending
+			</span>
+		</div>
+		<span class="text-info/30 px-2">|</span>
+		<div class="flex flex-wrap justify-center tooltip text-warning cursor-help" data-tip="used">{ fmt.Sprint(user.VacationUsed) } <span class="!truncate text-info/80 px-2">used</span></div> <span class="text-info/30 px-2">|</span>
+		<div class="flex flex-wrap justify-center tooltip text-secondary cursor-help" data-tip="remaining">{ fmt.Sprint(user.VacationRemaining) } <span class="!truncate text-info/80 px-2">remaining</span></div>
+		<div class="flex flex-wrap justify-center tooltip text-info hidden cursor-help" data-tip="total">{ strNum } total</div>
 	</div>
 }
 
@@ -165,7 +185,7 @@ templ UserFilter(users []domain.User, month domain.Month, userFilter, eventFilte
 		hx-get={ fmt.Sprintf("/%v/%v", month.Year, month.Number) }
 		hx-target="#calendar"
 		hx-swap="outerHTML"
-		class="col-span-1  select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color w-full text-lg rounded-xl"
+		class="w-full col-span-1 cursor-pointer bg-base-100 select hover:text-white border-0 hover:bg-[#6F78EA] text-center focus:outline-0 h-full text-lg rounded-xl animate-color"
 		name="filter"
 		id="filter"
 		hx-push-url="true"
@@ -190,7 +210,7 @@ templ EventFilter(month domain.Month, eventFilter, userFilter string) {
 		hx-get={ fmt.Sprintf("/%v/%v", month.Year, month.Number) }
 		hx-target="#calendar"
 		hx-swap="outerHTML"
-		class="col-span-1 select min-w-44 h-full focus:border-0 border-0 bg-base-300 hover:bg-base-300 transition-color w-full text-lg rounded-xl"
+		class="w-full col-span-1 cursor-pointer bg-base-100 select hover:text-white border-0 hover:bg-[#6F78EA] text-center focus:outline-0 h-full text-lg rounded-xl animate-color"
 		name="event-filter"
 		id="event-filter"
 		hx-push-url="true"

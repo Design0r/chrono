@@ -9,21 +9,21 @@ import (
 templ Requests(user *domain.User, requests []domain.BatchRequest, notifications []domain.Notification) {
 	@Index(user, notifications) {
 		<div id="reject-modal"></div>
-		<div class="p-2">
-			<div class="pt-2 bg-base-200 rounded-xl">
-				<table class="table rounded-xl">
+		<div class="p-2 my-2">
+			<div class="overflow-x-auto bg-info/3">
+				<table class="table table-zebra table-md ">
 					<thead>
-						<tr class="text-[15px] text-base-content border-b-2 border-base-content border-opacity-10">
+						<tr class="bg-base-200 text-base-content border-b-1.5 border-primary/65">
 							<th>ID</th>
 							<th>Name</th>
-							<th>Message</th>
+							// <th>Message</th>
 							<th>Event Type</th>
 							<th>Number of Days</th>
 							<th>Event Start Date</th>
 							<th>Event End Date</th>
-							<th></th>
-							<th></th>
 							<th>Conflicts</th>
+							<th class="text-center">Actions</th>
+							// <th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -39,53 +39,51 @@ templ Requests(user *domain.User, requests []domain.BatchRequest, notifications 
 
 templ RequestRow(request domain.BatchRequest) {
 	{{
-	msg := ""
-	if request.Request.Message != nil {
-		msg = *request.Request.Message
-	}
+	// msg := ""
+	// if request.Request.Message != nil {
+	// 	msg = *request.Request.Message
+	// }
 	startYear, startMonth, startDay := request.StartDate.Date()
 	endYear, endMonth, endDay := request.EndDate.Date()
 	}}
-	<tr id={ fmt.Sprintf("request-%v", request.Request.ID) } class="hover:bg-base-300 pt-8 border-b-2 border-base-100 opacity-80 border-opacity-50">
+	<tr id={ fmt.Sprintf("request-%v", request.Request.ID) } class="hover:bg-primary/10 pt-8 border-b-1 border-primary/25 text-base-content/80 hover:text-primary animate-color">
 		<td>{ fmt.Sprint(request.Request.ID) }</td>
 		<td>{ request.Request.Username }</td>
-		<td>{ msg }</td>
+		// <td class="truncate min-w-40">{ msg }</td>
 		<td>{ request.Request.Name }</td>
-		<td>{ fmt.Sprint(request.EventCount) }</td>
+		<td>{ fmt.Sprint(request.EventCount) } <span class="opacity-40 px-1">days</span></td>
 		<td>{ fmt.Sprintf("%v. %v %v",startDay, startMonth, startYear) }</td>
 		<td>{ fmt.Sprintf("%v. %v %v",endDay, endMonth, endYear) }</td>
-		<td>
-			<button
-				hx-patch="/requests"
-				hx-vals={ fmt.Sprintf("{\"state\":\"accepted\", \"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID) }
-				hx-swap="delete"
-				hx-target={ fmt.Sprintf("#request-%v", request.Request.ID) }
-				class="btn btn-ghost border-success text-success hover:bg-success hover:text-base-300 icon-outlined text-xl float-end"
-			>
-				check
-			</button>
-		</td>
-		<td>
-			<button
-				hx-get="/requests/modal"
-				hx-target="#reject-modal"
-				hx-swap="outerHTML"
-				hx-vals={ fmt.Sprintf("{\"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\", \"request_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID, request.Request.ID) }
-				class="btn btn-ghost border-error text-error hover:bg-error hover:text-base-300 icon-outlined text-xl float-start"
-			>
-				close
-			</button>
-		</td>
-		<td>
+		<td class="align-middle">
 			if request.Conflicts != nil {
-				<div class="flex flex-col space-y-1">
+				<div class="flex flex-wrap space-x-2 space-y-2">
 					for _, user := range *request.Conflicts {
-						<span class="badge badge-error flex">
+						<span class="badge badge-soft badge-info badge-sm cursor-default hover:text-white/60 hover:bg-info/20 animate-color">
 							{ user.Username }
 						</span>
 					}
 				</div>
 			}
+		</td>
+		<td class="flex justify-center align-middle gap-2">
+			<button
+				hx-patch="/requests"
+				hx-vals={ fmt.Sprintf("{\"state\":\"accepted\", \"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID) }
+				hx-swap="delete"
+				hx-target={ fmt.Sprintf("#request-%v", request.Request.ID) }
+				class="btn btn-soft btn-sm btn-primary icon-outlined animate-color"
+			>
+				check
+			</button>
+			<button
+				hx-get="/requests/modal"
+				hx-target="#reject-modal"
+				hx-swap="outerHTML"
+				hx-vals={ fmt.Sprintf("{\"start_date\":\"%v\", \"end_date\":\"%v\", \"user_id\":\"%v\", \"request_id\":\"%v\"}", request.StartDate.Unix(), request.EndDate.Unix(), request.Request.UserID, request.Request.ID) }
+				class="btn btn-soft btn-sm btn-error icon-outlined animate-color"
+			>
+				close
+			</button>
 		</td>
 	</tr>
 }
@@ -115,7 +113,7 @@ templ RejectModal(message *string, startDate time.Time, endDate time.Time, userI
 							hx-swap="delete"
 							hx-target={ fmt.Sprintf("#request-%v", requestId) }
 							hx-on::after-request="closeModal()"
-							class="btn btn-error text-xl"
+							class="btn btn-error text-xl animate-color"
 						>Reject</button>
 					</div>
 				</div>

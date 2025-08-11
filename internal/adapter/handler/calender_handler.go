@@ -95,6 +95,15 @@ func (h *CalendarHandler) Calendar(c echo.Context) error {
 		return RenderError(c, http.StatusInternalServerError, "Failed to get users")
 	}
 
+	// Check if this is an HTMX request (from filter changes)
+	if c.Request().Header.Get("HX-Request") == "true" {
+		return Render(
+			c,
+			http.StatusOK,
+			templates.CalendarCoreResponse(month, currUser, userFilter, eventFilter),
+		)
+	}
+
 	return Render(
 		c,
 		http.StatusOK,

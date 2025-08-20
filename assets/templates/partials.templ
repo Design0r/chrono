@@ -142,12 +142,33 @@ templ AdminCheckbox(currUser domain.User, userId int64, isSuperuser bool, form b
 		icon = "check_box"
 	}
 	}}
-	<td id={ fmt.Sprintf("admin-%v", userId) } class="icon-outlined">
+	<td class="icon-outlined">
 		if currUser.IsSuperuser && form {
 			<a
-				hx-put={ fmt.Sprintf("profile/%v/admin", userId) }
+				hx-patch={ fmt.Sprintf("profile/%v/admin", userId) }
 				hx-swap="outerHTML"
-				hx-target={ fmt.Sprintf("#admin-%v", userId) }
+				hx-target="closest td"
+				class="icon-outlined cursor-pointer text-lg text-center"
+			>{ icon }</a>
+		} else {
+			<span class="icon-outlined cursor-not-allowed">{ icon }</span>
+		}
+	</td>
+}
+
+templ EnabledCheckbox(currUser domain.User, userId int64, isEnabled bool, form bool) {
+	{{
+	icon := "check_box_outline_blank"
+	if isEnabled {
+		icon = "check_box"
+	}
+	}}
+	<td class="icon-outlined">
+		if currUser.IsSuperuser && form {
+			<a
+				hx-patch={ fmt.Sprintf("profile/%v/enabled", userId) }
+				hx-swap="outerHTML"
+				hx-target="closest td"
 				class="icon-outlined cursor-pointer text-lg text-center"
 			>{ icon }</a>
 		} else {

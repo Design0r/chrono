@@ -2,8 +2,25 @@ package domain
 
 import (
 	"context"
+	"slices"
 	"time"
 )
+
+type Role string
+
+var (
+	AdminRole Role = "admin"
+	UserRole  Role = "user"
+	GuestRole Role = "guest"
+)
+
+func UserRoles() []Role {
+	return []Role{AdminRole, UserRole, GuestRole}
+}
+
+func IsValidRole(role Role) bool {
+	return slices.Contains(UserRoles(), role)
+}
 
 type User struct {
 	ID           int64     `json:"id"`
@@ -35,6 +52,8 @@ type PatchUser struct {
 	Email    string `form:"email"`
 	Color    string `form:"color"`
 	Password string `form:"password"`
+	Role     string `form:"role"`
+	Enabled  bool   `form:"enabled"`
 }
 
 type CreateUser struct {

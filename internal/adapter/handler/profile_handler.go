@@ -1,10 +1,8 @@
 package handler
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 
@@ -33,7 +31,6 @@ func (h *ProfileHandler) RegisterRoutes(authGrp *echo.Group, adminGrp *echo.Grou
 	authGrp.GET("/profile", h.Profile)
 	authGrp.GET("/profile/edit", h.ProfileEditForm)
 	authGrp.PATCH("/profile", h.ProfileEdit)
-	adminGrp.PATCH("/profile/:id/admin", h.ToggleAdmin)
 }
 
 func (h *ProfileHandler) Profile(c echo.Context) error {
@@ -63,13 +60,18 @@ func (h *ProfileHandler) ProfileEdit(c echo.Context) error {
 	if err := c.Bind(&patchedData); err != nil {
 		return RenderError(c, http.StatusBadRequest, "Invalid data")
 	}
-	fmt.Println(patchedData)
+
+	if !domain.IsValidRole((domain.Role)(patchedData.Role)) {
+		return RenderError(c, http.StatusBadRequest, "Invalid user role")
+	}
 
 	u := &domain.User{
 		ID:           currUser.ID,
 		Username:     patchedData.Name,
 		Email:        patchedData.Email,
 		Color:        patchedData.Color,
+		Role:         patchedData.Role,
+		Enabled:      patchedData.Enabled,
 		IsSuperuser:  currUser.IsSuperuser,
 		VacationDays: currUser.VacationDays,
 		Password:     currUser.Password,
@@ -78,7 +80,11 @@ func (h *ProfileHandler) ProfileEdit(c echo.Context) error {
 	if patchedData.Password != "" {
 		pw, err := h.auth.HashPassword(patchedData.Password)
 		if err != nil {
-			return RenderError(c, http.StatusInternalServerError, "Failed to update user information.")
+			return RenderError(
+				c,
+				http.StatusInternalServerError,
+				"Failed to update user information.",
+			)
 		}
 		u.Password = pw
 	}
@@ -87,7 +93,6 @@ func (h *ProfileHandler) ProfileEdit(c echo.Context) error {
 		c.Request().Context(),
 		u,
 	)
-
 	if err != nil {
 		return RenderError(c, http.StatusInternalServerError, "Failed to update user information.")
 	}
@@ -98,25 +103,4 @@ func (h *ProfileHandler) ProfileEdit(c echo.Context) error {
 	}
 
 	return Render(c, http.StatusOK, templates.UpdateProfileWithMessage(*updatedUser, notifications))
-}
-
-func (h *ProfileHandler) ToggleAdmin(c echo.Context) error {
-	currUser := c.Get("user").(domain.User)
-
-	idParam := c.Param("id")
-	id, err := strconv.ParseInt(idParam, 10, 64)
-	if err != nil {
-		return RenderError(c, http.StatusBadRequest, "Invalid user id")
-	}
-
-	updatedUser, err := h.user.ToggleAdmin(c.Request().Context(), id, &currUser)
-	if err != nil {
-		return RenderError(c, http.StatusInternalServerError, "Failed to change admin status")
-	}
-
-	return Render(
-		c,
-		http.StatusOK,
-		templates.AdminCheckbox(currUser, updatedUser.ID, updatedUser.IsSuperuser, true),
-	)
 }

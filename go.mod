@@ -18,7 +18,7 @@ require (
 )
 
 require (
-	github.com/a-h/templ v0.3.920
+	github.com/a-h/templ v0.3.943
 	github.com/labstack/gommon v0.4.2
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

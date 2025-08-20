@@ -135,48 +135,6 @@ templ UpdateProfileWithMessage(user domain.User, notifications []domain.Notifica
 	@Message("Successfully updated profile", "success")
 }
 
-templ AdminCheckbox(currUser domain.User, userId int64, isSuperuser bool, form bool) {
-	{{
-	icon := "check_box_outline_blank"
-	if isSuperuser {
-		icon = "check_box"
-	}
-	}}
-	<td class="icon-outlined">
-		if currUser.IsSuperuser && form {
-			<a
-				hx-patch={ fmt.Sprintf("profile/%v/admin", userId) }
-				hx-swap="outerHTML"
-				hx-target="closest td"
-				class="icon-outlined cursor-pointer text-lg text-center"
-			>{ icon }</a>
-		} else {
-			<span class="icon-outlined cursor-not-allowed">{ icon }</span>
-		}
-	</td>
-}
-
-templ EnabledCheckbox(currUser domain.User, userId int64, isEnabled bool, form bool) {
-	{{
-	icon := "check_box_outline_blank"
-	if isEnabled {
-		icon = "check_box"
-	}
-	}}
-	<td class="icon-outlined">
-		if currUser.IsSuperuser && form {
-			<a
-				hx-patch={ fmt.Sprintf("profile/%v/enabled", userId) }
-				hx-swap="outerHTML"
-				hx-target="closest td"
-				class="icon-outlined cursor-pointer text-lg text-center"
-			>{ icon }</a>
-		} else {
-			<span class="icon-outlined cursor-not-allowed">{ icon }</span>
-		}
-	</td>
-}
-
 templ CalendarCore(month domain.Month, user domain.User, userFilter, eventFilter string) {
 	<div id="calendar" class="my-12 lg:my-8 lg:mt-0 mx-auto grid px-6 grid-cols-1 gap-y-6 lg:grid-cols-7 lg:px-4 gap-x-2 lg:gap-y-4 overflow-x-scroll">
 		@WeekdayHeader("Monday", month)

@@ -4,57 +4,13 @@ import (
 	"chrono/config"
 	"chrono/internal/domain"
 	"fmt"
+	"strings"
 )
 
 templ Team(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification) {
 	@Index(&currUser, notifications) {
-		@TeamTable(users, currUser, notifications, false) {
-			if currUser.IsSuperuser {
-				<div class="mt-4">
-					<button
-						hx-get="/team/form"
-						hx-target="#team-table"
-						hx-swap="outerHTML"
-						class="btn btn-soft btn-primary animate-color"
-					><span class="icon-outlined pr-2">edit</span>Handle Team</button>
-				</div>
-			}
-		}
+		@TeamTable(users, currUser, notifications, false)
 	}
-}
-
-templ TeamHTMX(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification) {
-	@TeamTable(users, currUser, notifications, false) {
-		if currUser.IsSuperuser {
-			<div class="mt-4">
-				<button
-					hx-get="/team/form"
-					hx-target="#team-table"
-					hx-swap="outerHTML"
-					class="btn btn-soft btn-primary animate-color"
-				><span class="icon-outlined pr-2">edit</span>Handle Team</button>
-			</div>
-		}
-	}
-	@Message("Saved changes", "success")
-}
-
-templ TeamForm(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification) {
-	<form id="team-table" hx-patch="/team">
-		@TeamTable(users, currUser, notifications, true) {
-			if currUser.IsSuperuser {
-				<div class="mt-4">
-					<button
-						type="submit"
-						hx-patch="/team"
-						hx-target="#team-table"
-						hx-swap="outerHTML"
-						class="btn btn-primary animate-color"
-					><span class="icon-outlined pr-2">save</span>Save Team</button>
-				</div>
-			}
-		}
-	</form>
 }
 
 templ TeamTable(users []domain.UserWithVacation, currUser domain.User, notifications []domain.Notification, form bool) {
@@ -69,7 +25,14 @@ templ TeamTable(users []domain.UserWithVacation, currUser domain.User, notificat
 						<th class="text-center">Used</th>
 						<th class="text-center">Remaining</th>
 						<th>Email</th>
-						<th>Admin</th>
+						<th>Role</th>
+						if currUser.IsAdmin() {
+							<th>Enabled</th>
+							<th></th>
+							if form {
+								<th></th>
+							}
+						}
 					</tr>
 				</thead>
 				<tbody>
@@ -79,7 +42,6 @@ templ TeamTable(users []domain.UserWithVacation, currUser domain.User, notificat
 				</tbody>
 			</table>
 		</div>
-		{ children... }
 	</div>
 }
 
@@ -94,8 +56,13 @@ templ TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) {
 	borderColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.6)", h, s*100, l*100)
 	bgColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.20)", h, s*100, l*100)
 	textColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 1)", h, s*100, l*100)
+
+	formId := fmt.Sprintf("form-%v", user.ID)
 	}}
 	<tr class={ css }>
+		if form {
+			<form hx-patch={ fmt.Sprintf("/team/%v", user.ID) } hx-swap="outerHTML" hx-target="closest tr" id={ formId }></form>
+		}
 		<th>
 			<div
 				tabindex="0"
@@ -116,14 +83,93 @@ templ TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) {
 			</div>
 		</th>
 		<th>{ user.Username }</th>
-		if form {
-			<td><input type="number" class="input input-bordered h-8" value={ fmt.Sprint(user.VacationDays) } name={ fmt.Sprint(user.ID) }/></td>
-		} else {
-			<td class="text-center">{ fmt.Sprint(user.VacationDays) }</td>
-		}
+		<td class="text-center">
+			if form {
+				<input
+					form={ formId }
+					type="number"
+					class="input input-bordered h-8"
+					value={ fmt.Sprint(user.VacationDays) }
+					name="vacation"
+				/>
+			} else {
+				{ fmt.Sprint(user.VacationDays) }
+			}
+		</td>
 		<td class="text-center">{ fmt.Sprint(user.VacationUsed) }</td>
 		<td class="text-center">{ fmt.Sprint(user.VacationRemaining) }</td>
 		<td>{ user.Email }</td>
-		@AdminCheckbox(currUser, user.ID, user.IsSuperuser, form)
+		<td>
+			if currUser.IsSuperuser && form {
+				<select
+					form={ formId }
+					name="role"
+				>
+					for _, role := range domain.UserRoles() {
+						if string(role) == user.Role {
+							<option selected value={ role }>{ strings.Title(string(role)) }</option>
+						} else {
+							<option value={ role }>{ strings.Title(string(role)) }</option>
+						}
+					}
+				</select>
+			} else {
+				<span>{ user.Role }</span>
+			}
+		</td>
+		{{
+	icon := "check_box_outline_blank"
+	if user.Enabled {
+		icon = "check_box"
+	}
+		}}
+		<td class="icon-outlined">
+			if currUser.IsSuperuser && form {
+				if user.Enabled {
+					<input
+						form={ formId }
+						type="checkbox"
+						name="enabled"
+						checked
+						class="icon-outlined "
+					/>
+				} else {
+					<input
+						form={ formId }
+						type="checkbox"
+						name="enabled"
+						class="icon-outlined "
+					/>
+				}
+			} else {
+				<span class="icon-outlined cursor-not-allowed">{ icon }</span>
+			}
+		</td>
+		if currUser.IsAdmin() {
+			if form {
+				<td>
+					<button
+						class="btn btn-soft btn-success animate-color"
+						form={ formId }
+						type="submit"
+					>y</button>
+					<button
+						class="btn btn-soft btn-error animate-color"
+						hx-get={ fmt.Sprintf("/team/%v", user.ID) }
+						hx-swap="outerHTML"
+						hx-target="closest tr"
+					>n</button>
+				</td>
+			} else {
+				<td>
+					<button
+						class="btn btn-soft btn-primary animate-color"
+						hx-get={ fmt.Sprintf("/team/%v/edit", user.ID) }
+						hx-swap="outerHTML"
+						hx-target="closest tr"
+					>edit</button>
+				</td>
+			}
+		}
 	</tr>
 }

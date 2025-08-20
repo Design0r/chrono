@@ -18,9 +18,10 @@ type UserService interface {
 	GetAll(ctx context.Context) ([]domain.User, error)
 	Delete(ctx context.Context, id int64) error
 	GetUsersWithVacation(ctx context.Context) ([]*domain.UserWithVacation, error)
-	ToggleAdmin(
+	SetUserRole(
 		ctx context.Context,
 		userToUpdate int64,
+		role domain.Role,
 		currUser *domain.User,
 	) (*domain.User, error)
 	SetVacation(ctx context.Context, userId int64, vacation, year int) error
@@ -82,9 +83,10 @@ func (svc *userService) GetUsersWithVacation(
 	return nil, nil
 }
 
-func (svc *userService) ToggleAdmin(
+func (svc *userService) SetUserRole(
 	ctx context.Context,
 	userToChange int64,
+	role domain.Role,
 	currUser *domain.User,
 ) (*domain.User, error) {
 	if !currUser.IsSuperuser {
@@ -94,14 +96,18 @@ func (svc *userService) ToggleAdmin(
 	if err != nil {
 		return nil, err
 	}
-	user.IsSuperuser = true
+
+	if !domain.IsValidRole(role) {
+		return nil, fmt.Errorf("Invalid user role")
+	}
+	user.Role = string(role)
 
 	updatedUser, err := svc.Update(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
-	msg := fmt.Sprintf("%v changed your admin status to %v", currUser.Username, user.IsSuperuser)
+	msg := fmt.Sprintf("%v changed your user role to %v", currUser.Username, user.Role)
 	err = svc.notif.CreateAndNotify(ctx, msg, []domain.User{*user})
 	if err != nil {
 		return nil, err

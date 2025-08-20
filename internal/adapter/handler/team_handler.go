@@ -30,8 +30,9 @@ func NewTeamHandler(
 
 func (h *TeamHandler) RegisterRoutes(authGrp *echo.Group, adminGrp *echo.Group) {
 	authGrp.GET("/team", h.Team)
-	adminGrp.GET("/team/form", h.TeamForm)
-	adminGrp.PATCH("/team", h.TeamEdit)
+	adminGrp.GET("/team/:id/edit", h.GetTeamRowForm)
+	adminGrp.GET("/team/:id", h.GetTeamRow)
+	adminGrp.PATCH("/team/:id", h.PatchTeamRow)
 }
 
 func (h *TeamHandler) Team(c echo.Context) error {
@@ -51,57 +52,42 @@ func (h *TeamHandler) Team(c echo.Context) error {
 	return Render(c, http.StatusOK, templates.Team(allUserswithVac, currUser, notifs))
 }
 
-func (h *TeamHandler) TeamForm(c echo.Context) error {
+func (h *TeamHandler) GetTeamRow(c echo.Context) error {
 	ctx := c.Request().Context()
 	currUser := c.Get("user").(domain.User)
 
-	allUserswithVac, err := h.event.GetAllUsersWithVacation(ctx, domain.CurrentYear())
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
 	if err != nil {
-		return RenderError(c, http.StatusInternalServerError, "Failed to get user data.")
+		return RenderError(c, http.StatusBadRequest, "Invalid user id")
 	}
 
-	notifs, err := h.notif.GetByUserId(ctx, currUser.ID)
+	user, err := h.event.GetUserWithVacation(ctx, id, domain.CurrentYear(), 1)
 	if err != nil {
-		return RenderError(c, http.StatusInternalServerError, "Failed to get user notifications.")
+		return RenderError(c, http.StatusNotFound, "user not found")
 	}
 
-	return Render(c, http.StatusOK, templates.TeamForm(allUserswithVac, currUser, notifs))
+	return Render(c, http.StatusOK, templates.TeamRow(currUser, user, false))
 }
 
-func (h *TeamHandler) TeamEdit(c echo.Context) error {
+func (h *TeamHandler) GetTeamRowForm(c echo.Context) error {
 	ctx := c.Request().Context()
 	currUser := c.Get("user").(domain.User)
 
-	form, err := c.FormParams()
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
 	if err != nil {
-		return err
+		return RenderError(c, http.StatusBadRequest, "Invalid user id")
 	}
 
-	for k, v := range form {
-		userId, err := strconv.ParseInt(k, 10, 64)
-		if err != nil {
-			continue
-		}
-		vacation, err := strconv.Atoi(v[0])
-		if err != nil {
-			continue
-		}
-
-		err = h.user.SetVacation(ctx, userId, vacation, domain.CurrentYear())
-		if err != nil {
-			continue
-		}
-	}
-
-	allUserswithVac, err := h.event.GetAllUsersWithVacation(ctx, domain.CurrentYear())
+	user, err := h.event.GetUserWithVacation(ctx, id, domain.CurrentYear(), 1)
 	if err != nil {
-		return RenderError(c, http.StatusInternalServerError, "Failed to get user data.")
+		return RenderError(c, http.StatusNotFound, "user not found")
 	}
 
-	notifs, err := h.notif.GetByUserId(ctx, currUser.ID)
-	if err != nil {
-		return RenderError(c, http.StatusInternalServerError, "Failed to get user notifications.")
-	}
+	return Render(c, http.StatusOK, templates.TeamRow(currUser, user, true))
+}
 
-	return Render(c, http.StatusOK, templates.TeamHTMX(allUserswithVac, currUser, notifs))
+func (h *TeamHandler) PatchTeamRow(c echo.Context) error {
+	return RenderError(c, http.StatusInternalServerError, "not implemented.")
 }

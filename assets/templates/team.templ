@@ -167,7 +167,7 @@ templ TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) {
 						hx-get={ fmt.Sprintf("/team/%v/edit", user.ID) }
 						hx-swap="outerHTML"
 						hx-target="closest tr"
-					>edit</button>
+					>Edit</button>
 				</td>
 			}
 		}

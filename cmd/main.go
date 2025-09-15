@@ -17,10 +17,18 @@ import (
 	"chrono/config"
 	"chrono/db"
 	"chrono/internal"
+	"chrono/internal/logging"
 )
 
 func main() {
 	fmt.Println(banner)
+	logger, logFile, err := logging.NewTextMultiLogger("logs/chrono.log", "debug", true)
+	if err != nil {
+		panic(err)
+	}
+	defer logFile.Close()
+	slog.SetDefault(logger)
+
 	slog.Info("Initializing chrono...")
 
 	cfg := config.NewConfigFromEnv()

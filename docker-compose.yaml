@@ -26,6 +26,7 @@ services:
     restart: unless-stopped
     volumes:
       - db:/app/db
+      - logs:/app/logs
     env_file:
       - .env
     networks:
@@ -40,6 +41,7 @@ volumes:
   db:
   caddy_data:
   caddy_config:
+  logs:
 
 
 networks:

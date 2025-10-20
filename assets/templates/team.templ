@@ -26,8 +26,8 @@ templ TeamTable(users []domain.UserWithVacation, currUser domain.User, notificat
 						<th class="text-center">Remaining</th>
 						<th>Email</th>
 						<th>Role</th>
+						<th>Enabled</th>
 						if currUser.IsAdmin() {
-							<th>Enabled</th>
 							<th></th>
 							if form {
 								<th></th>

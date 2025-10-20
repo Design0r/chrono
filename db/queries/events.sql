@@ -76,3 +76,7 @@ JOIN users u on e.user_id = u.id
 WHERE u.id != ? 
 AND e.scheduled_at >= ?
 AND e.scheduled_at <= ?;
+
+-- name: GetEventsByUserId :many
+SELECT * from events
+WHERE user_id = ?;

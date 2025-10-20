@@ -202,6 +202,7 @@ func (s *Server) InitRoutes() {
 		s.services.notif,
 		s.services.token,
 		s.services.session,
+		s.services.event,
 		s.log,
 	)
 	settinsHandler := handler.NewSettingsHandler(s.services.settings)

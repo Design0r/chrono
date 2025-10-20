@@ -349,3 +349,23 @@ func (r *SQLEventRepo) UpdateInRange(
 
 	return nil
 }
+func (r *SQLEventRepo) GetAllByUserId(
+	ctx context.Context,
+	userId int64,
+) ([]domain.Event, error) {
+	e, err := r.r.GetEventsByUserId(ctx, userId)
+	if err != nil {
+		r.log.Error(
+			"UpdateEventsRange failed",
+			slog.String("error", err.Error()),
+		)
+		return nil, err
+	}
+
+	events := make([]domain.Event, len(e))
+	for i, event := range e {
+		events[i] = (domain.Event)(event)
+	}
+
+	return events, nil
+}

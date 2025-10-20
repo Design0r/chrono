@@ -52,6 +52,8 @@ func (svc *holidayService) Update(ctx context.Context, year int) error {
 		return err
 	}
 
+	holidays = svc.filterHolidays(holidays)
+
 	for name, data := range holidays {
 		date, err := time.Parse(time.DateOnly, data["datum"])
 		if err != nil {
@@ -90,6 +92,18 @@ func (svc *holidayService) FetchHolidays(year int) (domain.Holidays, error) {
 	}
 
 	return holidays, nil
+}
+
+func (svc *holidayService) filterHolidays(holidays domain.Holidays) domain.Holidays {
+	filter := map[string]bool{"Reformationstag": true}
+
+	for holiday := range holidays {
+		if _, exists := filter[holiday]; exists {
+			delete(holidays, holiday)
+		}
+	}
+
+	return holidays
 }
 
 func (svc *holidayService) HolidayCacheExists(ctx context.Context, year int) bool {

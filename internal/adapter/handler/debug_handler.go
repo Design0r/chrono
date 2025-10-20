@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"chrono/assets/templates"
+	"chrono/config"
 	"chrono/internal/domain"
 	"chrono/internal/service"
 )
@@ -18,6 +19,7 @@ type DebugHandler struct {
 	token   service.TokenService
 	session service.SessionService
 	log     *slog.Logger
+	event   service.EventService
 }
 
 func NewDebugHandler(
@@ -26,9 +28,10 @@ func NewDebugHandler(
 	n service.NotificationService,
 	t service.TokenService,
 	s service.SessionService,
+	e service.EventService,
 	log *slog.Logger,
 ) DebugHandler {
-	return DebugHandler{user: u, auth: a, notif: n, token: t, session: s, log: log}
+	return DebugHandler{user: u, auth: a, notif: n, token: t, session: s, log: log, event: e}
 }
 
 func (h *DebugHandler) RegisterRoutes(group *echo.Group) {
@@ -37,6 +40,7 @@ func (h *DebugHandler) RegisterRoutes(group *echo.Group) {
 	group.DELETE("/debug/sessions", h.DeleteSessions)
 	group.PATCH("/debug/color", h.UserColor)
 	group.PATCH("/debug/password", h.ChangePassword)
+	group.DELETE("/debug/botEvents", h.DeleteBotEventsByName)
 }
 
 func (h *DebugHandler) Debug(c echo.Context) error {
@@ -91,6 +95,9 @@ func (h *DebugHandler) UserColor(c echo.Context) error {
 	}
 
 	bot, err := h.user.GetById(ctx, 1)
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, err.Error())
+	}
 	bot.Color = domain.Color.HSLToHex(domain.Color.HSLFloat(1))
 	h.user.Update(ctx, bot)
 
@@ -123,4 +130,32 @@ func (h *DebugHandler) ChangePassword(c echo.Context) error {
 	}
 
 	return Render(c, http.StatusOK, templates.Message("Successfully changed password", "success"))
+}
+
+func (h *DebugHandler) DeleteBotEventsByName(c echo.Context) error {
+	ctx := c.Request().Context()
+	currUser := c.Get("user").(domain.User)
+	eventName := c.FormValue("eventName")
+	cfg := config.GetConfig()
+	bot, err := h.user.GetByName(ctx, cfg.BotName)
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, "Failed to get chrono bot.")
+	}
+	events, err := h.event.GetAllByUserId(ctx, bot.ID)
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, "Failed to get events for user.")
+	}
+
+	for _, event := range events {
+		if event.Name == eventName {
+			_, err = h.event.Delete(ctx, event.ID, &currUser)
+			if err != nil {
+				h.log.Error("failed deleting event", slog.String("event", event.Name), slog.String("error", err.Error()))
+			}
+
+			h.log.Debug("deleted event", slog.String("event", event.Name))
+		}
+	}
+
+	return Render(c, http.StatusOK, templates.Message("Successfully deleted events", "success"))
 }

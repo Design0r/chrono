@@ -203,7 +203,7 @@ func TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) temp
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<th><div tabindex=\"0\" role=\"button\" class=\"avatar placeholder p-0 \"><div class=\"w-8 !flex items-center justify-center border rounded-full text-neutral-content\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<th><div tabindex=\"0\" role=\"button\" class=\"avatar placeholder p-0 \"><div class=\"w-8 flex items-center justify-center border rounded-full text-neutral-content\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

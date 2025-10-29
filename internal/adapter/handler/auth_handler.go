@@ -72,7 +72,7 @@ func (h *AuthHandler) Signup(c echo.Context) error {
 
 	cookie, err := h.auth.Signup(c.Request().Context(), loginData)
 	if err != nil {
-		return RenderError(c, http.StatusNotFound, "Incorrect email or password")
+		return RenderError(c, http.StatusNotFound, err.Error())
 	}
 
 	c.SetCookie(cookie)

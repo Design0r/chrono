@@ -89,5 +89,30 @@ func (h *TeamHandler) GetTeamRowForm(c echo.Context) error {
 }
 
 func (h *TeamHandler) PatchTeamRow(c echo.Context) error {
-	return RenderError(c, http.StatusInternalServerError, "not implemented.")
+	ctx := c.Request().Context()
+	currUser := c.Get("user").(domain.User)
+
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return RenderError(c, http.StatusBadRequest, "Invalid user id")
+	}
+
+	vacParam := c.FormValue("vacation")
+	vac, err := strconv.Atoi(vacParam)
+	if err != nil {
+		return RenderError(c, http.StatusBadRequest, "Invalid vacation number")
+	}
+
+	err = h.user.SetVacation(ctx, id, vac, domain.CurrentYear())
+	if err != nil {
+		return RenderError(c, http.StatusBadRequest, "Failed to update user vacation")
+	}
+
+	user, err := h.event.GetUserWithVacation(ctx, id, domain.CurrentYear(), 1)
+	if err != nil {
+		return RenderError(c, http.StatusNotFound, "user not found")
+	}
+
+	return Render(c, http.StatusOK, templates.TeamRow(currUser, user, false))
 }

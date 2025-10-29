@@ -47,17 +47,17 @@ templ TeamTable(users []domain.UserWithVacation, currUser domain.User, notificat
 
 templ TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) {
 	{{
-	cfg := config.GetConfig()
-	css := "hover:bg-primary/10 pt-8 border-b-1 border-primary/25 text-base-content/80 hover:text-primary animate-color"
-	if user.VacationDays == 0 && user.Username != cfg.BotName {
-		css = "bg-error/35 hover:bg-error/50 pt-8 border-2 border-error/70 text-base-content/80 animate-color"
-	}
-	h, s, l := domain.Color.HexToHSL(user.Color)
-	borderColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.6)", h, s*100, l*100)
-	bgColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.20)", h, s*100, l*100)
-	textColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 1)", h, s*100, l*100)
+		cfg := config.GetConfig()
+		css := "hover:bg-primary/10 pt-8 border-b-1 border-primary/25 text-base-content/80 hover:text-primary animate-color"
+		if user.VacationDays == 0 && user.Username != cfg.BotName {
+			css = "bg-error/35 hover:bg-error/50 pt-8 border-2 border-error/70 text-base-content/80 animate-color"
+		}
+		h, s, l := domain.Color.HexToHSL(user.Color)
+		borderColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.6)", h, s*100, l*100)
+		bgColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.20)", h, s*100, l*100)
+		textColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 1)", h, s*100, l*100)
 
-	formId := fmt.Sprintf("form-%v", user.ID)
+		formId := fmt.Sprintf("form-%v", user.ID)
 	}}
 	<tr class={ css }>
 		if form {
@@ -70,7 +70,7 @@ templ TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) {
 				class="avatar placeholder p-0 "
 			>
 				<div
-					class="w-8 !flex items-center justify-center border rounded-full text-neutral-content"
+					class="w-8 flex items-center justify-center border rounded-full text-neutral-content"
 					{ templ.Attributes{"style":fmt.Sprintf("background-color: %v; border-color: %v;", bgColor, borderColor)}... }
 				>
 					<div
@@ -118,10 +118,10 @@ templ TeamRow(currUser domain.User, user domain.UserWithVacation, form bool) {
 			}
 		</td>
 		{{
-	icon := "check_box_outline_blank"
-	if user.Enabled {
-		icon = "check_box"
-	}
+			icon := "check_box_outline_blank"
+			if user.Enabled {
+				icon = "check_box"
+			}
 		}}
 		<td class="icon-outlined">
 			if currUser.IsSuperuser && form {

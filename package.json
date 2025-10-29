@@ -10,8 +10,8 @@
 		"dev": "npx --yes @tailwindcss/cli -i ./assets/css/input.css -o ./assets/static/css/output.css --minify --watch --host"
 	},
 	"dependencies": {
-		"@tailwindcss/cli": "^4.1.7",
-		"tailwindcss": "^4.1.7",
-		"daisyui": "^5.0.35"
+		"@tailwindcss/cli": "^4.1.16",
+		"daisyui": "^5.3.10",
+		"tailwindcss": "^4.1.16"
 	}
 }

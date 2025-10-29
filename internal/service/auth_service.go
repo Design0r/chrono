@@ -108,7 +108,7 @@ func (svc *authService) Signup(
 	_, err := svc.user.GetByEmail(ctx, userParams.Email)
 	if err == nil {
 		svc.log.Error("User with this email already exists", slog.String("email", userParams.Email))
-		return nil, err
+		return nil, errors.New("User with this email already exists")
 	}
 
 	hashedPw, err := svc.pw.Hash(userParams.Password)

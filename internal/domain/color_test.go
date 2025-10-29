@@ -14,7 +14,7 @@ func TestRandomHexColor(t *testing.T) {
 		t.Errorf("Expected color to start with '#', got %s", color)
 	}
 	if len(color) != 7 {
-		t.Errorf("Expected hex color length of 7 (like #FFFFFF), got %d", len(color))
+		t.Errorf("Expected hex color length of 7 (like #FFFFFF), got %v", color)
 	}
 }
 

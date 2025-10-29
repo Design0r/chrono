@@ -1,10 +1,10 @@
 module chrono
 
-go 1.24.4
+go 1.25.3
 
 require (
-	github.com/getsentry/sentry-go v0.36.0
-	github.com/getsentry/sentry-go/echo v0.36.0
+	github.com/getsentry/sentry-go v0.36.2
+	github.com/getsentry/sentry-go/echo v0.36.2
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/pressly/goose/v3 v3.26.0

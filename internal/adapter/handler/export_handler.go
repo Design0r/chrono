@@ -13,11 +13,12 @@ import (
 )
 
 type ExportHandler struct {
-	krank service.ExportService
+	krank  service.ExportService
+	notifs service.NotificationService
 }
 
-func NewExportHandler(k service.ExportService) ExportHandler {
-	return ExportHandler{krank: k}
+func NewExportHandler(k service.ExportService, n service.NotificationService) ExportHandler {
+	return ExportHandler{krank: k, notifs: n}
 }
 
 func (s *ExportHandler) RegisterRoutes(group *echo.Group) {
@@ -29,7 +30,12 @@ func (s *ExportHandler) RegisterRoutes(group *echo.Group) {
 func (h *ExportHandler) Export(c echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 
-	return Render(c, http.StatusOK, templates.Export(currUser, []domain.Notification{}))
+	notifs, err := h.notifs.GetByUserId(c.Request().Context(), currUser.ID)
+	if err != nil {
+		return RenderError(c, http.StatusInternalServerError, "Failed to get user notifications.")
+	}
+
+	return Render(c, http.StatusOK, templates.Export(currUser, notifs))
 }
 
 func (h *ExportHandler) ExportAll(c echo.Context) error {

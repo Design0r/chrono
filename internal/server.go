@@ -210,7 +210,7 @@ func (s *Server) InitRoutes() {
 	)
 	settinsHandler := handler.NewSettingsHandler(s.services.settings)
 
-	exportHandler := handler.NewExportHandler(s.services.krank)
+	exportHandler := handler.NewExportHandler(s.services.krank, s.services.notif)
 
 	settingsGrp := s.Router.Group("", mw.SettingsMiddleware(s.services.settings))
 

@@ -1,0 +1,21 @@
+package templates
+
+import "chrono/internal/domain"
+import "fmt"
+
+templ Export(user domain.User, notifications []domain.Notification) {
+	@Index(&user, notifications) {
+		<div class="container justify-center">
+			<div class="justify-center flex flex-col mx-auto max-w-sm">
+				<form action="/export/all" method="get">
+					<div class="flex flex-col space-y-2">
+						<label>
+							<input class="input input-bordered w-full" name="year" type="number" step="1" value={ fmt.Sprint(domain.CurrentYear()) }/>
+						</label>
+						<button class="btn text-white btn-primary bg-primary/80 hover:bg-primary animate-color" type="submit">Krankheitstage Jahr</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	}
+}

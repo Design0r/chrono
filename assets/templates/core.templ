@@ -120,6 +120,11 @@ templ Header(user *domain.User, notifications []domain.Notification) {
 								tokenClasses += " text-primary"
 							}
 
+							exportClasses := "btn btn-ghost py-6 hover:bg-accent/5 border-0 max-lg:min-w-24"
+							if strings.Contains(currentPath, "/export") {
+								exportClasses += " text-primary"
+							}
+
 							settingsClasses := "btn btn-ghost py-6 hover:bg-accent/5 border-0 max-lg:min-w-24"
 							if strings.Contains(currentPath, "/settings") {
 								settingsClasses += " text-primary"
@@ -146,6 +151,10 @@ templ Header(user *domain.User, notifications []domain.Notification) {
 								<span class="icon-outlined">local_activity</span>
 								<span class="font-medium text-base">Tokens</span>
 							</a>
+							<a href="/export" class={ tokenClasses }>
+								<span class="icon-outlined">file_export</span>
+								<span class="font-medium text-base">Export</span>
+							</a>
 							<a href="/settings" class={ settingsClasses }>
 								<span class="icon-outlined">settings</span>
 								<span class="font-medium text-base">Settings</span>
@@ -171,14 +180,14 @@ templ Header(user *domain.User, notifications []domain.Notification) {
 
 templ Avatar(user domain.User) {
 	{{
-	initial := "?"
-	if len(user.Username) > 0 {
-		initial = strings.ToUpper(user.Username[:1])
-	}
-	h, s, l := domain.Color.HexToHSL(user.Color)
-	bgColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.25)", h, s*100, l*100)
-	borderColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.6)", h, s*100, l*100)
-	textColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 1)", h, s*100, l*100)
+		initial := "?"
+		if len(user.Username) > 0 {
+			initial = strings.ToUpper(user.Username[:1])
+		}
+		h, s, l := domain.Color.HexToHSL(user.Color)
+		bgColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.25)", h, s*100, l*100)
+		borderColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.6)", h, s*100, l*100)
+		textColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 1)", h, s*100, l*100)
 	}}
 	<div class="dropdown dropdown-end pr-2">
 		<!-- Trigger -->

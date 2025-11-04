@@ -47,6 +47,7 @@ type services struct {
 	user     service.UserService
 	vac      service.VacationTokenService
 	pwHasher auth.PasswordHasher
+	krank    service.ExportService
 }
 
 type Server struct {
@@ -141,6 +142,7 @@ func (s *Server) InitServices() {
 
 	holidaySvc := service.NewHolidayService(&userSvc, &eventSvc, s.repos.apiCache, s.log)
 	settingSvc := service.NewSettingsService(s.repos.settings, s.log)
+	krankSvc := service.NewKrankheitsExportService(&eventSvc, &userSvc)
 
 	s.services = services{
 		refresh:  &refreshTokenSvc,
@@ -155,6 +157,7 @@ func (s *Server) InitServices() {
 		auth:     &authSvc,
 		holiday:  &holidaySvc,
 		settings: &settingSvc,
+		krank:    &krankSvc,
 	}
 
 	s.log.Info("Initialized services.")
@@ -207,6 +210,8 @@ func (s *Server) InitRoutes() {
 	)
 	settinsHandler := handler.NewSettingsHandler(s.services.settings)
 
+	exportHandler := handler.NewExportHandler(s.services.krank)
+
 	settingsGrp := s.Router.Group("", mw.SettingsMiddleware(s.services.settings))
 
 	authGrp := settingsGrp.Group(
@@ -230,6 +235,8 @@ func (s *Server) InitRoutes() {
 	settinsHandler.RegisterRoutes(adminGrp)
 
 	authHandler.RegisterRoutes(honeypotGrp)
+
+	exportHandler.RegisterRoutes(authGrp)
 
 	s.log.Info("Initialized routes.")
 }

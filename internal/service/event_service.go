@@ -28,6 +28,10 @@ type EventService interface {
 		userFilter *domain.User,
 		eventFilter string,
 	) (domain.Month, error)
+	GetForYear(
+		ctx context.Context,
+		year int,
+	) ([]domain.EventUser, error)
 	GetHistogramForYear(ctx context.Context, year int) ([]domain.YearHistogram, error)
 	GetPendingForUser(ctx context.Context, userId int64, year int) (int, error)
 	GetUsedVacationForUser(ctx context.Context, userId int64, year int) (float64, error)
@@ -145,6 +149,13 @@ func (svc *eventService) GetForMonth(
 ) (domain.Month, error) {
 	cfg := config.GetConfig()
 	return svc.event.GetForMonth(ctx, data, cfg.BotName, userFilter, eventFilter)
+}
+
+func (svc *eventService) GetForYear(
+	ctx context.Context,
+	year int,
+) ([]domain.EventUser, error) {
+	return svc.event.GetForYear(ctx, year)
 }
 
 func (svc *eventService) GetHistogramForYear(

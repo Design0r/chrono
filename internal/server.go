@@ -14,6 +14,7 @@ import (
 	"chrono/db/repo"
 	"chrono/internal/adapter/db"
 	"chrono/internal/adapter/handler"
+	"chrono/internal/adapter/handler/api"
 	mw "chrono/internal/adapter/middleware"
 	"chrono/internal/domain"
 	"chrono/internal/service"
@@ -184,7 +185,12 @@ func (s *Server) InitRoutes() {
 		s.services.user,
 		s.log,
 	)
-	profileHandler := handler.NewProfileHandler(s.services.user, s.services.notif, s.services.auth, s.log)
+	profileHandler := handler.NewProfileHandler(
+		s.services.user,
+		s.services.notif,
+		s.services.auth,
+		s.log,
+	)
 	requestHandler := handler.NewRequestHandler(
 		s.services.request,
 		s.services.notif,
@@ -241,6 +247,26 @@ func (s *Server) InitRoutes() {
 	s.log.Info("Initialized routes.")
 }
 
+func (s *Server) InitAPIRoutes() {
+	authHandler := api.NewAPIAuthHandler(
+		s.services.user,
+		s.services.auth,
+		s.log,
+	)
+
+	settingsGrp := s.Router.Group("/api/v1", mw.SettingsAPIMiddleware(s.services.settings))
+
+	authGrp := settingsGrp.Group(
+		"",
+		mw.SessionAPIMiddleware(s.services.session),
+		mw.AuthenticationAPIMiddleware(s.services.auth),
+	)
+
+	authHandler.RegisterRoutes(authGrp)
+
+	s.log.Info("Initialized api routes.")
+}
+
 func (s *Server) Start(address string) error {
 	err := s.PreStart()
 	if err != nil {
@@ -255,6 +281,7 @@ func (s *Server) PreStart() error {
 	s.InitRepos()
 	s.InitServices()
 	s.InitRoutes()
+	// s.InitAPIRoutes()
 
 	settings := domain.Settings{SignupEnabled: false}
 	_, err := s.services.settings.Init(context.Background(), settings)

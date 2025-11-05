@@ -70,6 +70,11 @@ type Login struct {
 	Password string `form:"qwepasswordasd"`
 }
 
+type APILogin struct {
+	Email    string `form:"email"`
+	Password string `form:"password"`
+}
+
 type Honeypot struct {
 	Name     string `form:"name"     json:"name"`
 	Email    string `form:"email"    json:"email"`

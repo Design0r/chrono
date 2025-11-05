@@ -31,7 +31,7 @@ func (h *APIAuthHandler) RegisterRoutes(group *echo.Group) {
 }
 
 func (h *APIAuthHandler) Login(c echo.Context) error {
-	var loginData domain.Login
+	var loginData domain.APILogin
 	if err := c.Bind(&loginData); err != nil {
 		return NewErrorResponse(c, http.StatusBadRequest, "Invalid inputs")
 	}

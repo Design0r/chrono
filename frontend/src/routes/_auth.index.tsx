@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { StatCard, StatCardElement } from "../components/StatCard";
 import { TitleSection } from "../components/TitleSection";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_auth/")({
   component: Home,
 });
 

@@ -1,6 +1,7 @@
 import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 
 import { useAuth } from "../auth";
+import { Header } from "../components/Header";
 
 export const Route = createFileRoute("/_auth")({
   beforeLoad: ({ context, location }) => {
@@ -31,5 +32,9 @@ function AuthLayout() {
     }
   };
 
-  return <div></div>;
+  return (
+    <div>
+      <Header />
+    </div>
+  );
 }

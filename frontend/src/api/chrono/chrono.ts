@@ -1,1 +1,1 @@
-export const CHRONO_URL = "localhost:8080/api/v1";
+export const CHRONO_URL = "http://localhost:8080/api/v1";

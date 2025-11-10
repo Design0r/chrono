@@ -79,6 +79,14 @@ func (s *Server) InitMiddleware() {
 	s.Router.Use(middleware.Secure())
 	s.Router.Use(middleware.Recover())
 	s.Router.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
+	s.Router.Use(
+		middleware.CORSWithConfig(
+			middleware.CORSConfig{
+				AllowOrigins:     []string{"http://localhost:8080", "http://localhost:5173"},
+				AllowCredentials: true,
+			},
+		),
+	)
 	s.Router.GET("/static/*", mw.StaticHandler, mw.CacheControl)
 	s.Router.Use(sentryecho.New(sentryecho.Options{Repanic: true}))
 
@@ -256,13 +264,13 @@ func (s *Server) InitAPIRoutes() {
 
 	settingsGrp := s.Router.Group("/api/v1", mw.SettingsAPIMiddleware(s.services.settings))
 
-	authGrp := settingsGrp.Group(
-		"",
-		mw.SessionAPIMiddleware(s.services.session),
-		mw.AuthenticationAPIMiddleware(s.services.auth),
-	)
+	// authGrp := settingsGrp.Group(
+	// 	"",
+	// 	mw.SessionAPIMiddleware(s.services.session),
+	// 	mw.AuthenticationAPIMiddleware(s.services.auth),
+	// )
 
-	authHandler.RegisterRoutes(authGrp)
+	authHandler.RegisterRoutes(settingsGrp)
 
 	s.log.Info("Initialized api routes.")
 }
@@ -281,7 +289,7 @@ func (s *Server) PreStart() error {
 	s.InitRepos()
 	s.InitServices()
 	s.InitRoutes()
-	// s.InitAPIRoutes()
+	s.InitAPIRoutes()
 
 	settings := domain.Settings{SignupEnabled: false}
 	_, err := s.services.settings.Init(context.Background(), settings)

@@ -4,6 +4,8 @@ import { createRoot } from "react-dom/client";
 import { AuthProvider, useAuth } from "./auth";
 import "./css/index.css";
 import { routeTree } from "./routeTree.gen";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 // Set up a Router instance
 const router = createRouter({
@@ -27,16 +29,21 @@ function InnerApp() {
   return <RouterProvider router={router} context={{ auth }} />;
 }
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <AuthProvider>
-      <InnerApp />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ReactQueryDevtools />
+        <InnerApp />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
-  </StrictMode>
+  </StrictMode>,
 );

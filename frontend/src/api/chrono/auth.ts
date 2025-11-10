@@ -5,7 +5,7 @@ import { CHRONO_URL } from "./chrono";
 
 export async function login(data: LoginRequest): Promise<ChronoResponse> {
   const form = new FormData();
-  form.append("username", data.username);
+  form.append("email", data.email);
   form.append("password", data.password);
 
   const response = await fetch(CHRONO_URL + "/login", {

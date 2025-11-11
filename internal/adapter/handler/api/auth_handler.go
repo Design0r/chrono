@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -31,19 +32,28 @@ func (h *APIAuthHandler) RegisterRoutes(group *echo.Group) {
 }
 
 func (h *APIAuthHandler) Login(c echo.Context) error {
+	ctx := c.Request().Context()
+
 	var loginData domain.APILogin
 	if err := c.Bind(&loginData); err != nil {
 		return NewErrorResponse(c, http.StatusBadRequest, "Invalid inputs")
 	}
 
-	cookie, err := h.auth.Login(c.Request().Context(), loginData.Email, loginData.Password)
+	fmt.Println(loginData)
+
+	cookie, err := h.auth.Login(ctx, loginData.Email, loginData.Password)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusNotFound, "Incorrect email or password")
 	}
 
+	user, err := h.user.GetByEmail(ctx, loginData.Email)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusNotFound, "Unable to fetch user")
+	}
+
 	c.SetCookie(cookie)
 
-	return NewJsonResponse(c, nil)
+	return NewJsonResponse(c, user)
 }
 
 func (h *APIAuthHandler) Signup(c echo.Context) error {

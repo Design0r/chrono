@@ -70,7 +70,7 @@ func (svc *userService) GetByName(ctx context.Context, name string) (*domain.Use
 }
 
 func (svc *userService) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
-	return svc.user.GetByName(ctx, email)
+	return svc.user.GetByEmail(ctx, email)
 }
 
 func (svc *userService) GetAll(ctx context.Context) ([]domain.User, error) {

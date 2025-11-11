@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { useRouter } from "@tanstack/react-router";
 import {
   login as chrono_login,
   logout as chrono_logout,
@@ -16,16 +17,23 @@ export interface AuthContext {
 const AuthContext = React.createContext<AuthContext | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<User | null>(null);
+  const local = localStorage.getItem("user");
+  const parsed = local ? JSON.parse(local) : null;
+  const [user, setUser] = React.useState<User | null>(parsed);
   const isAuthenticated = !!user;
+  const router = useRouter();
 
   const logout = React.useCallback(async () => {
     await chrono_logout();
+    localStorage.removeItem("user");
     setUser(null);
+    await router.invalidate();
+    router.navigate({ to: "/login" });
   }, []);
 
   const login = React.useCallback(async (data: LoginRequest) => {
     const user = (await chrono_login(data)).data;
+    localStorage.setItem("user", JSON.stringify(user));
     setUser(user);
   }, []);
 

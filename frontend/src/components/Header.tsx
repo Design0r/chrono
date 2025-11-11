@@ -1,11 +1,29 @@
 import {
   Link,
   useLocation,
+  useNavigate,
+  useRouter,
   type LinkProps,
   type RegisteredRouter,
 } from "@tanstack/react-router";
+import { useAuth } from "../auth";
+import { Avatar } from "./Avatar";
 
 export function Header() {
+  const router = useRouter();
+  const navigate = useNavigate();
+  const auth = useAuth();
+
+  const handleLogout = () => {
+    auth.logout().then(() => {
+      router.invalidate().finally(() => {
+        navigate({ to: "/" });
+      });
+    });
+  };
+
+  console.log(auth.user);
+
   return (
     <div className="mb-4 mx-auto p-4 lg:px-4">
       <div className="navbar flex justify-between">
@@ -32,12 +50,18 @@ export function Header() {
           </div>
         </div>
         <div className="flex items-center justify-end gap-6">
-          <a href="/login" className="btn btn-ghost">
-            Login
-          </a>
-          <a href="/signup" className="btn btn-ghost">
-            Signup
-          </a>
+          {!auth.user ? (
+            <>
+              <a href="/login" className="btn btn-ghost">
+                Login
+              </a>
+              <a href="/signup" className="btn btn-ghost">
+                Signup
+              </a>
+            </>
+          ) : (
+            <Avatar user={auth.user} />
+          )}
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useAuth } from "../auth";
 import { StatCard, StatCardElement } from "../components/StatCard";
 import { TitleSection } from "../components/TitleSection";
 
@@ -7,11 +8,13 @@ export const Route = createFileRoute("/_auth/")({
 });
 
 function Home() {
+  const auth = useAuth();
+
   return (
     <div className="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
       <div className="text-[48px] pl-2 text-primary font-light mb-2">
         <span className="animate-pulse font-medium text-white pr-1"> Hej </span>
-        {"username"}
+        {auth.user?.username}
       </div>
       <TitleSection title="Your vacation stats">
         <StatCard>

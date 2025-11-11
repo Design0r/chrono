@@ -6,9 +6,11 @@ import {
   logout as chrono_logout,
 } from "./api/chrono/auth";
 import type { LoginRequest, User } from "./types/auth";
+import { useEffect } from "react";
+import { getUserById } from "./api/chrono/users";
 
 export interface AuthContext {
-  isAuthenticated: boolean;
+  isAuthenticated: () => boolean;
   login: (data: LoginRequest) => Promise<void>;
   logout: () => Promise<void>;
   user: User | null;
@@ -17,11 +19,27 @@ export interface AuthContext {
 const AuthContext = React.createContext<AuthContext | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const local = localStorage.getItem("user");
-  const parsed = local ? JSON.parse(local) : null;
-  const [user, setUser] = React.useState<User | null>(parsed);
-  const isAuthenticated = !!user;
+  const [user, setUser] = React.useState<User | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fn = async () => {
+      const local = localStorage.getItem("user");
+      if (local) {
+        const user = await getUserById(Number.parseInt(local));
+        if (!cancelled) setUser(user);
+        console.log(user);
+      }
+    };
+
+    fn();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const logout = React.useCallback(async () => {
     await chrono_logout();
@@ -33,9 +51,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = React.useCallback(async (data: LoginRequest) => {
     const user = (await chrono_login(data)).data;
-    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("user", String(user.id));
     setUser(user);
   }, []);
+
+  const isAuthenticated = () => !!user;
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>

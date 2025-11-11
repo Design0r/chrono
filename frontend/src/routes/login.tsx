@@ -16,7 +16,6 @@ function RouteComponent() {
   const mutation = useMutation({
     mutationFn: async (data: LoginRequest) => await auth.login(data),
     onSuccess: async () => {
-      console.log(auth.user);
       await router.invalidate();
       await navigate({ to: "/" });
     },
@@ -31,7 +30,7 @@ function RouteComponent() {
           <form
             className="w-max"
             onSubmit={handleSubmit((data: LoginRequest) =>
-              mutation.mutate(data)
+              mutation.mutate(data),
             )}
           >
             <div className="w-lg">

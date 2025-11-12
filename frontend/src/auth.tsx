@@ -1,71 +1,55 @@
-import * as React from "react";
-
-import { useRouter } from "@tanstack/react-router";
 import {
-  login as chrono_login,
-  logout as chrono_logout,
-} from "./api/chrono/auth";
-import type { LoginRequest, User } from "./types/auth";
-import { useEffect } from "react";
-import { getUserById } from "./api/chrono/users";
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  type ReactNode,
+} from "react";
+import { ChronoClient } from "./api/chrono/client";
+import type { LoginRequest } from "./types/auth";
 
 export interface AuthContext {
-  isAuthenticated: () => boolean;
+  isAuthenticated: boolean;
   login: (data: LoginRequest) => Promise<void>;
   logout: () => Promise<void>;
-  user: User | null;
+  userId: number | null;
 }
 
-const AuthContext = React.createContext<AuthContext | null>(null);
+const AuthContext = createContext<AuthContext | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<User | null>(null);
-  const router = useRouter();
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const uid = localStorage.getItem("user");
+  const [userId, setUserId] = useState<number | null>(
+    uid ? Number.parseInt(uid) : null
+  );
+  const [isAuthenticated, setIsAuthenticated] = useState(!!uid);
+  const chrono = new ChronoClient();
 
-  useEffect(() => {
-    let cancelled = false;
+  console.log(isAuthenticated);
 
-    const fn = async () => {
-      const local = localStorage.getItem("user");
-      if (local) {
-        const user = await getUserById(Number.parseInt(local));
-        if (!cancelled) setUser(user);
-        console.log(user);
-      }
-    };
-
-    fn();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const logout = React.useCallback(async () => {
-    await chrono_logout();
+  const logout = useCallback(async () => {
+    await chrono.auth.logout();
     localStorage.removeItem("user");
-    setUser(null);
-    await router.invalidate();
-    router.navigate({ to: "/login" });
+    setUserId(null);
+    setIsAuthenticated(false);
   }, []);
 
-  const login = React.useCallback(async (data: LoginRequest) => {
-    const user = (await chrono_login(data)).data;
-    localStorage.setItem("user", String(user.id));
-    setUser(user);
+  const login = useCallback(async (data: LoginRequest) => {
+    const user = (await chrono.auth.login(data)).data;
+    localStorage.setItem("user", user.id);
+    setUserId(user.id);
+    setIsAuthenticated(true);
   }, []);
-
-  const isAuthenticated = () => !!user;
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, userId, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const context = React.useContext(AuthContext);
+  const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }

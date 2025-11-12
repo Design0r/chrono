@@ -18,7 +18,7 @@ export function Header() {
             <img className="w-40" alt="chrono logo" src="chrono.svg" />
           </div>
 
-          {auth.isAuthenticated() && (
+          {auth.isAuthenticated && (
             <div
               className="z-20! max-lg:dock max-lg:border-t max-lg:border-accent/15 max-lg:bg-base-100/50! backdrop-blur-xl overflow-x-auto flex gap-4 lg:w-fit 
 						*:flex *:flex-col! *:lg:flex-row! *:lg:gap-2 *:lg:items-center"
@@ -39,7 +39,7 @@ export function Header() {
           )}
         </div>
         <div className="flex items-center justify-end gap-6">
-          {!auth.user || !auth.isAuthenticated() ? (
+          {!auth.isAuthenticated ? (
             <>
               <a href="/login" className="btn btn-ghost">
                 Login

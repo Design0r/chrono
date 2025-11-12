@@ -1,11 +1,21 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { AuthProvider, useAuth } from "./auth";
+import { ChronoClient } from "./api/chrono/client";
+import { AuthProvider, useAuth, type AuthContext } from "./auth";
 import "./css/index.css";
 import { routeTree } from "./routeTree.gen";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+const queryClient = new QueryClient();
+const chrono = new ChronoClient();
+
+export type RouterContext = {
+  auth: ReturnType<typeof useAuth>;
+  queryClient: QueryClient;
+  chrono: ChronoClient;
+};
 
 // Set up a Router instance
 const router = createRouter({
@@ -13,7 +23,9 @@ const router = createRouter({
   defaultPreload: "intent",
   scrollRestoration: true,
   context: {
-    auth: undefined!,
+    auth: undefined! as unknown as AuthContext,
+    chrono: chrono,
+    queryClient: queryClient,
   },
 });
 
@@ -29,8 +41,6 @@ function InnerApp() {
   return <RouterProvider router={router} context={{ auth }} />;
 }
 
-const queryClient = new QueryClient();
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -45,5 +55,5 @@ function App() {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
-  </StrictMode>,
+  </StrictMode>
 );

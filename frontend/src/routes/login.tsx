@@ -12,12 +12,11 @@ function RouteComponent() {
   const router = useRouter();
   const auth = useAuth();
   const { register, handleSubmit } = useForm<LoginRequest>();
-  const navigate = Route.useNavigate();
   const mutation = useMutation({
     mutationFn: async (data: LoginRequest) => await auth.login(data),
     onSuccess: async () => {
       await router.invalidate();
-      await navigate({ to: "/" });
+      await router.navigate({ to: "/" });
     },
   });
 
@@ -30,7 +29,7 @@ function RouteComponent() {
           <form
             className="w-max"
             onSubmit={handleSubmit((data: LoginRequest) =>
-              mutation.mutate(data),
+              mutation.mutate(data)
             )}
           >
             <div className="w-lg">

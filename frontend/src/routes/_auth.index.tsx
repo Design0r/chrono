@@ -4,12 +4,17 @@ import { TitleSection } from "../components/TitleSection";
 
 export const Route = createFileRoute("/_auth/")({
   component: Home,
+  loader: async ({ context }) => {
+    const { user, refreshUser } = context.auth;
+    if (!user) {
+      const u = await refreshUser();
+      return u;
+    }
+  },
 });
 
 function Home() {
-  const {
-    auth: { user },
-  } = Route.useRouteContext();
+  const user = Route.useLoaderData();
 
   return (
     <div className="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">

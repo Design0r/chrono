@@ -5,23 +5,33 @@ import { hexToHSL, hsla } from "../utils/colors";
 
 export const Route = createFileRoute("/_auth/team")({
   component: RouteComponent,
-  loader: async ({ context: { chrono, queryClient } }) => {
-    const data = queryClient.ensureQueryData({
+  beforeLoad: async ({ context: { auth } }) => {
+    let user = auth.user;
+    if (!user) {
+      user = await auth.refreshUser();
+    }
+  },
+  loader: async ({ context: { chrono, queryClient, auth } }) => {
+    let user = auth.user;
+    if (!user) {
+      user = await auth.refreshUser();
+    }
+
+    const data = await queryClient.ensureQueryData({
       queryKey: ["users"],
-      queryFn: () => chrono.users.getUsers({ year: new Date().getFullYear() }),
+      queryFn: async () =>
+        await chrono.users.getUsers({ year: new Date().getFullYear() }),
     });
 
-    return data;
+    return { user: user, users: data };
   },
 });
 
 function RouteComponent() {
-  const users = Route.useLoaderData() as UserWithVacation[];
-  const {
-    auth: { user },
-  } = Route.useRouteContext();
-
-  console.log(users);
+  const { user, users } = Route.useLoaderData() as {
+    users: UserWithVacation[];
+    user: User;
+  };
 
   return (
     <div className="p-2 my-2">

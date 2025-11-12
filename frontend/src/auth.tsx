@@ -2,7 +2,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useState,
   type ReactNode,
 } from "react";
@@ -14,7 +13,7 @@ export interface AuthContext {
   login: (data: LoginRequest) => Promise<void>;
   logout: () => Promise<void>;
   userId: number | null;
-  setUser: (data: User) => void;
+  refreshUser: () => Promise<User>;
   user: User | null;
 }
 
@@ -30,11 +29,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(!!uid);
   const chrono = new ChronoClient();
 
-  useEffect(() => {
+  const refreshUser = useCallback(async () => {
     if (!isAuthenticated || !userId) return;
-    if (isAuthenticated && userId && !user)
-      chrono.users.getUserById(userId).then((v) => setUser(v));
-  }, [isAuthenticated, userId]);
+    const u = await chrono.users.getUserById(userId);
+    setUser(u);
+    return u;
+  }, []);
 
   const logout = useCallback(async () => {
     await chrono.auth.logout();
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, userId, login, logout, user, setUser }}
+      value={{ isAuthenticated, userId, login, logout, user, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

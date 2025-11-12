@@ -49,7 +49,7 @@ export function Header() {
               </a>
             </>
           ) : (
-            <Avatar user={auth.user} />
+            <Avatar />
           )}
         </div>
       </div>
@@ -65,11 +65,13 @@ export function MenuButton({ children, to, ...props }: MenuButtonProps) {
   const pathname = useLocation({
     select: (location) => location.pathname,
   });
+
+  console.log(pathname, to);
   return (
     <Link
       to={to}
       {...props}
-      className={`btn btn-ghost py-6 hover:bg-accent/5 border-0 max-lg:min-w-24 ${pathname.includes(to!) && "text-primary"}`}
+      className={`btn btn-ghost py-6 hover:bg-accent/5 border-0 max-lg:min-w-24 ${pathname === to && "text-primary"}`}
     >
       {children && Array.isArray(children) ? (
         <>{...children}</>

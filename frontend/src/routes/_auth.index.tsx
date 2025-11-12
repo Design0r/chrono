@@ -4,22 +4,12 @@ import { TitleSection } from "../components/TitleSection";
 
 export const Route = createFileRoute("/_auth/")({
   component: Home,
-  loader: async ({ context }) => {
-    const { queryClient, chrono, auth } = context;
-    if (!auth.userId) return null;
-
-    const user = await queryClient.ensureQueryData({
-      queryKey: ["user", auth.userId],
-      queryFn: () => chrono.users.getUserById(auth.userId!),
-      staleTime: 60_000,
-    });
-
-    return user;
-  },
 });
 
 function Home() {
-  const user = Route.useLoaderData();
+  const {
+    auth: { user },
+  } = Route.useRouteContext();
 
   return (
     <div className="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">

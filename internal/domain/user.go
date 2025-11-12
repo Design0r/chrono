@@ -37,14 +37,14 @@ type User struct {
 }
 
 func (u *User) IsAdmin() bool {
-	return u.IsSuperuser == true
+	return u.IsSuperuser
 }
 
 type UserWithVacation struct {
 	User
-	VacationRemaining float64
-	VacationUsed      float64
-	PendingEvents     int
+	VacationRemaining float64 `json:"vacation_remaining"`
+	VacationUsed      float64 `json:"vacation_used"`
+	PendingEvents     int     `json:"pending_events"`
 }
 
 type PatchUser struct {

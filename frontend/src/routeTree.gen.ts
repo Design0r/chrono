@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth.index'
+import { Route as AuthTeamRouteImport } from './routes/_auth.team'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -27,27 +28,35 @@ const AuthIndexRoute = AuthIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthTeamRoute = AuthTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
+  '/team': typeof AuthTeamRoute
   '/': typeof AuthIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/team': typeof AuthTeamRoute
   '/': typeof AuthIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
+  '/_auth/team': typeof AuthTeamRoute
   '/_auth/': typeof AuthIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/'
+  fullPaths: '/login' | '/team' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/'
-  id: '__root__' | '/_auth' | '/login' | '/_auth/'
+  to: '/login' | '/team' | '/'
+  id: '__root__' | '/_auth' | '/login' | '/_auth/team' | '/_auth/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -78,14 +87,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthIndexRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/team': {
+      id: '/_auth/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof AuthTeamRouteImport
+      parentRoute: typeof AuthRoute
+    }
   }
 }
 
 interface AuthRouteChildren {
+  AuthTeamRoute: typeof AuthTeamRoute
   AuthIndexRoute: typeof AuthIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthTeamRoute: AuthTeamRoute,
   AuthIndexRoute: AuthIndexRoute,
 }
 

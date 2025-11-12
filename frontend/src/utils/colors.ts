@@ -44,3 +44,7 @@ export function hexToHSL(hex: string): [number, number, number] {
   const hDegrees = h * 360;
   return [hDegrees, s, l];
 }
+
+export function hsla(h: number, s: number, l: number, a: number): string {
+  return `hsla(${h.toFixed(1)}, ${(s * 100).toFixed(1)}%, ${l * 100}%, ${a})`;
+}

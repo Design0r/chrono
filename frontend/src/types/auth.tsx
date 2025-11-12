@@ -15,3 +15,9 @@ export type User = {
   role: string;
   enabled: boolean;
 };
+
+export type UserWithVacation = User & {
+  vacation_remaining: number;
+  vacation_used: number;
+  pending_events: number;
+};

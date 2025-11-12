@@ -261,7 +261,7 @@ func (s *Server) InitAPIRoutes() {
 		s.services.auth,
 		s.log,
 	)
-	userHandler := api.NewAPIUserHandler(s.services.user, s.log)
+	userHandler := api.NewAPIUserHandler(s.services.user, s.services.event, s.log)
 
 	settingsGrp := s.Router.Group("/api/v1", mw.SettingsAPIMiddleware(s.services.settings))
 	authGrp := settingsGrp.Group(

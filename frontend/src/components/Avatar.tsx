@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ChronoClient } from "../api/chrono/client";
 import { useAuth } from "../auth";
 import type { User } from "../types/auth";
-import { hexToHSL } from "../utils/colors";
+import { hexToHSL, hsla } from "../utils/colors";
 
 export function Avatar() {
   const auth = useAuth();
@@ -27,10 +27,10 @@ export function Avatar() {
     setUser(data);
   }, [data]);
 
-  const [h, s, l] = hexToHSL(user ? user.color : "#000");
-  const bgColor = `hsla(${h.toFixed(1)}, ${(s * 100).toFixed(1)}%, ${l * 100}%, 0.25)`;
-  const borderColor = `hsla(${h.toFixed(1)}, ${(s * 100).toFixed(1)}%, ${l * 100}%, 0.6)`;
-  const textColor = `hsla(${h.toFixed(1)}, ${(s * 100).toFixed(1)}%, ${l * 100}%, 0.6)`;
+  const hsl = hexToHSL(user ? user.color : "#000");
+  const borderColor = hsla(...hsl, 0.6);
+  const bgColor = hsla(...hsl, 0.2);
+  const textColor = hsla(...hsl, 1);
 
   return (
     <div className="dropdown dropdown-end pr-2">

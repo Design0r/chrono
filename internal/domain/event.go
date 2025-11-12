@@ -65,8 +65,8 @@ type EventRepository interface {
 }
 
 type EventUser struct {
-	Event Event
-	User  User
+	Event Event `json:"event"`
+	User  User  `json:"user"`
 }
 
 type YMDDate struct {

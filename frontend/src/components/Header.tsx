@@ -10,6 +10,8 @@ import { Avatar } from "./Avatar";
 export function Header() {
   const auth = useAuth();
 
+  const date = new Date();
+
   return (
     <div className="mb-4 mx-auto p-4 lg:px-4">
       <div className="navbar flex justify-between">
@@ -27,7 +29,13 @@ export function Header() {
                 <span className="icon-outlined">home</span>
                 <span className="font-medium text-base">Home</span>
               </MenuButton>
-              <MenuButton to="/calendar">
+              <MenuButton
+                to="/calendar/$year/$month"
+                params={{
+                  year: date.getFullYear().toString(),
+                  month: date.getMonth().toString(),
+                }}
+              >
                 <span className="icon-outlined">calendar_today</span>
                 <span className="font-medium text-base">Calendar</span>
               </MenuButton>

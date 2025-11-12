@@ -34,18 +34,18 @@ var (
 )
 
 type Month struct {
-	Name   string
-	Number int
-	Year   int
-	Days   []Day
-	Offset int
+	Name   string `json:"name"`
+	Number int    `json:"number"`
+	Year   int    `json:"year"`
+	Days   []Day  `json:"days"`
+	Offset int    `json:"offset"`
 }
 
 type Day struct {
-	Number int
-	Name   string
-	Events []EventUser
-	Date   time.Time
+	Number int         `json:"number"`
+	Name   string      `json:"name"`
+	Events []EventUser `json:"events"`
+	Date   time.Time   `json:"date"`
 }
 
 type YearProgress struct {

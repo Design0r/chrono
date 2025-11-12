@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth.index'
 import { Route as AuthTeamRouteImport } from './routes/_auth.team'
+import { Route as AuthCalendarYearMonthRouteImport } from './routes/_auth.calendar.$year.$month'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -33,16 +34,23 @@ const AuthTeamRoute = AuthTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthCalendarYearMonthRoute = AuthCalendarYearMonthRouteImport.update({
+  id: '/calendar/$year/$month',
+  path: '/calendar/$year/$month',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/team': typeof AuthTeamRoute
   '/': typeof AuthIndexRoute
+  '/calendar/$year/$month': typeof AuthCalendarYearMonthRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/team': typeof AuthTeamRoute
   '/': typeof AuthIndexRoute
+  '/calendar/$year/$month': typeof AuthCalendarYearMonthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,13 +58,20 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_auth/team': typeof AuthTeamRoute
   '/_auth/': typeof AuthIndexRoute
+  '/_auth/calendar/$year/$month': typeof AuthCalendarYearMonthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/team' | '/'
+  fullPaths: '/login' | '/team' | '/' | '/calendar/$year/$month'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/team' | '/'
-  id: '__root__' | '/_auth' | '/login' | '/_auth/team' | '/_auth/'
+  to: '/login' | '/team' | '/' | '/calendar/$year/$month'
+  id:
+    | '__root__'
+    | '/_auth'
+    | '/login'
+    | '/_auth/team'
+    | '/_auth/'
+    | '/_auth/calendar/$year/$month'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,17 +109,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthTeamRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/calendar/$year/$month': {
+      id: '/_auth/calendar/$year/$month'
+      path: '/calendar/$year/$month'
+      fullPath: '/calendar/$year/$month'
+      preLoaderRoute: typeof AuthCalendarYearMonthRouteImport
+      parentRoute: typeof AuthRoute
+    }
   }
 }
 
 interface AuthRouteChildren {
   AuthTeamRoute: typeof AuthTeamRoute
   AuthIndexRoute: typeof AuthIndexRoute
+  AuthCalendarYearMonthRoute: typeof AuthCalendarYearMonthRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthTeamRoute: AuthTeamRoute,
   AuthIndexRoute: AuthIndexRoute,
+  AuthCalendarYearMonthRoute: AuthCalendarYearMonthRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)

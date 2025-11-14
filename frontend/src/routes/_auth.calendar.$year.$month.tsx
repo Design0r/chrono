@@ -6,6 +6,7 @@ import {
   UserFilter,
   VacationCounter,
 } from "../components/Calendar";
+import type { UserWithVacation } from "../types/auth";
 
 export const Route = createFileRoute("/_auth/calendar/$year/$month")({
   component: RouteComponent,
@@ -32,6 +33,10 @@ export const Route = createFileRoute("/_auth/calendar/$year/$month")({
 function RouteComponent() {
   const { users, month } = Route.useLoaderData();
   const params = Route.useParams();
+  const { auth } = Route.useRouteContext();
+  const currUser = users.find(
+    (u) => u.id === auth.user?.id,
+  ) as UserWithVacation;
 
   return (
     <div>
@@ -51,6 +56,7 @@ function RouteComponent() {
           <CalendarNavigation
             year={Number.parseInt(params.year)}
             month={Number.parseInt(params.month)}
+            monthName={month.name}
           />
           <div className="row-span-2 col-span-2 lg:row-span-1 lg:col-span-4 h-full text-lg">
             <div className="h-full items-center rounded-xl bg-base-200">
@@ -70,7 +76,11 @@ function RouteComponent() {
                   />
                 </div>
                 <div className="flex col-span-2 w-full items-center align-middle h-full ">
-                  <VacationCounter pending={3} used={5} remaining={6} />
+                  <VacationCounter
+                    pending={currUser.pending_events}
+                    used={currUser.vacation_used}
+                    remaining={currUser.vacation_remaining}
+                  />
                 </div>
               </div>
             </div>

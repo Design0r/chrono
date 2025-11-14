@@ -1,20 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { StatCard, StatCardElement } from "../components/StatCard";
 import { TitleSection } from "../components/TitleSection";
+import { VacationGraph } from "../components/VacationGraph";
+import type { User } from "../types/auth";
 
 export const Route = createFileRoute("/_auth/")({
   component: Home,
   loader: async ({ context }) => {
     const { user, refreshUser } = context.auth;
+    const { queryClient, chrono } = context;
+    let u: User | null = null;
     if (!user) {
-      const u = await refreshUser();
-      return u;
+      u = await refreshUser();
     }
+
+    const data = await queryClient.ensureQueryData({
+      queryKey: ["vacation_graph"],
+      queryFn: async () =>
+        await chrono.events.getVacationGraph(new Date().getFullYear()),
+    });
+
+    return { user: user ? user : u, data: data };
   },
 });
 
 function Home() {
-  const user = Route.useLoaderData();
+  const { user, data } = Route.useLoaderData();
 
   return (
     <div className="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
@@ -72,6 +83,13 @@ function Home() {
             />
           </StatCardElement>
         </StatCard>
+      </TitleSection>
+      <TitleSection title="Team Vacation">
+        <VacationGraph
+          yearOffset={data.year_offset}
+          gaps={data.month_gaps}
+          data={data.vacation_data}
+        />
       </TitleSection>
     </div>
   );

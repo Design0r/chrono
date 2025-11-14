@@ -3,6 +3,7 @@ package api
 import (
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 
@@ -26,6 +27,7 @@ func NewAPIEventHandler(
 
 func (h *APIEventHandler) RegisterRoutes(group *echo.Group) {
 	group.GET("/events/:year/:month", h.GetEventsForMonth)
+	group.GET("/events/:year", h.GetVacationGraph)
 }
 
 func (h *APIEventHandler) GetEventsForMonth(c echo.Context) error {
@@ -56,4 +58,34 @@ func (h *APIEventHandler) GetEventsForMonth(c echo.Context) error {
 	}
 
 	return NewJsonResponse(c, month)
+}
+
+func (h *APIEventHandler) GetVacationGraph(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	yearParam := c.Param("year")
+	year, err := strconv.Atoi(yearParam)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusBadRequest, "invalid year parameter")
+	}
+
+	data, err := h.event.GetHistogramForYear(ctx, year)
+	if err != nil {
+		return NewErrorResponse(
+			c,
+			http.StatusInternalServerError,
+			"failed to fetch data for vacation graph",
+		)
+	}
+
+	yearOffset := domain.GetYearOffset(year)
+	monthGaps := domain.GetMonthGaps(year)
+
+	response := map[string]any{
+		"year_offset":   yearOffset,
+		"month_gaps":    monthGaps,
+		"vacation_data": data,
+	}
+
+	return NewJsonResponse(c, response)
 }

@@ -38,3 +38,18 @@ export type Event = {
 };
 
 export type EventUser = { event: Event; user: User };
+
+export type VacationGraphMonth = {
+  is_holiday: boolean;
+  count: number;
+  last_day_of_month: number;
+  is_current_week: boolean;
+  usernames: string[] | null;
+  date: string;
+};
+
+export type VacationGraph = {
+  month_gaps: number[];
+  year_offset: number;
+  vacation_data: VacationGraphMonth[];
+};

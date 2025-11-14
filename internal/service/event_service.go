@@ -169,10 +169,17 @@ func (svc *eventService) GetHistogramForYear(
 	numDays := domain.NumDaysInYear(year)
 	eventList := make([]domain.YearHistogram, numDays)
 
+	for i := range eventList {
+		date := time.Date(year, time.Month(1), i+1, 0, 0, 0, 0, time.Local)
+		days := domain.GetNumDaysOfMonth(date.Month(), date.Year())
+		eventList[i].LastDayOfMonth = date.Day() == days
+	}
+
 	for _, event := range events {
 		i := event.Event.ScheduledAt.YearDay() - 1
 		date := event.Event.ScheduledAt
 		days := domain.GetNumDaysOfMonth(date.Month(), date.Year())
+		fmt.Println(days, date.Day())
 
 		eventList[i].Count += 1
 		eventList[i].IsHoliday = event.User.ID == 1

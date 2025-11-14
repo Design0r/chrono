@@ -6,9 +6,11 @@ import type { EventUser, Month, Event } from "../types/response";
 export function CalendarNavigation({
   year: currYear,
   month: currMonth,
+  monthName,
 }: {
   year: number;
   month: number;
+  monthName: string;
 }) {
   let year = currYear;
   let nextYear = currYear;
@@ -47,7 +49,9 @@ export function CalendarNavigation({
           </Link>
         </div>
         <div className="pl-4 text-lg">
-          <p>month.Name strYear</p>
+          <p>
+            {monthName} {year}
+          </p>
         </div>
       </div>
     </div>
@@ -180,7 +184,7 @@ export function Event({ event }: { event: EventUser }) {
               </button>
             </span>
             <div className="text-base-content group-hover:text-white/0 animate-all">
-              {event.event.name.toUpperCase()}
+              {event.event.name}
             </div>
             <div className="pb-1 text-xs text-base-content/80 group-hover:text-white/0 animate-all">
               {event.user.username}
@@ -189,7 +193,7 @@ export function Event({ event }: { event: EventUser }) {
         ) : (
           <>
             <div className="text-base-content animate-all">
-              {event.event.name.toUpperCase()}
+              {event.event.name}
             </div>
             <div className="pb-1 text-xs text-base-content/80 animate-all">
               {event.user.username}
@@ -235,8 +239,8 @@ export function Day({
       </div>
       <div className="flex flex-col px-2 h-full lg:bg-base-200/65 rounded-t-none rounded-b-[0.65rem]">
         <div className="flex flex-col gap-2 h-fit rounded-[0.7rem] *:first:mt-2">
-          {events?.map((e) => (
-            <Event event={e} />
+          {events?.map((e, i) => (
+            <Event key={i} event={e} />
           ))}
         </div>
         <button className="my-2 btn btn-sm border border-dashed border-primary/30 hover:bg-primary/10 rounded-lg text-primary hover:text-base-content w-full hover:icon-filled">

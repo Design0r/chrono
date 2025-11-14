@@ -173,24 +173,22 @@ func (svc *eventService) GetHistogramForYear(
 		date := time.Date(year, time.Month(1), i+1, 0, 0, 0, 0, time.Local)
 		days := domain.GetNumDaysOfMonth(date.Month(), date.Year())
 		eventList[i].LastDayOfMonth = date.Day() == days
+
+		s := strings.Split(date.Format(time.DateOnly), "-")
+		slices.Reverse(s)
+		eventList[i].Date = strings.Join(s, ".")
 	}
 
 	for _, event := range events {
 		i := event.Event.ScheduledAt.YearDay() - 1
 		date := event.Event.ScheduledAt
-		days := domain.GetNumDaysOfMonth(date.Month(), date.Year())
-		fmt.Println(days, date.Day())
 
 		eventList[i].Count += 1
 		eventList[i].IsHoliday = event.User.ID == 1
-		eventList[i].LastDayOfMonth = date.Day() == days
 		_, dateWeek := date.ISOWeek()
 		_, currWeek := time.Now().ISOWeek()
 		eventList[i].IsCurrentWeek = dateWeek == currWeek
 		eventList[i].Usernames = append(eventList[i].Usernames, event.User.Username)
-		s := strings.Split(date.Format(time.DateOnly), "-")
-		slices.Reverse(s)
-		eventList[i].Date = strings.Join(s, ".")
 	}
 
 	return eventList, err

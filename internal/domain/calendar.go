@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -114,20 +115,17 @@ func GetMonthGaps(year int) []int {
 	for i := range 12 {
 		month := time.Month(i + 1)
 		firstDay := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
-		offset := getMonthOffset(firstDay.Weekday())
+		offset := int(firstDay.Weekday()+6) - 1 // -1 because sunday is considered the first day
 		numDays := GetNumDaysOfMonth(month, year)
 
 		cols := int((offset + numDays) / 7)
-		rem := (offset + numDays) % 7
 
-		if offset != 0 && i > 0 {
-			cols--
-		}
-		if rem == 0 {
+		if offset > 0 && i > 0 {
 			cols--
 		}
 
-		list[i] = cols
+		list[i] = max(cols-1, 0)
+
 	}
 
 	return list

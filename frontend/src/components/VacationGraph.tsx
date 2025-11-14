@@ -74,6 +74,7 @@ export function VacationGraph({
         week++;
         out.push({ type: "gap", week: week });
       }
+      week++;
     }
     return out;
   }, [gaps]);

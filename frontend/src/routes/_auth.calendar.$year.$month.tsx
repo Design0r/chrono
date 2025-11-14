@@ -7,36 +7,51 @@ import {
   VacationCounter,
 } from "../components/Calendar";
 import type { UserWithVacation } from "../types/auth";
+import { useQuery } from "@tanstack/react-query";
+import { LoadingSpinnerPage } from "../components/LoadingSpinner";
+import { ErrorPage } from "../components/ErrorPage";
 
 export const Route = createFileRoute("/_auth/calendar/$year/$month")({
   component: RouteComponent,
-  loader: async ({ context: { chrono, queryClient }, params }) => {
-    const users = await queryClient.ensureQueryData({
-      queryKey: ["users"],
-      queryFn: async () =>
-        await chrono.users.getUsers({ year: Number.parseInt(params.year) }),
-    });
-
-    const month = await queryClient.ensureQueryData({
-      queryKey: ["month", params.year, params.month],
-      queryFn: async () =>
-        await chrono.events.getEventsForMonth(
-          Number.parseInt(params.year),
-          Number.parseInt(params.month),
-        ),
-    });
-
-    return { users: users, month: month };
-  },
 });
 
 function RouteComponent() {
-  const { users, month } = Route.useLoaderData();
+  const { chrono, auth } = Route.useRouteContext();
   const params = Route.useParams();
-  const { auth } = Route.useRouteContext();
-  const currUser = users.find(
-    (u) => u.id === auth.user?.id,
-  ) as UserWithVacation;
+  const year = Number.parseInt(params.year);
+  const month = Number.parseInt(params.month);
+
+  const usersQ = useQuery({
+    queryKey: ["users", "vacation", year],
+    queryFn: () => chrono.users.getUsers({ year: year }),
+    staleTime: 1000 * 60 * 30, // 30min
+    gcTime: 1000 * 60 * 60 * 1, // 1h
+  });
+
+  const currUserQ = useQuery({
+    queryKey: ["user", auth.userId, "vacation", year],
+    queryFn: () => chrono.users.getUserById(auth.userId!, { year: year }),
+    staleTime: 1000 * 60 * 60 * 6, // 6h
+    gcTime: 1000 * 60 * 60 * 7, // 7h
+  });
+
+  const monthQ = useQuery({
+    queryKey: ["month", params.year, params.month],
+    queryFn: () => chrono.events.getEventsForMonth(year, month),
+    staleTime: 1000 * 60 * 1, // 1min
+    gcTime: 1000 * 60 * 30, // 30min
+  });
+
+  const queries = [usersQ, currUserQ, monthQ];
+  const anyPending = queries.some((q) => q.isPending);
+  const firstError = queries.find((q) => q.isError)?.error;
+
+  if (anyPending) return <LoadingSpinnerPage />;
+  if (firstError) return <ErrorPage error={firstError} />;
+
+  const users = usersQ.data!;
+  const currUser = currUserQ.data! as UserWithVacation;
+  const monthData = monthQ.data!;
 
   return (
     <div>
@@ -56,7 +71,7 @@ function RouteComponent() {
           <CalendarNavigation
             year={Number.parseInt(params.year)}
             month={Number.parseInt(params.month)}
-            monthName={month.name}
+            monthName={monthData.name}
           />
           <div className="row-span-2 col-span-2 lg:row-span-1 lg:col-span-4 h-full text-lg">
             <div className="h-full items-center rounded-xl bg-base-200">
@@ -87,7 +102,7 @@ function RouteComponent() {
           </div>
         </div>
       </div>
-      <Calendar month={month} />
+      <Calendar month={monthData} />
     </div>
   );
 }

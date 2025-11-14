@@ -1,31 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ChronoClient } from "../api/chrono/client";
-import { useAuth } from "../auth";
 import type { User } from "../types/auth";
 import { hexToHSL, hsla } from "../utils/colors";
 
-export function Avatar() {
-  const auth = useAuth();
+export function Avatar({ user }: { user: User | null }) {
   const router = useRouter();
-  const chrono = new ChronoClient();
-  const [initial, setInitial] = useState("");
-  const [user, setUser] = useState<User | null>(null);
-
-  const { data } = useQuery({
-    queryKey: ["user", auth.userId],
-    queryFn: () => chrono.users.getUserById(auth.userId!),
-    staleTime: 60_000,
-  });
+  const [initial, setInitial] = useState("?");
 
   useEffect(() => {
-    if (!data) return;
-    if (data.username.length > 0) {
-      setInitial(data.username.slice(0, 1));
+    if (!user) return;
+    if (user.username.length > 0) {
+      setInitial(user.username.slice(0, 1));
     }
-    setUser(data);
-  }, [data]);
+  }, [user]);
 
   const hsl = hexToHSL(user ? user.color : "#000");
   const borderColor = hsla(...hsl, 0.6);

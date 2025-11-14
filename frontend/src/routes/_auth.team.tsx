@@ -2,36 +2,40 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import type { User, UserWithVacation } from "../types/auth";
 import { hexToHSL, hsla } from "../utils/colors";
+import { LoadingSpinnerPage } from "../components/LoadingSpinner";
+import { ErrorPage } from "../components/ErrorPage";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_auth/team")({
   component: RouteComponent,
-  beforeLoad: async ({ context: { auth } }) => {
-    let user = auth.user;
-    if (!user) {
-      user = await auth.refreshUser();
-    }
-  },
-  loader: async ({ context: { chrono, queryClient, auth } }) => {
-    let user = auth.user;
-    if (!user) {
-      user = await auth.refreshUser();
-    }
-
-    const data = await queryClient.ensureQueryData({
-      queryKey: ["users"],
-      queryFn: async () =>
-        await chrono.users.getUsers({ year: new Date().getFullYear() }),
-    });
-
-    return { user: user, users: data };
-  },
 });
 
 function RouteComponent() {
-  const { user, users } = Route.useLoaderData() as {
-    users: UserWithVacation[];
-    user: User;
-  };
+  const { chrono, auth } = Route.useRouteContext();
+
+  const usersQ = useQuery({
+    queryKey: ["users"],
+    queryFn: () => chrono.users.getUsers(),
+    staleTime: 1000 * 60 * 30, // 30min
+    gcTime: 1000 * 60 * 60 * 1, // 1h
+  });
+
+  const currUserQ = useQuery({
+    queryKey: ["user", auth.userId],
+    queryFn: () => chrono.users.getUserById(auth.userId!),
+    staleTime: 1000 * 60 * 60 * 6, // 6h
+    gcTime: 1000 * 60 * 60 * 7, // 7h
+  });
+
+  const queries = [usersQ, currUserQ];
+  const anyPending = queries.some((q) => q.isPending);
+  const firstError = queries.find((q) => q.isError)?.error;
+
+  if (anyPending) return <LoadingSpinnerPage />;
+  if (firstError) return <ErrorPage error={firstError} />;
+
+  const users = usersQ.data!;
+  const user = currUserQ.data! as UserWithVacation;
 
   return (
     <div className="p-2 my-2">

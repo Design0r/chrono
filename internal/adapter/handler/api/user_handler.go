@@ -39,6 +39,28 @@ func (h *APIUserHandler) GetUserById(c echo.Context) error {
 		return NewErrorResponse(c, http.StatusBadRequest, "invalid user id")
 	}
 
+	yearParam := c.QueryParam("year")
+
+	year, err := strconv.Atoi(yearParam)
+	if err != nil {
+		year = domain.CurrentYear()
+	}
+
+	vacParam := c.QueryParam("vacation")
+	vacation, err := strconv.ParseBool(vacParam)
+	if err != nil {
+		vacation = false
+	}
+
+	if vacation {
+		user, err := h.event.GetUserWithVacation(ctx, userId, year, 1)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusNotFound, "user not found")
+		}
+
+		return NewJsonResponse(c, user)
+	}
+
 	user, err := h.user.GetById(ctx, userId)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusNotFound, "user not found")

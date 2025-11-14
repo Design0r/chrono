@@ -6,9 +6,28 @@ import {
 } from "@tanstack/react-router";
 import { useAuth } from "../auth";
 import { Avatar } from "./Avatar";
+import { useQuery } from "@tanstack/react-query";
+import type { ChronoClient } from "../api/chrono/client";
+import { LoadingSpinner } from "./LoadingSpinner";
+import { ErrorPage } from "./ErrorPage";
 
-export function Header() {
+export function Header({ chrono }: { chrono: ChronoClient }) {
   const auth = useAuth();
+
+  const {
+    data: user,
+    isPending,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["user", auth.userId],
+    queryFn: () => chrono.users.getUserById(auth.userId!),
+    staleTime: 1000 * 60 * 60 * 6, // 6h
+    gcTime: 1000 * 60 * 60 * 7, // 7h
+  });
+
+  if (isPending) return <LoadingSpinner />;
+  if (isError) return <ErrorPage error={error} />;
 
   const date = new Date();
 
@@ -57,7 +76,7 @@ export function Header() {
               </a>
             </>
           ) : (
-            <Avatar />
+            <Avatar user={user} />
           )}
         </div>
       </div>
@@ -74,7 +93,6 @@ export function MenuButton({ children, to, ...props }: MenuButtonProps) {
     select: (location) => location.pathname,
   });
 
-  console.log(pathname, to);
   return (
     <Link
       to={to}

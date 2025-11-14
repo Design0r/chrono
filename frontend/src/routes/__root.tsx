@@ -8,11 +8,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 function RootComponent() {
+  const { chrono } = Route.useRouteContext();
   return (
-    <>
-      <Header />
+    <div>
+      <Header chrono={chrono} />
       <Outlet />
       <TanStackRouterDevtools position="bottom-right" />
-    </>
+    </div>
   );
 }

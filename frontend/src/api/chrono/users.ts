@@ -3,21 +3,30 @@ import { returnOrError } from "../error";
 import { CHRONO_URL } from "./chrono";
 
 export class ApiUsers {
-  async getUserById(id: number): Promise<User> {
-    const response = await fetch(CHRONO_URL + `/users/${id}`, {
-      method: "GET",
-      credentials: "include",
-    });
+  async getUserById(
+    id: number,
+    vacation: { year: number } | null = null,
+  ): Promise<User> {
+    const params = new URLSearchParams(
+      vacation ? { vacation: "true", year: String(vacation.year) } : {},
+    ).toString();
+    const response = await fetch(
+      CHRONO_URL + `/users/${id}` + (params ? "?" + params : ""),
+      {
+        method: "GET",
+        credentials: "include",
+      },
+    );
 
     const r = await returnOrError(response);
-    return r.data as User;
+    return r.data as User | UserWithVacation;
   }
 
   async getUsers(
-    vacation: null | { year: number } = null
+    vacation: null | { year: number } = null,
   ): Promise<User[] | UserWithVacation[]> {
     const params = new URLSearchParams(
-      vacation ? { vacation: "true", year: String(vacation.year) } : {}
+      vacation ? { vacation: "true", year: String(vacation.year) } : {},
     ).toString();
 
     const response = await fetch(
@@ -25,7 +34,7 @@ export class ApiUsers {
       {
         method: "GET",
         credentials: "include",
-      }
+      },
     );
 
     const r = await returnOrError(response);

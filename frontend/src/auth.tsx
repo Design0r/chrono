@@ -7,14 +7,14 @@ import {
 } from "react";
 import { ChronoClient } from "./api/chrono/client";
 import type { LoginRequest, User } from "./types/auth";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface AuthContext {
   isAuthenticated: boolean;
   login: (data: LoginRequest) => Promise<void>;
   logout: () => Promise<void>;
   userId: number | null;
-  refreshUser: () => Promise<User>;
-  user: User | null;
+  getUser: () => Promise<User | null>;
 }
 
 const AuthContext = createContext<AuthContext | null>(null);
@@ -22,17 +22,22 @@ const AuthContext = createContext<AuthContext | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const uid = localStorage.getItem("user");
   const [userId, setUserId] = useState<number | null>(
-    uid ? Number.parseInt(uid) : null
+    uid ? Number.parseInt(uid) : null,
   );
 
-  const [user, setUser] = useState<User | null>(null);
+  const queryClient = useQueryClient();
+
   const [isAuthenticated, setIsAuthenticated] = useState(!!uid);
   const chrono = new ChronoClient();
 
-  const refreshUser = useCallback(async () => {
-    if (!isAuthenticated || !userId) return;
-    const u = await chrono.users.getUserById(userId);
-    setUser(u);
+  const getUser = useCallback(async () => {
+    if (!isAuthenticated || !userId) return null;
+    const u = await queryClient.ensureQueryData({
+      queryKey: ["user", userId],
+      queryFn: () => chrono.users.getUserById(userId),
+      staleTime: 1000 * 60 * 60 * 6, // 6h
+      gcTime: 1000 * 60 * 60 * 7, // 7h
+    });
     return u;
   }, []);
 
@@ -40,21 +45,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await chrono.auth.logout();
     localStorage.removeItem("user");
     setUserId(null);
-    setUser(null);
     setIsAuthenticated(false);
+    queryClient.clear();
   }, []);
 
   const login = useCallback(async (data: LoginRequest) => {
     const user = (await chrono.auth.login(data)).data;
     localStorage.setItem("user", user.id);
     setUserId(user.id);
-    setUser(user);
     setIsAuthenticated(true);
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, userId, login, logout, user, refreshUser }}
+      value={{
+        isAuthenticated,
+        userId,
+        login,
+        logout,
+        getUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

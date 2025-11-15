@@ -270,6 +270,7 @@ func (s *Server) InitAPIRoutes() {
 		s.log,
 	)
 	tokenHandler := api.NewAPITokenHandler(s.services.vac, s.services.user, s.services.notif, s.log)
+	settingsHandler := api.NewAPISettingsHandler(s.services.settings)
 
 	settingsGrp := s.Router.Group("/api/v1", mw.SettingsAPIMiddleware(s.services.settings))
 	authGrp := settingsGrp.Group(
@@ -285,6 +286,7 @@ func (s *Server) InitAPIRoutes() {
 	eventHandler.RegisterRoutes(authGrp)
 	requestHandler.RegisterRoutes(adminGrp)
 	tokenHandler.RegisterRoutes(adminGrp)
+	settingsHandler.RegisterRoutes(adminGrp)
 
 	s.log.Info("Initialized api routes.")
 }

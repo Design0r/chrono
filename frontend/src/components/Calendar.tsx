@@ -1,8 +1,8 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import type { User } from "../types/auth";
 import { hexToHSL, hsla } from "../utils/colors";
 import type { EventUser, Month, Event } from "../types/response";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChronoClient } from "../api/chrono/client";
 import { LoadingSpinner } from "./LoadingSpinner";
@@ -39,6 +39,7 @@ export function CalendarNavigation({
             to="/calendar/$year/$month"
             params={{ year: year.toString(), month: prevMonth.toString() }}
             className="btn btn-sm btn-soft btn-primary hover:text-neutral icon-outlined animate-color duration-500"
+            search={(prev) => prev}
           >
             arrow_back
           </Link>
@@ -48,6 +49,7 @@ export function CalendarNavigation({
             to="/calendar/$year/$month"
             params={{ year: nextYear.toString(), month: nextMonth.toString() }}
             className="btn btn-sm btn-soft btn-primary hover:text-neutral icon-outlined animate-color duration-500"
+            search={(prev) => prev}
           >
             arrow_forward
           </Link>
@@ -64,16 +66,29 @@ export function CalendarNavigation({
 
 export function UserFilter({
   users,
+  userFilter,
   setUserFilter,
 }: {
   users: User[];
-  setUserFilter: (value: string | null) => void;
+  userFilter?: string;
+  setUserFilter: (value?: string) => void;
 }) {
+  const navigate = useNavigate();
+  const params = useParams({ from: "/_auth/calendar/$year/$month" });
+
   return (
     <select
-      onChange={(e) =>
-        setUserFilter(e.target.value === "allUsers" ? null : e.target.value)
-      }
+      defaultValue={userFilter}
+      onChange={(e) => {
+        const filtered =
+          e.target.value === "allUsers" ? undefined : e.target.value;
+        setUserFilter(filtered);
+        navigate({
+          to: "/calendar/$year/$month",
+          search: (prev) => ({ ...prev, user: filtered }),
+          params: params,
+        });
+      }}
       className="w-full col-span-1 cursor-pointer bg-base-100 select hover:text-white border-0 hover:bg-[#6F78EA] text-center focus:outline-0 h-full text-lg rounded-xl animate-color"
     >
       <option value="allUsers">All Users</option>
@@ -88,21 +103,34 @@ export function UserFilter({
 
 export function EventFilter({
   events,
+  eventFilter,
   setEventFilter,
 }: {
   events: string[];
-  setEventFilter: (value: string | null) => void;
+  eventFilter?: string;
+  setEventFilter: (value: string | undefined) => void;
 }) {
+  const navigate = useNavigate();
+  const params = useParams({ from: "/_auth/calendar/$year/$month" });
+
   return (
     <select
+      defaultValue={eventFilter}
       onChange={(e) => {
-        setEventFilter(e.target.value === "allEvents" ? null : e.target.value);
+        const filtered =
+          e.target.value === "allEvents" ? undefined : e.target.value;
+        setEventFilter(filtered);
+        navigate({
+          to: "/calendar/$year/$month",
+          search: (prev) => ({ ...prev, event: filtered }),
+          params: params,
+        });
       }}
       className="w-full col-span-1 cursor-pointer bg-base-100 select hover:text-white border-0 hover:bg-[#6F78EA] text-center focus:outline-0 h-full text-lg rounded-xl animate-color"
     >
       <option value={"allEvents"}>All Events</option>
       {events.map((e, i) => (
-        <option key={i} value={e}>
+        <option key={i} value={e.toLowerCase()}>
           {e}
         </option>
       ))}
@@ -278,6 +306,8 @@ export function Day({
     now.getFullYear() === year;
 
   const [evts, setEvts] = useState<EventUser[]>(events);
+
+  useEffect(() => setEvts(events), [events]);
   const chrono = new ChronoClient();
   const queryClient = useQueryClient();
 
@@ -345,8 +375,8 @@ export function Calendar({
   currUser,
 }: {
   month: Month;
-  eventFilter: string | null;
-  userFilter: string | null;
+  eventFilter: string | undefined;
+  userFilter: string | undefined;
   selectedEvent: string;
   currUser: User;
 }) {
@@ -364,6 +394,7 @@ export function Calendar({
       ))}
       {month.days.map((d, i) => {
         const date = new Date(d.date);
+
         return (
           <Day
             selectedEvent={selectedEvent}

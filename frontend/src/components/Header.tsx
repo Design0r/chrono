@@ -14,20 +14,26 @@ import { ErrorPage } from "./ErrorPage";
 export function Header({ chrono }: { chrono: ChronoClient }) {
   const auth = useAuth();
 
-  const {
-    data: user,
-    isPending,
-    isError,
-    error,
-  } = useQuery({
+  const userQ = useQuery({
     queryKey: ["user", auth.userId],
     queryFn: () => chrono.users.getUserById(auth.userId!),
     staleTime: 1000 * 60 * 60 * 6, // 6h
     gcTime: 1000 * 60 * 60 * 7, // 7h
   });
 
-  if (isPending) return <LoadingSpinner />;
-  if (isError) return <ErrorPage error={error} />;
+  const settingQ = useQuery({
+    queryKey: ["settings"],
+    queryFn: () => chrono.settings.getSettings(),
+    staleTime: 1000 * 30, // 30s
+    gcTime: 1000 * 60 * 5, // 5m
+  });
+
+  const queries = [userQ, settingQ];
+  const anyPending = queries.some((q) => q.isPending);
+  const firstError = queries.find((q) => q.isError)?.error;
+
+  if (anyPending) return <LoadingSpinner />;
+  if (firstError) return <ErrorPage error={firstError} />;
 
   const date = new Date();
 
@@ -62,7 +68,7 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
                 <span className="icon-outlined">group</span>
                 <span className="font-medium text-base">Team</span>
               </MenuButton>
-              {user.is_superuser && (
+              {userQ.data!.is_superuser && (
                 <>
                   <MenuButton to="/requests">
                     <span className="icon-outlined">mark_chat_unread</span>
@@ -71,6 +77,14 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
                   <MenuButton to="/tokens">
                     <span className="icon-outlined">local_activity</span>
                     <span className="font-medium text-base">Tokens</span>
+                  </MenuButton>
+                  <MenuButton to="/settings">
+                    <span className="icon-outlined">settings</span>
+                    <span className="font-medium text-base">Settings</span>
+                  </MenuButton>
+                  <MenuButton to="/export">
+                    <span className="icon-outlined">file_export</span>
+                    <span className="font-medium text-base">Export</span>
                   </MenuButton>
                 </>
               )}
@@ -83,12 +97,14 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
               <a href="/login" className="btn btn-ghost">
                 Login
               </a>
-              <a href="/signup" className="btn btn-ghost">
-                Signup
-              </a>
+              {settingQ.data!.signup_enabled && (
+                <a href="/signup" className="btn btn-ghost">
+                  Signup
+                </a>
+              )}
             </>
           ) : (
-            <Avatar user={user} />
+            <Avatar user={userQ.data!} />
           )}
         </div>
       </div>

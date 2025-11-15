@@ -98,3 +98,8 @@ export type PatchRequestForm = {
   start_date: string;
   end_date: string;
 };
+
+export type Settings = {
+  id: number;
+  signup_enabled: boolean;
+};

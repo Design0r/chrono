@@ -6,10 +6,14 @@ export function LoadingSpinner({
   return <span className={`loading loading-spinner loading-${size}`}></span>;
 }
 
-export function LoadingSpinnerPage() {
+export function LoadingSpinnerPage({
+  size = "xl",
+}: {
+  size?: "xl" | "lg" | "md" | "sm" | "xs";
+}) {
   return (
     <div className="fixed flex  inset-0 justify-center">
-      <LoadingSpinner />
+      <LoadingSpinner size={size} />
     </div>
   );
 }

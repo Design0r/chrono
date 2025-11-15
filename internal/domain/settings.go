@@ -3,8 +3,8 @@ package domain
 import "context"
 
 type Settings struct {
-	ID            int64
-	SignupEnabled bool `form:"signup_enabled"`
+	ID            int64 `json:"id"`
+	SignupEnabled bool  `json:"signup_enabled" form:"signup_enabled"`
 }
 
 type SettingsPatch struct {

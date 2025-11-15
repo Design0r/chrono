@@ -14,8 +14,11 @@ function RouteComponent() {
   const { chrono, auth } = Route.useRouteContext();
 
   const usersQ = useQuery({
-    queryKey: ["users"],
-    queryFn: () => chrono.users.getUsers(),
+    queryKey: ["users", "vacation"],
+    queryFn: () =>
+      chrono.users.getUsers({
+        year: new Date().getFullYear(),
+      }),
     staleTime: 1000 * 60 * 30, // 30min
     gcTime: 1000 * 60 * 60 * 1, // 1h
   });
@@ -34,7 +37,7 @@ function RouteComponent() {
   if (anyPending) return <LoadingSpinnerPage />;
   if (firstError) return <ErrorPage error={firstError} />;
 
-  const users = usersQ.data!;
+  const users = usersQ.data! as UserWithVacation[];
   const user = currUserQ.data! as UserWithVacation;
 
   return (

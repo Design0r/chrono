@@ -68,6 +68,10 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
                     <span className="icon-outlined">mark_chat_unread</span>
                     <span className="font-medium text-base">Requests</span>
                   </MenuButton>
+                  <MenuButton to="/tokens">
+                    <span className="icon-outlined">local_activity</span>
+                    <span className="font-medium text-base">Tokens</span>
+                  </MenuButton>
                 </>
               )}
             </div>

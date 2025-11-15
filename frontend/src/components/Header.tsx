@@ -62,6 +62,14 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
                 <span className="icon-outlined">group</span>
                 <span className="font-medium text-base">Team</span>
               </MenuButton>
+              {user.is_superuser && (
+                <>
+                  <MenuButton to="/requests">
+                    <span className="icon-outlined">mark_chat_unread</span>
+                    <span className="font-medium text-base">Requests</span>
+                  </MenuButton>
+                </>
+              )}
             </div>
           )}
         </div>

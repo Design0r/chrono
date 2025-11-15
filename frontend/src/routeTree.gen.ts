@@ -13,6 +13,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth.index'
 import { Route as AuthTeamRouteImport } from './routes/_auth.team'
+import { Route as AuthAdminRouteImport } from './routes/_auth._admin'
+import { Route as AuthAdminRequestsRouteImport } from './routes/_auth._admin.requests'
 import { Route as AuthCalendarYearMonthRouteImport } from './routes/_auth.calendar.$year.$month'
 
 const LoginRoute = LoginRouteImport.update({
@@ -34,6 +36,15 @@ const AuthTeamRoute = AuthTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthAdminRoute = AuthAdminRouteImport.update({
+  id: '/_admin',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthAdminRequestsRoute = AuthAdminRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
 const AuthCalendarYearMonthRoute = AuthCalendarYearMonthRouteImport.update({
   id: '/calendar/$year/$month',
   path: '/calendar/$year/$month',
@@ -44,33 +55,39 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/team': typeof AuthTeamRoute
   '/': typeof AuthIndexRoute
+  '/requests': typeof AuthAdminRequestsRoute
   '/calendar/$year/$month': typeof AuthCalendarYearMonthRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/team': typeof AuthTeamRoute
   '/': typeof AuthIndexRoute
+  '/requests': typeof AuthAdminRequestsRoute
   '/calendar/$year/$month': typeof AuthCalendarYearMonthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
+  '/_auth/_admin': typeof AuthAdminRouteWithChildren
   '/_auth/team': typeof AuthTeamRoute
   '/_auth/': typeof AuthIndexRoute
+  '/_auth/_admin/requests': typeof AuthAdminRequestsRoute
   '/_auth/calendar/$year/$month': typeof AuthCalendarYearMonthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/team' | '/' | '/calendar/$year/$month'
+  fullPaths: '/login' | '/team' | '/' | '/requests' | '/calendar/$year/$month'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/team' | '/' | '/calendar/$year/$month'
+  to: '/login' | '/team' | '/' | '/requests' | '/calendar/$year/$month'
   id:
     | '__root__'
     | '/_auth'
     | '/login'
+    | '/_auth/_admin'
     | '/_auth/team'
     | '/_auth/'
+    | '/_auth/_admin/requests'
     | '/_auth/calendar/$year/$month'
   fileRoutesById: FileRoutesById
 }
@@ -109,6 +126,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthTeamRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/_admin': {
+      id: '/_auth/_admin'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthAdminRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/_admin/requests': {
+      id: '/_auth/_admin/requests'
+      path: '/requests'
+      fullPath: '/requests'
+      preLoaderRoute: typeof AuthAdminRequestsRouteImport
+      parentRoute: typeof AuthAdminRoute
+    }
     '/_auth/calendar/$year/$month': {
       id: '/_auth/calendar/$year/$month'
       path: '/calendar/$year/$month'
@@ -119,13 +150,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthAdminRouteChildren {
+  AuthAdminRequestsRoute: typeof AuthAdminRequestsRoute
+}
+
+const AuthAdminRouteChildren: AuthAdminRouteChildren = {
+  AuthAdminRequestsRoute: AuthAdminRequestsRoute,
+}
+
+const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
+  AuthAdminRouteChildren,
+)
+
 interface AuthRouteChildren {
+  AuthAdminRoute: typeof AuthAdminRouteWithChildren
   AuthTeamRoute: typeof AuthTeamRoute
   AuthIndexRoute: typeof AuthIndexRoute
   AuthCalendarYearMonthRoute: typeof AuthCalendarYearMonthRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthAdminRoute: AuthAdminRouteWithChildren,
   AuthTeamRoute: AuthTeamRoute,
   AuthIndexRoute: AuthIndexRoute,
   AuthCalendarYearMonthRoute: AuthCalendarYearMonthRoute,

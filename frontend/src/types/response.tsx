@@ -5,6 +5,8 @@ export type ChronoResponse = {
   data: any | null;
 };
 
+export type State = "accepted" | "declined" | "pending";
+
 export type Notification = {
   id: string;
   message: string;
@@ -33,7 +35,7 @@ export type Event = {
   created_at: Date;
   edited_at: Date;
   name: string;
-  state: "accepted" | "declined" | "pending";
+  state: State;
   user_id: number;
 };
 
@@ -52,4 +54,47 @@ export type VacationGraph = {
   month_gaps: number[];
   year_offset: number;
   vacation_data: VacationGraphMonth[];
+};
+
+export type BatchRequest = {
+  start_date: string;
+  end_date: string;
+  event_count: number;
+  request: RequestEventUser;
+  conflicts: User[] | null;
+};
+
+export type RequestEventUser = {
+  request_id: number;
+  message: string | null;
+  request_state: State;
+  created_at: string;
+  edited_at: string;
+  edited_by: number | null;
+
+  user_id: number;
+  username: string;
+  email: string;
+  vacation_days: number;
+  is_superuser: boolean;
+  user_created_at: string;
+  user_edited_at: string;
+  color: string;
+  role: string;
+  enabled: boolean;
+
+  event_id: number;
+  scheduled_at: string;
+  name: string;
+  event_state: State;
+  event_created_at: string;
+  event_edited_at: string;
+};
+
+export type PatchRequestForm = {
+  userId: number;
+  state: string;
+  reason: string;
+  start_date: string;
+  end_date: string;
 };

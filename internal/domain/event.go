@@ -69,6 +69,13 @@ type EventUser struct {
 	User  User  `json:"user"`
 }
 
+type CreateEvent struct {
+	Year      int    `form:"year"`
+	Month     int    `form:"month"`
+	Day       int    `form:"day"`
+	EventName string `form:"eventName"`
+}
+
 type YMDDate struct {
 	Year  int `param:"year"`
 	Month int `param:"month"`

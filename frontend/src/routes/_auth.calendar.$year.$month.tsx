@@ -10,6 +10,7 @@ import type { UserWithVacation } from "../types/auth";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { ErrorPage } from "../components/ErrorPage";
+import { useState } from "react";
 
 export const Route = createFileRoute("/_auth/calendar/$year/$month")({
   component: RouteComponent,
@@ -20,6 +21,10 @@ function RouteComponent() {
   const params = Route.useParams();
   const year = Number.parseInt(params.year);
   const month = Number.parseInt(params.month);
+
+  const [userFilter, setUserFilter] = useState<string | null>(null);
+  const [eventFilter, setEventFilter] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<string>("Urlaub");
 
   const usersQ = useQuery({
     queryKey: ["users", "vacation", year],
@@ -58,6 +63,7 @@ function RouteComponent() {
       <div className="grid grid-cols-7">
         <div className="px-6 col-span-7 grid grid-cols-1 grid-rows-4 lg:grid-rows-1 items-center gap-y-2 lg:gap-y-0 lg:gap-x-2 mt-2 lg:mb-16 lg:grid-cols-7 lg:px-4 ">
           <select
+            onChange={(e) => setSelectedEvent(e.target.value)}
             className=" col-span-1 lg:col-span-1 cursor-pointer bg-base-100 select hover:text-white border-0 hover:bg-[#6F78EA] text-center focus:outline-0 h-full w-full text-lg rounded-xl animate-color"
             name="eventName"
             id="eventName"
@@ -69,18 +75,19 @@ function RouteComponent() {
             <option value="home office">Home Office</option>
           </select>
           <CalendarNavigation
-            year={Number.parseInt(params.year)}
-            month={Number.parseInt(params.month)}
+            year={year}
+            month={month}
             monthName={monthData.name}
           />
           <div className="row-span-2 col-span-2 lg:row-span-1 lg:col-span-4 h-full text-lg">
             <div className="h-full items-center rounded-xl bg-base-200">
               <div className="grid grid-cols-2 lg:grid-cols-4 w-full h-full gap-x-2 gap-y-2 lg:gap-y-0">
                 <div className="col-span-1 w-full justify-center ">
-                  <UserFilter users={users} />
+                  <UserFilter users={users} setUserFilter={setUserFilter} />
                 </div>
                 <div className="col-span-1 w-full justify-center ">
                   <EventFilter
+                    setEventFilter={setEventFilter}
                     events={[
                       "Krank",
                       "Home Office",
@@ -102,7 +109,13 @@ function RouteComponent() {
           </div>
         </div>
       </div>
-      <Calendar month={monthData} />
+      <Calendar
+        selectedEvent={selectedEvent}
+        eventFilter={eventFilter}
+        userFilter={userFilter}
+        month={monthData}
+        currUser={currUser}
+      />
     </div>
   );
 }

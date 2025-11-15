@@ -23,7 +23,7 @@ export type Month = {
 export type Day = {
   name: string;
   number: number;
-  events: EventUser[];
+  events: EventUser[] | null;
   date: Date;
 };
 

@@ -2,6 +2,10 @@ import { Link } from "@tanstack/react-router";
 import type { User } from "../types/auth";
 import { hexToHSL, hsla } from "../utils/colors";
 import type { EventUser, Month, Event } from "../types/response";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ChronoClient } from "../api/chrono/client";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 export function CalendarNavigation({
   year: currYear,
@@ -58,12 +62,23 @@ export function CalendarNavigation({
   );
 }
 
-export function UserFilter({ users }: { users: User[] }) {
+export function UserFilter({
+  users,
+  setUserFilter,
+}: {
+  users: User[];
+  setUserFilter: (value: string | null) => void;
+}) {
   return (
-    <select className="w-full col-span-1 cursor-pointer bg-base-100 select hover:text-white border-0 hover:bg-[#6F78EA] text-center focus:outline-0 h-full text-lg rounded-xl animate-color">
-      <option value="all">All Users</option>
+    <select
+      onChange={(e) =>
+        setUserFilter(e.target.value === "allUsers" ? null : e.target.value)
+      }
+      className="w-full col-span-1 cursor-pointer bg-base-100 select hover:text-white border-0 hover:bg-[#6F78EA] text-center focus:outline-0 h-full text-lg rounded-xl animate-color"
+    >
+      <option value="allUsers">All Users</option>
       {users.map((u, i) => (
-        <option key={i} onSelect={() => {}} value={u.username}>
+        <option key={i} value={u.username}>
           {u.username}
         </option>
       ))}
@@ -71,12 +86,23 @@ export function UserFilter({ users }: { users: User[] }) {
   );
 }
 
-export function EventFilter({ events }: { events: string[] }) {
+export function EventFilter({
+  events,
+  setEventFilter,
+}: {
+  events: string[];
+  setEventFilter: (value: string | null) => void;
+}) {
   return (
-    <select className="w-full col-span-1 cursor-pointer bg-base-100 select hover:text-white border-0 hover:bg-[#6F78EA] text-center focus:outline-0 h-full text-lg rounded-xl animate-color">
-      <option value="all">All Events</option>
+    <select
+      onChange={(e) => {
+        setEventFilter(e.target.value === "allEvents" ? null : e.target.value);
+      }}
+      className="w-full col-span-1 cursor-pointer bg-base-100 select hover:text-white border-0 hover:bg-[#6F78EA] text-center focus:outline-0 h-full text-lg rounded-xl animate-color"
+    >
+      <option value={"allEvents"}>All Events</option>
       {events.map((e, i) => (
-        <option key={i} onSelect={() => {}} value={e}>
+        <option key={i} value={e}>
           {e}
         </option>
       ))}
@@ -137,68 +163,91 @@ export function WeekdayHeader({
   );
 }
 
-export function Event({ event }: { event: EventUser }) {
-  // {{
-  // 	cfg := config.GetConfig()
-  // 	h, s, l := domain.Color.HexToHSL(event.User.Color)
-  // 	borderColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.6)", h, s*100, l*100)
-  // 	bgColor := fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.20)", h, s*100, l*100)
-  // 	if !event.Event.IsVacation() && event.User.Username != cfg.BotName {
-  // 		h, s, l := domain.Color.HexToHSL(event.User.Color)
-  // 		borderColor = fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.30)", h, s*100, l*100)
-  // 		bgColor = fmt.Sprintf("hsla(%.0f, %.1f%%, %.1f%%, 0.10)", h, s*100, l*100)
-  // 		// Auch hier Transparenz hinzufügen falls gewünscht
-  // 	}
-  // 	eventId := fmt.Sprintf("event-%v", event.Event.ID)
-  // 	deleteUrl := fmt.Sprintf("#%v", eventId)
-  // }}
-  //
-  //
+export function Event({
+  event,
+  currUser,
+}: {
+  event: EventUser;
+  currUser: User;
+}) {
+  const chrono = new ChronoClient();
+  const queryClient = useQueryClient();
 
   const hsl = hexToHSL(event.user.color);
   const bgColor = hsla(...hsl, 0.2);
   const borderColor = hsla(...hsl, 0.3);
-  const deletable = true;
+
+  const [visible, setVisible] = useState(true);
+
+  const currDate = new Date();
+  const eventDate = new Date(event.event.scheduled_at);
+  const isInFuture = eventDate >= currDate;
+  const isFromCurrUser = event.event.user_id === currUser.id;
+  const isAdmin = currUser.is_superuser;
+  const isHoliday = event.user.id === 1;
+
+  const shortName = isHoliday
+    ? event.event.name
+    : chrono.events.getShortEventName(event.event.name);
+
+  const isDeletable =
+    isAdmin ||
+    (isFromCurrUser && (isInFuture || event.event.state !== "accepted"));
+
+  const mutation = useMutation({
+    mutationKey: ["deleteEvent", event.event.id],
+    mutationFn: () => chrono.events.deleteEvent(event.event.id),
+    onSuccess: () => {
+      setVisible(false);
+      return queryClient.invalidateQueries({
+        queryKey: ["month"],
+      });
+    },
+  });
+
+  if (!visible) return <></>;
   return (
     <div className="indicator w-full">
-      <div className="absolute top-1.5 right-1.5 z-10 w-3 bg-neutral/50 aspect-square rounded-full flex items-center justify-center">
-        <span
-          className={
-            event.event.state === "pending"
-              ? "bg-accent status status-sm status-accent animate-ping"
-              : event.event.state === "declined"
-                ? "status status-md status-error"
-                : "status status-md status-success"
-          }
-        ></span>
-      </div>
+      {!isHoliday && (
+        <div className="absolute top-1.5 right-1.5 z-10 w-3 bg-neutral/50 aspect-square rounded-full flex items-center justify-center">
+          <span
+            className={
+              event.event.state === "pending"
+                ? "bg-accent status status-sm status-accent animate-ping"
+                : event.event.state === "declined"
+                  ? "status status-md status-error"
+                  : "status status-md status-success"
+            }
+          ></span>
+        </div>
+      )}
       <div
         style={{ backgroundColor: bgColor, borderColor: borderColor }}
-        className="group relative text-center border py-1 w-full rounded-lg"
+        className={`group gap-2 relative ${!isHoliday && "flex"} text-center border py-1 w-full rounded-lg`}
       >
-        {deletable ? (
+        {isDeletable && (
           <>
             <span className="flex items-center justify-center text-transparent rounded-lg group-hover:mix-blend-revert group-hover:text-base-content absolute top-0 left-0 w-full h-full icon-outlined animate-all">
-              <button className="h-9 w-12 text-center rounded-xl cursor-pointer hover:drop-shadow-lg icon-outlined group-hover:bg-neutral/30 group-hover:text-base-content hover:text-error-content hover:duration-1000 hover:bg-error/80 hover:w-full hover:h-full hover:rounded-lg animate-all">
+              <button
+                onClick={() => mutation.mutate()}
+                className="h-9 w-12 text-center rounded-xl cursor-pointer hover:drop-shadow-lg icon-outlined group-hover:bg-neutral/30 group-hover:text-base-content hover:text-error-content hover:duration-1000 hover:bg-error/80 hover:w-full hover:h-full hover:rounded-lg animate-all"
+              >
                 delete
               </button>
             </span>
-            <div className="text-base-content group-hover:text-white/0 animate-all">
-              {event.event.name}
-            </div>
-            <div className="pb-1 text-xs text-base-content/80 group-hover:text-white/0 animate-all">
-              {event.user.username}
-            </div>
           </>
-        ) : (
-          <>
-            <div className="text-base-content animate-all">
-              {event.event.name}
-            </div>
-            <div className="pb-1 text-xs text-base-content/80 animate-all">
-              {event.user.username}
-            </div>
-          </>
+        )}
+        <div
+          className={`${!isHoliday && "bg-black/20 rounded px-1"} text-base-content ${isDeletable && "group-hover:text-white/0"}  animate-all`}
+        >
+          {shortName}
+        </div>
+        {!isHoliday && (
+          <div
+            className={`content-center text-base-content/80 ${isDeletable && "group-hover:text-white/0"} animate-all`}
+          >
+            {event.user.username}
+          </div>
         )}
       </div>
     </div>
@@ -211,18 +260,44 @@ export function Day({
   month,
   year,
   events,
+  selectedEvent,
+  currUser,
 }: {
   date: number;
   day: string;
   month: number;
   year: number;
   events: EventUser[];
+  selectedEvent: string;
+  currUser: User;
 }) {
   const now = new Date(Date.now());
   const isToday =
     now.getDay() === date &&
-    now.getMonth() === month &&
+    now.getMonth() + 1 === month &&
     now.getFullYear() === year;
+
+  const [evts, setEvts] = useState<EventUser[]>(events);
+  const chrono = new ChronoClient();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationKey: ["createEvent", year, month, date, selectedEvent],
+    mutationFn: () =>
+      chrono.events.createEvent({
+        year: year,
+        month: month,
+        day: date,
+        event: selectedEvent,
+      }),
+    onSuccess: (e) => {
+      setEvts((ev) => [...ev, e]);
+      return queryClient.invalidateQueries({
+        queryKey: ["month"],
+      });
+    },
+  });
+
   return (
     <div
       className={
@@ -239,21 +314,42 @@ export function Day({
       </div>
       <div className="flex flex-col px-2 h-full lg:bg-base-200/65 rounded-t-none rounded-b-[0.65rem]">
         <div className="flex flex-col gap-2 h-fit rounded-[0.7rem] *:first:mt-2">
-          {events?.map((e, i) => (
-            <Event key={i} event={e} />
+          {evts.map((e, i) => (
+            <Event key={i} event={e} currUser={currUser} />
           ))}
         </div>
-        <button className="my-2 btn btn-sm border border-dashed border-primary/30 hover:bg-primary/10 rounded-lg text-primary hover:text-base-content w-full hover:icon-filled">
-          <span className="icon-outlined hover:icon-filled text-2xl leading-5">
-            add
-          </span>
+        <button
+          onClick={() => mutation.mutate()}
+          className="my-2 btn btn-sm border border-dashed border-primary/30 hover:bg-primary/10 rounded-lg text-primary hover:text-base-content w-full hover:icon-filled"
+        >
+          {mutation.isPending ? (
+            <div className="w-5 flex">
+              <LoadingSpinner />
+            </div>
+          ) : (
+            <span className="icon-outlined hover:icon-filled text-2xl leading-5">
+              add
+            </span>
+          )}
         </button>
       </div>
     </div>
   );
 }
 
-export function Calendar({ month }: { month: Month }) {
+export function Calendar({
+  month,
+  eventFilter,
+  userFilter,
+  selectedEvent,
+  currUser,
+}: {
+  month: Month;
+  eventFilter: string | null;
+  userFilter: string | null;
+  selectedEvent: string;
+  currUser: User;
+}) {
   return (
     <div className="my-12 lg:my-8 lg:mt-0 mx-auto grid px-6 grid-cols-1 gap-y-6 lg:grid-cols-7 lg:px-4 gap-x-2 lg:gap-y-4 overflow-x-scroll">
       <WeekdayHeader label="Monday" />
@@ -263,19 +359,34 @@ export function Calendar({ month }: { month: Month }) {
       <WeekdayHeader label="Friday" />
       <WeekdayHeader label="Saturday" />
       <WeekdayHeader label="Sunday" />
-      {Array(month.offset).map((_, i) => (
+      {Array.from({ length: month.offset }).map((_, i) => (
         <div key={i} className="hidden lg:block"></div>
       ))}
       {month.days.map((d, i) => {
         const date = new Date(d.date);
         return (
           <Day
+            selectedEvent={selectedEvent}
             key={i}
             date={d.number}
             day={d.name}
-            month={date.getMonth()}
+            month={date.getMonth() + 1}
             year={date.getFullYear()}
-            events={d.events}
+            currUser={currUser}
+            events={
+              d.events?.filter((e) => {
+                let event = true;
+                let user = true;
+                if (eventFilter && e.user.id !== 1) {
+                  event = e.event.name === eventFilter;
+                }
+                if (userFilter && e.user.id !== 1) {
+                  user = e.user.username === userFilter;
+                }
+
+                return event && user;
+              }) || []
+            }
           />
         );
       })}

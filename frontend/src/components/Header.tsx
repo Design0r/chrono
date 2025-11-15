@@ -52,7 +52,7 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
                 to="/calendar/$year/$month"
                 params={{
                   year: date.getFullYear().toString(),
-                  month: date.getMonth().toString(),
+                  month: (date.getMonth() + 1).toString(),
                 }}
               >
                 <span className="icon-outlined">calendar_today</span>

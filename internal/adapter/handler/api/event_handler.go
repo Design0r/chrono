@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 
@@ -28,6 +29,8 @@ func NewAPIEventHandler(
 func (h *APIEventHandler) RegisterRoutes(group *echo.Group) {
 	group.GET("/events/:year/:month", h.GetEventsForMonth)
 	group.GET("/events/:year", h.GetVacationGraph)
+	group.POST("/events", h.CreateEvent)
+	group.DELETE("/events/:id", h.DeleteEvent)
 }
 
 func (h *APIEventHandler) GetEventsForMonth(c echo.Context) error {
@@ -88,4 +91,46 @@ func (h *APIEventHandler) GetVacationGraph(c echo.Context) error {
 	}
 
 	return NewJsonResponse(c, response)
+}
+
+func (h *APIEventHandler) CreateEvent(c echo.Context) error {
+	ctx := c.Request().Context()
+	currUser := c.Get("user").(domain.User)
+
+	var eventForm domain.CreateEvent
+	if err := c.Bind(&eventForm); err != nil {
+		return NewErrorResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	event, err := h.event.Create(
+		ctx,
+		domain.YMDDate{Year: eventForm.Year, Month: eventForm.Month, Day: eventForm.Day},
+		strings.ToLower(eventForm.EventName),
+		&currUser,
+	)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusInternalServerError, "Failed to create event.")
+	}
+
+	eventUser := domain.EventUser{User: currUser, Event: *event}
+
+	return NewJsonResponse(c, eventUser)
+}
+
+func (h *APIEventHandler) DeleteEvent(c echo.Context) error {
+	ctx := c.Request().Context()
+	currUser := c.Get("user").(domain.User)
+
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid event id")
+	}
+
+	_, err = h.event.Delete(ctx, id, &currUser)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusInternalServerError, "Failed to delete event.")
+	}
+
+	return NewJsonResponse(c, nil)
 }

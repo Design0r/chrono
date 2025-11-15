@@ -1,5 +1,9 @@
-export function LoadingSpinner() {
-  return <span className="loading loading-spinner loading-xl"></span>;
+export function LoadingSpinner({
+  size = "xl",
+}: {
+  size?: "xl" | "lg" | "md" | "sm" | "xs";
+}) {
+  return <span className={`loading loading-spinner loading-${size}`}></span>;
 }
 
 export function LoadingSpinnerPage() {

@@ -1,8 +1,9 @@
-import { useRouter } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { User } from "../types/auth";
 import { hexToHSL, hsla } from "../utils/colors";
 import { useAuth } from "../auth";
+import { capitalize } from "../utils/string";
 
 export function Avatar({ user }: { user?: User | null }) {
   const router = useRouter();
@@ -12,7 +13,7 @@ export function Avatar({ user }: { user?: User | null }) {
   useEffect(() => {
     if (!user) return;
     if (user.username.length > 0) {
-      setInitial(user.username.slice(0, 1));
+      setInitial(capitalize(user.username)[0]);
     }
   }, [user]);
 
@@ -42,28 +43,18 @@ export function Avatar({ user }: { user?: User | null }) {
         className="dropdown-content mt-1.5 min-w-40 pt-4 pb-3 px-3 menu bg-info/20 backdrop-blur-xl rounded-box z-10 drop-shadow-xl animate-color"
       >
         <li>
-          <a className="py-2.5" href="/profile">
-            Profile
-          </a>
+          <Link to="/profile">Profile</Link>
         </li>
-        {user?.is_superuser && (
-          <li>
-            <a className="py-2.5" href="/settings">
-              Settings
-            </a>
-          </li>
-        )}
         <li>
-          <button
+          <Link
+            to="/login"
             onClick={async () => {
-              await auth.logout();
               await router.invalidate();
-              await router.navigate({ to: "/login" });
+              await auth.logout();
             }}
-            className="w-full text-left py-1"
           >
             Logout
-          </button>
+          </Link>
         </li>
       </ul>
     </div>

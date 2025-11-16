@@ -9,10 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth.index'
 import { Route as AuthTeamRouteImport } from './routes/_auth.team'
+import { Route as AuthProfileRouteImport } from './routes/_auth.profile'
 import { Route as AuthAdminRouteImport } from './routes/_auth._admin'
 import { Route as AuthAdminTokensRouteImport } from './routes/_auth._admin.tokens'
 import { Route as AuthAdminSettingsRouteImport } from './routes/_auth._admin.settings'
@@ -20,6 +22,11 @@ import { Route as AuthAdminRequestsRouteImport } from './routes/_auth._admin.req
 import { Route as AuthAdminExportRouteImport } from './routes/_auth._admin.export'
 import { Route as AuthCalendarYearMonthRouteImport } from './routes/_auth.calendar.$year.$month'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -37,6 +44,11 @@ const AuthIndexRoute = AuthIndexRouteImport.update({
 const AuthTeamRoute = AuthTeamRouteImport.update({
   id: '/team',
   path: '/team',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthProfileRoute = AuthProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthAdminRoute = AuthAdminRouteImport.update({
@@ -71,6 +83,8 @@ const AuthCalendarYearMonthRoute = AuthCalendarYearMonthRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/profile': typeof AuthProfileRoute
   '/team': typeof AuthTeamRoute
   '/': typeof AuthIndexRoute
   '/export': typeof AuthAdminExportRoute
@@ -81,6 +95,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/profile': typeof AuthProfileRoute
   '/team': typeof AuthTeamRoute
   '/': typeof AuthIndexRoute
   '/export': typeof AuthAdminExportRoute
@@ -93,7 +109,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/_auth/_admin': typeof AuthAdminRouteWithChildren
+  '/_auth/profile': typeof AuthProfileRoute
   '/_auth/team': typeof AuthTeamRoute
   '/_auth/': typeof AuthIndexRoute
   '/_auth/_admin/export': typeof AuthAdminExportRoute
@@ -106,6 +124,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/login'
+    | '/signup'
+    | '/profile'
     | '/team'
     | '/'
     | '/export'
@@ -116,6 +136,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/signup'
+    | '/profile'
     | '/team'
     | '/'
     | '/export'
@@ -127,7 +149,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_auth'
     | '/login'
+    | '/signup'
     | '/_auth/_admin'
+    | '/_auth/profile'
     | '/_auth/team'
     | '/_auth/'
     | '/_auth/_admin/export'
@@ -140,10 +164,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -170,6 +202,13 @@ declare module '@tanstack/react-router' {
       path: '/team'
       fullPath: '/team'
       preLoaderRoute: typeof AuthTeamRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/profile': {
+      id: '/_auth/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthProfileRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/_admin': {
@@ -237,6 +276,7 @@ const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
 
 interface AuthRouteChildren {
   AuthAdminRoute: typeof AuthAdminRouteWithChildren
+  AuthProfileRoute: typeof AuthProfileRoute
   AuthTeamRoute: typeof AuthTeamRoute
   AuthIndexRoute: typeof AuthIndexRoute
   AuthCalendarYearMonthRoute: typeof AuthCalendarYearMonthRoute
@@ -244,6 +284,7 @@ interface AuthRouteChildren {
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAdminRoute: AuthAdminRouteWithChildren,
+  AuthProfileRoute: AuthProfileRoute,
   AuthTeamRoute: AuthTeamRoute,
   AuthIndexRoute: AuthIndexRoute,
   AuthCalendarYearMonthRoute: AuthCalendarYearMonthRoute,
@@ -254,6 +295,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

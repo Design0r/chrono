@@ -56,12 +56,30 @@ type PatchUser struct {
 	Enabled  bool   `form:"enabled"`
 }
 
+type ApiPatchUser struct {
+	Name     string `form:"username"`
+	Email    string `form:"email"`
+	Color    string `form:"color"`
+	Password string `form:"password"`
+	Role     string `form:"role"`
+	Enabled  bool   `form:"enabled"`
+}
+
 type CreateUser struct {
 	Username     string `json:"username"      form:"qwenameasd"`
 	Color        string `json:"color"`
 	VacationDays int64  `json:"vacation_days"`
 	Email        string `json:"email"         form:"qweemailasd"`
 	Password     string `json:"password"      form:"qwepasswordasd"`
+	IsSuperuser  bool   `json:"is_superuser"`
+}
+
+type ApiCreateUser struct {
+	Username     string `json:"username"      form:"username"`
+	Color        string `json:"color"`
+	VacationDays int64  `json:"vacation_days"`
+	Email        string `json:"email"         form:"email"`
+	Password     string `json:"password"      form:"password"`
 	IsSuperuser  bool   `json:"is_superuser"`
 }
 

@@ -1,4 +1,5 @@
 import type { User, UserWithVacation } from "../../types/auth";
+import type { ProfileEditForm } from "../../types/forms";
 import { returnOrError } from "../error";
 import { CHRONO_URL } from "./chrono";
 
@@ -36,6 +37,22 @@ export class ApiUsers {
         credentials: "include",
       },
     );
+
+    const r = await returnOrError(response);
+    return r.data;
+  }
+
+  async updateUser(userId: number, data: ProfileEditForm): Promise<User> {
+    const form = new FormData();
+    Object.entries(data).map(([k, v]) => form.append(k, v.toString()));
+
+    console.log("hello");
+
+    const response = await fetch(CHRONO_URL + `/users/${userId}`, {
+      method: "PATCH",
+      credentials: "include",
+      body: form,
+    });
 
     const r = await returnOrError(response);
     return r.data;

@@ -57,23 +57,36 @@ func (h *APIAuthHandler) Login(c echo.Context) error {
 }
 
 func (h *APIAuthHandler) Signup(c echo.Context) error {
+	ctx := c.Request().Context()
 	settings := c.Get("settings").(domain.Settings)
 	if !settings.SignupEnabled {
-		return NewErrorResponse(c, http.StatusBadRequest, "Signups are currently disabled.")
+		return NewErrorResponse(c, http.StatusForbidden, "Signups are currently disabled.")
 	}
 
-	var loginData domain.CreateUser
+	var loginData domain.ApiCreateUser
 	if err := c.Bind(&loginData); err != nil {
-		return NewErrorResponse(c, http.StatusBadRequest, "Invalid inputs")
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "Invalid inputs")
 	}
 
-	cookie, err := h.auth.Signup(c.Request().Context(), loginData)
+	cookie, err := h.auth.Signup(
+		ctx,
+		domain.CreateUser{
+			Username: loginData.Username,
+			Password: loginData.Password,
+			Email:    loginData.Email,
+		},
+	)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusNotFound, err.Error())
+	}
+
+	user, err := h.user.GetByEmail(ctx, loginData.Email)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusNotFound, err.Error())
 	}
 
 	c.SetCookie(cookie)
-	return NewJsonResponse(c, nil)
+	return NewJsonResponse(c, user)
 }
 
 func (h *APIAuthHandler) Logout(c echo.Context) error {

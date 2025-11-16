@@ -14,16 +14,12 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
 
   const userQ = useQuery({
     queryKey: ["user", auth.userId],
-    queryFn: () => chrono.users.getUserById(auth.userId!),
+    queryFn: () => {
+      if (!auth.userId) throw new Error("no user id found");
+      return chrono.users.getUserById(auth.userId);
+    },
     staleTime: 1000 * 60 * 60 * 6, // 6h
     gcTime: 1000 * 60 * 60 * 7, // 7h
-  });
-
-  const settingQ = useQuery({
-    queryKey: ["settings"],
-    queryFn: () => chrono.settings.getSettings(),
-    staleTime: 1000 * 30, // 30s
-    gcTime: 1000 * 60 * 5, // 5m
   });
 
   const date = new Date();
@@ -88,11 +84,11 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
               <a href="/login" className="btn btn-ghost">
                 Login
               </a>
-              {settingQ.data?.signup_enabled && (
+              {
                 <a href="/signup" className="btn btn-ghost">
                   Signup
                 </a>
-              )}
+              }
             </>
           ) : (
             <Avatar user={userQ.data} />

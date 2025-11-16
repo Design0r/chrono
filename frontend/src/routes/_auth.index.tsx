@@ -60,7 +60,7 @@ function Home() {
         <span className="animate-pulse font-medium text-white pr-1"> Hej </span>
         {user?.username}
       </div>
-      <TitleSection title="Your vacation stats">
+      <TitleSection title="Your vacation">
         <StatCard>
           <StatCardElement
             title="Vacation remaining"
@@ -99,7 +99,7 @@ function Home() {
           </StatCardElement>
         </StatCard>
       </TitleSection>
-      <TitleSection title="Your year stats">
+      <TitleSection title="Year progession">
         <StatCard>
           <StatCardElement
             title="Days this year"

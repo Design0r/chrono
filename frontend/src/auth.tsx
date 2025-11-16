@@ -6,12 +6,13 @@ import {
   type ReactNode,
 } from "react";
 import { ChronoClient } from "./api/chrono/client";
-import type { LoginRequest, User } from "./types/auth";
+import type { LoginRequest, SignupRequest, User } from "./types/auth";
 import { useQueryClient } from "@tanstack/react-query";
 
 export interface AuthContext {
   isAuthenticated: boolean;
   login: (data: LoginRequest) => Promise<void>;
+  signup: (data: SignupRequest) => Promise<void>;
   logout: () => Promise<void>;
   userId: number | null;
   getUser: () => Promise<User | null>;
@@ -56,6 +57,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(true);
   }, []);
 
+  const signup = useCallback(async (data: SignupRequest) => {
+    const user = (await chrono.auth.signup(data)).data;
+    localStorage.setItem("user", user.id);
+    setUserId(user.id);
+    setIsAuthenticated(true);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -64,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         getUser,
+        signup,
       }}
     >
       {children}

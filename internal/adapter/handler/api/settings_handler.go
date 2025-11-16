@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 
@@ -33,7 +34,12 @@ func (h *APISettingsHandler) Settings(c echo.Context) error {
 }
 
 func (h *APISettingsHandler) PatchSettings(c echo.Context) error {
-	settings := domain.Settings{ID: 1, SignupEnabled: c.FormValue("signup_enabled") == "on"}
+	signupEnabled, err := strconv.ParseBool(c.FormValue("signup_enabled"))
+	if err != nil {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid parameters")
+	}
+
+	settings := domain.Settings{ID: 1, SignupEnabled: signupEnabled}
 	s, err := h.settings.Update(c.Request().Context(), settings)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusBadRequest, "Failed to update settings.")

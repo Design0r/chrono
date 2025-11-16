@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { ErrorPage } from "../components/ErrorPage";
+import type { Settings } from "../types/response";
+import { useToast } from "../components/Toast";
 
 export const Route = createFileRoute("/_auth/_admin/settings")({
   component: SettingsComponent,
@@ -9,12 +11,20 @@ export const Route = createFileRoute("/_auth/_admin/settings")({
 
 function SettingsComponent() {
   const { chrono } = Route.useRouteContext();
+  const { addToast, addErrorToast } = useToast();
 
   const settingQ = useQuery({
     queryKey: ["settings"],
     queryFn: () => chrono.settings.getSettings(),
     staleTime: 1000 * 30, // 30s
     gcTime: 1000 * 60 * 5, // 5m
+  });
+
+  const mutation = useMutation({
+    mutationKey: ["settings", "signup_enabled"],
+    mutationFn: (s: Settings) => chrono.settings.updateSettings(s),
+    onSuccess: () => addToast("Updated settings", "success"),
+    onError: (error) => addErrorToast(error),
   });
 
   if (settingQ.isPending) return <LoadingSpinnerPage />;
@@ -28,7 +38,13 @@ function SettingsComponent() {
         </div>
         <div className="flex justify-end col-start-2">
           <input
-            checked={settingQ.data!.signup_enabled}
+            defaultChecked={settingQ.data!.signup_enabled}
+            onChange={(e) =>
+              mutation.mutate({
+                ...settingQ.data,
+                signup_enabled: Boolean(e.target.value),
+              })
+            }
             type="checkbox"
             className="toggle border-error text-error checked:border-success checked:text-success"
           />

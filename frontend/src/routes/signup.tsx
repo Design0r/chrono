@@ -2,23 +2,24 @@ import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../auth";
-import type { LoginRequest } from "../types/auth";
+import type { SignupRequest } from "../types/auth";
 import { useToast } from "../components/Toast";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 
-export const Route = createFileRoute("/login")({
+export const Route = createFileRoute("/signup")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const router = useRouter();
   const auth = useAuth();
-  const { register, handleSubmit } = useForm<LoginRequest>();
+  const { register, handleSubmit } = useForm<SignupRequest>();
   const { addToast, addErrorToast } = useToast();
+
   const mutation = useMutation({
-    mutationFn: async (data: LoginRequest) => await auth.login(data),
+    mutationFn: (data: SignupRequest) => auth.signup(data),
     onSuccess: async () => {
-      addToast("Successfully logged in", "success");
+      addToast("Successfully signed up", "success");
       await router.invalidate();
       await router.navigate({ to: "/" });
     },
@@ -29,14 +30,26 @@ function RouteComponent() {
     <div className="flex my-10">
       <div className="align-middle flex m-auto">
         <div>
-          <h1 className="font-bold text-xl">Log in</h1>
+          <h1 className="font-bold text-xl">Sign up</h1>
           <br />
           <form
             className="w-max"
-            onSubmit={handleSubmit((data: LoginRequest) =>
+            onSubmit={handleSubmit((data: SignupRequest) =>
               mutation.mutate(data),
             )}
           >
+            <div className="w-lg">
+              <label htmlFor="username">Username</label>
+              <br />
+              <input
+                className="input w-full input-bordered"
+                type="text"
+                required
+                {...register("username")}
+              />
+              <br />
+              <br />
+            </div>
             <div className="w-lg">
               <label htmlFor="email">Email</label>
               <br />
@@ -66,7 +79,7 @@ function RouteComponent() {
               type="submit"
               disabled={mutation.isPending}
             >
-              {mutation.isPending ? <LoadingSpinner /> : "Log in"}
+              {mutation.isPending ? <LoadingSpinner /> : "Sign up"}
             </button>
           </form>
         </div>

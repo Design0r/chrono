@@ -3,14 +3,20 @@ export type LoginRequest = {
   password: string;
 };
 
+export type SignupRequest = {
+  email: string;
+  username: string;
+  password: string;
+};
+
 export type User = {
   id: number;
   username: string;
   email: string;
   vacation_days: number;
   is_superuser: boolean;
-  created_at: Date;
-  edited_at: Date;
+  created_at: string;
+  edited_at: string;
   color: string;
   role: string;
   enabled: boolean;

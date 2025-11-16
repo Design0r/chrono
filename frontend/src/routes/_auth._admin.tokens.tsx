@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { ErrorPage } from "../components/ErrorPage";
 import { useRef, useState } from "react";
+import { useToast } from "../components/Toast";
 
 export const Route = createFileRoute("/_auth/_admin/tokens")({
   component: RouteComponent,
@@ -12,6 +13,7 @@ function RouteComponent() {
   const { chrono } = Route.useRouteContext();
   const selectRef = useRef<HTMLSelectElement>(null!);
   const queryClient = useQueryClient();
+  const { addToast, addErrorToast } = useToast();
 
   const usersQ = useQuery({
     queryKey: ["users", "vacation"],
@@ -29,7 +31,12 @@ function RouteComponent() {
         Number.parseInt(selectRef.current.value),
         token,
       ),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
+    onSuccess: (_, variables) => {
+      addToast(`Added ${variables} tokens`, "success");
+      return queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+
+    onError: (error) => addErrorToast(error),
   });
 
   if (usersQ.isPending) return <LoadingSpinnerPage />;
@@ -46,7 +53,7 @@ function RouteComponent() {
               name="filter"
             >
               {usersQ.data!.map((u) => (
-                <option key={u.id} value={u.id}>
+                <option key={u.id} label={u.username} value={u.id}>
                   {u.username}
                 </option>
               ))}

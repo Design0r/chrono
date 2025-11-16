@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChronoClient } from "../api/chrono/client";
 import { LoadingSpinner } from "./LoadingSpinner";
+import { useToast } from "./Toast";
 
 export function CalendarNavigation({
   year: currYear,
@@ -200,6 +201,7 @@ export function Event({
 }) {
   const chrono = new ChronoClient();
   const queryClient = useQueryClient();
+  const { addToast, addErrorToast } = useToast();
 
   const hsl = hexToHSL(event.user.color);
   const bgColor = hsla(...hsl, 0.2);
@@ -226,11 +228,13 @@ export function Event({
     mutationKey: ["deleteEvent", event.event.id],
     mutationFn: () => chrono.events.deleteEvent(event.event.id),
     onSuccess: () => {
+      addToast(`Successfully deleted event ${event.event.id}`, "success");
       setVisible(false);
       return queryClient.invalidateQueries({
         queryKey: ["month"],
       });
     },
+    onError: (error) => addErrorToast(error),
   });
 
   if (!visible) return <></>;
@@ -310,6 +314,7 @@ export function Day({
   useEffect(() => setEvts(events), [events]);
   const chrono = new ChronoClient();
   const queryClient = useQueryClient();
+  const { addToast, addErrorToast } = useToast();
 
   const mutation = useMutation({
     mutationKey: ["createEvent", year, month, date, selectedEvent],
@@ -322,10 +327,12 @@ export function Day({
       }),
     onSuccess: (e) => {
       setEvts((ev) => [...ev, e]);
+      addToast(`Successfully created event ${selectedEvent}`, "success");
       return queryClient.invalidateQueries({
         queryKey: ["month"],
       });
     },
+    onError: (error) => addErrorToast(error),
   });
 
   return (

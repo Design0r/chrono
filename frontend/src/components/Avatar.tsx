@@ -2,10 +2,12 @@ import { useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { User } from "../types/auth";
 import { hexToHSL, hsla } from "../utils/colors";
+import { useAuth } from "../auth";
 
-export function Avatar({ user }: { user: User | null }) {
+export function Avatar({ user }: { user?: User | null }) {
   const router = useRouter();
   const [initial, setInitial] = useState("?");
+  const auth = useAuth();
 
   useEffect(() => {
     if (!user) return;

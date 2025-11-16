@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useToast } from "../components/Toast";
 
 export const Route = createFileRoute("/_auth/_admin/export")({
   component: RouteComponent,
@@ -10,10 +11,14 @@ function RouteComponent() {
   const { chrono } = Route.useRouteContext();
   const currYear = new Date().getFullYear();
   const [year, setYear] = useState(currYear);
+  const toast = useToast();
 
   const mutation = useMutation({
     mutationKey: ["export", year],
     mutationFn: (y: number) => chrono.export.download(y),
+    onSuccess: () => toast.addToast("Created report"),
+    onError: (error) =>
+      toast.addToast(`${error.name}: ${error.message}`, "error"),
   });
 
   return (

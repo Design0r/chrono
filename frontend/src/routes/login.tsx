@@ -3,6 +3,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../auth";
 import type { LoginRequest } from "../types/auth";
+import { useToast } from "../components/Toast";
 
 export const Route = createFileRoute("/login")({
   component: RouteComponent,
@@ -12,12 +13,15 @@ function RouteComponent() {
   const router = useRouter();
   const auth = useAuth();
   const { register, handleSubmit } = useForm<LoginRequest>();
+  const { addToast, addErrorToast } = useToast();
   const mutation = useMutation({
     mutationFn: async (data: LoginRequest) => await auth.login(data),
     onSuccess: async () => {
+      addToast("Successfully logged in", "success");
       await router.invalidate();
       await router.navigate({ to: "/" });
     },
+    onError: (error) => addErrorToast(error),
   });
 
   return (
@@ -29,7 +33,7 @@ function RouteComponent() {
           <form
             className="w-max"
             onSubmit={handleSubmit((data: LoginRequest) =>
-              mutation.mutate(data)
+              mutation.mutate(data),
             )}
           >
             <div className="w-lg">

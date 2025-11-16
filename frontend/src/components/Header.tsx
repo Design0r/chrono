@@ -8,8 +8,6 @@ import { useAuth } from "../auth";
 import { Avatar } from "./Avatar";
 import { useQuery } from "@tanstack/react-query";
 import type { ChronoClient } from "../api/chrono/client";
-import { LoadingSpinner } from "./LoadingSpinner";
-import { ErrorPage } from "./ErrorPage";
 
 export function Header({ chrono }: { chrono: ChronoClient }) {
   const auth = useAuth();
@@ -27,13 +25,6 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
     staleTime: 1000 * 30, // 30s
     gcTime: 1000 * 60 * 5, // 5m
   });
-
-  const queries = [userQ, settingQ];
-  const anyPending = queries.some((q) => q.isPending);
-  const firstError = queries.find((q) => q.isError)?.error;
-
-  if (anyPending) return <LoadingSpinner />;
-  if (firstError) return <ErrorPage error={firstError} />;
 
   const date = new Date();
 
@@ -68,7 +59,7 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
                 <span className="icon-outlined">group</span>
                 <span className="font-medium text-base">Team</span>
               </MenuButton>
-              {userQ.data!.is_superuser && (
+              {userQ.data?.is_superuser && (
                 <>
                   <MenuButton to="/requests">
                     <span className="icon-outlined">mark_chat_unread</span>
@@ -97,14 +88,14 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
               <a href="/login" className="btn btn-ghost">
                 Login
               </a>
-              {settingQ.data!.signup_enabled && (
+              {settingQ.data?.signup_enabled && (
                 <a href="/signup" className="btn btn-ghost">
                   Signup
                 </a>
               )}
             </>
           ) : (
-            <Avatar user={userQ.data!} />
+            <Avatar user={userQ.data} />
           )}
         </div>
       </div>

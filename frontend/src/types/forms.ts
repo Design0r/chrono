@@ -4,3 +4,9 @@ export type ProfileEditForm = {
   email: string;
   color: string;
 };
+
+export type TeamEditForm = {
+  vacation_days: number;
+  enabled: boolean;
+  role: string;
+};

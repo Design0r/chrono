@@ -4,13 +4,16 @@ import type { User, UserWithVacation } from "../types/auth";
 import { hexToHSL, hsla } from "../utils/colors";
 import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { ErrorPage } from "../components/ErrorPage";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { TeamEditForm } from "../types/forms";
+import { useToast } from "../components/Toast";
+import { capitalize } from "../utils/string";
 
 export const Route = createFileRoute("/_auth/team")({
-  component: RouteComponent,
+  component: TeamComponent,
 });
 
-function RouteComponent() {
+function TeamComponent() {
   const { chrono, auth } = Route.useRouteContext();
 
   const usersQ = useQuery({
@@ -45,7 +48,7 @@ function RouteComponent() {
       <div className="overflow-x-auto bg-info/3">
         <table className="table table-zebra table-md">
           <thead>
-            <tr className="bg-base-200 text-base-content border-b-1.5 border-primary/65">
+            <tr className="text-base-content border-b-1.5 border-primary/65">
               <th>ID</th>
               <th>Name</th>
               <th className="text-center">Vacation Days</th>
@@ -81,6 +84,23 @@ function TableRow({
   currUser: User;
 }) {
   const [edit, setEdit] = useState(false);
+  const { chrono, queryClient } = Route.useRouteContext();
+  const { addToast, addErrorToast } = useToast();
+  const [vacDays, setVacDays] = useState(user.vacation_days);
+  const [role, setRole] = useState(user.role);
+  const [enabled, setEnabled] = useState(user.enabled);
+
+  const mutation = useMutation({
+    mutationKey: ["user", "update", user.id],
+    mutationFn: ({ userId, data }: { userId: number; data: TeamEditForm }) =>
+      chrono.users.updateUser(userId, data),
+    onSuccess: () => {
+      addToast("Successfully updated profile settings", "success");
+      setEdit(false);
+      return queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (error) => addErrorToast(error),
+  });
 
   const hsl = hexToHSL(user ? user.color : "#000");
   const borderColor = hsla(...hsl, 0.6);
@@ -108,31 +128,81 @@ function TableRow({
         </div>
       </th>
       <th>{user.username}</th>
-      <td className="text-center">{user.vacation_days}</td>
+      <td className="text-center">
+        {edit ? (
+          <input
+            className="input input-bordered"
+            type="number"
+            step={0.5}
+            required
+            defaultValue={user.vacation_days}
+            onChange={(e) => setVacDays(Number(e.target.value))}
+          />
+        ) : (
+          <>{user.vacation_days}</>
+        )}
+      </td>
       <td className="text-center">{user.vacation_used}</td>
       <td className="text-center">{user.vacation_remaining}</td>
       <td>{user.email}</td>
       <td>
-        <span>{user.role}</span>
+        {edit ? (
+          <select
+            required
+            defaultValue={user.role}
+            onChange={(e) => setRole(e.target.value)}
+          >
+            {chrono.users.getRoles().map((u, i) => (
+              <option key={i} value={u}>
+                {capitalize(u)}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <>{user.role}</>
+        )}
       </td>
 
       <td className="icon-outlined">
-        <span className="icon-outlined cursor-not-allowed ">
-          {user.enabled ? "check_box" : "check_box_outline_blank"}
-        </span>
+        {edit ? (
+          <input
+            type="checkbox"
+            className="checkbox"
+            onChange={(e) => setEnabled(Boolean(e.target.value))}
+            defaultChecked={user.enabled}
+          />
+        ) : (
+          <input
+            type="checkbox"
+            className="checkbox cursor-not-allowed"
+            defaultChecked={user.enabled}
+            contentEditable={false}
+          />
+        )}
       </td>
       {currUser.is_superuser && (
         <td>
           {edit ? (
             <>
               <button
-                onClick={() => setEdit(false)}
+                onClick={() => {
+                  mutation.mutate({
+                    userId: user.id,
+                    data: { vacation_days: vacDays, enabled, role },
+                  });
+                  setEdit(false);
+                }}
                 className="btn btn-soft btn-success animate-color icon-outlined"
               >
                 check
               </button>
               <button
-                onClick={() => setEdit(false)}
+                onClick={() => {
+                  setEdit(false);
+                  setRole(user.role);
+                  setVacDays(user.vacation_days);
+                  setEnabled(user.enabled);
+                }}
                 className="btn btn-soft btn-error animate-color icon-outlined"
               >
                 close

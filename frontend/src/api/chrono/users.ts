@@ -1,5 +1,5 @@
 import type { User, UserWithVacation } from "../../types/auth";
-import type { ProfileEditForm } from "../../types/forms";
+import type { ProfileEditForm, TeamEditForm } from "../../types/forms";
 import { returnOrError } from "../error";
 import { CHRONO_URL } from "./chrono";
 
@@ -42,7 +42,10 @@ export class ApiUsers {
     return r.data;
   }
 
-  async updateUser(userId: number, data: ProfileEditForm): Promise<User> {
+  async updateUser(
+    userId: number,
+    data: ProfileEditForm | TeamEditForm,
+  ): Promise<User> {
     const form = new FormData();
     Object.entries(data).map(([k, v]) => form.append(k, v.toString()));
 
@@ -56,5 +59,9 @@ export class ApiUsers {
 
     const r = await returnOrError(response);
     return r.data;
+  }
+
+  getRoles() {
+    return ["admin", "user", "guest"] as const;
   }
 }

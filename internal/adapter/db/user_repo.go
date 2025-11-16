@@ -48,6 +48,7 @@ func (r *SQLUserRepo) Update(ctx context.Context, user *domain.User) (*domain.Us
 		repo.UpdateUserParams{
 			Username:     user.Username,
 			Color:        user.Color,
+			Role:         user.Role,
 			VacationDays: user.VacationDays,
 			Email:        user.Email,
 			Password:     user.Password,

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -105,23 +106,72 @@ func (h *APIUserHandler) GetUsers(c echo.Context) error {
 
 func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 	currUser := c.Get("user").(domain.User)
+	ctx := c.Request().Context()
+
+	id := c.Param("id")
+	userId, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid user id")
+	}
+
+	userToEdit, err := h.user.GetById(ctx, userId)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusNotFound, "user id does not exist")
+	}
 
 	patchedData := domain.ApiPatchUser{}
 	if err := c.Bind(&patchedData); err != nil {
 		return NewErrorResponse(c, http.StatusUnprocessableEntity, "Invalid data")
 	}
 
+	username := userToEdit.Username
+	if patchedData.Name != "" {
+		username = patchedData.Name
+	}
+
+	email := userToEdit.Email
+	if patchedData.Email != "" {
+		email = patchedData.Email
+	}
+
+	color := userToEdit.Color
+	if patchedData.Color != "" {
+		color = patchedData.Color
+	}
+
+	vacDays := userToEdit.VacationDays
+	if currUser.IsAdmin() && patchedData.VacationDays != nil {
+		vacDays = *patchedData.VacationDays
+	}
+
+	role := userToEdit.Role
+	if currUser.IsAdmin() && patchedData.Role != "" {
+		if !domain.IsValidRole((domain.Role)(patchedData.Role)) {
+			return NewErrorResponse(c, http.StatusUnprocessableEntity, "Invalid user role")
+		}
+		role = patchedData.Role
+	}
+
+	superuser := role == "admin"
+
+	enabled := userToEdit.Enabled
+	if currUser.IsAdmin() && patchedData.Enabled != nil {
+		enabled = *patchedData.Enabled
+	}
+
 	u := &domain.User{
-		ID:           currUser.ID,
-		Username:     patchedData.Name,
-		Email:        patchedData.Email,
-		Color:        patchedData.Color,
-		Role:         currUser.Role,
-		Enabled:      currUser.Enabled,
-		IsSuperuser:  currUser.IsSuperuser,
-		VacationDays: currUser.VacationDays,
+		ID:           userToEdit.ID,
+		Username:     username,
+		Email:        email,
+		Color:        color,
+		Role:         role,
+		Enabled:      enabled,
+		IsSuperuser:  superuser,
+		VacationDays: vacDays,
 		Password:     currUser.Password,
 	}
+
+	fmt.Println(u)
 
 	if patchedData.Password != "" {
 		pw, err := h.auth.HashPassword(patchedData.Password)

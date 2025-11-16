@@ -57,12 +57,13 @@ type PatchUser struct {
 }
 
 type ApiPatchUser struct {
-	Name     string `form:"username"`
-	Email    string `form:"email"`
-	Color    string `form:"color"`
-	Password string `form:"password"`
-	Role     string `form:"role"`
-	Enabled  bool   `form:"enabled"`
+	Name         string `form:"username"`
+	Email        string `form:"email"`
+	Color        string `form:"color"`
+	Password     string `form:"password"`
+	Role         string `form:"role"`
+	Enabled      *bool  `form:"enabled"`
+	VacationDays *int64 `form:"vacation_days"`
 }
 
 type CreateUser struct {

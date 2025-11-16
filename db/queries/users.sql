@@ -25,6 +25,7 @@ SET color = ?,
 username = ?,
 email = ?,
 password = ?,
+role = ?,
 vacation_days = ?,
 is_superuser = ?,
 edited_at = CURRENT_TIMESTAMP

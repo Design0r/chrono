@@ -218,6 +218,7 @@ SET color = ?,
 username = ?,
 email = ?,
 password = ?,
+role = ?,
 vacation_days = ?,
 is_superuser = ?,
 edited_at = CURRENT_TIMESTAMP
@@ -230,6 +231,7 @@ type UpdateUserParams struct {
 	Username     string `json:"username"`
 	Email        string `json:"email"`
 	Password     string `json:"password"`
+	Role         string `json:"role"`
 	VacationDays int64  `json:"vacation_days"`
 	IsSuperuser  bool   `json:"is_superuser"`
 	ID           int64  `json:"id"`
@@ -241,6 +243,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.Username,
 		arg.Email,
 		arg.Password,
+		arg.Role,
 		arg.VacationDays,
 		arg.IsSuperuser,
 		arg.ID,

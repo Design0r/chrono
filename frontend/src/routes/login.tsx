@@ -7,10 +7,10 @@ import { useToast } from "../components/Toast";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 
 export const Route = createFileRoute("/login")({
-  component: RouteComponent,
+  component: LoginComponent,
 });
 
-function RouteComponent() {
+function LoginComponent() {
   const router = useRouter();
   const auth = useAuth();
   const { register, handleSubmit } = useForm<LoginRequest>();

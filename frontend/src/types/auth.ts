@@ -20,6 +20,7 @@ export type User = {
   color: string;
   role: string;
   enabled: boolean;
+  awork_id: string | null;
 };
 
 export type UserWithVacation = User & {

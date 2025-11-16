@@ -16,6 +16,34 @@ type Request struct {
 	EventID   int64     `json:"event_id"`
 }
 
+// ID           int64     `json:"id"`
+// Message      *string   `json:"message"`
+// State        string    `json:"state"`
+// CreatedAt    time.Time `json:"created_at"`
+// EditedAt     time.Time `json:"edited_at"`
+// UserID       int64     `json:"user_id"`
+// EditedBy     *int64    `json:"edited_by"`
+// EventID      int64     `json:"event_id"`
+// ID_2         int64     `json:"id_2"`
+// Username     string    `json:"username"`
+// Email        string    `json:"email"`
+// Password     string    `json:"password"`
+// VacationDays int64     `json:"vacation_days"`
+// IsSuperuser  bool      `json:"is_superuser"`
+// CreatedAt_2  time.Time `json:"created_at_2"`
+// EditedAt_2   time.Time `json:"edited_at_2"`
+// Color        string    `json:"color"`
+// Role         string    `json:"role"`
+// Enabled      bool      `json:"enabled"`
+// AworkID      *string   `json:"awork_id"`
+// ID_3         int64     `json:"id_3"`
+// ScheduledAt  time.Time `json:"scheduled_at"`
+// Name         string    `json:"name"`
+// State_2      string    `json:"state_2"`
+// CreatedAt_3  time.Time `json:"created_at_3"`
+// EditedAt_3   time.Time `json:"edited_at_3"`
+// UserID_2     int64     `json:"user_id_2"`
+
 type RequestEventUser struct {
 	ID           int64     `json:"request_id"`
 	Message      *string   `json:"message"`
@@ -36,6 +64,7 @@ type RequestEventUser struct {
 	Color        string    `json:"color"`
 	Role         string    `json:"role"`
 	Enabled      bool      `json:"enabled"`
+	AworkID      *string   `json:"awork_id"`
 	ID_3         int64     `json:"event_id"`
 	ScheduledAt  time.Time `json:"scheduled_at"`
 	Name         string    `json:"name"`

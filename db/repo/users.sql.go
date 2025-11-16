@@ -10,18 +10,19 @@ import (
 )
 
 const CreateUser = `-- name: CreateUser :one
-INSERT INTO users (username, color, vacation_days, email, password, is_superuser)
-VALUES (?, ?, ?, ?, ?, ?)
-RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled
+INSERT INTO users (username, color, vacation_days, email, password, is_superuser, awork_id)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id
 `
 
 type CreateUserParams struct {
-	Username     string `json:"username"`
-	Color        string `json:"color"`
-	VacationDays int64  `json:"vacation_days"`
-	Email        string `json:"email"`
-	Password     string `json:"password"`
-	IsSuperuser  bool   `json:"is_superuser"`
+	Username     string  `json:"username"`
+	Color        string  `json:"color"`
+	VacationDays int64   `json:"vacation_days"`
+	Email        string  `json:"email"`
+	Password     string  `json:"password"`
+	IsSuperuser  bool    `json:"is_superuser"`
+	AworkID      *string `json:"awork_id"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -32,6 +33,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.Email,
 		arg.Password,
 		arg.IsSuperuser,
+		arg.AworkID,
 	)
 	var i User
 	err := row.Scan(
@@ -46,6 +48,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Color,
 		&i.Role,
 		&i.Enabled,
+		&i.AworkID,
 	)
 	return i, err
 }
@@ -61,7 +64,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const GetAdmins = `-- name: GetAdmins :many
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id FROM users
 WHERE is_superuser = true
 `
 
@@ -86,6 +89,7 @@ func (q *Queries) GetAdmins(ctx context.Context) ([]User, error) {
 			&i.Color,
 			&i.Role,
 			&i.Enabled,
+			&i.AworkID,
 		); err != nil {
 			return nil, err
 		}
@@ -101,7 +105,7 @@ func (q *Queries) GetAdmins(ctx context.Context) ([]User, error) {
 }
 
 const GetAllUsers = `-- name: GetAllUsers :many
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id FROM users
 WHERE id != 1
 `
 
@@ -126,6 +130,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 			&i.Color,
 			&i.Role,
 			&i.Enabled,
+			&i.AworkID,
 		); err != nil {
 			return nil, err
 		}
@@ -141,7 +146,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const GetUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id FROM users
 WHERE email = ?
 `
 
@@ -160,12 +165,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Color,
 		&i.Role,
 		&i.Enabled,
+		&i.AworkID,
 	)
 	return i, err
 }
 
 const GetUserByID = `-- name: GetUserByID :one
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id FROM users
 WHERE id = ?
 `
 
@@ -184,12 +190,13 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 		&i.Color,
 		&i.Role,
 		&i.Enabled,
+		&i.AworkID,
 	)
 	return i, err
 }
 
 const GetUserByName = `-- name: GetUserByName :one
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id FROM users
 WHERE username = ?
 `
 
@@ -208,6 +215,7 @@ func (q *Queries) GetUserByName(ctx context.Context, username string) (User, err
 		&i.Color,
 		&i.Role,
 		&i.Enabled,
+		&i.AworkID,
 	)
 	return i, err
 }
@@ -219,22 +227,24 @@ username = ?,
 email = ?,
 password = ?,
 role = ?,
+awork_id = ?,
 vacation_days = ?,
 is_superuser = ?,
 edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
-RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id
 `
 
 type UpdateUserParams struct {
-	Color        string `json:"color"`
-	Username     string `json:"username"`
-	Email        string `json:"email"`
-	Password     string `json:"password"`
-	Role         string `json:"role"`
-	VacationDays int64  `json:"vacation_days"`
-	IsSuperuser  bool   `json:"is_superuser"`
-	ID           int64  `json:"id"`
+	Color        string  `json:"color"`
+	Username     string  `json:"username"`
+	Email        string  `json:"email"`
+	Password     string  `json:"password"`
+	Role         string  `json:"role"`
+	AworkID      *string `json:"awork_id"`
+	VacationDays int64   `json:"vacation_days"`
+	IsSuperuser  bool    `json:"is_superuser"`
+	ID           int64   `json:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
@@ -244,6 +254,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.Email,
 		arg.Password,
 		arg.Role,
+		arg.AworkID,
 		arg.VacationDays,
 		arg.IsSuperuser,
 		arg.ID,
@@ -261,6 +272,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.Color,
 		&i.Role,
 		&i.Enabled,
+		&i.AworkID,
 	)
 	return i, err
 }

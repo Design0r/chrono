@@ -103,3 +103,9 @@ export type Settings = {
   id: number;
   signup_enabled: boolean;
 };
+
+export type WorkTime = {
+  worked: number;
+  expected: number;
+  vacation: number;
+};

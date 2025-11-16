@@ -1,0 +1,60 @@
+package api
+
+import (
+	"log/slog"
+	"net/http"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
+
+	"chrono/internal/domain"
+	"chrono/internal/service"
+)
+
+type APIAworkHandler struct {
+	user  service.UserService
+	event service.EventService
+	awork service.AworkService
+	log   *slog.Logger
+}
+
+func NewAPIAworkHandler(
+	u service.UserService,
+	e service.EventService,
+	aw service.AworkService,
+	log *slog.Logger,
+) APIAworkHandler {
+	return APIAworkHandler{user: u, event: e, awork: aw, log: log}
+}
+
+func (h *APIAworkHandler) RegisterRoutes(group *echo.Group) {
+	group.GET("/awork/:year", h.GetWorkHoursForYear)
+}
+
+func (h *APIAworkHandler) GetWorkHoursForYear(c echo.Context) error {
+	ctx := c.Request().Context()
+	currUser := c.Get("user").(domain.User)
+
+	yearParam := c.Param("year")
+	year, err := strconv.Atoi(yearParam)
+	if err != nil {
+		year = domain.CurrentYear()
+	}
+
+	if currUser.AworkID == nil {
+		return NewErrorResponse(c, http.StatusBadRequest, "awork id is missing")
+	}
+
+	work, err := h.awork.GetWorkHoursForYear(*currUser.AworkID, year)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+
+	user, err := h.event.GetUserWithVacation(ctx, currUser.ID, year, 1)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusNotFound, "user not found")
+	}
+
+	work.Vacation = user.VacationUsed
+	return NewJsonResponse(c, work)
+}

@@ -49,6 +49,7 @@ type services struct {
 	vac      service.VacationTokenService
 	pwHasher auth.PasswordHasher
 	krank    service.ExportService
+	awork    service.AworkService
 }
 
 type Server struct {
@@ -152,6 +153,7 @@ func (s *Server) InitServices() {
 	holidaySvc := service.NewHolidayService(&userSvc, &eventSvc, s.repos.apiCache, s.log)
 	settingSvc := service.NewSettingsService(s.repos.settings, s.log)
 	krankSvc := service.NewKrankheitsExportService(&eventSvc, &userSvc)
+	aworkSvc := service.NewAworkService(s.log)
 
 	s.services = services{
 		refresh:  &refreshTokenSvc,
@@ -167,6 +169,7 @@ func (s *Server) InitServices() {
 		holiday:  &holidaySvc,
 		settings: &settingSvc,
 		krank:    &krankSvc,
+		awork:    aworkSvc,
 	}
 
 	s.log.Info("Initialized services.")
@@ -272,6 +275,12 @@ func (s *Server) InitAPIRoutes() {
 	tokenHandler := api.NewAPITokenHandler(s.services.vac, s.services.user, s.services.notif, s.log)
 	settingsHandler := api.NewAPISettingsHandler(s.services.settings)
 	exportHander := api.NewAPIExportHandler(s.services.krank)
+	aworkHandler := api.NewAPIAworkHandler(
+		s.services.user,
+		s.services.event,
+		s.services.awork,
+		s.log,
+	)
 
 	settingsGrp := s.Router.Group("/api/v1", mw.SettingsAPIMiddleware(s.services.settings))
 	authGrp := settingsGrp.Group(
@@ -289,6 +298,7 @@ func (s *Server) InitAPIRoutes() {
 	tokenHandler.RegisterRoutes(adminGrp)
 	settingsHandler.RegisterRoutes(adminGrp)
 	exportHander.RegisterRoutes(adminGrp)
+	aworkHandler.RegisterRoutes(authGrp)
 
 	s.log.Info("Initialized api routes.")
 }

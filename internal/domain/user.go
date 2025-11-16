@@ -34,6 +34,7 @@ type User struct {
 	Color        string    `json:"color"`
 	Role         string    `json:"role"`
 	Enabled      bool      `json:"enabled"`
+	AworkID      *string   `json:"awork_id"`
 }
 
 func (u *User) IsAdmin() bool {
@@ -57,13 +58,14 @@ type PatchUser struct {
 }
 
 type ApiPatchUser struct {
-	Name         string `form:"username"`
-	Email        string `form:"email"`
-	Color        string `form:"color"`
-	Password     string `form:"password"`
-	Role         string `form:"role"`
-	Enabled      *bool  `form:"enabled"`
-	VacationDays *int64 `form:"vacation_days"`
+	Name         string  `form:"username"`
+	Email        string  `form:"email"`
+	Color        string  `form:"color"`
+	Password     string  `form:"password"`
+	Role         string  `form:"role"`
+	Enabled      *bool   `form:"enabled"`
+	VacationDays *int64  `form:"vacation_days"`
+	AworkID      *string `form:"awork_id"`
 }
 
 type CreateUser struct {
@@ -76,12 +78,13 @@ type CreateUser struct {
 }
 
 type ApiCreateUser struct {
-	Username     string `json:"username"      form:"username"`
-	Color        string `json:"color"`
-	VacationDays int64  `json:"vacation_days"`
-	Email        string `json:"email"         form:"email"`
-	Password     string `json:"password"      form:"password"`
-	IsSuperuser  bool   `json:"is_superuser"`
+	Username     string  `json:"username"      form:"username"`
+	Color        string  `json:"color"`
+	VacationDays int64   `json:"vacation_days"`
+	Email        string  `json:"email"         form:"email"`
+	Password     string  `json:"password"      form:"password"`
+	IsSuperuser  bool    `json:"is_superuser"`
+	AworkID      *string `json:"awork_id"`
 }
 
 type Login struct {

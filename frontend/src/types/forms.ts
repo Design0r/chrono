@@ -3,6 +3,7 @@ export type ProfileEditForm = {
   password: string;
   email: string;
   color: string;
+  awork_id: string;
 };
 
 export type TeamEditForm = {

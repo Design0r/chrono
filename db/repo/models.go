@@ -79,6 +79,7 @@ type User struct {
 	Color        string    `json:"color"`
 	Role         string    `json:"role"`
 	Enabled      bool      `json:"enabled"`
+	AworkID      *string   `json:"awork_id"`
 }
 
 type VacationToken struct {

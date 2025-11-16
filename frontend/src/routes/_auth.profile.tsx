@@ -50,9 +50,9 @@ function ProfileComponent() {
       {edit ? (
         <div>
           <form
-            onSubmit={handleSubmit((data: ProfileEditForm) =>
-              mutation.mutate({ userId: user.id, data }),
-            )}
+            onSubmit={handleSubmit((data: ProfileEditForm) => {
+              return mutation.mutate({ userId: user.id, data });
+            })}
           >
             <div className="container justify-center flex">
               <div className="space-y-2 bg-base-100 rounded-xl px-8 py-10">
@@ -74,6 +74,14 @@ function ProfileComponent() {
                     required
                     defaultValue={user.email}
                     {...register("email")}
+                  />
+                  <label htmlFor="awork_id">Awork ID</label>
+                  <input
+                    className="input input-bordered"
+                    type="text"
+                    required
+                    defaultValue={user.awork_id || ""}
+                    {...register("awork_id")}
                   />
                   <label htmlFor="password">New Password</label>
                   <input
@@ -123,6 +131,8 @@ function ProfileComponent() {
                 <p>{user.username}</p>
                 <p>Email</p>
                 <p>{user.email}</p>
+                <p>Awork ID</p>
+                <p>{user.awork_id}</p>
                 <p>Admin</p>
                 <p>{String(user.is_superuser)}</p>
                 <p>Yearly Vacation</p>

@@ -134,6 +134,11 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		email = patchedData.Email
 	}
 
+	aworkId := userToEdit.AworkID
+	if patchedData.AworkID != nil {
+		aworkId = patchedData.AworkID
+	}
+
 	color := userToEdit.Color
 	if patchedData.Color != "" {
 		color = patchedData.Color
@@ -165,6 +170,7 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		Email:        email,
 		Color:        color,
 		Role:         role,
+		AworkID:      aworkId,
 		Enabled:      enabled,
 		IsSuperuser:  superuser,
 		VacationDays: vacDays,

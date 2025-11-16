@@ -73,7 +73,7 @@ func (q *Queries) GetSessionById(ctx context.Context, id string) (Session, error
 }
 
 const GetUserFromSession = `-- name: GetUserFromSession :one
-SELECT u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at, u.color, u.role, u.enabled FROM sessions s
+SELECT u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at, u.color, u.role, u.enabled, u.awork_id FROM sessions s
 JOIN users u ON s.user_id = u.id
 WHERE s.id = ?
 `
@@ -93,6 +93,7 @@ func (q *Queries) GetUserFromSession(ctx context.Context, id string) (User, erro
 		&i.Color,
 		&i.Role,
 		&i.Enabled,
+		&i.AworkID,
 	)
 	return i, err
 }

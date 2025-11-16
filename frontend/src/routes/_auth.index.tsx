@@ -5,8 +5,12 @@ import { VacationGraph } from "../components/VacationGraph";
 import type { UserWithVacation } from "../types/auth";
 import { dayOfYear, daysInYear } from "../utils/calendar";
 import { useQuery } from "@tanstack/react-query";
-import { LoadingSpinnerPage } from "../components/LoadingSpinner";
+import {
+  LoadingSpinner,
+  LoadingSpinnerPage,
+} from "../components/LoadingSpinner";
 import { ErrorPage } from "../components/ErrorPage";
+import { useToast } from "../components/Toast";
 
 export const Route = createFileRoute("/_auth/")({
   component: Home,
@@ -15,6 +19,7 @@ export const Route = createFileRoute("/_auth/")({
 function Home() {
   const { chrono, auth } = Route.useRouteContext();
   const year = new Date().getFullYear();
+  const { addErrorToast } = useToast();
 
   const userQ = useQuery({
     queryKey: ["user", auth.userId, "vacation", year],
@@ -33,15 +38,24 @@ function Home() {
     gcTime: 1000 * 60 * 30, // 30min
   });
 
+  const aworkQ = useQuery({
+    queryKey: ["awork", year],
+    queryFn: () => chrono.awork.getWorkTimesforYear(year),
+    staleTime: 1000 * 60 * 60, // 1h
+    gcTime: 1000 * 60 * 60 * 2, // 2h
+  });
+
   const queries = [userQ, vacationQ];
   const anyPending = queries.some((q) => q.isPending);
   const firstError = queries.find((q) => q.isError)?.error;
 
   if (anyPending) return <LoadingSpinnerPage />;
   if (firstError) return <ErrorPage error={firstError} />;
+  if (aworkQ.isError) addErrorToast(aworkQ.error);
 
   const user = userQ.data! as UserWithVacation;
   const vacation = vacationQ.data!;
+  const awork = aworkQ.data!;
 
   const daysYear = daysInYear(year);
   const currDay = dayOfYear();
@@ -98,6 +112,52 @@ function Home() {
             </span>
           </StatCardElement>
         </StatCard>
+      </TitleSection>
+
+      <TitleSection title="Your worktimes">
+        {aworkQ.isPending ? (
+          <div className="justify-center">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <>
+            {!aworkQ.isError && (
+              <>
+                <StatCard>
+                  <StatCardElement
+                    title="Hours horked this year"
+                    subtitle={`${awork.worked.toFixed(2)}h`}
+                  >
+                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-primary">
+                      {awork.worked.toFixed(2)}h
+                    </span>
+                  </StatCardElement>
+                  <StatCardElement title="Expected work" subtitle="">
+                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">
+                      {awork.expected * 8} h
+                    </span>
+                  </StatCardElement>
+                  <StatCardElement
+                    title="Vacation hours"
+                    subtitle={`${awork.vacation * 8} h`}
+                  >
+                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">
+                      {awork.vacation * 8} h
+                    </span>
+                  </StatCardElement>
+                  <StatCardElement title="Expected (With Vacation)" subtitle="">
+                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-accent">
+                      <span className="animate-pulse text-primary">
+                        {awork.expected * 8 - awork.vacation * 8}
+                      </span>{" "}
+                      h
+                    </span>
+                  </StatCardElement>
+                </StatCard>
+              </>
+            )}
+          </>
+        )}
       </TitleSection>
       <TitleSection title="Year progession">
         <StatCard>

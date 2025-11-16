@@ -50,6 +50,7 @@ func (r *SQLUserRepo) Update(ctx context.Context, user *domain.User) (*domain.Us
 			Color:        user.Color,
 			Role:         user.Role,
 			VacationDays: user.VacationDays,
+			AworkID:      user.AworkID,
 			Email:        user.Email,
 			Password:     user.Password,
 			IsSuperuser:  user.IsSuperuser,

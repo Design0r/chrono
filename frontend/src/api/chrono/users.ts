@@ -48,8 +48,7 @@ export class ApiUsers {
   ): Promise<User> {
     const form = new FormData();
     Object.entries(data).map(([k, v]) => form.append(k, v.toString()));
-
-    console.log("hello");
+    console.log(data);
 
     const response = await fetch(CHRONO_URL + `/users/${userId}`, {
       method: "PATCH",

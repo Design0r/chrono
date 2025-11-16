@@ -1,4 +1,5 @@
 import { ApiAuth } from "./auth";
+import { ApiAwork } from "./awork";
 import { ApiEvents } from "./events";
 import { ApiExport } from "./export";
 import { ApiRequests } from "./requests";
@@ -14,4 +15,5 @@ export class ChronoClient {
   tokens = new ApiTokens();
   settings = new ApiSettings();
   export = new ApiExport();
+  awork = new ApiAwork();
 }

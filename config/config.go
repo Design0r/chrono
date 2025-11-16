@@ -16,6 +16,7 @@ type Config struct {
 	BotName     string
 	Banner      string
 	SentryUrl   string
+	AworkApiKey string
 }
 
 var config *Config
@@ -33,7 +34,11 @@ func NewConfigFromEnv() *Config {
 		BotName:     loadStrict("BOT_NAME"),
 		BotEmail:    loadStrict("BOT_EMAIL"),
 		BotPassword: loadStrict("BOT_PASSWORD"),
-		SentryUrl:   loadIf("SENTRY_URL", func() bool { return loadDefault("DEBUG", "0") == "0" }),
+		SentryUrl: loadIf(
+			"SENTRY_URL",
+			func() bool { return loadDefault("DEBUG", "0") == "0" },
+		),
+		AworkApiKey: loadDefault("AWORK_API_KEY", ""),
 	}
 
 	slog.Info("Config loaded")

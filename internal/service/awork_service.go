@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -106,6 +107,10 @@ func (a *AworkService) GetTimeEntries(
 	if err != nil {
 		a.log.Error("Failed to send request", slog.String("error", err.Error()))
 		return data, err
+	}
+
+	if res.StatusCode != 200 {
+		return data, errors.New(res.Status)
 	}
 
 	body, err := io.ReadAll(res.Body)

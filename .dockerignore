@@ -11,3 +11,5 @@ build
 *.json
 !/package.json
 !/package-lock.json
+frontend/.tanstack
+frontend/node_modules

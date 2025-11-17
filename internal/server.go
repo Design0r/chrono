@@ -87,7 +87,6 @@ func (s *Server) InitMiddleware() {
 			},
 		),
 	)
-	s.Router.GET("/static/*", mw.StaticHandler, mw.CacheControl)
 	s.Router.Use(sentryecho.New(sentryecho.Options{Repanic: true}))
 
 	s.log.Info("Initialized middleware.")

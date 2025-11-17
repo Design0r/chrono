@@ -7,7 +7,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"chrono/frontend"
 	"chrono/internal/adapter/handler/api"
 	"chrono/internal/domain"
 	"chrono/internal/service"
@@ -82,13 +81,6 @@ func CacheControl(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
-
-var StaticHandler = echo.WrapHandler(
-	http.StripPrefix(
-		"/",
-		http.FileServer(http.FS(frontend.StaticFS)),
-	),
-)
 
 func SettingsAPIMiddleware(svc service.SettingsService) MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {

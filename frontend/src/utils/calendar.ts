@@ -6,7 +6,9 @@ export function dayOfYear(): number {
   var now = new Date();
   var start = new Date(now.getFullYear(), 0, 0);
   var diff =
+    //@ts-expect-error
     now -
+    //@ts-expect-error
     start +
     (start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000;
   var oneDay = 1000 * 60 * 60 * 24;

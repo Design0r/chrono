@@ -1,8 +1,8 @@
-package assets
+package frontend
 
 import (
 	"embed"
 )
 
-//go:embed static/*
+//go:embed dist/*
 var StaticFS embed.FS

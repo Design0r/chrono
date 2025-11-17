@@ -1,18 +1,12 @@
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import { useMemo } from "react";
-import type { VacationGraph, VacationGraphMonth } from "../types/response";
+import type { VacationGraphMonth } from "../types/response";
 import { clamp } from "../utils/math";
 
 dayjs.extend(isoWeek);
 
-export function OverviewDay({
-  day,
-  index,
-}: {
-  day: VacationGraphMonth;
-  index: number;
-}) {
+export function OverviewDay({ day }: { day: VacationGraphMonth }) {
   const greens = [
     "#313745",
     "#a7f3d0",
@@ -24,8 +18,6 @@ export function OverviewDay({
     "#065f46",
     "#064e3b",
   ];
-  const weekDay = index % 7;
-  const isWeekend = weekDay === 3 || weekDay === 4;
   const holidayColor = "#7C85FF";
   const color = day.is_holiday ? holidayColor : greens[clamp(day.count, 0, 8)];
 
@@ -109,7 +101,7 @@ export function VacationGraph({
             <p key={`gap-${i}`} className="w-4 h-4 text-center">
               {c.week}
             </p>
-          ),
+          )
         )}
       </div>
 
@@ -129,7 +121,7 @@ export function VacationGraph({
             <p key={`yo-${i}`} />
           ))}
           {data.map((d, i) => (
-            <OverviewDay key={i} day={d} index={i} />
+            <OverviewDay key={i} day={d} />
           ))}
         </div>
       </div>

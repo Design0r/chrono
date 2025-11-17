@@ -13,7 +13,6 @@ import (
 	"chrono/config"
 	"chrono/db/repo"
 	"chrono/internal/adapter/db"
-	"chrono/internal/adapter/handler"
 	"chrono/internal/adapter/handler/api"
 	mw "chrono/internal/adapter/middleware"
 	"chrono/internal/domain"
@@ -83,7 +82,7 @@ func (s *Server) InitMiddleware() {
 	s.Router.Use(
 		middleware.CORSWithConfig(
 			middleware.CORSConfig{
-				AllowOrigins:     []string{"http://localhost:8080", "http://localhost:5173"},
+				AllowOrigins:     []string{"http://localhost:8080", "http://localhost:5173", "https://chrono.theapic.com"},
 				AllowCredentials: true,
 			},
 		),
@@ -175,89 +174,6 @@ func (s *Server) InitServices() {
 	s.log.Info("Initialized services.")
 }
 
-func (s *Server) InitRoutes() {
-	authHandler := handler.NewAuthHandler(
-		s.services.user,
-		s.services.auth,
-		s.log,
-	)
-	homeHandler := handler.NewHomeHandler(s.services.token, s.services.event, s.services.notif)
-	calendarHandler := handler.NewCalendarHandler(
-		s.services.user,
-		s.services.notif,
-		s.services.event,
-		s.services.token,
-		s.services.holiday,
-		s.log,
-	)
-	teamHandler := handler.NewTeamHandler(
-		s.services.event,
-		s.services.notif,
-		s.services.user,
-		s.log,
-	)
-	profileHandler := handler.NewProfileHandler(
-		s.services.user,
-		s.services.notif,
-		s.services.auth,
-		s.log,
-	)
-	requestHandler := handler.NewRequestHandler(
-		s.services.request,
-		s.services.notif,
-		s.services.event,
-		s.services.vac,
-		s.log,
-	)
-	notificationHandler := handler.NewNotificationHandler(s.services.notif, s.log)
-	tokenHandler := handler.NewTokenHandler(
-		s.services.vac,
-		s.services.user,
-		s.services.notif,
-		s.log,
-	)
-	debugHandler := handler.NewDebugHandler(
-		s.services.user,
-		s.services.auth,
-		s.services.notif,
-		s.services.token,
-		s.services.session,
-		s.services.event,
-		s.log,
-	)
-	settinsHandler := handler.NewSettingsHandler(s.services.settings)
-
-	exportHandler := handler.NewExportHandler(s.services.krank, s.services.notif)
-
-	settingsGrp := s.Router.Group("", mw.SettingsMiddleware(s.services.settings))
-
-	authGrp := settingsGrp.Group(
-		"",
-		mw.SessionMiddleware(s.services.session),
-		mw.AuthenticationMiddleware(s.services.auth),
-	)
-	adminGrp := authGrp.Group("", mw.AdminMiddleware())
-	honeypotGrp := settingsGrp.Group("", mw.HoneypotMiddleware())
-
-	calendarHandler.RegisterRoutes(authGrp)
-	homeHandler.RegisterRoutes(authGrp)
-	notificationHandler.RegisterRoutes(authGrp)
-
-	teamHandler.RegisterRoutes(authGrp, adminGrp)
-	profileHandler.RegisterRoutes(authGrp, adminGrp)
-
-	requestHandler.RegisterRoutes(adminGrp)
-	tokenHandler.RegisterRoutes(adminGrp)
-	debugHandler.RegisterRoutes(adminGrp)
-	settinsHandler.RegisterRoutes(adminGrp)
-
-	authHandler.RegisterRoutes(honeypotGrp)
-
-	exportHandler.RegisterRoutes(authGrp)
-
-	s.log.Info("Initialized routes.")
-}
-
 func (s *Server) InitAPIRoutes() {
 	authHandler := api.NewAPIAuthHandler(
 		s.services.user,
@@ -290,7 +206,7 @@ func (s *Server) InitAPIRoutes() {
 		mw.AuthenticationAPIMiddleware(s.services.auth),
 	)
 
-	adminGrp := authGrp.Group("", mw.AdminMiddleware())
+	adminGrp := authGrp.Group("", mw.AdminAPIMiddleware())
 
 	authHandler.RegisterRoutes(settingsGrp)
 	userHandler.RegisterRoutes(authGrp)
@@ -318,7 +234,6 @@ func (s *Server) PreStart() error {
 	s.InitMiddleware()
 	s.InitRepos()
 	s.InitServices()
-	s.InitRoutes()
 	s.InitAPIRoutes()
 
 	settings := domain.Settings{SignupEnabled: false}

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -176,8 +175,6 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		VacationDays: vacDays,
 		Password:     currUser.Password,
 	}
-
-	fmt.Println(u)
 
 	if patchedData.Password != "" {
 		pw, err := h.auth.HashPassword(patchedData.Password)

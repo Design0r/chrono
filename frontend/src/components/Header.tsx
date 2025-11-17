@@ -93,7 +93,7 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
             </>
           ) : (
             <>
-              <Notifications notifications={[]} />
+              <Notifications />
               <Avatar user={userQ.data} />
             </>
           )}

@@ -109,3 +109,9 @@ export type WorkTime = {
   expected: number;
   vacation: number;
 };
+
+export type AworkUser = {
+  id: string;
+  firstName: string;
+  lastName: string;
+};

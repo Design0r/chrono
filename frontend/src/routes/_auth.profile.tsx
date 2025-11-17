@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import dayjs from "dayjs";
-import { LoadingSpinnerPage } from "../components/LoadingSpinner";
-import { ErrorPage } from "../components/ErrorPage";
 import { useState } from "react";
-import type { ProfileEditForm } from "../types/forms";
 import { useForm } from "react-hook-form";
+import { ErrorPage } from "../components/ErrorPage";
+import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { useToast } from "../components/Toast";
+import type { ProfileEditForm } from "../types/forms";
 
 export const Route = createFileRoute("/_auth/profile")({
   component: ProfileComponent,
@@ -22,6 +22,13 @@ function ProfileComponent() {
   const userQ = useQuery({
     queryKey: ["user", auth.userId],
     queryFn: () => chrono.users.getUserById(auth.userId!),
+    staleTime: 1000 * 60 * 60 * 6, // 6h
+    gcTime: 1000 * 60 * 60 * 7, // 7h
+  });
+
+  const aworkUserQ = useQuery({
+    queryKey: ["aworkUsers"],
+    queryFn: () => chrono.awork.getUsers(),
     staleTime: 1000 * 60 * 60 * 6, // 6h
     gcTime: 1000 * 60 * 60 * 7, // 7h
   });
@@ -51,7 +58,10 @@ function ProfileComponent() {
         <div>
           <form
             onSubmit={handleSubmit((data: ProfileEditForm) => {
-              return mutation.mutate({ userId: user.id, data });
+              return mutation.mutate({
+                userId: user.id,
+                data,
+              });
             })}
           >
             <div className="container justify-center flex">
@@ -76,13 +86,19 @@ function ProfileComponent() {
                     {...register("email")}
                   />
                   <label htmlFor="awork_id">Awork ID</label>
-                  <input
-                    className="input input-bordered"
-                    type="text"
-                    required
+                  <select
                     defaultValue={user.awork_id || ""}
+                    className="w-full col-span-1 cursor-pointer p-2 select pl-3 text-center h-full  rounded-md "
                     {...register("awork_id")}
-                  />
+                  >
+                    <option value="">-</option>
+                    {aworkUserQ.data?.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.firstName} {a.lastName}
+                      </option>
+                    ))}
+                  </select>
+
                   <label htmlFor="password">New Password</label>
                   <input
                     className="input input-bordered"

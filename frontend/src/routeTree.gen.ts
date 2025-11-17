@@ -20,6 +20,7 @@ import { Route as AuthAdminTokensRouteImport } from './routes/_auth._admin.token
 import { Route as AuthAdminSettingsRouteImport } from './routes/_auth._admin.settings'
 import { Route as AuthAdminRequestsRouteImport } from './routes/_auth._admin.requests'
 import { Route as AuthAdminExportRouteImport } from './routes/_auth._admin.export'
+import { Route as AuthAdminDebugRouteImport } from './routes/_auth._admin.debug'
 import { Route as AuthCalendarYearMonthRouteImport } from './routes/_auth.calendar.$year.$month'
 
 const SignupRoute = SignupRouteImport.update({
@@ -75,6 +76,11 @@ const AuthAdminExportRoute = AuthAdminExportRouteImport.update({
   path: '/export',
   getParentRoute: () => AuthAdminRoute,
 } as any)
+const AuthAdminDebugRoute = AuthAdminDebugRouteImport.update({
+  id: '/debug',
+  path: '/debug',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
 const AuthCalendarYearMonthRoute = AuthCalendarYearMonthRouteImport.update({
   id: '/calendar/$year/$month',
   path: '/calendar/$year/$month',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthProfileRoute
   '/team': typeof AuthTeamRoute
   '/': typeof AuthIndexRoute
+  '/debug': typeof AuthAdminDebugRoute
   '/export': typeof AuthAdminExportRoute
   '/requests': typeof AuthAdminRequestsRoute
   '/settings': typeof AuthAdminSettingsRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthProfileRoute
   '/team': typeof AuthTeamRoute
   '/': typeof AuthIndexRoute
+  '/debug': typeof AuthAdminDebugRoute
   '/export': typeof AuthAdminExportRoute
   '/requests': typeof AuthAdminRequestsRoute
   '/settings': typeof AuthAdminSettingsRoute
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/_auth/profile': typeof AuthProfileRoute
   '/_auth/team': typeof AuthTeamRoute
   '/_auth/': typeof AuthIndexRoute
+  '/_auth/_admin/debug': typeof AuthAdminDebugRoute
   '/_auth/_admin/export': typeof AuthAdminExportRoute
   '/_auth/_admin/requests': typeof AuthAdminRequestsRoute
   '/_auth/_admin/settings': typeof AuthAdminSettingsRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/team'
     | '/'
+    | '/debug'
     | '/export'
     | '/requests'
     | '/settings'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/team'
     | '/'
+    | '/debug'
     | '/export'
     | '/requests'
     | '/settings'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/_auth/profile'
     | '/_auth/team'
     | '/_auth/'
+    | '/_auth/_admin/debug'
     | '/_auth/_admin/export'
     | '/_auth/_admin/requests'
     | '/_auth/_admin/settings'
@@ -246,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAdminExportRouteImport
       parentRoute: typeof AuthAdminRoute
     }
+    '/_auth/_admin/debug': {
+      id: '/_auth/_admin/debug'
+      path: '/debug'
+      fullPath: '/debug'
+      preLoaderRoute: typeof AuthAdminDebugRouteImport
+      parentRoute: typeof AuthAdminRoute
+    }
     '/_auth/calendar/$year/$month': {
       id: '/_auth/calendar/$year/$month'
       path: '/calendar/$year/$month'
@@ -257,6 +276,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthAdminRouteChildren {
+  AuthAdminDebugRoute: typeof AuthAdminDebugRoute
   AuthAdminExportRoute: typeof AuthAdminExportRoute
   AuthAdminRequestsRoute: typeof AuthAdminRequestsRoute
   AuthAdminSettingsRoute: typeof AuthAdminSettingsRoute
@@ -264,6 +284,7 @@ interface AuthAdminRouteChildren {
 }
 
 const AuthAdminRouteChildren: AuthAdminRouteChildren = {
+  AuthAdminDebugRoute: AuthAdminDebugRoute,
   AuthAdminExportRoute: AuthAdminExportRoute,
   AuthAdminRequestsRoute: AuthAdminRequestsRoute,
   AuthAdminSettingsRoute: AuthAdminSettingsRoute,

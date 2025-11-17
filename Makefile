@@ -25,25 +25,16 @@ migrate:
 live/server:
 	air
 
-live/tailwind:
-	npm install && \
-	npm run dev
-
 live/frontend:
 	cd frontend && npm install && npm run dev
 
 dev: 
-	make -j3 live/server live/tailwind live/frontend
+	make -j2 live/server  live/frontend
 
 build:
-	templ generate
 	go build -o ./build/chrono$(BIN_SUFFIX) -ldflags='-s -w -extldflags "-static"' ./cmd/main.go
 
-docker-install:
-	@go install github.com/a-h/templ/cmd/templ@latest
-
 install:
-	@go install github.com/a-h/templ/cmd/templ@latest
 	@go install github.com/air-verse/air@latest
 	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 

@@ -82,7 +82,11 @@ func (s *Server) InitMiddleware() {
 	s.Router.Use(
 		middleware.CORSWithConfig(
 			middleware.CORSConfig{
-				AllowOrigins:     []string{"http://localhost:8080", "http://localhost:5173", "https://chrono.theapic.com"},
+				AllowOrigins: []string{
+					"http://localhost:8080",
+					"http://localhost:5173",
+					"https://chrono.theapic.com",
+				},
 				AllowCredentials: true,
 			},
 		),
@@ -151,7 +155,7 @@ func (s *Server) InitServices() {
 	holidaySvc := service.NewHolidayService(&userSvc, &eventSvc, s.repos.apiCache, s.log)
 	settingSvc := service.NewSettingsService(s.repos.settings, s.log)
 	krankSvc := service.NewKrankheitsExportService(&eventSvc, &userSvc)
-	aworkSvc := service.NewAworkService(s.log)
+	aworkSvc := service.NewAworkService(&eventSvc, &userSvc, s.log)
 
 	s.services = services{
 		refresh:  &refreshTokenSvc,

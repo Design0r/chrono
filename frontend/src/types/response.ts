@@ -108,6 +108,8 @@ export type WorkTime = {
   worked: number;
   expected: number;
   vacation: number;
+  holidays: number;
+  holidaysOnWeekends: number;
 };
 
 export type AworkUser = {

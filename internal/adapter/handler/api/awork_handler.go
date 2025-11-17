@@ -33,7 +33,6 @@ func (h *APIAworkHandler) RegisterRoutes(group *echo.Group) {
 }
 
 func (h *APIAworkHandler) GetWorkHoursForYear(c echo.Context) error {
-	ctx := c.Request().Context()
 	currUser := c.Get("user").(domain.User)
 
 	yearParam := c.Param("year")
@@ -46,22 +45,15 @@ func (h *APIAworkHandler) GetWorkHoursForYear(c echo.Context) error {
 		return NewErrorResponse(c, http.StatusBadRequest, "awork id is missing")
 	}
 
-	work, err := h.awork.GetWorkHoursForYear(*currUser.AworkID, year)
+	work, err := h.awork.GetWorkHoursForYear(*currUser.AworkID, currUser.ID, year)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
 
-	user, err := h.event.GetUserWithVacation(ctx, currUser.ID, year, 1)
-	if err != nil {
-		return NewErrorResponse(c, http.StatusNotFound, "user not found")
-	}
-
-	work.Vacation = user.VacationUsed
 	return NewJsonResponse(c, work)
 }
 
 func (h *APIAworkHandler) GetAworkUsers(c echo.Context) error {
-
 	users, err := h.awork.GetUsers()
 	if err != nil {
 		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())

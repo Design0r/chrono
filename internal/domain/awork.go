@@ -42,5 +42,6 @@ type TimeBookingResponse struct {
 type WorkHours struct {
 	Worked   float64 `json:"worked"`
 	Expected float64 `json:"expected"`
+	Holidays float64 `json:"holidays"`
 	Vacation float64 `json:"vacation"`
 }

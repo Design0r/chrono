@@ -1,13 +1,14 @@
+import { useQuery } from "@tanstack/react-query";
 import {
   Link,
   useLocation,
   type LinkProps,
   type RegisteredRouter,
 } from "@tanstack/react-router";
+import type { ChronoClient } from "../api/chrono/client";
 import { useAuth } from "../auth";
 import { Avatar } from "./Avatar";
-import { useQuery } from "@tanstack/react-query";
-import type { ChronoClient } from "../api/chrono/client";
+import { Notifications } from "./Notifications";
 
 export function Header({ chrono }: { chrono: ChronoClient }) {
   const auth = useAuth();
@@ -29,7 +30,7 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
       <div className="navbar flex justify-between">
         <div className="flex items-center">
           <div className="pr-14">
-            <img className="w-40" alt="chrono logo" src="chrono.svg" />
+            <img className="w-40" alt="chrono logo" src="./chrono.svg" />
           </div>
 
           {auth.isAuthenticated && (
@@ -91,7 +92,10 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
               }
             </>
           ) : (
-            <Avatar user={userQ.data} />
+            <>
+              <Notifications notifications={[]} />
+              <Avatar user={userQ.data} />
+            </>
           )}
         </div>
       </div>

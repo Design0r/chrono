@@ -1,10 +1,10 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import type { User } from "../types/auth";
-import { hexToHSL, hsla } from "../utils/colors";
-import type { EventUser, Month, Event } from "../types/response";
-import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ChronoClient } from "../api/chrono/client";
+import type { User } from "../types/auth";
+import type { EventUser, Month } from "../types/response";
+import { hexToHSL, hsla } from "../utils/colors";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { useToast } from "./Toast";
 
@@ -162,7 +162,7 @@ export function VacationCounter({
         className="flex flex-wrap justify-center tooltip text-warning cursor-help"
         data-tip="used"
       >
-        {used} <span className="!truncate text-info/80 px-2">used</span>
+        {used} <span className="truncate! text-info/80 px-2">used</span>
       </div>{" "}
       <span className="text-info/30 px-2">|</span>
       <div
@@ -170,7 +170,7 @@ export function VacationCounter({
         data-tip="remaining"
       >
         {remaining}{" "}
-        <span className="!truncate text-info/80 px-2">remaining</span>
+        <span className="truncate! text-info/80 px-2">remaining</span>
       </div>
     </div>
   );

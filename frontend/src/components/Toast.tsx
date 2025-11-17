@@ -24,7 +24,7 @@ interface ToastContextType {
   addToast: (
     message: string,
     type?: "info" | "success" | "warning" | "error",
-    timer?: number,
+    timer?: number
   ) => void;
   addErrorToast: (error: { name: string; message: string }) => void;
 }
@@ -39,7 +39,7 @@ const typeMap = {
 export default function Toast({
   message,
   type = "info",
-  timer = 2000,
+  timer = 3000,
   onClose,
 }: ToastProps): JSX.Element {
   const [visible, setVisible] = useState(true);
@@ -97,7 +97,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
   const addToast = (
     message: string,
     type: "info" | "success" | "warning" | "error" = "info",
-    timer?: number,
+    timer?: number
   ) => {
     const id = Date.now() + Math.random();
     setToasts((prevToasts) => [...prevToasts, { id, message, type, timer }]);

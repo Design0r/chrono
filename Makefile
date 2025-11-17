@@ -22,9 +22,6 @@ migrate:
 	$(eval args=$(filter-out $@,$(MAKECMDGOALS)))
 	@goose sqlite3 ${DB_DIR} -dir=${MIGRATION_DIR} create ${args} sql
 
-live/templ:
-	templ generate --watch --proxy="http://localhost:8080" --open-browser=true
-
 live/server:
 	air
 
@@ -32,8 +29,11 @@ live/tailwind:
 	npm install && \
 	npm run dev
 
+live/frontend:
+	cd frontend && npm install && npm run dev
+
 dev: 
-	make -j3 live/templ live/server live/tailwind
+	make -j3 live/server live/tailwind live/frontend
 
 build:
 	templ generate

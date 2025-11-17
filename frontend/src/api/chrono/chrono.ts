@@ -1,1 +1,1 @@
-export const CHRONO_URL = "http://localhost:8080/api/v1";
+export const CHRONO_URL = `${import.meta.env.VITE_CHRONO_URL}/api/v1`;

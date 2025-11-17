@@ -281,6 +281,7 @@ func (s *Server) InitAPIRoutes() {
 		s.services.awork,
 		s.log,
 	)
+	notificationHandler := api.NewAPINotificationHandler(s.services.notif, s.log)
 
 	settingsGrp := s.Router.Group("/api/v1", mw.SettingsAPIMiddleware(s.services.settings))
 	authGrp := settingsGrp.Group(
@@ -299,6 +300,7 @@ func (s *Server) InitAPIRoutes() {
 	settingsHandler.RegisterRoutes(adminGrp)
 	exportHander.RegisterRoutes(adminGrp)
 	aworkHandler.RegisterRoutes(authGrp)
+	notificationHandler.RegisterRoutes(authGrp)
 
 	s.log.Info("Initialized api routes.")
 }

@@ -8,7 +8,7 @@ export type ChronoResponse = {
 export type State = "accepted" | "declined" | "pending";
 
 export type Notification = {
-  id: string;
+  id: number;
   message: string;
   created_at: Date;
   viewed_at: Date;

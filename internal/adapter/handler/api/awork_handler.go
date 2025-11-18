@@ -38,11 +38,11 @@ func (h *APIAworkHandler) GetWorkHoursForYear(c echo.Context) error {
 	yearParam := c.Param("year")
 	year, err := strconv.Atoi(yearParam)
 	if err != nil {
-		year = domain.CurrentYear()
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "year parameter is missing")
 	}
 
-	if currUser.AworkID == nil {
-		return NewErrorResponse(c, http.StatusBadRequest, "awork id is missing")
+	if currUser.AworkID == nil || *currUser.AworkID == "" {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "awork id is missing")
 	}
 
 	work, err := h.awork.GetWorkHoursForYear(*currUser.AworkID, currUser.ID, year)

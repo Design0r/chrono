@@ -79,7 +79,7 @@ function Home() {
         100
       : 100 - vacRemainingPercent;
 
-  const workRemaining = aworkQ.isError ? 0 : awork.expected - awork.worked;
+  const workRemaining = awork ? awork.expected - awork.worked : 0;
 
   return (
     <div className="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
@@ -154,15 +154,15 @@ function Home() {
                     </span>
                   </StatCardElement>
                   <StatCardElement
-                    title="Vacation taken hours"
-                    subtitle={`${awork.vacation} h`}
+                    title="Vacation taken"
+                    subtitle={`${(awork.vacation / 8).toFixed(2)} days`}
                   >
                     <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">
                       {awork.vacation} h
                     </span>
                   </StatCardElement>
                   <StatCardElement
-                    title="Holidays hours"
+                    title="Holidays"
                     subtitle={`${(awork.holidays / 8).toFixed(2)} days`}
                   >
                     <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">

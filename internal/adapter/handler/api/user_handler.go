@@ -133,9 +133,9 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		email = patchedData.Email
 	}
 
-	aworkId := userToEdit.AworkID
-	if patchedData.AworkID != nil {
-		aworkId = patchedData.AworkID
+	aworkId := patchedData.AworkID
+	if patchedData.AworkID == nil || *patchedData.AworkID == "" {
+		aworkId = nil
 	}
 
 	color := userToEdit.Color

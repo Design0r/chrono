@@ -15,6 +15,7 @@ type APIUserHandler struct {
 	user  service.UserService
 	event service.EventService
 	auth  service.AuthService
+	token service.TokenService
 	log   *slog.Logger
 }
 
@@ -22,9 +23,10 @@ func NewAPIUserHandler(
 	u service.UserService,
 	e service.EventService,
 	a service.AuthService,
+	t service.TokenService,
 	log *slog.Logger,
 ) APIUserHandler {
-	return APIUserHandler{user: u, event: e, auth: a, log: log}
+	return APIUserHandler{user: u, event: e, auth: a, token: t, log: log}
 }
 
 func (h *APIUserHandler) RegisterRoutes(group *echo.Group) {
@@ -35,6 +37,16 @@ func (h *APIUserHandler) RegisterRoutes(group *echo.Group) {
 
 func (h *APIUserHandler) GetUserById(c echo.Context) error {
 	ctx := c.Request().Context()
+	currUser := c.Get("user").(domain.User)
+
+	err := h.token.InitYearlyTokens(ctx, &currUser, domain.CurrentYear())
+	if err != nil {
+		return NewErrorResponse(
+			c,
+			http.StatusInternalServerError,
+			"Failed to initialize vacation tokens",
+		)
+	}
 
 	id := c.Param("id")
 	userId, err := strconv.ParseInt(id, 10, 64)

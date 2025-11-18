@@ -30,7 +30,7 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
       <div className="navbar flex justify-between">
         <div className="flex items-center">
           <div className="pr-14">
-            <img className="w-40" alt="chrono logo" src="./chrono.svg" />
+            <img className="w-40" alt="chrono logo" src="/chrono.svg" />
           </div>
 
           {auth.isAuthenticated && (

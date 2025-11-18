@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"chrono/config"
@@ -169,6 +170,9 @@ func (a *AworkService) GetWorkHoursForMonth(
 
 	workSecs := 0
 	for _, entry := range entries {
+		if entry.Project.Name == "Nicht bei der Arbeit" {
+			continue
+		}
 		workSecs += entry.Duration
 	}
 
@@ -187,6 +191,19 @@ func (a *AworkService) GetWorkHoursForMonth(
 	return domain.WorkHours{Worked: workHours, Expected: float64(expected), Vacation: 0}, nil
 }
 
+func (a *AworkService) ConvertAworkTime(aworkTime string) (time.Time, error) {
+	split := strings.Split(aworkTime, "T")
+	date := split[0]
+	parsed, err := time.Parse(time.DateOnly, date)
+
+	if err != nil {
+		a.log.Error("Failed to parse date")
+		return time.Time{}, err
+	}
+
+	return parsed, nil
+}
+
 func (a *AworkService) GetWorkHoursForYear(
 	aworkUserId string,
 	userId int64,
@@ -201,6 +218,32 @@ func (a *AworkService) GetWorkHoursForYear(
 		return domain.WorkHours{}, err
 	}
 
+	entryIds := map[string]bool{}
+	for _, e := range entries {
+		entryIds[e.Id] = true
+	}
+
+	lastEntry := entries[len(entries)-1]
+	if len(entries) == 1000 {
+		newStartDate, err := a.ConvertAworkTime(lastEntry.EndDateLocal)
+		if err != nil {
+			return domain.WorkHours{}, err
+		}
+		newEntries, err := a.GetTimeEntries(aworkUserId, newStartDate, yearEnd)
+		if err != nil {
+			return domain.WorkHours{}, err
+		}
+
+		for _, e := range newEntries {
+			if _, exists := entryIds[e.Id]; exists {
+				continue
+			}
+
+			entries = append(entries, e)
+		}
+
+	}
+
 	holidays, err := a.event.GetNonWeekendCountHolidaysForYear(ctx, year)
 	if err != nil {
 		return domain.WorkHours{}, err
@@ -211,8 +254,23 @@ func (a *AworkService) GetWorkHoursForYear(
 		return domain.WorkHours{}, err
 	}
 
+	sickDays := 0
+	allEvents, err := a.event.GetAllByUserId(ctx, userId)
+	if err != nil {
+		return domain.WorkHours{}, err
+	}
+
+	for _, e := range allEvents {
+		if e.ScheduledAt.Year() == year && e.ScheduledAt.Unix() <= time.Now().Unix() && e.Name == "krank" {
+			sickDays++
+		}
+	}
+
 	workSecs := 0
 	for _, entry := range entries {
+		if entry.Project.Name == "Urlaub" || entry.Task.Name == "Feiertag" || entry.Task.Name == "Ausgleich" {
+			continue
+		}
 		workSecs += entry.Duration
 	}
 
@@ -220,7 +278,7 @@ func (a *AworkService) GetWorkHoursForYear(
 
 	expected := 0
 	start := yearStart
-	for range yearEnd.YearDay() {
+	for range yearEnd.YearDay() - 1 {
 		weekday := start.Weekday()
 		if weekday != time.Sunday && weekday != time.Saturday {
 			expected += 1
@@ -230,7 +288,7 @@ func (a *AworkService) GetWorkHoursForYear(
 
 	return domain.WorkHours{
 		Worked:   workHours,
-		Expected: (float64(expected-holidays) - vacation) * 8,
+		Expected: (float64(expected-holidays) - vacation - float64(sickDays)) * 8,
 		Holidays: float64(holidays) * 8,
 		Vacation: vacation * 8,
 	}, nil

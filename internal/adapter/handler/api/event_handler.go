@@ -15,15 +15,17 @@ import (
 type APIEventHandler struct {
 	user  service.UserService
 	event service.EventService
+	token service.TokenService
 	log   *slog.Logger
 }
 
 func NewAPIEventHandler(
 	u service.UserService,
 	e service.EventService,
+	t service.TokenService,
 	log *slog.Logger,
 ) APIEventHandler {
-	return APIEventHandler{user: u, event: e, log: log}
+	return APIEventHandler{user: u, event: e, token: t, log: log}
 }
 
 func (h *APIEventHandler) RegisterRoutes(group *echo.Group) {
@@ -35,23 +37,23 @@ func (h *APIEventHandler) RegisterRoutes(group *echo.Group) {
 
 func (h *APIEventHandler) GetEventsForMonth(c echo.Context) error {
 	ctx := c.Request().Context()
+	currUser := c.Get("user").(domain.User)
 
 	var date domain.YMDate
 	if err := c.Bind(&date); err != nil {
 		return NewErrorResponse(c, http.StatusBadRequest, "Invalid date")
 	}
 
-	eventFilter := c.QueryParam("event-filter")
-	userFilter := c.QueryParam("filter")
-	var filtered *domain.User
-	if userFilter != "" {
-		filteredUser, err := h.user.GetByName(ctx, userFilter)
-		if err == nil {
-			filtered = filteredUser
-		}
+	err := h.token.InitYearlyTokens(ctx, &currUser, date.Year)
+	if err != nil {
+		return NewErrorResponse(
+			c,
+			http.StatusInternalServerError,
+			"Failed to initialize vacation tokens",
+		)
 	}
 
-	month, err := h.event.GetForMonth(ctx, date, filtered, eventFilter)
+	month, err := h.event.GetForMonth(ctx, date, nil, "")
 	if err != nil {
 		return NewErrorResponse(
 			c,

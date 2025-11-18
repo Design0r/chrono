@@ -184,7 +184,7 @@ func (s *Server) InitAPIRoutes() {
 		s.log,
 	)
 	userHandler := api.NewAPIUserHandler(s.services.user, s.services.event, s.services.auth, s.services.token, s.log)
-	eventHandler := api.NewAPIEventHandler(s.services.user, s.services.event, s.log)
+	eventHandler := api.NewAPIEventHandler(s.services.user, s.services.event, s.services.token, s.log)
 	requestHandler := api.NewAPIRequestsHandler(
 		s.services.request,
 		s.services.event,

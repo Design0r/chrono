@@ -27,6 +27,7 @@ const router = createRouter({
     chrono: chrono,
     queryClient: queryClient,
   },
+  notFoundMode: "root",
 });
 
 // Register things for typesafety

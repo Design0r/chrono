@@ -160,6 +160,11 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		vacDays = *patchedData.VacationDays
 	}
 
+	h.user.SetVacation(ctx, userToEdit.ID, int(vacDays), domain.CurrentYear())
+	if err := c.Bind(&patchedData); err != nil {
+		return NewErrorResponse(c, http.StatusInternalServerError, "Failed updating vacation")
+	}
+
 	role := userToEdit.Role
 	if currUser.IsAdmin() && patchedData.Role != "" {
 		if !domain.IsValidRole((domain.Role)(patchedData.Role)) {
@@ -185,7 +190,7 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		Enabled:      enabled,
 		IsSuperuser:  superuser,
 		VacationDays: vacDays,
-		Password:     currUser.Password,
+		Password:     userToEdit.Password,
 	}
 
 	if patchedData.Password != "" {

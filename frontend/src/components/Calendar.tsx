@@ -21,15 +21,14 @@ export function CalendarNavigation({
   let nextYear = currYear;
   let nextMonth = currMonth + 1;
   let prevMonth = currMonth - 1;
-  if (prevMonth <= 0) {
-    prevMonth = 12;
+  if (prevMonth < 0) {
+    prevMonth = 11;
     year--;
   }
 
-  if (nextMonth > 12) {
+  if (nextMonth > 11) {
     nextMonth = nextMonth % 12;
     nextYear++;
-    if (nextMonth === 0) nextMonth = 1;
   }
 
   return (

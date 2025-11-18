@@ -31,8 +31,8 @@ function CalendarComponent() {
   const { chrono, auth } = Route.useRouteContext();
   const params = Route.useParams();
   const search = Route.useSearch();
-  const year = Number.parseInt(params.year);
-  const month = Number.parseInt(params.month);
+  const year = Number(params.year);
+  const month = Number(params.month);
 
   const [userFilter, setUserFilter] = useState<string | undefined>(search.user);
   const [eventFilter, setEventFilter] = useState<string | undefined>(

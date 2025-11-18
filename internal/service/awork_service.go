@@ -268,7 +268,7 @@ func (a *AworkService) GetWorkHoursForYear(
 
 	workSecs := 0
 	for _, entry := range entries {
-		if entry.Project.Name == "Urlaub" || entry.Task.Name == "Feiertag" || entry.Task.Name == "Ausgleich" {
+		if entry.Task.Name == "Urlaub" || entry.Task.Name == "Feiertag" || entry.Task.Name == "Ausgleich" {
 			continue
 		}
 		workSecs += entry.Duration

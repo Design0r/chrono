@@ -1,13 +1,26 @@
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useState,
   type ReactNode,
 } from "react";
 import { ChronoClient } from "./api/chrono/client";
 import type { LoginRequest, SignupRequest, User } from "./types/auth";
-import { useQueryClient } from "@tanstack/react-query";
+
+let logoutFn: (() => Promise<void>) | null = null;
+
+export function registerLogout(fn: () => Promise<void>) {
+  logoutFn = fn;
+}
+
+export async function logoutOutsideReact() {
+  if (logoutFn) {
+    await logoutFn();
+  }
+}
 
 export interface AuthContext {
   isAuthenticated: boolean;
@@ -23,7 +36,7 @@ const AuthContext = createContext<AuthContext | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const uid = localStorage.getItem("user");
   const [userId, setUserId] = useState<number | null>(
-    uid ? Number.parseInt(uid) : null,
+    uid ? Number.parseInt(uid) : null
   );
 
   const queryClient = useQueryClient();
@@ -63,6 +76,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserId(user.id);
     setIsAuthenticated(true);
   }, []);
+
+  useEffect(() => {
+    registerLogout(logout);
+  }, [logout]);
 
   return (
     <AuthContext.Provider

@@ -1,16 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { StatCard, StatCardElement } from "../components/StatCard";
-import { TitleSection } from "../components/TitleSection";
-import { VacationGraph } from "../components/VacationGraph";
-import type { UserWithVacation } from "../types/auth";
-import { dayOfYear, daysInYear } from "../utils/calendar";
 import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { ErrorPage } from "../components/ErrorPage";
 import {
   LoadingSpinner,
   LoadingSpinnerPage,
 } from "../components/LoadingSpinner";
-import { ErrorPage } from "../components/ErrorPage";
+import { StatCard, StatCardElement } from "../components/StatCard";
+import { TitleSection } from "../components/TitleSection";
 import { useToast } from "../components/Toast";
+import { VacationGraph } from "../components/VacationGraph";
+import type { UserWithVacation } from "../types/auth";
+import type { WorkTime } from "../types/response";
+import { dayOfYear, daysInYear } from "../utils/calendar";
 
 export const Route = createFileRoute("/_auth/")({
   component: Home,
@@ -45,17 +47,26 @@ function Home() {
     gcTime: 1000 * 60 * 60 * 2, // 2h
   });
 
+  const [awork, setAwork] = useState<WorkTime | undefined>();
+
   const queries = [userQ, vacationQ];
   const anyPending = queries.some((q) => q.isPending);
   const firstError = queries.find((q) => q.isError)?.error;
 
+  useEffect(() => {
+    if (aworkQ.isError) {
+      addErrorToast(aworkQ.error);
+      return;
+    }
+    if (aworkQ.isPending) return;
+    setAwork(aworkQ.data);
+  }, [aworkQ.isError, aworkQ.isPending, aworkQ.data]);
+
   if (anyPending) return <LoadingSpinnerPage />;
   if (firstError) return <ErrorPage error={firstError} />;
-  if (aworkQ.isError) addErrorToast(aworkQ.error);
 
   const user = userQ.data! as UserWithVacation;
   const vacation = vacationQ.data!;
-  const awork = aworkQ.data!;
 
   const daysYear = daysInYear(year);
   const currDay = dayOfYear();
@@ -121,7 +132,7 @@ function Home() {
           </div>
         ) : (
           <>
-            {!aworkQ.isError && (
+            {awork && (
               <>
                 <StatCard>
                   <StatCardElement

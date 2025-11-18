@@ -44,6 +44,12 @@ type EventService interface {
 	GetAllUsersWithVacation(ctx context.Context, year int) ([]domain.UserWithVacation, error)
 	UpdateInRange(ctx context.Context, userId int64, state string, start, end time.Time) error
 	GetAllByUserId(ctx context.Context, userId int64) ([]domain.Event, error)
+	GetNonWeekendCountHolidaysForYear(ctx context.Context, year int) (int, error)
+	GetUsedVacationTilNow(
+		ctx context.Context,
+		userId int64,
+		year int,
+	) (float64, error)
 }
 
 type eventService struct {
@@ -285,4 +291,58 @@ func (svc *eventService) GetAllByUserId(
 	userId int64,
 ) ([]domain.Event, error) {
 	return svc.event.GetAllByUserId(ctx, userId)
+}
+
+func (svc *eventService) GetNonWeekendCountHolidaysForYear(
+	ctx context.Context,
+	year int,
+) (int, error) {
+	cfg := config.GetConfig()
+	bot, err := svc.user.GetByName(ctx, cfg.BotName)
+	if err != nil {
+		return 0, err
+	}
+
+	holidays, err := svc.event.GetAllByUserId(context.Background(), bot.ID)
+	if err != nil {
+		return 0, err
+	}
+
+	now := time.Now()
+	nonWeekendHolidays := 0
+	for _, h := range holidays {
+		weekday := h.ScheduledAt.Weekday()
+		if h.ScheduledAt.Unix() <= now.Unix() && h.ScheduledAt.Year() == year &&
+			(weekday != time.Saturday && weekday != time.Sunday) {
+			nonWeekendHolidays++
+		}
+	}
+
+	return nonWeekendHolidays, nil
+}
+
+func (svc *eventService) GetUsedVacationTilNow(
+	ctx context.Context,
+	userId int64,
+	year int,
+) (float64, error) {
+	events, err := svc.event.GetAllByUserId(context.Background(), userId)
+	if err != nil {
+		return 0, err
+	}
+
+	count := 0.0
+	now := time.Now()
+	for _, e := range events {
+		if e.ScheduledAt.Unix() <= now.Unix() && e.State == "accepted" {
+			switch e.Name {
+			case "urlaub":
+				count += 1
+			case "urlaub halbtags":
+				count += 0.5
+			}
+		}
+	}
+
+	return count, nil
 }

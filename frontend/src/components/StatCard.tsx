@@ -1,5 +1,6 @@
 type StatCardElementProps = {
   title: string;
+  skeleton?: boolean;
   stat?: string;
   statClassName?: string;
   subtitle: string;
@@ -24,10 +25,11 @@ export function StatCardElement({
   stat,
   statClassName = "-mb-1 pt-1.5 stat-value max-sm:text-2xl text-primary",
   subtitle,
+  skeleton = false,
   children,
 }: StatCardElementProps) {
   return (
-    <div className="stat">
+    <div className={`stat ${skeleton && "skeleton"}`}>
       <div className="stat-figure"></div>
       <div className="stat-title truncate text-accent/75 text-base ">
         {title}

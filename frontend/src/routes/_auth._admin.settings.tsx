@@ -39,12 +39,12 @@ function SettingsComponent() {
         <div className="flex justify-end col-start-2">
           <input
             defaultChecked={settingQ.data!.signup_enabled}
-            onChange={(e) =>
+            onChange={(e) => {
               mutation.mutate({
                 ...settingQ.data,
-                signup_enabled: Boolean(e.target.value),
-              })
-            }
+                signup_enabled: e.target.checked,
+              });
+            }}
             type="checkbox"
             className="toggle border-error text-error checked:border-success checked:text-success"
           />

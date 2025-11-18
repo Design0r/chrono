@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,10 +20,12 @@ const AWORK_API_URL = "https://api.awork.com/api/v1"
 type AworkService struct {
 	client http.Client
 	log    *slog.Logger
+	event  EventService
+	user   UserService
 }
 
-func NewAworkService(s *slog.Logger) AworkService {
-	return AworkService{client: http.Client{}, log: s}
+func NewAworkService(e EventService, u UserService, s *slog.Logger) AworkService {
+	return AworkService{client: http.Client{}, event: e, user: u, log: s}
 }
 
 func (a *AworkService) GetUsers() ([]domain.AworkUser, error) {
@@ -185,13 +188,25 @@ func (a *AworkService) GetWorkHoursForMonth(
 }
 
 func (a *AworkService) GetWorkHoursForYear(
-	userId string,
+	aworkUserId string,
+	userId int64,
 	year int,
 ) (domain.WorkHours, error) {
+	ctx := context.Background()
 	yearStart := time.Date(year, time.January, 1, 0, 0, 0, 0, time.Now().Location())
 	yearEnd := time.Now()
 
-	entries, err := a.GetTimeEntries(userId, yearStart, yearEnd)
+	entries, err := a.GetTimeEntries(aworkUserId, yearStart, yearEnd)
+	if err != nil {
+		return domain.WorkHours{}, err
+	}
+
+	holidays, err := a.event.GetNonWeekendCountHolidaysForYear(ctx, year)
+	if err != nil {
+		return domain.WorkHours{}, err
+	}
+
+	vacation, err := a.event.GetUsedVacationTilNow(ctx, userId, year)
 	if err != nil {
 		return domain.WorkHours{}, err
 	}
@@ -213,5 +228,10 @@ func (a *AworkService) GetWorkHoursForYear(
 		start = start.AddDate(0, 0, 1)
 	}
 
-	return domain.WorkHours{Worked: workHours, Expected: float64(expected), Vacation: 0}, nil
+	return domain.WorkHours{
+		Worked:   workHours,
+		Expected: (float64(expected-holidays) - vacation) * 8,
+		Holidays: float64(holidays) * 8,
+		Vacation: vacation * 8,
+	}, nil
 }

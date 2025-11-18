@@ -5,6 +5,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ChronoClient } from "./api/chrono/client";
 import { AuthProvider, useAuth, type AuthContext } from "./auth";
+import { ErrorPage } from "./components/ErrorPage";
 import "./css/index.css";
 import { routeTree } from "./routeTree.gen";
 
@@ -27,7 +28,10 @@ const router = createRouter({
     chrono: chrono,
     queryClient: queryClient,
   },
-  notFoundMode: "root",
+
+  defaultNotFoundComponent: () => (
+    <ErrorPage error={{ name: "404", message: "Not Found" }} />
+  ),
 });
 
 // Register things for typesafety

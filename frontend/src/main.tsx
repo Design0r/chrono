@@ -32,6 +32,15 @@ const router = createRouter({
   defaultNotFoundComponent: () => (
     <ErrorPage error={{ name: "404", message: "Not Found" }} />
   ),
+
+  defaultErrorComponent: () => (
+    <ErrorPage
+      error={{
+        name: "",
+        message: "I dont know what you did, but it wasn't good",
+      }}
+    />
+  ),
 });
 
 // Register things for typesafety

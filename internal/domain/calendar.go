@@ -80,7 +80,7 @@ func GetDaysOfMonth(month time.Month, year int) Month {
 	numDays := GetNumDaysOfMonth(month, year)
 	days := make([]Day, numDays)
 	for i := range numDays {
-		date := time.Date(year, month, i+1, 0, 0, 0, 0, time.UTC)
+		date := time.Date(year, month, i+1, 0, 0, 0, 0, time.Local)
 		day := Day{Number: i + 1, Name: weekdays[date.Weekday()], Date: date}
 		days[i] = day
 	}
@@ -88,18 +88,18 @@ func GetDaysOfMonth(month time.Month, year int) Month {
 	return Month{
 		Name:   days[0].Date.Month().String(),
 		Days:   days,
-		Offset: getMonthOffset(days[0].Date.Weekday() + 6), // Weekday 0 = Sunday
+		Offset: getMonthOffset(days[0].Date.Weekday()),
 		Year:   year,
 		Number: int(month),
 	}
 }
 
 func getMonthOffset(weekday time.Weekday) int {
-	return int(weekday) % 7
+	return (int(weekday) + 6) % 7 // Weekday 0 = Sunday
 }
 
 func GetYearOffset(year int) int {
-	firstDay := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+	firstDay := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
 	offset := int(firstDay.Weekday()) - 1
 	if offset < 0 {
 		offset = 6

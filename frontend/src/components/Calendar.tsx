@@ -21,12 +21,12 @@ export function CalendarNavigation({
   let nextYear = currYear;
   let nextMonth = currMonth + 1;
   let prevMonth = currMonth - 1;
-  if (prevMonth < 0) {
-    prevMonth = 11;
+  if (prevMonth <= 0) {
+    prevMonth = 12;
     year--;
   }
 
-  if (nextMonth > 11) {
+  if (nextMonth > 12) {
     nextMonth = nextMonth % 12;
     nextYear++;
   }
@@ -177,7 +177,7 @@ export function VacationCounter({
 
 export function WeekdayHeader({
   label,
-  highlighted = false,
+  highlighted = true,
 }: {
   label: string;
   highlighted?: boolean;
@@ -386,21 +386,29 @@ export function Calendar({
   selectedEvent: string;
   currUser: User;
 }) {
+  const isHighlighted = (day: number) => {
+    const now = new Date();
+    return (
+      now.getDay() === day &&
+      now.getMonth() + 1 === month.number &&
+      now.getFullYear() === month.year
+    );
+  };
+
   return (
     <div className="my-12 lg:my-8 lg:mt-0 mx-auto grid px-6 grid-cols-1 gap-y-6 lg:grid-cols-7 lg:px-4 gap-x-2 lg:gap-y-4 overflow-x-scroll">
-      <WeekdayHeader label="Monday" />
-      <WeekdayHeader label="Tuesday" />
-      <WeekdayHeader label="Wednesday" />
-      <WeekdayHeader label="Thursday" />
-      <WeekdayHeader label="Friday" />
-      <WeekdayHeader label="Saturday" />
-      <WeekdayHeader label="Sunday" />
+      <WeekdayHeader highlighted={isHighlighted(1)} label="Monday" />
+      <WeekdayHeader highlighted={isHighlighted(2)} label="Tuesday" />
+      <WeekdayHeader highlighted={isHighlighted(3)} label="Wednesday" />
+      <WeekdayHeader highlighted={isHighlighted(4)} label="Thursday" />
+      <WeekdayHeader highlighted={isHighlighted(5)} label="Friday" />
+      <WeekdayHeader highlighted={isHighlighted(6)} label="Saturday" />
+      <WeekdayHeader highlighted={isHighlighted(7)} label="Sunday" />
       {Array.from({ length: month.offset }).map((_, i) => (
         <div key={i} className="hidden lg:block"></div>
       ))}
       {month.days.map((d, i) => {
         const date = new Date(d.date);
-        console.log(date, d.date, d.number);
 
         return (
           <Day

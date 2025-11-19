@@ -302,9 +302,9 @@ export function Day({
   selectedEvent: string;
   currUser: User;
 }) {
-  const now = new Date(Date.now());
+  const now = new Date();
   const isToday =
-    now.getDay() === date &&
+    now.getDate() === date &&
     now.getMonth() + 1 === month &&
     now.getFullYear() === year;
 
@@ -400,6 +400,7 @@ export function Calendar({
       ))}
       {month.days.map((d, i) => {
         const date = new Date(d.date);
+        console.log(date, d.date, d.number);
 
         return (
           <Day

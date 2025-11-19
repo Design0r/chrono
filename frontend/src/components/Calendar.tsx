@@ -239,19 +239,6 @@ export function Event({
   if (!visible) return <></>;
   return (
     <div className="indicator w-full">
-      {!isHoliday && (
-        <div className="absolute top-1.5 right-1.5 z-10 w-3 bg-neutral/50 aspect-square rounded-full flex items-center justify-center">
-          <span
-            className={
-              event.event.state === "pending"
-                ? "bg-accent status status-sm status-accent animate-ping"
-                : event.event.state === "declined"
-                  ? "status status-md status-error"
-                  : "status status-md status-success"
-            }
-          ></span>
-        </div>
-      )}
       <div
         style={{ backgroundColor: bgColor, borderColor: borderColor }}
         className={`group gap-2 relative ${!isHoliday && "flex"} text-center border py-1 w-full rounded-lg`}
@@ -269,15 +256,29 @@ export function Event({
           </>
         )}
         <div
-          className={`${!isHoliday && "bg-black/20 rounded px-1"} text-base-content ${isDeletable && "group-hover:text-white/0"}  animate-all`}
+          className={`${!isHoliday && "bg-black/30 rounded-lg  px-2"} ml-1 text-base-content ${isDeletable && "group-hover:text-white/0"}  animate-all`}
         >
           {shortName}
         </div>
         {!isHoliday && (
-          <div
-            className={`content-center text-base-content/80 ${isDeletable && "group-hover:text-white/0"} animate-all`}
-          >
-            {event.user.username}
+          <div className="flex justify-between w-full">
+            <div
+              className={`text-base-content/80 ${isDeletable && "group-hover:text-white/0"} animate-all`}
+            >
+              {event.user.username}
+            </div>
+
+            <div className="flex mr-1 w-3 aspect-square rounded-full items-center ">
+              <span
+                className={
+                  event.event.state === "pending"
+                    ? "bg-accent status status-sm status-accent animate-ping"
+                    : event.event.state === "declined"
+                      ? "status status-md status-error"
+                      : "status status-md status-success"
+                }
+              ></span>
+            </div>
           </div>
         )}
       </div>

@@ -239,10 +239,6 @@ func (a *AworkService) GetWorkHoursForYear(
 		}
 	}
 
-	for i, e := range entries {
-		fmt.Println(i, e.StartDateLocal, e.EndDateLocal, e.Task.Name)
-	}
-
 	// ---- HOLIDAYS / VACATION / SICKNESS ----
 	// NOTE: these must use the same period (yearStart..periodEnd) to be fully consistent.
 	holidays, err := a.event.GetNonWeekendCountHolidays(ctx, yearStart, periodEnd)

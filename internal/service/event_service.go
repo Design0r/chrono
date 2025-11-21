@@ -44,11 +44,14 @@ type EventService interface {
 	GetAllUsersWithVacation(ctx context.Context, year int) ([]domain.UserWithVacation, error)
 	UpdateInRange(ctx context.Context, userId int64, state string, start, end time.Time) error
 	GetAllByUserId(ctx context.Context, userId int64) ([]domain.Event, error)
-	GetNonWeekendCountHolidaysForYear(ctx context.Context, year int) (int, error)
-	GetUsedVacationTilNow(
+	GetNonWeekendCountHolidays(
+		ctx context.Context,
+		start, end time.Time,
+	) (int, error)
+	GetUsedVacation(
 		ctx context.Context,
 		userId int64,
-		year int,
+		start, end time.Time,
 	) (float64, error)
 }
 
@@ -293,54 +296,74 @@ func (svc *eventService) GetAllByUserId(
 	return svc.event.GetAllByUserId(ctx, userId)
 }
 
-func (svc *eventService) GetNonWeekendCountHolidaysForYear(
+func (svc *eventService) GetNonWeekendCountHolidays(
 	ctx context.Context,
-	year int,
+	start, end time.Time,
 ) (int, error) {
 	cfg := config.GetConfig()
+
+	// "Bot" user that holds holiday events
 	bot, err := svc.user.GetByName(ctx, cfg.BotName)
 	if err != nil {
 		return 0, err
 	}
 
-	holidays, err := svc.event.GetAllByUserId(context.Background(), bot.ID)
+	holidays, err := svc.event.GetAllByUserId(ctx, bot.ID)
 	if err != nil {
 		return 0, err
 	}
 
-	now := time.Now()
 	nonWeekendHolidays := 0
+
 	for _, h := range holidays {
-		weekday := h.ScheduledAt.Weekday()
-		if h.ScheduledAt.Unix() <= now.Unix() && h.ScheduledAt.Year() == year &&
-			(weekday != time.Saturday && weekday != time.Sunday) {
-			nonWeekendHolidays++
+		t := h.ScheduledAt
+
+		// only count events within [start, end]
+		if t.Before(start) || t.After(end) {
+			continue
 		}
+
+		wd := t.Weekday()
+		if wd == time.Saturday || wd == time.Sunday {
+			continue
+		}
+
+		nonWeekendHolidays++
 	}
 
 	return nonWeekendHolidays, nil
 }
 
-func (svc *eventService) GetUsedVacationTilNow(
+func (svc *eventService) GetUsedVacation(
 	ctx context.Context,
 	userId int64,
-	year int,
+	start, end time.Time,
 ) (float64, error) {
-	events, err := svc.event.GetAllByUserId(context.Background(), userId)
+	events, err := svc.event.GetAllByUserId(ctx, userId)
 	if err != nil {
 		return 0, err
 	}
 
 	count := 0.0
-	now := time.Now()
+
 	for _, e := range events {
-		if e.ScheduledAt.Unix() <= now.Unix() && e.State == "accepted" {
-			switch e.Name {
-			case "urlaub":
-				count += 1
-			case "urlaub halbtags":
-				count += 0.5
-			}
+		t := e.ScheduledAt
+
+		// only count events within [start, end]
+		if t.Before(start) || t.After(end) {
+			continue
+		}
+
+		// only accepted vacation
+		if e.State != "accepted" {
+			continue
+		}
+
+		switch e.Name {
+		case "urlaub":
+			count += 1.0
+		case "urlaub halbtags":
+			count += 0.5
 		}
 	}
 

@@ -57,17 +57,17 @@ export function VacationGraph({
 
   const cells = useMemo(() => {
     let week = 1;
-    const out: Array<
-      { type: "label"; week: number } | { type: "gap"; week: number }
-    > = [];
+    const out: Array<number> = [];
+
     for (const g of gaps) {
-      out.push({ type: "label", week });
+      out.push(week);
       for (let i = 0; i < g; i++) {
         week++;
-        out.push({ type: "gap", week: week });
+        out.push(week);
       }
       week++;
     }
+
     return out;
   }, [gaps]);
 
@@ -78,7 +78,7 @@ export function VacationGraph({
         {gaps.map((g, i) => (
           <div key={`top-${i}`} className="contents">
             <p className="h-4 w-4 text-center">{i + 1}.</p>
-            {Array.from({ length: g }).map((_, j) => (
+            {Array.from({ length: g }).map((j) => (
               <p key={`top-gap-${i}-${j}`} className="w-4 h-4 -z-10" />
             ))}
           </div>
@@ -87,22 +87,14 @@ export function VacationGraph({
 
       <div className="col-span-1" />
       <div className="col-span-11 grid grid-rows-1 grid-flow-col h-10 gap-1 text-sm text-base-content/40">
-        {cells.map((c, i) =>
-          c.type === "label" ? (
-            <p
-              key={`w-${c.week}`}
-              className={`w-4 h-4 text-center ${
-                currWeek === c.week ? "text-primary" : "text-secondary/70"
-              }`}
-            >
-              {c.week}
-            </p>
-          ) : (
-            <p key={`gap-${i}`} className="w-4 h-4 text-center">
-              {c.week}
-            </p>
-          )
-        )}
+        {cells.map((week) => (
+          <p
+            key={week}
+            className={`w-4 h-4 text-center ${currWeek === week ? "text-primary font-bold" : "font-light text-secondary/60"}`}
+          >
+            {week}
+          </p>
+        ))}
       </div>
 
       <div className="col-span-1 grid grid-rows-7 text-secondary/60 text-sm">

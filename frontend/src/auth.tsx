@@ -36,7 +36,7 @@ const AuthContext = createContext<AuthContext | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const uid = localStorage.getItem("user");
   const [userId, setUserId] = useState<number | null>(
-    uid ? Number.parseInt(uid) : null
+    uid ? Number.parseInt(uid) : null,
   );
 
   const queryClient = useQueryClient();
@@ -56,11 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    await chrono.auth.logout();
-    localStorage.removeItem("user");
-    setUserId(null);
-    setIsAuthenticated(false);
-    queryClient.clear();
+    try {
+      await chrono.auth.logout();
+    } finally {
+      localStorage.removeItem("user");
+      setUserId(null);
+      setIsAuthenticated(false);
+      queryClient.clear();
+    }
   }, []);
 
   const login = useCallback(async (data: LoginRequest) => {

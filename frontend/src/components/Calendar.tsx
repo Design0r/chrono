@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { ChronoClient } from "../api/chrono/client";
 import type { User } from "../types/auth";
 import type { EventUser, Month } from "../types/response";

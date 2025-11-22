@@ -199,14 +199,12 @@ export function Event({
   currUser: User;
 }) {
   const chrono = new ChronoClient();
-  const queryClient = useQueryClient();
   const { addToast, addErrorToast } = useToast();
+  const queryClient = useQueryClient();
 
   const hsl = hexToHSL(event.user.color);
   const bgColor = hsla(...hsl, 0.2);
   const borderColor = hsla(...hsl, 0.3);
-
-  const [visible, setVisible] = useState(true);
 
   const currDate = new Date();
   const eventDate = new Date(event.event.scheduled_at);
@@ -227,16 +225,12 @@ export function Event({
     mutationKey: ["deleteEvent", event.event.id],
     mutationFn: () => chrono.events.deleteEvent(event.event.id),
     onSuccess: () => {
-      addToast(`Successfully deleted event ${event.event.id}`, "success");
-      setVisible(false);
-      return queryClient.invalidateQueries({
-        queryKey: ["month"],
-      });
+      addToast(`Successfully deleted event ${event.event.name}`, "success");
+      queryClient.invalidateQueries({ queryKey: ["month"] });
     },
     onError: (error) => addErrorToast(error),
   });
 
-  if (!visible) return <></>;
   return (
     <div className="indicator w-full">
       <div
@@ -309,9 +303,6 @@ export function Day({
     now.getMonth() + 1 === month &&
     now.getFullYear() === year;
 
-  const [evts, setEvts] = useState<EventUser[]>(events);
-
-  useEffect(() => setEvts(events), [events]);
   const chrono = new ChronoClient();
   const queryClient = useQueryClient();
   const { addToast, addErrorToast } = useToast();
@@ -325,12 +316,9 @@ export function Day({
         day: date,
         event: selectedEvent,
       }),
-    onSuccess: (e) => {
-      setEvts((ev) => [...ev, e]);
+    onSuccess: () => {
       addToast(`Successfully created event ${selectedEvent}`, "success");
-      return queryClient.invalidateQueries({
-        queryKey: ["month"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["month"] });
     },
     onError: (error) => addErrorToast(error),
   });
@@ -351,7 +339,7 @@ export function Day({
       </div>
       <div className="flex flex-col px-2 h-full lg:bg-base-200/65 rounded-t-none rounded-b-[0.65rem]">
         <div className="flex flex-col gap-2 h-fit rounded-[0.7rem] *:first:mt-2">
-          {evts.map((e, i) => (
+          {events.map((e, i) => (
             <Event key={i} event={e} currUser={currUser} />
           ))}
         </div>

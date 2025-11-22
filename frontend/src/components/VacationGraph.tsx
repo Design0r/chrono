@@ -78,7 +78,7 @@ export function VacationGraph({
         {gaps.map((g, i) => (
           <div key={`top-${i}`} className="contents">
             <p className="h-4 w-4 text-center">{i + 1}.</p>
-            {Array.from({ length: g }).map((j) => (
+            {Array.from({ length: g }).map((_, j) => (
               <p key={`top-gap-${i}-${j}`} className="w-4 h-4 -z-10" />
             ))}
           </div>

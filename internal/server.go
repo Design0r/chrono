@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log/slog"
+	"net/http"
 	"time"
 
 	sentryecho "github.com/getsentry/sentry-go/echo"
@@ -183,8 +184,19 @@ func (s *Server) InitAPIRoutes() {
 		s.services.auth,
 		s.log,
 	)
-	userHandler := api.NewAPIUserHandler(s.services.user, s.services.event, s.services.auth, s.services.token, s.log)
-	eventHandler := api.NewAPIEventHandler(s.services.user, s.services.event, s.services.token, s.log)
+	userHandler := api.NewAPIUserHandler(
+		s.services.user,
+		s.services.event,
+		s.services.auth,
+		s.services.token,
+		s.log,
+	)
+	eventHandler := api.NewAPIEventHandler(
+		s.services.user,
+		s.services.event,
+		s.services.token,
+		s.log,
+	)
 	requestHandler := api.NewAPIRequestsHandler(
 		s.services.request,
 		s.services.event,
@@ -220,6 +232,11 @@ func (s *Server) InitAPIRoutes() {
 	exportHander.RegisterRoutes(adminGrp)
 	aworkHandler.RegisterRoutes(authGrp)
 	notificationHandler.RegisterRoutes(authGrp)
+
+	s.Router.GET(
+		"/api/v1/health",
+		func(c echo.Context) error { return c.String(http.StatusOK, "") },
+	)
 
 	s.log.Info("Initialized api routes.")
 }

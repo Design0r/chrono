@@ -11,10 +11,10 @@ import (
 )
 
 type APIExportHandler struct {
-	krank service.ExportService
+	krank *service.KrankheitsExport
 }
 
-func NewAPIExportHandler(k service.ExportService) APIExportHandler {
+func NewAPIExportHandler(k *service.KrankheitsExport) APIExportHandler {
 	return APIExportHandler{krank: k}
 }
 

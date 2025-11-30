@@ -11,14 +11,14 @@ import (
 )
 
 type APIAuthHandler struct {
-	user service.UserService
-	auth service.AuthService
+	user *service.UserService
+	auth *service.AuthService
 	log  *slog.Logger
 }
 
 func NewAPIAuthHandler(
-	u service.UserService,
-	a service.AuthService,
+	u *service.UserService,
+	a *service.AuthService,
 	log *slog.Logger,
 ) APIAuthHandler {
 	return APIAuthHandler{user: u, auth: a, log: log}

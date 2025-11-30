@@ -11,15 +11,7 @@ import (
 	"chrono/internal/service/auth"
 )
 
-type AuthService interface {
-	Login(ctx context.Context, email, password string) (*http.Cookie, error)
-	Logout(ctx context.Context, cookie string) (*http.Cookie, error)
-	Signup(ctx context.Context, userParams domain.CreateUser) (*http.Cookie, error)
-	GetCurrentUser(ctx context.Context, cookie string) (*domain.User, error)
-	HashPassword(passwrd string) (string, error)
-}
-
-type authService struct {
+type AuthService struct {
 	user            domain.UserRepository
 	session         domain.SessionRepository
 	pw              auth.PasswordHasher
@@ -33,11 +25,11 @@ func NewAuthService(
 	sessionDuration time.Duration,
 	pw auth.PasswordHasher,
 	log *slog.Logger,
-) authService {
-	return authService{user: u, session: s, log: log, sessionDuration: sessionDuration, pw: pw}
+) AuthService {
+	return AuthService{user: u, session: s, log: log, sessionDuration: sessionDuration, pw: pw}
 }
 
-func (svc *authService) createSessionCookie(session domain.Session) *http.Cookie {
+func (svc *AuthService) createSessionCookie(session domain.Session) *http.Cookie {
 	return &http.Cookie{
 		Path:     "/",
 		Name:     "session",
@@ -49,7 +41,7 @@ func (svc *authService) createSessionCookie(session domain.Session) *http.Cookie
 	}
 }
 
-func (svc *authService) deleteSessionCookie() *http.Cookie {
+func (svc *AuthService) deleteSessionCookie() *http.Cookie {
 	return &http.Cookie{
 		Path:     "/",
 		Name:     "session",
@@ -62,7 +54,7 @@ func (svc *authService) deleteSessionCookie() *http.Cookie {
 	}
 }
 
-func (svc *authService) Login(ctx context.Context, email, pw string) (*http.Cookie, error) {
+func (svc *AuthService) Login(ctx context.Context, email, pw string) (*http.Cookie, error) {
 	user, err := svc.user.GetByEmail(ctx, email)
 	if err != nil {
 		svc.log.Error(
@@ -92,7 +84,7 @@ func (svc *authService) Login(ctx context.Context, email, pw string) (*http.Cook
 	return svc.createSessionCookie(*session), nil
 }
 
-func (svc *authService) Logout(ctx context.Context, cookie string) (*http.Cookie, error) {
+func (svc *AuthService) Logout(ctx context.Context, cookie string) (*http.Cookie, error) {
 	err := svc.session.Delete(ctx, cookie)
 	if err != nil {
 		return nil, err
@@ -101,7 +93,7 @@ func (svc *authService) Logout(ctx context.Context, cookie string) (*http.Cookie
 	return svc.deleteSessionCookie(), nil
 }
 
-func (svc *authService) Signup(
+func (svc *AuthService) Signup(
 	ctx context.Context,
 	userParams domain.CreateUser,
 ) (*http.Cookie, error) {
@@ -146,10 +138,10 @@ func (svc *authService) Signup(
 	return svc.createSessionCookie(*session), nil
 }
 
-func (svc *authService) GetCurrentUser(ctx context.Context, cookie string) (*domain.User, error) {
+func (svc *AuthService) GetCurrentUser(ctx context.Context, cookie string) (*domain.User, error) {
 	return svc.session.GetSessionUser(ctx, cookie)
 }
 
-func (svc *authService) HashPassword(password string) (string, error) {
+func (svc *AuthService) HashPassword(password string) (string, error) {
 	return svc.pw.Hash(password)
 }

@@ -11,10 +11,10 @@ import (
 )
 
 type APISettingsHandler struct {
-	settings service.SettingsService
+	settings *service.SettingsService
 }
 
-func NewAPISettingsHandler(s service.SettingsService) APISettingsHandler {
+func NewAPISettingsHandler(s *service.SettingsService) APISettingsHandler {
 	return APISettingsHandler{settings: s}
 }
 

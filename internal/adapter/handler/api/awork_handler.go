@@ -12,16 +12,16 @@ import (
 )
 
 type APIAworkHandler struct {
-	user  service.UserService
-	event service.EventService
-	awork service.AworkService
+	user  *service.UserService
+	event *service.EventService
+	awork *service.AworkService
 	log   *slog.Logger
 }
 
 func NewAPIAworkHandler(
-	u service.UserService,
-	e service.EventService,
-	aw service.AworkService,
+	u *service.UserService,
+	e *service.EventService,
+	aw *service.AworkService,
 	log *slog.Logger,
 ) APIAworkHandler {
 	return APIAworkHandler{user: u, event: e, awork: aw, log: log}

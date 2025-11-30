@@ -8,24 +8,7 @@ import (
 	"chrono/internal/domain"
 )
 
-type VacationTokenService interface {
-	Create(
-		ctx context.Context,
-		value float64,
-		year int,
-		userId int64,
-	) (*domain.VacationToken, error)
-	Delete(ctx context.Context, id int64) error
-	DeleteAll(ctx context.Context) error
-	GetRemainingVacationForUser(
-		ctx context.Context,
-		userId int64,
-		start time.Time,
-		end time.Time,
-	) (float64, error)
-}
-
-type vacationTokenService struct {
+type VacationTokenService struct {
 	vacation domain.VacationTokenRepository
 	log      *slog.Logger
 }
@@ -33,11 +16,11 @@ type vacationTokenService struct {
 func NewVacationTokenService(
 	r domain.VacationTokenRepository,
 	log *slog.Logger,
-) vacationTokenService {
-	return vacationTokenService{vacation: r, log: log}
+) VacationTokenService {
+	return VacationTokenService{vacation: r, log: log}
 }
 
-func (svc *vacationTokenService) Create(
+func (svc *VacationTokenService) Create(
 	ctx context.Context, value float64, year int, userId int64,
 ) (*domain.VacationToken, error) {
 	start := time.Date(
@@ -57,15 +40,15 @@ func (svc *vacationTokenService) Create(
 	)
 }
 
-func (svc *vacationTokenService) Delete(ctx context.Context, id int64) error {
+func (svc *VacationTokenService) Delete(ctx context.Context, id int64) error {
 	return svc.vacation.Delete(ctx, id)
 }
 
-func (svc *vacationTokenService) DeleteAll(ctx context.Context) error {
+func (svc *VacationTokenService) DeleteAll(ctx context.Context) error {
 	return svc.vacation.DeleteAll(ctx)
 }
 
-func (svc *vacationTokenService) GetRemainingVacationForUser(
+func (svc *VacationTokenService) GetRemainingVacationForUser(
 	ctx context.Context,
 	userId int64,
 	start time.Time,

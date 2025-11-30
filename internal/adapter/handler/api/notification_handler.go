@@ -13,10 +13,13 @@ import (
 
 type APINotificationHandler struct {
 	log   *slog.Logger
-	notif service.NotificationService
+	notif *service.NotificationService
 }
 
-func NewAPINotificationHandler(n service.NotificationService, log *slog.Logger) APINotificationHandler {
+func NewAPINotificationHandler(
+	n *service.NotificationService,
+	log *slog.Logger,
+) APINotificationHandler {
 	return APINotificationHandler{notif: n, log: log}
 }
 
@@ -31,7 +34,11 @@ func (h *APINotificationHandler) Notifications(c echo.Context) error {
 
 	notifications, err := h.notif.GetByUserId(c.Request().Context(), currUser.ID)
 	if err != nil {
-		return NewErrorResponse(c, http.StatusInternalServerError, "Failed to get user notifications.")
+		return NewErrorResponse(
+			c,
+			http.StatusInternalServerError,
+			"Failed to get user notifications.",
+		)
 	}
 
 	return NewJsonResponse(c, notifications)

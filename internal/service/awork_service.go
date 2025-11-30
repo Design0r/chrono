@@ -21,11 +21,11 @@ const AWORK_API_URL = "https://api.awork.com/api/v1"
 type AworkService struct {
 	client http.Client
 	log    *slog.Logger
-	event  EventService
-	user   UserService
+	event  *EventService
+	user   *UserService
 }
 
-func NewAworkService(e EventService, u UserService, s *slog.Logger) AworkService {
+func NewAworkService(e *EventService, u *UserService, s *slog.Logger) AworkService {
 	return AworkService{client: http.Client{}, event: e, user: u, log: s}
 }
 

@@ -11,16 +11,16 @@ import (
 )
 
 type APIRequestsHandler struct {
-	request  service.RequestService
-	event    service.EventService
-	vacation service.VacationTokenService
+	request  *service.RequestService
+	event    *service.EventService
+	vacation *service.VacationTokenService
 	log      *slog.Logger
 }
 
 func NewAPIRequestsHandler(
-	r service.RequestService,
-	e service.EventService,
-	v service.VacationTokenService,
+	r *service.RequestService,
+	e *service.EventService,
+	v *service.VacationTokenService,
 	log *slog.Logger,
 ) APIRequestsHandler {
 	return APIRequestsHandler{request: r, event: e, vacation: v, log: log}

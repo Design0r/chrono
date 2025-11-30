@@ -7,27 +7,21 @@ import (
 	"chrono/internal/domain"
 )
 
-type TokenService interface {
-	InitYearlyTokens(ctx context.Context, user *domain.User, year int) error
-	UpdateYearlyTokens(ctx context.Context, userId int64, vacation, year int) error
-	DeleteAll(ctx context.Context) error
-}
-
-type tokenService struct {
-	refresh RefreshTokenService
-	vac     VacationTokenService
+type TokenService struct {
+	refresh *RefreshTokenService
+	vac     *VacationTokenService
 	log     *slog.Logger
 }
 
 func NewTokenService(
-	r RefreshTokenService,
-	v VacationTokenService,
+	r *RefreshTokenService,
+	v *VacationTokenService,
 	log *slog.Logger,
-) tokenService {
-	return tokenService{refresh: r, vac: v, log: log}
+) TokenService {
+	return TokenService{refresh: r, vac: v, log: log}
 }
 
-func (svc *tokenService) InitYearlyTokens(ctx context.Context, user *domain.User, year int) error {
+func (svc *TokenService) InitYearlyTokens(ctx context.Context, user *domain.User, year int) error {
 	exists, err := svc.refresh.CreateIfNotExists(ctx, user.ID, year)
 	if err != nil {
 		svc.log.Error("failed to get refresh token")
@@ -48,7 +42,7 @@ func (svc *tokenService) InitYearlyTokens(ctx context.Context, user *domain.User
 	return nil
 }
 
-func (svc *tokenService) UpdateYearlyTokens(
+func (svc *TokenService) UpdateYearlyTokens(
 	ctx context.Context,
 	userId int64,
 	vacation, year int,
@@ -66,7 +60,7 @@ func (svc *tokenService) UpdateYearlyTokens(
 	return nil
 }
 
-func (svc *tokenService) DeleteAll(ctx context.Context) error {
+func (svc *TokenService) DeleteAll(ctx context.Context) error {
 	err := svc.vac.DeleteAll(ctx)
 	if err != nil {
 		return err

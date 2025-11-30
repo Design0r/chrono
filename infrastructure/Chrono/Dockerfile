@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine AS build
+FROM golang:1.25-alpine AS build
 
 ENV CGO_ENABLED=1
 RUN apk add --no-cache gcc musl-dev ca-certificates
@@ -12,7 +12,7 @@ COPY . .
 RUN go build -o /app/build/chrono -ldflags="-s -w" ./cmd/main.go
 
 # Runtime image
-FROM alpine:3.20
+FROM alpine:latest
 
 RUN apk add --no-cache ca-certificates tzdata
 

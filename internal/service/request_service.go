@@ -9,26 +9,9 @@ import (
 	"chrono/internal/domain"
 )
 
-type RequestService interface {
-	Create(
-		ctx context.Context,
-		msg string,
-		user *domain.User,
-		event *domain.Event,
-	) (*domain.Request, error)
-	GetPending(ctx context.Context) ([]domain.BatchRequest, error)
-	GetInRange(ctx context.Context, userId int64, start, end time.Time) ([]domain.Request, error)
-	UpdateInRange(
-		ctx context.Context,
-		editor int64,
-		form domain.PatchRequestForm,
-	) (int64, error)
-	GetEventName(ctx context.Context, reqId int64) (string, error)
-}
-
-type requestService struct {
+type RequestService struct {
 	request domain.RequestRepository
-	notif   NotificationService
+	notif   *NotificationService
 	user    domain.UserRepository
 	log     *slog.Logger
 }
@@ -36,13 +19,13 @@ type requestService struct {
 func NewRequestService(
 	r domain.RequestRepository,
 	u domain.UserRepository,
-	n NotificationService,
+	n *NotificationService,
 	log *slog.Logger,
-) requestService {
-	return requestService{request: r, notif: n, log: log, user: u}
+) RequestService {
+	return RequestService{request: r, notif: n, log: log, user: u}
 }
 
-func (svc *requestService) Create(
+func (svc *RequestService) Create(
 	ctx context.Context,
 	msg string,
 	user *domain.User,
@@ -66,7 +49,7 @@ func (svc *requestService) Create(
 	return req, nil
 }
 
-func (svc *requestService) GetPending(ctx context.Context) ([]domain.BatchRequest, error) {
+func (svc *RequestService) GetPending(ctx context.Context) ([]domain.BatchRequest, error) {
 	req, err := svc.request.GetPending(ctx)
 	if err != nil {
 		return nil, err
@@ -113,14 +96,14 @@ func (svc *requestService) GetPending(ctx context.Context) ([]domain.BatchReques
 	return requestsToShow, nil
 }
 
-func (svc *requestService) GetEventNameFrom(
+func (svc *RequestService) GetEventNameFrom(
 	ctx context.Context,
 	req int64,
 ) (string, error) {
 	return svc.request.GetEventNameFrom(ctx, req)
 }
 
-func (svc *requestService) GetInRange(
+func (svc *RequestService) GetInRange(
 	ctx context.Context,
 	userId int64,
 	start, end time.Time,
@@ -128,7 +111,7 @@ func (svc *requestService) GetInRange(
 	return svc.request.GetInRange(ctx, userId, start, end)
 }
 
-func (svc *requestService) UpdateInRange(
+func (svc *RequestService) UpdateInRange(
 	ctx context.Context,
 	editorId int64,
 	form domain.PatchRequestForm,
@@ -165,6 +148,6 @@ func (svc *requestService) UpdateInRange(
 	return reqId, nil
 }
 
-func (svc *requestService) GetEventName(ctx context.Context, reqId int64) (string, error) {
+func (svc *RequestService) GetEventName(ctx context.Context, reqId int64) (string, error) {
 	return svc.request.GetEventNameFrom(ctx, reqId)
 }

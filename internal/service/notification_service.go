@@ -7,17 +7,7 @@ import (
 	"chrono/internal/domain"
 )
 
-type NotificationService interface {
-	Create(ctx context.Context, msg string) (domain.Notification, error)
-	CreateAndNotify(ctx context.Context, msg string, users []domain.User) error
-	NotifyUser(ctx context.Context, user int64, notif domain.Notification) error
-	NotifyUsers(ctx context.Context, users []domain.User, notif domain.Notification) error
-	GetByUserId(ctx context.Context, userId int64) ([]domain.Notification, error)
-	Clear(ctx context.Context, notifId int64) error
-	ClearAll(ctx context.Context, userId int64) error
-}
-
-type notificationService struct {
+type NotificationService struct {
 	notif     domain.NotificationRepository
 	userNotif domain.NotificationUserRepository
 	log       *slog.Logger
@@ -27,18 +17,18 @@ func NewNotificationService(
 	n domain.NotificationRepository,
 	un domain.NotificationUserRepository,
 	log *slog.Logger,
-) notificationService {
-	return notificationService{notif: n, userNotif: un, log: log}
+) NotificationService {
+	return NotificationService{notif: n, userNotif: un, log: log}
 }
 
-func (svc *notificationService) Create(
+func (svc *NotificationService) Create(
 	ctx context.Context,
 	msg string,
 ) (domain.Notification, error) {
 	return svc.notif.Create(ctx, msg)
 }
 
-func (svc *notificationService) CreateAndNotify(
+func (svc *NotificationService) CreateAndNotify(
 	ctx context.Context,
 	msg string,
 	users []domain.User,
@@ -58,7 +48,7 @@ func (svc *notificationService) CreateAndNotify(
 	return nil
 }
 
-func (svc *notificationService) NotifyUser(
+func (svc *NotificationService) NotifyUser(
 	ctx context.Context,
 	user int64,
 	notif domain.Notification,
@@ -66,7 +56,7 @@ func (svc *notificationService) NotifyUser(
 	return svc.userNotif.Create(ctx, user, notif.ID)
 }
 
-func (svc *notificationService) NotifyUsers(
+func (svc *NotificationService) NotifyUsers(
 	ctx context.Context,
 	users []domain.User,
 	notif domain.Notification,
@@ -81,17 +71,17 @@ func (svc *notificationService) NotifyUsers(
 	return nil
 }
 
-func (svc *notificationService) GetByUserId(
+func (svc *NotificationService) GetByUserId(
 	ctx context.Context,
 	userId int64,
 ) ([]domain.Notification, error) {
 	return svc.userNotif.GetByUserId(ctx, userId)
 }
 
-func (svc *notificationService) Clear(ctx context.Context, notifId int64) error {
+func (svc *NotificationService) Clear(ctx context.Context, notifId int64) error {
 	return svc.notif.Clear(ctx, notifId)
 }
 
-func (svc *notificationService) ClearAll(ctx context.Context, userId int64) error {
+func (svc *NotificationService) ClearAll(ctx context.Context, userId int64) error {
 	return svc.notif.ClearAll(ctx, userId)
 }

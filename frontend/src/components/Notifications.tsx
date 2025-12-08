@@ -40,12 +40,15 @@ export function Notifications() {
         </span>
       )}
       <div className="dropdown dropdown-end">
-        <button className="btn btn-ghost px-5 border-1.5 border-white/2 py-1 hover:bg-info/20 rounded-full text-xl icon-outlined bg-base-100 animate-color">
+        <button
+          tabIndex={0}
+          className="btn btn-ghost rounded-full text-xl icon-outlined bg-base-100 animate-color"
+        >
           notifications
         </button>
 
         <ul
-          tabIndex={0}
+          tabIndex={-1}
           className="mt-1.5 min-w-64 pt-4 pb-3 px-3 dropdown-content menu bg-info/20 backdrop-blur-xl rounded-box z-10 drop-shadow-xl"
         >
           <p className="px-3 pb-2 text-lg font-bold">Notifications</p>
@@ -59,9 +62,10 @@ export function Notifications() {
               notification={n}
             />
           ))}
+          <hr className="border-base-200/80 pb-2" />
           <button
             onClick={() => mutation.mutate()}
-            className="mt-4 btn btn-soft rounded-xl text-neutral border-0 hover:border-0 bg-primary/90 font-semibold hover:bg-primary hover:text-neutral animate-color"
+            className="btn btn-soft rounded-xl"
           >
             Clear All
           </button>

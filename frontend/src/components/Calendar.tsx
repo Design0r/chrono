@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { ChronoClient } from "../api/chrono/client";
 import type { User } from "../types/auth";
 import type { EventUser, Month } from "../types/response";
@@ -29,7 +28,6 @@ export function CalendarNavigation({
   if (nextMonth > 12) {
     nextMonth = nextMonth % 12;
     nextYear++;
-    if (nextMonth === 0) nextMonth = 1;
   }
 
   return (
@@ -178,7 +176,7 @@ export function VacationCounter({
 
 export function WeekdayHeader({
   label,
-  highlighted = false,
+  highlighted = true,
 }: {
   label: string;
   highlighted?: boolean;
@@ -200,14 +198,12 @@ export function Event({
   currUser: User;
 }) {
   const chrono = new ChronoClient();
-  const queryClient = useQueryClient();
   const { addToast, addErrorToast } = useToast();
+  const queryClient = useQueryClient();
 
   const hsl = hexToHSL(event.user.color);
   const bgColor = hsla(...hsl, 0.2);
   const borderColor = hsla(...hsl, 0.3);
-
-  const [visible, setVisible] = useState(true);
 
   const currDate = new Date();
   const eventDate = new Date(event.event.scheduled_at);
@@ -228,31 +224,14 @@ export function Event({
     mutationKey: ["deleteEvent", event.event.id],
     mutationFn: () => chrono.events.deleteEvent(event.event.id),
     onSuccess: () => {
-      addToast(`Successfully deleted event ${event.event.id}`, "success");
-      setVisible(false);
-      return queryClient.invalidateQueries({
-        queryKey: ["month"],
-      });
+      addToast(`Successfully deleted event ${event.event.name}`, "success");
+      queryClient.invalidateQueries({ queryKey: ["month"] });
     },
     onError: (error) => addErrorToast(error),
   });
 
-  if (!visible) return <></>;
   return (
     <div className="indicator w-full">
-      {!isHoliday && (
-        <div className="absolute top-1.5 right-1.5 z-10 w-3 bg-neutral/50 aspect-square rounded-full flex items-center justify-center">
-          <span
-            className={
-              event.event.state === "pending"
-                ? "bg-accent status status-sm status-accent animate-ping"
-                : event.event.state === "declined"
-                  ? "status status-md status-error"
-                  : "status status-md status-success"
-            }
-          ></span>
-        </div>
-      )}
       <div
         style={{ backgroundColor: bgColor, borderColor: borderColor }}
         className={`group gap-2 relative ${!isHoliday && "flex"} text-center border py-1 w-full rounded-lg`}
@@ -270,15 +249,29 @@ export function Event({
           </>
         )}
         <div
-          className={`${!isHoliday && "bg-black/20 rounded px-1"} text-base-content ${isDeletable && "group-hover:text-white/0"}  animate-all`}
+          className={`${!isHoliday && "bg-black/30 rounded-lg  px-2"} ml-1 text-base-content ${isDeletable && "group-hover:text-white/0"}  animate-all`}
         >
           {shortName}
         </div>
         {!isHoliday && (
-          <div
-            className={`content-center text-base-content/80 ${isDeletable && "group-hover:text-white/0"} animate-all`}
-          >
-            {event.user.username}
+          <div className="flex justify-between w-full">
+            <div
+              className={`text-base-content/80 ${isDeletable && "group-hover:text-white/0"} animate-all`}
+            >
+              {event.user.username}
+            </div>
+
+            <div className="flex mr-1 w-3 aspect-square rounded-full items-center ">
+              <span
+                className={
+                  event.event.state === "pending"
+                    ? "bg-accent status status-sm status-accent animate-ping"
+                    : event.event.state === "declined"
+                      ? "status status-md status-error"
+                      : "status status-md status-success"
+                }
+              ></span>
+            </div>
           </div>
         )}
       </div>
@@ -303,15 +296,12 @@ export function Day({
   selectedEvent: string;
   currUser: User;
 }) {
-  const now = new Date(Date.now());
+  const now = new Date();
   const isToday =
-    now.getDay() === date &&
+    now.getDate() === date &&
     now.getMonth() + 1 === month &&
     now.getFullYear() === year;
 
-  const [evts, setEvts] = useState<EventUser[]>(events);
-
-  useEffect(() => setEvts(events), [events]);
   const chrono = new ChronoClient();
   const queryClient = useQueryClient();
   const { addToast, addErrorToast } = useToast();
@@ -325,12 +315,9 @@ export function Day({
         day: date,
         event: selectedEvent,
       }),
-    onSuccess: (e) => {
-      setEvts((ev) => [...ev, e]);
+    onSuccess: () => {
       addToast(`Successfully created event ${selectedEvent}`, "success");
-      return queryClient.invalidateQueries({
-        queryKey: ["month"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["month"] });
     },
     onError: (error) => addErrorToast(error),
   });
@@ -351,7 +338,7 @@ export function Day({
       </div>
       <div className="flex flex-col px-2 h-full lg:bg-base-200/65 rounded-t-none rounded-b-[0.65rem]">
         <div className="flex flex-col gap-2 h-fit rounded-[0.7rem] *:first:mt-2">
-          {evts.map((e, i) => (
+          {events.map((e, i) => (
             <Event key={i} event={e} currUser={currUser} />
           ))}
         </div>
@@ -387,15 +374,24 @@ export function Calendar({
   selectedEvent: string;
   currUser: User;
 }) {
+  const isHighlighted = (day: number) => {
+    const now = new Date();
+    return (
+      now.getDay() === day &&
+      now.getMonth() + 1 === month.number &&
+      now.getFullYear() === month.year
+    );
+  };
+
   return (
     <div className="my-12 lg:my-8 lg:mt-0 mx-auto grid px-6 grid-cols-1 gap-y-6 lg:grid-cols-7 lg:px-4 gap-x-2 lg:gap-y-4 overflow-x-scroll">
-      <WeekdayHeader label="Monday" />
-      <WeekdayHeader label="Tuesday" />
-      <WeekdayHeader label="Wednesday" />
-      <WeekdayHeader label="Thursday" />
-      <WeekdayHeader label="Friday" />
-      <WeekdayHeader label="Saturday" />
-      <WeekdayHeader label="Sunday" />
+      <WeekdayHeader highlighted={isHighlighted(1)} label="Monday" />
+      <WeekdayHeader highlighted={isHighlighted(2)} label="Tuesday" />
+      <WeekdayHeader highlighted={isHighlighted(3)} label="Wednesday" />
+      <WeekdayHeader highlighted={isHighlighted(4)} label="Thursday" />
+      <WeekdayHeader highlighted={isHighlighted(5)} label="Friday" />
+      <WeekdayHeader highlighted={isHighlighted(6)} label="Saturday" />
+      <WeekdayHeader highlighted={isHighlighted(7)} label="Sunday" />
       {Array.from({ length: month.offset }).map((_, i) => (
         <div key={i} className="hidden lg:block"></div>
       ))}

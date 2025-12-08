@@ -12,65 +12,25 @@ import (
 	"chrono/internal/domain"
 )
 
-type EventService interface {
-	Create(
-		ctx context.Context,
-		data domain.YMDDate,
-		eventType string,
-		user *domain.User,
-	) (*domain.Event, error)
-	Update(ctx context.Context, eventId int64, state string) (*domain.Event, error)
-	Delete(ctx context.Context, id int64, currUser *domain.User) (*domain.Event, error)
-	GetForDay(ctx context.Context, data domain.YMDDate) ([]domain.Event, error)
-	GetForMonth(
-		ctx context.Context,
-		data domain.YMDate,
-		userFilter *domain.User,
-		eventFilter string,
-	) (domain.Month, error)
-	GetForYear(
-		ctx context.Context,
-		year int,
-	) ([]domain.EventUser, error)
-	GetHistogramForYear(ctx context.Context, year int) ([]domain.YearHistogram, error)
-	GetPendingForUser(ctx context.Context, userId int64, year int) (int, error)
-	GetUsedVacationForUser(ctx context.Context, userId int64, year int) (float64, error)
-	GetUserWithVacation(
-		ctx context.Context,
-		userId int64,
-		year int,
-		month int,
-	) (domain.UserWithVacation, error)
-	GetAllUsersWithVacation(ctx context.Context, year int) ([]domain.UserWithVacation, error)
-	UpdateInRange(ctx context.Context, userId int64, state string, start, end time.Time) error
-	GetAllByUserId(ctx context.Context, userId int64) ([]domain.Event, error)
-	GetNonWeekendCountHolidaysForYear(ctx context.Context, year int) (int, error)
-	GetUsedVacationTilNow(
-		ctx context.Context,
-		userId int64,
-		year int,
-	) (float64, error)
-}
-
-type eventService struct {
+type EventService struct {
 	log      *slog.Logger
 	event    domain.EventRepository
-	vacation VacationTokenService
-	request  RequestService
-	user     UserService
+	vacation *VacationTokenService
+	request  *RequestService
+	user     *UserService
 }
 
 func NewEventService(
 	e domain.EventRepository,
-	r RequestService,
-	u UserService,
-	v VacationTokenService,
+	r *RequestService,
+	u *UserService,
+	v *VacationTokenService,
 	log *slog.Logger,
-) eventService {
-	return eventService{log: log, event: e, request: r, user: u, vacation: v}
+) EventService {
+	return EventService{log: log, event: e, request: r, user: u, vacation: v}
 }
 
-func (svc *eventService) Create(
+func (svc *EventService) Create(
 	ctx context.Context,
 	data domain.YMDDate,
 	eventType string,
@@ -103,7 +63,7 @@ func (svc *eventService) Create(
 	return event, nil
 }
 
-func (svc *eventService) Update(
+func (svc *EventService) Update(
 	ctx context.Context,
 	eventId int64,
 	state string,
@@ -111,7 +71,7 @@ func (svc *eventService) Update(
 	return svc.event.Update(ctx, eventId, state)
 }
 
-func (svc *eventService) Delete(
+func (svc *EventService) Delete(
 	ctx context.Context,
 	eventId int64,
 	currUser *domain.User,
@@ -140,14 +100,14 @@ func (svc *eventService) Delete(
 	return event, nil
 }
 
-func (svc *eventService) GetForDay(
+func (svc *EventService) GetForDay(
 	ctx context.Context,
 	data domain.YMDDate,
 ) ([]domain.Event, error) {
 	return svc.event.GetForDay(ctx, data)
 }
 
-func (svc *eventService) GetForMonth(
+func (svc *EventService) GetForMonth(
 	ctx context.Context,
 	data domain.YMDate,
 	userFilter *domain.User,
@@ -157,14 +117,14 @@ func (svc *eventService) GetForMonth(
 	return svc.event.GetForMonth(ctx, data, cfg.BotName, userFilter, eventFilter)
 }
 
-func (svc *eventService) GetForYear(
+func (svc *EventService) GetForYear(
 	ctx context.Context,
 	year int,
 ) ([]domain.EventUser, error) {
 	return svc.event.GetForYear(ctx, year)
 }
 
-func (svc *eventService) GetHistogramForYear(
+func (svc *EventService) GetHistogramForYear(
 	ctx context.Context,
 	year int,
 ) ([]domain.YearHistogram, error) {
@@ -200,7 +160,7 @@ func (svc *eventService) GetHistogramForYear(
 	return eventList, err
 }
 
-func (svc *eventService) GetPendingForUser(
+func (svc *EventService) GetPendingForUser(
 	ctx context.Context,
 	userId int64,
 	year int,
@@ -208,7 +168,7 @@ func (svc *eventService) GetPendingForUser(
 	return svc.event.GetPendingForUser(ctx, userId, year)
 }
 
-func (svc *eventService) GetUsedVacationForUser(
+func (svc *EventService) GetUsedVacationForUser(
 	ctx context.Context,
 	userId int64,
 	year int,
@@ -216,7 +176,7 @@ func (svc *eventService) GetUsedVacationForUser(
 	return svc.event.GetUsedVacationForUser(ctx, userId, year)
 }
 
-func (svc *eventService) GetUserWithVacation(
+func (svc *EventService) GetUserWithVacation(
 	ctx context.Context,
 	userId int64,
 	year int,
@@ -251,7 +211,7 @@ func (svc *eventService) GetUserWithVacation(
 	}, nil
 }
 
-func (svc *eventService) GetAllUsersWithVacation(
+func (svc *EventService) GetAllUsersWithVacation(
 	ctx context.Context,
 	year int,
 ) ([]domain.UserWithVacation, error) {
@@ -277,7 +237,7 @@ func (svc *eventService) GetAllUsersWithVacation(
 	return allUsersWithVac, nil
 }
 
-func (svc *eventService) UpdateInRange(
+func (svc *EventService) UpdateInRange(
 	ctx context.Context,
 	userId int64,
 	state string,
@@ -286,61 +246,81 @@ func (svc *eventService) UpdateInRange(
 	return svc.event.UpdateInRange(ctx, userId, state, start, end)
 }
 
-func (svc *eventService) GetAllByUserId(
+func (svc *EventService) GetAllByUserId(
 	ctx context.Context,
 	userId int64,
 ) ([]domain.Event, error) {
 	return svc.event.GetAllByUserId(ctx, userId)
 }
 
-func (svc *eventService) GetNonWeekendCountHolidaysForYear(
+func (svc *EventService) GetNonWeekendCountHolidays(
 	ctx context.Context,
-	year int,
+	start, end time.Time,
 ) (int, error) {
 	cfg := config.GetConfig()
+
+	// "Bot" user that holds holiday events
 	bot, err := svc.user.GetByName(ctx, cfg.BotName)
 	if err != nil {
 		return 0, err
 	}
 
-	holidays, err := svc.event.GetAllByUserId(context.Background(), bot.ID)
+	holidays, err := svc.event.GetAllByUserId(ctx, bot.ID)
 	if err != nil {
 		return 0, err
 	}
 
-	now := time.Now()
 	nonWeekendHolidays := 0
+
 	for _, h := range holidays {
-		weekday := h.ScheduledAt.Weekday()
-		if h.ScheduledAt.Unix() <= now.Unix() && h.ScheduledAt.Year() == year &&
-			(weekday != time.Saturday && weekday != time.Sunday) {
-			nonWeekendHolidays++
+		t := h.ScheduledAt
+
+		// only count events within [start, end]
+		if t.Before(start) || t.After(end) {
+			continue
 		}
+
+		wd := t.Weekday()
+		if wd == time.Saturday || wd == time.Sunday {
+			continue
+		}
+
+		nonWeekendHolidays++
 	}
 
 	return nonWeekendHolidays, nil
 }
 
-func (svc *eventService) GetUsedVacationTilNow(
+func (svc *EventService) GetUsedVacation(
 	ctx context.Context,
 	userId int64,
-	year int,
+	start, end time.Time,
 ) (float64, error) {
-	events, err := svc.event.GetAllByUserId(context.Background(), userId)
+	events, err := svc.event.GetAllByUserId(ctx, userId)
 	if err != nil {
 		return 0, err
 	}
 
 	count := 0.0
-	now := time.Now()
+
 	for _, e := range events {
-		if e.ScheduledAt.Unix() <= now.Unix() && e.State == "accepted" {
-			switch e.Name {
-			case "urlaub":
-				count += 1
-			case "urlaub halbtags":
-				count += 0.5
-			}
+		t := e.ScheduledAt
+
+		// only count events within [start, end]
+		if t.Before(start) || t.After(end) {
+			continue
+		}
+
+		// only accepted vacation
+		if e.State != "accepted" {
+			continue
+		}
+
+		switch e.Name {
+		case "urlaub":
+			count += 1.0
+		case "urlaub halbtags":
+			count += 0.5
 		}
 	}
 

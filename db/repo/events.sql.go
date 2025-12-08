@@ -200,6 +200,7 @@ SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id
 FROM events e
 JOIN users u ON e.user_id = u.id
 WHERE scheduled_at >= ? AND scheduled_at < ?
+ORDER BY e.user_id
 `
 
 type GetEventsForMonthParams struct {

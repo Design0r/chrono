@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -12,14 +11,14 @@ import (
 )
 
 type APIAuthHandler struct {
-	user service.UserService
-	auth service.AuthService
+	user *service.UserService
+	auth *service.AuthService
 	log  *slog.Logger
 }
 
 func NewAPIAuthHandler(
-	u service.UserService,
-	a service.AuthService,
+	u *service.UserService,
+	a *service.AuthService,
 	log *slog.Logger,
 ) APIAuthHandler {
 	return APIAuthHandler{user: u, auth: a, log: log}
@@ -38,8 +37,6 @@ func (h *APIAuthHandler) Login(c echo.Context) error {
 	if err := c.Bind(&loginData); err != nil {
 		return NewErrorResponse(c, http.StatusBadRequest, "Invalid inputs")
 	}
-
-	fmt.Println(loginData)
 
 	cookie, err := h.auth.Login(ctx, loginData.Email, loginData.Password)
 	if err != nil {

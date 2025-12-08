@@ -1,24 +1,20 @@
 package service
 
 import (
-	"chrono/internal/domain"
 	"context"
 	"fmt"
 	"strings"
 	"time"
+
+	"chrono/internal/domain"
 )
 
-type ExportService interface {
-	ExportForUser(ctx context.Context, userId int64) (string, error)
-	ExportAll(ctx context.Context, year int) (string, error)
-}
-
 type KrankheitsExport struct {
-	event EventService
-	user  UserService
+	event *EventService
+	user  *UserService
 }
 
-func NewKrankheitsExportService(e EventService, u UserService) KrankheitsExport {
+func NewKrankheitsExportService(e *EventService, u *UserService) KrankheitsExport {
 	return KrankheitsExport{
 		event: e,
 		user:  u,
@@ -70,7 +66,6 @@ func (svc *KrankheitsExport) processUser(userName string, events []domain.Event)
 	//line = append(line, "")
 
 	return strings.Join(line, ","), nil
-
 }
 
 func (svc *KrankheitsExport) ExportAll(ctx context.Context, year int) (string, error) {

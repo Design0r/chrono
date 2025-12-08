@@ -12,18 +12,18 @@ import (
 )
 
 type APIUserHandler struct {
-	user  service.UserService
-	event service.EventService
-	auth  service.AuthService
-	token service.TokenService
+	user  *service.UserService
+	event *service.EventService
+	auth  *service.AuthService
+	token *service.TokenService
 	log   *slog.Logger
 }
 
 func NewAPIUserHandler(
-	u service.UserService,
-	e service.EventService,
-	a service.AuthService,
-	t service.TokenService,
+	u *service.UserService,
+	e *service.EventService,
+	a *service.AuthService,
+	t *service.TokenService,
 	log *slog.Logger,
 ) APIUserHandler {
 	return APIUserHandler{user: u, event: e, auth: a, token: t, log: log}
@@ -160,6 +160,11 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		vacDays = *patchedData.VacationDays
 	}
 
+	h.user.SetVacation(ctx, userToEdit.ID, int(vacDays), domain.CurrentYear())
+	if err := c.Bind(&patchedData); err != nil {
+		return NewErrorResponse(c, http.StatusInternalServerError, "Failed updating vacation")
+	}
+
 	role := userToEdit.Role
 	if currUser.IsAdmin() && patchedData.Role != "" {
 		if !domain.IsValidRole((domain.Role)(patchedData.Role)) {
@@ -185,7 +190,7 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		Enabled:      enabled,
 		IsSuperuser:  superuser,
 		VacationDays: vacDays,
-		Password:     currUser.Password,
+		Password:     userToEdit.Password,
 	}
 
 	if patchedData.Password != "" {

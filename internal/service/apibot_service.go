@@ -36,7 +36,7 @@ func NewAPIBotFromEnv(log *slog.Logger) APIBot {
 	return APIBot{Name: name, Email: email, Password: pw, IsSuperuser: true, log: log}
 }
 
-func (a *APIBot) Register(svc UserService, pw auth.PasswordHasher) {
+func (a *APIBot) Register(svc *UserService, pw auth.PasswordHasher) {
 	ctx := context.Background()
 	_, err := svc.GetByEmail(ctx, a.Email)
 	if err == nil {

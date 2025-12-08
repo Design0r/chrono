@@ -14,16 +14,16 @@ import (
 )
 
 type APITokenHandler struct {
-	user     service.UserService
-	vacation service.VacationTokenService
-	notif    service.NotificationService
+	user     *service.UserService
+	vacation *service.VacationTokenService
+	notif    *service.NotificationService
 	log      *slog.Logger
 }
 
 func NewAPITokenHandler(
-	v service.VacationTokenService,
-	u service.UserService,
-	n service.NotificationService,
+	v *service.VacationTokenService,
+	u *service.UserService,
+	n *service.NotificationService,
 	log *slog.Logger,
 ) APITokenHandler {
 	return APITokenHandler{vacation: v, user: u, notif: n, log: log}

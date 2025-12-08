@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log/slog"
+	"net/http"
 	"time"
 
 	sentryecho "github.com/getsentry/sentry-go/echo"
@@ -34,21 +35,21 @@ type repos struct {
 }
 
 type services struct {
-	apiBot   service.APIBot
-	auth     service.AuthService
-	event    service.EventService
-	holiday  service.HolidayService
-	notif    service.NotificationService
-	refresh  service.RefreshTokenService
-	request  service.RequestService
-	session  service.SessionService
-	settings service.SettingsService
-	token    service.TokenService
-	user     service.UserService
-	vac      service.VacationTokenService
+	apiBot   *service.APIBot
+	auth     *service.AuthService
+	event    *service.EventService
+	holiday  *service.HolidayService
+	notif    *service.NotificationService
+	refresh  *service.RefreshTokenService
+	request  *service.RequestService
+	session  *service.SessionService
+	settings *service.SettingsService
+	token    *service.TokenService
+	user     *service.UserService
+	vac      *service.VacationTokenService
 	pwHasher auth.PasswordHasher
-	krank    service.ExportService
-	awork    service.AworkService
+	krank    *service.KrankheitsExport
+	awork    *service.AworkService
 }
 
 type Server struct {
@@ -61,12 +62,12 @@ type Server struct {
 	services services
 }
 
-func NewServer(router *echo.Echo, db *sql.DB, cfg *config.Config) *Server {
+func NewServer(router *echo.Echo, db *sql.DB, cfg *config.Config, log *slog.Logger) *Server {
 	return &Server{
 		Router: router,
 		Db:     db,
 		Repo:   repo.New(db),
-		log:    slog.Default(),
+		log:    log,
 		cfg:    cfg,
 	}
 }
@@ -78,7 +79,6 @@ func (s *Server) InitMiddleware() {
 	}))
 	s.Router.Use(middleware.Secure())
 	s.Router.Use(middleware.Recover())
-	s.Router.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
 	s.Router.Use(
 		middleware.CORSWithConfig(
 			middleware.CORSConfig{
@@ -92,7 +92,6 @@ func (s *Server) InitMiddleware() {
 		),
 	)
 	s.Router.Use(sentryecho.New(sentryecho.Options{Repanic: true}))
-
 	s.log.Info("Initialized middleware.")
 }
 
@@ -171,7 +170,7 @@ func (s *Server) InitServices() {
 		holiday:  &holidaySvc,
 		settings: &settingSvc,
 		krank:    &krankSvc,
-		awork:    aworkSvc,
+		awork:    &aworkSvc,
 	}
 
 	s.log.Info("Initialized services.")
@@ -183,8 +182,19 @@ func (s *Server) InitAPIRoutes() {
 		s.services.auth,
 		s.log,
 	)
-	userHandler := api.NewAPIUserHandler(s.services.user, s.services.event, s.services.auth, s.services.token, s.log)
-	eventHandler := api.NewAPIEventHandler(s.services.user, s.services.event, s.services.token, s.log)
+	userHandler := api.NewAPIUserHandler(
+		s.services.user,
+		s.services.event,
+		s.services.auth,
+		s.services.token,
+		s.log,
+	)
+	eventHandler := api.NewAPIEventHandler(
+		s.services.user,
+		s.services.event,
+		s.services.token,
+		s.log,
+	)
 	requestHandler := api.NewAPIRequestsHandler(
 		s.services.request,
 		s.services.event,
@@ -202,24 +212,31 @@ func (s *Server) InitAPIRoutes() {
 	)
 	notificationHandler := api.NewAPINotificationHandler(s.services.notif, s.log)
 
-	settingsGrp := s.Router.Group("/api/v1", mw.SettingsAPIMiddleware(s.services.settings))
-	authGrp := settingsGrp.Group(
+	apiGrp := s.Router.Group("/api/v1")
+	authGrp := apiGrp.Group(
 		"",
-		mw.SessionAPIMiddleware(s.services.session),
-		mw.AuthenticationAPIMiddleware(s.services.auth),
+		mw.SessionMiddleware(s.services.session),
+		mw.AuthenticationMiddleware(s.services.auth),
 	)
 
-	adminGrp := authGrp.Group("", mw.AdminAPIMiddleware())
+	adminGrp := authGrp.Group("", mw.AdminMiddleware())
 
-	authHandler.RegisterRoutes(settingsGrp)
+	authHandler.RegisterRoutes(apiGrp)
+
 	userHandler.RegisterRoutes(authGrp)
 	eventHandler.RegisterRoutes(authGrp)
+	aworkHandler.RegisterRoutes(authGrp)
+	notificationHandler.RegisterRoutes(authGrp)
+
 	requestHandler.RegisterRoutes(adminGrp)
 	tokenHandler.RegisterRoutes(adminGrp)
 	settingsHandler.RegisterRoutes(adminGrp)
 	exportHander.RegisterRoutes(adminGrp)
-	aworkHandler.RegisterRoutes(authGrp)
-	notificationHandler.RegisterRoutes(authGrp)
+
+	apiGrp.GET(
+		"/health",
+		func(c echo.Context) error { return c.NoContent(http.StatusOK) },
+	)
 
 	s.log.Info("Initialized api routes.")
 }

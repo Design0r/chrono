@@ -7,14 +7,7 @@ import (
 	"chrono/internal/domain"
 )
 
-type RefreshTokenService interface {
-	Create(ctx context.Context, year int, userId int64) (*domain.RefreshToken, error)
-	CreateIfNotExists(ctx context.Context, userId int64, year int) (bool, error)
-	DeleteAll(ctx context.Context) error
-	ExistsForUser(ctx context.Context, userId int64, year int) (bool, error)
-}
-
-type refreshTokenService struct {
+type RefreshTokenService struct {
 	refresh domain.RefreshTokenRepository
 	log     *slog.Logger
 }
@@ -22,11 +15,11 @@ type refreshTokenService struct {
 func NewRefreshTokenService(
 	r domain.RefreshTokenRepository,
 	log *slog.Logger,
-) refreshTokenService {
-	return refreshTokenService{refresh: r, log: log}
+) RefreshTokenService {
+	return RefreshTokenService{refresh: r, log: log}
 }
 
-func (svc *refreshTokenService) Create(
+func (svc *RefreshTokenService) Create(
 	ctx context.Context,
 	year int,
 	userId int64,
@@ -34,11 +27,11 @@ func (svc *refreshTokenService) Create(
 	return svc.refresh.Create(ctx, year, userId)
 }
 
-func (svc *refreshTokenService) DeleteAll(ctx context.Context) error {
+func (svc *RefreshTokenService) DeleteAll(ctx context.Context) error {
 	return svc.refresh.DeleteAll(ctx)
 }
 
-func (svc *refreshTokenService) ExistsForUser(
+func (svc *RefreshTokenService) ExistsForUser(
 	ctx context.Context,
 	userId int64,
 	year int,
@@ -46,7 +39,7 @@ func (svc *refreshTokenService) ExistsForUser(
 	return svc.refresh.ExistsForUser(ctx, userId, year)
 }
 
-func (svc *refreshTokenService) CreateIfNotExists(
+func (svc *RefreshTokenService) CreateIfNotExists(
 	ctx context.Context,
 	userId int64,
 	year int,

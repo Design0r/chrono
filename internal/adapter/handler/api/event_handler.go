@@ -13,16 +13,16 @@ import (
 )
 
 type APIEventHandler struct {
-	user  service.UserService
-	event service.EventService
-	token service.TokenService
+	user  *service.UserService
+	event *service.EventService
+	token *service.TokenService
 	log   *slog.Logger
 }
 
 func NewAPIEventHandler(
-	u service.UserService,
-	e service.EventService,
-	t service.TokenService,
+	u *service.UserService,
+	e *service.EventService,
+	t *service.TokenService,
 	log *slog.Logger,
 ) APIEventHandler {
 	return APIEventHandler{user: u, event: e, token: t, log: log}

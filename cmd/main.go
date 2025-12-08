@@ -22,14 +22,14 @@ import (
 
 func main() {
 	fmt.Println(banner)
-	logger, logFile, err := logging.NewTextMultiLogger("logs/chrono.log", "debug", true)
+	log, logFile, err := logging.NewTextMultiLogger("logs/chrono.log", "debug", true)
 	if err != nil {
 		panic(err)
 	}
 	defer logFile.Close()
-	slog.SetDefault(logger)
+	slog.SetDefault(log)
 
-	slog.Info("Initializing chrono...")
+	log.Info("Initializing chrono...")
 
 	cfg := config.NewConfigFromEnv()
 
@@ -41,7 +41,7 @@ func main() {
 		TracesSampleRate: 1.0,
 		SendDefaultPII:   true,
 	}); err != nil {
-		slog.Error("Sentry initialization failed", "error", err)
+		log.Error("Sentry initialization failed", "error", err)
 	}
 
 	dbConn := db.NewDB(cfg.DbName)
@@ -50,18 +50,18 @@ func main() {
 	e := echo.New()
 	e.HideBanner = true
 
-	server := internal.NewServer(e, dbConn, cfg)
+	server := internal.NewServer(e, dbConn, cfg, log)
 	go server.Start(fmt.Sprintf(":%v", cfg.Port))
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
-	slog.Info("Received shutdown signal, shutting down…")
+	log.Info("Received shutdown signal, shutting down…")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
-		slog.Error("Server forced to shutdown:", "error", err)
+		log.Error("Server forced to shutdown:", "error", err)
 		os.Exit(1)
 	}
 }

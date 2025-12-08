@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 
 type MiddlewareFunc = func(echo.HandlerFunc) echo.HandlerFunc
 
-func SessionAPIMiddleware(svc service.SessionService) MiddlewareFunc {
+func SessionMiddleware(svc *service.SessionService) MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			cookie, err := c.Cookie("session")
@@ -36,7 +35,7 @@ func SessionAPIMiddleware(svc service.SessionService) MiddlewareFunc {
 	}
 }
 
-func AuthenticationAPIMiddleware(svc service.AuthService) MiddlewareFunc {
+func AuthenticationMiddleware(svc *service.AuthService) MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			cookie, err := c.Cookie("session")
@@ -58,7 +57,7 @@ func AuthenticationAPIMiddleware(svc service.AuthService) MiddlewareFunc {
 	}
 }
 
-func AdminAPIMiddleware() MiddlewareFunc {
+func AdminMiddleware() MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			user := c.Get("user").(domain.User)
@@ -70,32 +69,6 @@ func AdminAPIMiddleware() MiddlewareFunc {
 				)
 			}
 
-			return next(c)
-		}
-	}
-}
-
-func CacheControl(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Response().Header().Set("Cache-Control", "public, max-age=86400") // 1 day
-		return next(c)
-	}
-}
-
-func SettingsAPIMiddleware(svc service.SettingsService) MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			settings, err := svc.GetFirst(c.Request().Context())
-			if err != nil {
-				return api.NewErrorResponse(c, http.StatusForbidden, "Failed to load settings")
-			}
-
-			ctx := context.WithValue(c.Request().Context(), "settings", settings)
-			// Aktuellen Pfad auch in Context setzen
-			ctx = context.WithValue(ctx, "currentPath", c.Request().URL.Path)
-			req := c.Request().WithContext(ctx)
-			c.SetRequest(req)
-			c.Set("settings", settings)
 			return next(c)
 		}
 	}

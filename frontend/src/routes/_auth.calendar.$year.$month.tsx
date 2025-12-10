@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   Calendar,
   CalendarNavigation,
@@ -6,11 +8,9 @@ import {
   UserFilter,
   VacationCounter,
 } from "../components/Calendar";
-import type { UserWithVacation } from "../types/auth";
-import { useQuery } from "@tanstack/react-query";
-import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { ErrorPage } from "../components/ErrorPage";
-import { useState } from "react";
+import { LoadingSpinnerPage } from "../components/LoadingSpinner";
+import type { UserWithVacation } from "../types/auth";
 
 type TeamSearchParams = {
   user?: string;
@@ -36,7 +36,7 @@ function CalendarComponent() {
 
   const [userFilter, setUserFilter] = useState<string | undefined>(search.user);
   const [eventFilter, setEventFilter] = useState<string | undefined>(
-    search.event,
+    search.event
   );
   const [selectedEvent, setSelectedEvent] = useState<string>("Urlaub");
 
@@ -45,6 +45,7 @@ function CalendarComponent() {
     queryFn: () => chrono.users.getUsers({ year: year }),
     staleTime: 1000 * 60 * 30, // 30min
     gcTime: 1000 * 60 * 60 * 1, // 1h
+    retry: false,
   });
 
   const currUserQ = useQuery({
@@ -52,6 +53,7 @@ function CalendarComponent() {
     queryFn: () => chrono.users.getUserById(auth.userId!, { year: year }),
     staleTime: 1000 * 60 * 60 * 6, // 6h
     gcTime: 1000 * 60 * 60 * 7, // 7h
+    retry: false,
   });
 
   const monthQ = useQuery({
@@ -59,6 +61,7 @@ function CalendarComponent() {
     queryFn: () => chrono.events.getEventsForMonth(year, month),
     staleTime: 1000 * 60 * 1, // 1min
     gcTime: 1000 * 60 * 30, // 30min
+    retry: false,
   });
 
   const queries = [usersQ, currUserQ, monthQ];

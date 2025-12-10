@@ -36,7 +36,7 @@ const AuthContext = createContext<AuthContext | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const uid = localStorage.getItem("user");
   const [userId, setUserId] = useState<number | null>(
-    uid ? Number.parseInt(uid) : null,
+    uid ? Number.parseInt(uid) : null
   );
 
   const queryClient = useQueryClient();
@@ -51,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryFn: () => chrono.users.getUserById(userId),
       staleTime: 1000 * 60 * 60 * 6, // 6h
       gcTime: 1000 * 60 * 60 * 7, // 7h
+      retry: false,
     });
     return u;
   }, []);

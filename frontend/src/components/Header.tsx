@@ -21,6 +21,7 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
     },
     staleTime: 1000 * 60 * 60 * 6, // 6h
     gcTime: 1000 * 60 * 60 * 7, // 7h
+    retry: false,
   });
 
   const date = new Date();

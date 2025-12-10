@@ -2,9 +2,9 @@ import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../auth";
-import type { LoginRequest } from "../types/auth";
-import { useToast } from "../components/Toast";
 import { LoadingSpinner } from "../components/LoadingSpinner";
+import { useToast } from "../components/Toast";
+import type { LoginRequest } from "../types/auth";
 
 export const Route = createFileRoute("/login")({
   component: LoginComponent,
@@ -23,6 +23,7 @@ function LoginComponent() {
       await router.navigate({ to: "/" });
     },
     onError: (error) => addErrorToast(error),
+    retry: false,
   });
 
   return (
@@ -34,7 +35,7 @@ function LoginComponent() {
           <form
             className="w-max"
             onSubmit={handleSubmit((data: LoginRequest) =>
-              mutation.mutate(data),
+              mutation.mutate(data)
             )}
           >
             <div className="w-lg">

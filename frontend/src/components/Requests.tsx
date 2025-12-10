@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import type { BatchRequest, State } from "../types/response";
-import { ChronoClient } from "../api/chrono/client";
 import { useState } from "react";
-import { useToast } from "./Toast";
+import { ChronoClient } from "../api/chrono/client";
+import type { BatchRequest, State } from "../types/response";
 import { capitalize } from "../utils/string";
+import { useToast } from "./Toast";
 
 export function RequestRow({ request }: { request: BatchRequest }) {
   const reqStartDate = new Date(request.start_date);
@@ -28,11 +28,12 @@ export function RequestRow({ request }: { request: BatchRequest }) {
     onSuccess: (_, vars) => {
       addToast(
         `${capitalize(vars.state)} request ${request.request.name} from ${request.request.username}`,
-        "success",
+        "success"
       );
       setVisible(false);
     },
     onError: (error) => addErrorToast(error),
+    retry: false,
   });
 
   if (!visible) return <></>;

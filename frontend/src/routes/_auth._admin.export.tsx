@@ -19,6 +19,7 @@ function RouteComponent() {
     onSuccess: () => toast.addToast("Created report"),
     onError: (error) =>
       toast.addToast(`${error.name}: ${error.message}`, "error"),
+    retry: false,
   });
 
   return (

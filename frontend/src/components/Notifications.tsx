@@ -14,6 +14,7 @@ export function Notifications() {
     queryFn: () => chrono.notifications.get(),
     staleTime: 1000 * 60 * 10, // 10min
     gcTime: 1000 * 60 * 20, // 20min
+    retry: false,
   });
 
   const mutation = useMutation({
@@ -21,6 +22,7 @@ export function Notifications() {
     mutationFn: () => chrono.notifications.clearAll(),
     onError: (e) => addErrorToast(e),
     onSuccess: () => setNotifications([]),
+    retry: false,
   });
 
   useEffect(() => {
@@ -88,6 +90,7 @@ export function NotificationElement({
     mutationKey: ["notification", notification.id],
     mutationFn: () => chrono.notifications.clear(notification.id),
     onError: (e) => addErrorToast(e),
+    retry: false,
   });
 
   return (

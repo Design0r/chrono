@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { LoadingSpinnerPage } from "../components/LoadingSpinner";
-import { ErrorPage } from "../components/ErrorPage";
 import { useRef, useState } from "react";
+import { ErrorPage } from "../components/ErrorPage";
+import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { useToast } from "../components/Toast";
 
 export const Route = createFileRoute("/_auth/_admin/tokens")({
@@ -20,6 +20,7 @@ function RouteComponent() {
     queryFn: () => chrono.users.getUsers(),
     staleTime: 1000 * 60 * 30, // 30min
     gcTime: 1000 * 60 * 60 * 1, // 1h
+    retry: false,
   });
 
   const [token, setToken] = useState(0);
@@ -29,7 +30,7 @@ function RouteComponent() {
     mutationFn: (token: number) =>
       chrono.tokens.createTokens(
         Number.parseInt(selectRef.current.value),
-        token,
+        token
       ),
     onSuccess: (_, variables) => {
       addToast(`Added ${variables} tokens`, "success");
@@ -37,6 +38,7 @@ function RouteComponent() {
     },
 
     onError: (error) => addErrorToast(error),
+    retry: false,
   });
 
   if (usersQ.isPending) return <LoadingSpinnerPage />;

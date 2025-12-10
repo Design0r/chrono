@@ -16,6 +16,7 @@ export function RouteComponent() {
       }),
     staleTime: 1000 * 60 * 30, // 30min
     gcTime: 1000 * 60 * 60 * 1, // 1h
+    retry: false,
   });
 
   return (

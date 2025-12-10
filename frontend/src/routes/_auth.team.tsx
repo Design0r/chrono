@@ -1,12 +1,12 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import type { User, UserWithVacation } from "../types/auth";
-import { hexToHSL, hsla } from "../utils/colors";
-import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { ErrorPage } from "../components/ErrorPage";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { TeamEditForm } from "../types/forms";
+import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { useToast } from "../components/Toast";
+import type { User, UserWithVacation } from "../types/auth";
+import type { TeamEditForm } from "../types/forms";
+import { hexToHSL, hsla } from "../utils/colors";
 import { capitalize } from "../utils/string";
 
 export const Route = createFileRoute("/_auth/team")({
@@ -24,6 +24,7 @@ function TeamComponent() {
       }),
     staleTime: 1000 * 60 * 30, // 30min
     gcTime: 1000 * 60 * 60 * 1, // 1h
+    retry: false,
   });
 
   const currUserQ = useQuery({
@@ -31,6 +32,7 @@ function TeamComponent() {
     queryFn: () => chrono.users.getUserById(auth.userId!),
     staleTime: 1000 * 60 * 60 * 6, // 6h
     gcTime: 1000 * 60 * 60 * 7, // 7h
+    retry: false,
   });
 
   const queries = [usersQ, currUserQ];
@@ -100,6 +102,7 @@ function TableRow({
       return queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: (error) => addErrorToast(error),
+    retry: false,
   });
 
   const hsl = hexToHSL(user ? user.color : "#000");

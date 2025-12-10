@@ -31,6 +31,7 @@ function Home() {
       }),
     staleTime: 1000 * 60 * 60 * 6, // 6h
     gcTime: 1000 * 60 * 60 * 7, // 7h
+    retry: false,
   });
 
   const vacationQ = useQuery({
@@ -38,6 +39,7 @@ function Home() {
     queryFn: () => chrono.events.getVacationGraph(year),
     staleTime: 1000 * 60 * 1, // 1min
     gcTime: 1000 * 60 * 30, // 30min
+    retry: false,
   });
 
   const aworkQ = useQuery({
@@ -45,6 +47,7 @@ function Home() {
     queryFn: () => chrono.awork.getWorkTimesforYear(year),
     staleTime: 1000 * 60 * 60, // 1h
     gcTime: 1000 * 60 * 60 * 2, // 2h
+    retry: false,
   });
 
   const [awork, setAwork] = useState<WorkTime | undefined>();

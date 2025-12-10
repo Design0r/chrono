@@ -24,6 +24,7 @@ function ProfileComponent() {
     queryFn: () => chrono.users.getUserById(auth.userId!),
     staleTime: 1000 * 60 * 60 * 6, // 6h
     gcTime: 1000 * 60 * 60 * 7, // 7h
+    retry: false,
   });
 
   const aworkUserQ = useQuery({
@@ -31,6 +32,7 @@ function ProfileComponent() {
     queryFn: () => chrono.awork.getUsers(),
     staleTime: 1000 * 60 * 60 * 6, // 6h
     gcTime: 1000 * 60 * 60 * 7, // 7h
+    retry: false,
   });
 
   const mutation = useMutation({
@@ -43,6 +45,7 @@ function ProfileComponent() {
       return queryClient.invalidateQueries({ queryKey: ["user"] });
     },
     onError: (error) => addErrorToast(error),
+    retry: false,
   });
 
   if (userQ.isPending) return <LoadingSpinnerPage />;

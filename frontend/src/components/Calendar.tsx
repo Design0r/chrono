@@ -228,6 +228,7 @@ export function Event({
       queryClient.invalidateQueries({ queryKey: ["month"] });
     },
     onError: (error) => addErrorToast(error),
+    retry: false,
   });
 
   return (
@@ -308,6 +309,7 @@ export function Day({
 
   const mutation = useMutation({
     mutationKey: ["createEvent", year, month, date, selectedEvent],
+    retry: false,
     mutationFn: () =>
       chrono.events.createEvent({
         year: year,

@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { RequestRow } from "../components/Requests";
 import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { ErrorPage } from "../components/ErrorPage";
 import { LoadingSpinnerPage } from "../components/LoadingSpinner";
+import { RequestRow } from "../components/Requests";
 
 export const Route = createFileRoute("/_auth/_admin/requests")({
   component: RouteComponent,
@@ -14,6 +14,7 @@ function RouteComponent() {
   const { isPending, data, error, isError } = useQuery({
     queryKey: ["requests"],
     queryFn: () => chrono.requests.getRequests(),
+    retry: false,
   });
 
   if (isError) return <ErrorPage error={error} />;

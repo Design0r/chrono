@@ -73,10 +73,7 @@ func NewServer(router *echo.Echo, db *sql.DB, cfg *config.Config, log *slog.Logg
 }
 
 func (s *Server) InitMiddleware() {
-	s.Router.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format:           "${time_custom} ${method} ${status} ${uri} ${error} ${latency_human}\n",
-		CustomTimeFormat: "2006/01/02 15:04:05",
-	}))
+	s.Router.Use(middleware.RequestLogger())
 	s.Router.Use(middleware.Secure())
 	s.Router.Use(middleware.Recover())
 	s.Router.Use(
@@ -86,6 +83,7 @@ func (s *Server) InitMiddleware() {
 					"http://localhost:8080",
 					"http://localhost:5173",
 					"https://chrono.theapic.com",
+					"https://chronoapi.theapic.com",
 				},
 				AllowCredentials: true,
 			},

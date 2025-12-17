@@ -91,7 +91,7 @@ func (h *APIAuthHandler) Logout(c echo.Context) error {
 	if err != nil {
 		return NewErrorResponse(
 			c,
-			http.StatusBadRequest,
+			http.StatusUnauthorized,
 			"No active user session found. Already logged out",
 		)
 	}
@@ -99,7 +99,7 @@ func (h *APIAuthHandler) Logout(c echo.Context) error {
 	if err != nil {
 		return NewErrorResponse(
 			c,
-			http.StatusInternalServerError,
+			http.StatusUnauthorized,
 			"Logout failed",
 		)
 	}

@@ -10,41 +10,35 @@ import (
 	"time"
 )
 
-const GetTimestampsById = `-- name: GetTimestampsById :many
-SELECT id, start_time, end_time, user_id from timestamps
+const DeleteTimestamp = `-- name: DeleteTimestamp :exec
+DELETE FROM timestamps
 WHERE id = ?
 `
 
-func (q *Queries) GetTimestampsById(ctx context.Context, id int64) ([]Timestamp, error) {
-	rows, err := q.db.QueryContext(ctx, GetTimestampsById, id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Timestamp
-	for rows.Next() {
-		var i Timestamp
-		if err := rows.Scan(
-			&i.ID,
-			&i.StartTime,
-			&i.EndTime,
-			&i.UserID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) DeleteTimestamp(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, DeleteTimestamp, id)
+	return err
+}
+
+const GetTimestampById = `-- name: GetTimestampById :one
+SELECT id, start_time, end_time, user_id FROM timestamps
+WHERE id = ?
+`
+
+func (q *Queries) GetTimestampById(ctx context.Context, id int64) (Timestamp, error) {
+	row := q.db.QueryRowContext(ctx, GetTimestampById, id)
+	var i Timestamp
+	err := row.Scan(
+		&i.ID,
+		&i.StartTime,
+		&i.EndTime,
+		&i.UserID,
+	)
+	return i, err
 }
 
 const GetTimestampsInRange = `-- name: GetTimestampsInRange :many
-SELECT id, start_time, end_time, user_id from timestamps
+SELECT id, start_time, end_time, user_id FROM timestamps
 WHERE user_id = ?
 AND start_time <= ?
 AND end_time IS NOT NULL

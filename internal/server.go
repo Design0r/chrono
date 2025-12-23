@@ -22,34 +22,36 @@ import (
 )
 
 type repos struct {
-	apiCache  domain.ApiCacheRepository
-	event     domain.EventRepository
-	notif     domain.NotificationRepository
-	notifUser domain.NotificationUserRepository
-	refresh   domain.RefreshTokenRepository
-	request   domain.RequestRepository
-	session   domain.SessionRepository
-	settings  domain.SettingsRepository
-	user      domain.UserRepository
-	vac       domain.VacationTokenRepository
+	apiCache   domain.ApiCacheRepository
+	event      domain.EventRepository
+	notif      domain.NotificationRepository
+	notifUser  domain.NotificationUserRepository
+	refresh    domain.RefreshTokenRepository
+	request    domain.RequestRepository
+	session    domain.SessionRepository
+	settings   domain.SettingsRepository
+	user       domain.UserRepository
+	vac        domain.VacationTokenRepository
+	timestamps domain.TimestampsRepository
 }
 
 type services struct {
-	apiBot   *service.APIBot
-	auth     *service.AuthService
-	event    *service.EventService
-	holiday  *service.HolidayService
-	notif    *service.NotificationService
-	refresh  *service.RefreshTokenService
-	request  *service.RequestService
-	session  *service.SessionService
-	settings *service.SettingsService
-	token    *service.TokenService
-	user     *service.UserService
-	vac      *service.VacationTokenService
-	pwHasher auth.PasswordHasher
-	krank    *service.KrankheitsExport
-	awork    *service.AworkService
+	apiBot     *service.APIBot
+	auth       *service.AuthService
+	event      *service.EventService
+	holiday    *service.HolidayService
+	notif      *service.NotificationService
+	refresh    *service.RefreshTokenService
+	request    *service.RequestService
+	session    *service.SessionService
+	settings   *service.SettingsService
+	token      *service.TokenService
+	user       *service.UserService
+	vac        *service.VacationTokenService
+	pwHasher   auth.PasswordHasher
+	krank      *service.KrankheitsExport
+	awork      *service.AworkService
+	timestamps *service.TimestampsService
 }
 
 type Server struct {
@@ -85,6 +87,7 @@ func (s *Server) InitMiddleware() {
 				AllowOrigins: []string{
 					"http://localhost:8080",
 					"http://localhost:5173",
+					"http://localhost:5174",
 					"https://chrono.theapic.com",
 				},
 				AllowCredentials: true,
@@ -107,18 +110,20 @@ func (s *Server) InitRepos() {
 	vacationTokenRepo := db.NewSQLVacationTokenRepo(s.Repo, s.log)
 	apiCacheRepo := db.NewSQLAPICacheRepo(s.Repo, s.log)
 	settingsRepo := db.NewSQLSettingsRepo(s.Repo, s.log)
+	timestampsRepo := db.NewSQLTimestampsRepo(s.Repo, s.log)
 
 	s.repos = repos{
-		user:      userRepo,
-		notifUser: notificationUserRepo,
-		notif:     notificationRepo,
-		event:     eventRepo,
-		request:   requestRepo,
-		session:   sessionRepo,
-		refresh:   refreshTokenRepo,
-		vac:       vacationTokenRepo,
-		apiCache:  apiCacheRepo,
-		settings:  settingsRepo,
+		user:       userRepo,
+		notifUser:  notificationUserRepo,
+		notif:      notificationRepo,
+		event:      eventRepo,
+		request:    requestRepo,
+		session:    sessionRepo,
+		refresh:    refreshTokenRepo,
+		vac:        vacationTokenRepo,
+		apiCache:   apiCacheRepo,
+		settings:   settingsRepo,
+		timestamps: timestampsRepo,
 	}
 
 	s.log.Info("Initialized repositories.")
@@ -156,22 +161,24 @@ func (s *Server) InitServices() {
 	settingSvc := service.NewSettingsService(s.repos.settings, s.log)
 	krankSvc := service.NewKrankheitsExportService(&eventSvc, &userSvc)
 	aworkSvc := service.NewAworkService(&eventSvc, &userSvc, s.log)
+	timestampSvc := service.NewTimestampsService(s.repos.timestamps, s.log)
 
 	s.services = services{
-		refresh:  &refreshTokenSvc,
-		vac:      &vacationTokenSvc,
-		token:    &tokenSvc,
-		notif:    &notificationSvc,
-		user:     &userSvc,
-		request:  &requestSvc,
-		session:  &sessionSvc,
-		event:    &eventSvc,
-		pwHasher: &passwordHasher,
-		auth:     &authSvc,
-		holiday:  &holidaySvc,
-		settings: &settingSvc,
-		krank:    &krankSvc,
-		awork:    &aworkSvc,
+		refresh:    &refreshTokenSvc,
+		vac:        &vacationTokenSvc,
+		token:      &tokenSvc,
+		notif:      &notificationSvc,
+		user:       &userSvc,
+		request:    &requestSvc,
+		session:    &sessionSvc,
+		event:      &eventSvc,
+		pwHasher:   &passwordHasher,
+		auth:       &authSvc,
+		holiday:    &holidaySvc,
+		settings:   &settingSvc,
+		krank:      &krankSvc,
+		awork:      &aworkSvc,
+		timestamps: &timestampSvc,
 	}
 
 	s.log.Info("Initialized services.")
@@ -212,6 +219,7 @@ func (s *Server) InitAPIRoutes() {
 		s.log,
 	)
 	notificationHandler := api.NewAPINotificationHandler(s.services.notif, s.log)
+	timestampsHandler := api.NewAPITimestampsHandler(s.services.timestamps)
 
 	apiGrp := s.Router.Group("/api/v1")
 	authGrp := apiGrp.Group(
@@ -228,6 +236,7 @@ func (s *Server) InitAPIRoutes() {
 	eventHandler.RegisterRoutes(authGrp)
 	aworkHandler.RegisterRoutes(authGrp)
 	notificationHandler.RegisterRoutes(authGrp)
+	timestampsHandler.RegisterRoutes(authGrp)
 
 	requestHandler.RegisterRoutes(adminGrp)
 	tokenHandler.RegisterRoutes(adminGrp)

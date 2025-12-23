@@ -13,6 +13,7 @@ import { VacationGraph } from "../components/VacationGraph";
 import type { UserWithVacation } from "../types/auth";
 import type { WorkTime } from "../types/response";
 import { dayOfYear, daysInYear } from "../utils/calendar";
+import { Timestamps } from "../components/Timestamps";
 
 export const Route = createFileRoute("/_auth/")({
   component: Home,
@@ -90,6 +91,9 @@ function Home() {
         <span className="animate-pulse font-medium text-white pr-1"> Hej </span>
         {user?.username}
       </div>
+      <TitleSection title="Timestamps">
+        <Timestamps />
+      </TitleSection>
       <TitleSection title="Your vacation">
         <StatCard>
           <StatCardElement

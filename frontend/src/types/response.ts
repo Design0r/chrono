@@ -117,3 +117,10 @@ export type AworkUser = {
   firstName: string;
   lastName: string;
 };
+
+export type Timestamp = {
+  id: number;
+  start_date: string;
+  end_date: string | null;
+  user_id: number;
+};

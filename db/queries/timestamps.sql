@@ -9,12 +9,16 @@ SET end_time = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING *;
 
--- name: GetTimestampsById :many
-SELECT * from timestamps
+-- name: DeleteTimestamp :exec
+DELETE FROM timestamps
+WHERE id = ?;
+
+-- name: GetTimestampById :one
+SELECT * FROM timestamps
 WHERE id = ?;
 
 -- name: GetTimestampsInRange :many
-SELECT * from timestamps
+SELECT * FROM timestamps
 WHERE user_id = ?
 AND start_time <= ?
 AND end_time IS NOT NULL

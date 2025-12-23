@@ -5,6 +5,7 @@ import { ApiExport } from "./export";
 import { ApiNotifications } from "./notifications";
 import { ApiRequests } from "./requests";
 import { ApiSettings } from "./settings";
+import { ApiTimestamps } from "./timestamps";
 import { ApiTokens } from "./tokens";
 import { ApiUsers } from "./users";
 
@@ -18,4 +19,5 @@ export class ChronoClient {
   export = new ApiExport();
   awork = new ApiAwork();
   notifications = new ApiNotifications();
+  timestamps = new ApiTimestamps();
 }

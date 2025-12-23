@@ -34,11 +34,11 @@ export class ApiAuth {
   }
 
   async logout(): Promise<ChronoResponse> {
-    const response = await fetch(CHRONO_URL + "/logout", {
+    await fetch(CHRONO_URL + "/logout", {
       method: "POST",
       credentials: "include",
     });
 
-    return await returnOrError(response);
+    return { message: "logged out", data: null };
   }
 }

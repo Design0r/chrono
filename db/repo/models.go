@@ -60,6 +60,13 @@ type Setting struct {
 	SignupEnabled bool  `json:"signup_enabled"`
 }
 
+type Timestamp struct {
+	ID        int64      `json:"id"`
+	StartTime time.Time  `json:"start_time"`
+	EndTime   *time.Time `json:"end_time"`
+	UserID    int64      `json:"user_id"`
+}
+
 type TokenRefresh struct {
 	ID        int64     `json:"id"`
 	Year      int64     `json:"year"`

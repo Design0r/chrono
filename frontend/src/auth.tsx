@@ -36,7 +36,7 @@ const AuthContext = createContext<AuthContext | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const uid = localStorage.getItem("user");
   const [userId, setUserId] = useState<number | null>(
-    uid ? Number.parseInt(uid) : null
+    uid ? Number.parseInt(uid) : null,
   );
 
   const queryClient = useQueryClient();

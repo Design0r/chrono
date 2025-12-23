@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -50,6 +51,8 @@ func (r *TimestampsService) GetForToday(
 	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	stop := start.AddDate(0, 0, 1)
 
+	fmt.Println(start, stop)
+
 	return r.timestamps.GetInRange(ctx, userId, start, stop)
 }
 
@@ -60,4 +63,10 @@ func (r *TimestampsService) GetTotalSecondsInRange(
 	stop time.Time,
 ) (float64, error) {
 	return r.timestamps.GetTotalSecondsInRange(ctx, userId, start, stop)
+}
+
+func (r *TimestampsService) GetLatest(
+	ctx context.Context, userId int64,
+) (domain.Timestamp, error) {
+	return r.timestamps.GetLatest(ctx, userId)
 }

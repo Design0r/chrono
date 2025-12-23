@@ -29,4 +29,5 @@ type TimestampsRepository interface {
 		start time.Time,
 		stop time.Time,
 	) (float64, error)
+	GetLatest(ctx context.Context, userId int64) (Timestamp, error)
 }

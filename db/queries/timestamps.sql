@@ -20,9 +20,14 @@ WHERE id = ?;
 -- name: GetTimestampsInRange :many
 SELECT * FROM timestamps
 WHERE user_id = ?
-AND start_time <= ?
+AND start_time < @end_time
 AND end_time IS NOT NULL
-AND end_time >= ?;
+AND end_time > @start_time;
+
+-- name: GetLatestTimestamp :one
+SELECT * FROM timestamps
+WHERE user_id = ?
+ORDER BY id DESC;
 
 -- name: GetTotalSecondsInRange :one
 SELECT

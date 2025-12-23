@@ -120,7 +120,7 @@ export type AworkUser = {
 
 export type Timestamp = {
   id: number;
-  start_date: string;
-  end_date: string | null;
+  start_time: string;
+  end_time: string | null;
   user_id: number;
 };

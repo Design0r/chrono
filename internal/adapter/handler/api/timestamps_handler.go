@@ -21,8 +21,9 @@ func NewAPITimestampsHandler(t *service.TimestampsService) APITimestampsHandler 
 func (s *APITimestampsHandler) RegisterRoutes(group *echo.Group) {
 	g := group.Group("/timestamps")
 	g.POST("", s.Start)
-	g.PATCH("/:id", s.Start)
+	g.PATCH("/:id", s.Stop)
 	g.GET("/day", s.GetTimestampsForToday)
+	g.GET("/latest", s.GetLatestTimestamp)
 }
 
 func (h *APITimestampsHandler) Start(c echo.Context) error {
@@ -60,6 +61,18 @@ func (h *APITimestampsHandler) GetTimestampsForToday(c echo.Context) error {
 	t, err := h.timestamps.GetForToday(ctx, currUser.ID)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return NewJsonResponse(c, t)
+}
+
+func (h *APITimestampsHandler) GetLatestTimestamp(c echo.Context) error {
+	currUser := c.Get("user").(domain.User)
+	ctx := c.Request().Context()
+
+	t, err := h.timestamps.GetLatest(ctx, currUser.ID)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusNotFound, err.Error())
 	}
 
 	return NewJsonResponse(c, t)

@@ -32,4 +32,14 @@ export class ApiTimestamps {
     const r = await returnOrError(response);
     return r.data as Timestamp[];
   }
+
+  async getLatest(): Promise<Timestamp> {
+    const response = await fetch(CHRONO_URL + `/timestamps/latest`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const r = await returnOrError(response);
+    return r.data as Timestamp;
+  }
 }

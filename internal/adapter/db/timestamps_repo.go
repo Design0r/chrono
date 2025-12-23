@@ -64,7 +64,7 @@ func (r *SQLTimestampsRepo) GetInRange(
 	start time.Time,
 	stop time.Time,
 ) ([]domain.Timestamp, error) {
-	params := repo.GetTimestampsInRangeParams{UserID: userId, StartTime: start, EndTime: &stop}
+	params := repo.GetTimestampsInRangeParams{UserID: userId, StartTime: &start, EndTime: stop}
 	t, err := r.q.GetTimestampsInRange(ctx, params)
 	if err != nil {
 		r.log.Error("repo.GetTimestampsInRange failed:", slog.String("error", err.Error()))
@@ -98,4 +98,14 @@ func (r *SQLTimestampsRepo) GetTotalSecondsInRange(
 	}
 
 	return s, nil
+}
+
+func (r *SQLTimestampsRepo) GetLatest(ctx context.Context, userId int64) (domain.Timestamp, error) {
+	t, err := r.q.GetLatestTimestamp(ctx, userId)
+	if err != nil {
+		r.log.Error("repo.GetLatestTimestamp failed:", slog.String("error", err.Error()))
+		return domain.Timestamp{}, err
+	}
+
+	return (domain.Timestamp)(t), nil
 }

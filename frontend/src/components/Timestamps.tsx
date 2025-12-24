@@ -177,39 +177,177 @@ function Timer({ startUnix, paused }: { startUnix: number; paused: boolean }) {
 }
 
 function TimestampTable({ timestamps }: { timestamps: Timestamp[] }) {
-  return (
-    <table className="table bg-base-300">
-      <thead>
-        <tr>
-          <th>Start</th>
-          <th>End</th>
-          <th>Duration</th>
-        </tr>
-      </thead>
-      <tbody className="">
-        {timestamps.map((t) => {
-          const start = new Date(t.start_time);
-          const end = t.end_time && new Date(t.end_time);
-          const duration = end
-            ? secondsToCounter((end.getTime() - start.getTime()) / 1000)
-            : { hours: 0, minutes: 0, seconds: 0 };
+  const [modal, setModal] = useState<Timestamp | null>(null);
 
-          return (
-            <tr key={t.id} className="hover:bg-base-300 bg-base-100">
-              <td>
-                {new Date(t.start_time).toLocaleString().replaceAll("/", ".")}
-              </td>
-              <td>
-                {t.end_time &&
-                  new Date(t.end_time).toLocaleString().replaceAll("/", ".")}
-              </td>
-              <td>
-                {duration.hours}h {duration.minutes}m {duration.seconds}s
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+  return (
+    <>
+      <table className="table bg-base-300">
+        <thead>
+          <tr>
+            <th>Start</th>
+            <th>End</th>
+            <th>Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          {timestamps.map((t) => {
+            const start = new Date(t.start_time);
+            const end = t.end_time && new Date(t.end_time);
+            const duration = end
+              ? secondsToCounter((end.getTime() - start.getTime()) / 1000)
+              : { hours: 0, minutes: 0, seconds: 0 };
+
+            return (
+              <tr
+                onClick={() => setModal(t)}
+                key={t.id}
+                className="hover:bg-base-300 bg-base-100"
+              >
+                <td>
+                  {new Date(t.start_time).toLocaleString().replaceAll("/", ".")}
+                </td>
+                <td>
+                  {t.end_time &&
+                    new Date(t.end_time).toLocaleString().replaceAll("/", ".")}
+                </td>
+                <td>
+                  {duration.hours}h {duration.minutes}m {duration.seconds}s
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {modal && <EditModal timestamp={modal} onClose={() => setModal(null)} />}
+    </>
+  );
+}
+
+// ISO ("2025-12-23T20:44:00Z") -> datetime-local ("2025-12-23T20:44")
+function isoToDatetimeLocal(iso: string) {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  // datetime-local is *local time* by spec
+  const yyyy = d.getFullYear();
+  const mm = pad(d.getMonth() + 1);
+  const dd = pad(d.getDate());
+  const hh = pad(d.getHours());
+  const min = pad(d.getMinutes());
+
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+}
+
+// datetime-local ("2025-12-23T21:44") -> ISO UTC ("2025-12-23T20:44:00Z")
+function datetimeLocalToIso(value: string) {
+  // value has no timezone -> interpreted as local time
+  const d = new Date(value);
+  return d.toISOString();
+}
+
+export function EditModal({
+  timestamp,
+  onClose,
+}: {
+  timestamp: Timestamp;
+  onClose: () => void;
+}) {
+  const [startDate, setStartDate] = useState(() =>
+    isoToDatetimeLocal(timestamp.start_time),
+  );
+  const [endDate, setEndDate] = useState(() =>
+    isoToDatetimeLocal(timestamp.end_time),
+  );
+
+  useEffect(() => {
+    setStartDate(isoToDatetimeLocal(timestamp.start_time));
+    setEndDate(isoToDatetimeLocal(timestamp.end_time));
+  }, [timestamp.start_time, timestamp.end_time]);
+
+  const chrono = new ChronoClient();
+  const { addToast, addErrorToast } = useToast();
+
+  const mutation = useMutation({
+    mutationKey: ["timestamps", timestamp.id],
+    mutationFn: () =>
+      chrono.timestamps.update(timestamp.id, {
+        start_time: datetimeLocalToIso(startDate),
+        end_time: datetimeLocalToIso(endDate),
+      }),
+    onError: (e) => addErrorToast(e),
+    onSuccess: () => addToast("Updated Timestamp"),
+    retry: false,
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex text-white items-center justify-center p-4">
+      <button
+        aria-label="Close modal"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+      />
+
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="relative w-full max-w-lg rounded-2xl bg-base-100 shadow-2xl ring-1 ring-black/10"
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-black/10">
+          <h2 className="text-base font-semibold">Edit Timestamp</h2>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+          >
+            <span className="icon-outlined text-[20px] leading-none">
+              close
+            </span>
+          </button>
+        </div>
+
+        <div className="px-5 py-4 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="space-y-2">
+              <span className="text-sm font-medium">Start</span>
+              <input
+                type="datetime-local"
+                className="input"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </label>
+
+            <label className="space-y-2">
+              <span className="text-sm font-medium">End</span>
+              <input
+                type="datetime-local"
+                className="input"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </label>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-black/10">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn btn-soft btn-error"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-soft btn-success"
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

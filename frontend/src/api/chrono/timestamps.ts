@@ -13,6 +13,20 @@ export class ApiTimestamps {
     return r.data as Timestamp;
   }
 
+  async update(ts: Timestamp): Promise<Timestamp> {
+    const form = new FormData();
+    form.append("id", ts.id.toString());
+    // form.append("start_time", new Date(ts.start_time))
+
+    const response = await fetch(CHRONO_URL + `/timestamps`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    const r = await returnOrError(response);
+    return r.data as Timestamp;
+  }
+
   async stop(id: number): Promise<Timestamp> {
     const response = await fetch(CHRONO_URL + `/timestamps/${id}`, {
       method: "PATCH",

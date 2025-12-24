@@ -34,12 +34,12 @@ function RouteComponent() {
           <h1 className="font-bold text-xl">Sign up</h1>
           <br />
           <form
-            className="w-max"
+            className="w-xs md:w-max"
             onSubmit={handleSubmit((data: SignupRequest) =>
-              mutation.mutate(data)
+              mutation.mutate(data),
             )}
           >
-            <div className="w-lg">
+            <div className="w-xs md:w-lg">
               <label htmlFor="username">Username</label>
               <br />
               <input
@@ -51,7 +51,7 @@ function RouteComponent() {
               <br />
               <br />
             </div>
-            <div className="w-lg">
+            <div>
               <label htmlFor="email">Email</label>
               <br />
               <input

@@ -27,6 +27,15 @@ func (r *TimestampsService) Start(ctx context.Context, userId int64) (domain.Tim
 }
 
 func (r *TimestampsService) Stop(ctx context.Context, id int64) (domain.Timestamp, error) {
+	t, err := r.GetById(ctx, id)
+	if err != nil {
+		return domain.Timestamp{}, err
+	}
+
+	if t.EndTime != nil {
+		return t, nil
+	}
+
 	return r.timestamps.Stop(ctx, id)
 }
 

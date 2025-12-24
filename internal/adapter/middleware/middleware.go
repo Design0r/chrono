@@ -13,7 +13,7 @@ import (
 
 type MiddlewareFunc = func(echo.HandlerFunc) echo.HandlerFunc
 
-func SessionMiddleware(svc *service.SessionService) MiddlewareFunc {
+func SessionMiddleware(s *service.SessionService, a *service.AuthService) MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			cookie, err := c.Cookie("session")
@@ -24,9 +24,11 @@ func SessionMiddleware(svc *service.SessionService) MiddlewareFunc {
 					"invalid or missing session cookie",
 				)
 			}
-			ok := svc.IsValidSession(c.Request().Context(), cookie.Value, time.Now())
+			ctx := c.Request().Context()
+			ok := s.IsValidSession(ctx, cookie.Value, time.Now())
 			if !ok {
-				svc.Delete(c.Request().Context(), cookie.Value)
+				s.Delete(ctx, cookie.Value)
+				c.SetCookie(a.DeleteSessionCookie())
 				return api.NewErrorResponse(c, http.StatusUnauthorized, "invalid session cookie")
 			}
 

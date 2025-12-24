@@ -24,7 +24,7 @@ interface ToastContextType {
   addToast: (
     message: string,
     type?: "info" | "success" | "warning" | "error",
-    timer?: number
+    timer?: number,
   ) => void;
   addErrorToast: (error: { name: string; message: string }) => void;
 }
@@ -97,7 +97,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
   const addToast = (
     message: string,
     type: "info" | "success" | "warning" | "error" = "info",
-    timer?: number
+    timer?: number,
   ) => {
     const id = Date.now() + Math.random();
     setToasts((prevToasts) => [...prevToasts, { id, message, type, timer }]);
@@ -114,7 +114,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <ToastContext.Provider value={{ addToast, addErrorToast }}>
       {children}
-      <div className="toast toast-bottom toast-start flex flex-col gap-2">
+      <div className="toast toast-bottom bottom-18 md:bottom-4 toast-start flex flex-col gap-2">
         {toasts.map((toast) => (
           <Toast
             key={toast.id}

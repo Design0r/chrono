@@ -36,9 +36,9 @@ export function Timestamps() {
     mutationFn: () => chrono.timestamps.start(),
     onError: (e) => addErrorToast(e),
     onSuccess: (data) => {
-      setPaused(false);
       setCurrTimer(data);
-      queryClient.invalidateQueries({ queryKey: ["timestamps"] });
+      setPaused(false);
+      setStartTime(Date.now());
       addToast("Started Timer");
     },
     retry: false,
@@ -49,8 +49,9 @@ export function Timestamps() {
     mutationFn: (id: number) => chrono.timestamps.stop(id),
     onError: (e) => addErrorToast(e),
     onSuccess: () => {
-      setPaused(true);
       setCurrTimer(null);
+      setStartTime(Date.now());
+      setPaused(true);
       queryClient.invalidateQueries({ queryKey: ["timestamps"] });
       addToast("Stopped Timer");
     },
@@ -67,7 +68,7 @@ export function Timestamps() {
     const latest = latestTimestampQ.data;
     if (!latest) return;
     const hasEnded = latest.end_time !== null;
-    if (!hasEnded) {
+    if (!hasEnded && latest.id !== currTimer?.id) {
       addToast("Resuming latest unfinished Timer", "info");
       setCurrTimer(latest);
       setStartTime(Date.parse(latest.start_time));
@@ -79,27 +80,55 @@ export function Timestamps() {
     if (timestampsQ.isError) addErrorToast(timestampsQ.error);
   }, [timestampsQ.isError]);
 
+  const totalTime = secondsToCounter(
+    timestamps
+      .map((t) => {
+        const start = new Date(t.start_time);
+        const end = t.end_time && new Date(t.end_time);
+        return end ? (end.getTime() - start.getTime()) / 1000 : 0;
+      })
+      .reduce((acc, curr) => {
+        console.log(curr);
+        return acc + curr;
+      }, 0),
+  );
+
   return (
-    <div>
-      <Timer paused={paused} startUnix={startTime} />
-      <button className="btn" onClick={() => startMut.mutate()}>
-        Start
-      </button>
-      <button
-        className="btn"
-        onClick={() => {
-          if (!currTimer) return;
-          stopMut.mutate(currTimer.id);
-        }}
-      >
-        Stop
-      </button>
-      <div>
-        {timestamps.map((t, i) => (
-          <div key={i}>
-            {t.start_time} - {t.end_time}
+    <div className="flex flex-col space-y-4 lg:space-y-8">
+      <div className="mx-auto justify-center">
+        <div className="space-y-4">
+          <Timer paused={paused} startUnix={startTime} />
+          <div className="justify-center flex space-x-2">
+            <button
+              disabled={!paused}
+              className="btn btn-soft btn-success icon-outlined"
+              onClick={() => startMut.mutate()}
+            >
+              play_arrow
+            </button>
+            <button
+              disabled={paused}
+              className="btn btn-error btn-soft icon-outlined"
+              onClick={() => {
+                if (!currTimer) return;
+                stopMut.mutate(currTimer.id);
+              }}
+            >
+              stop
+            </button>
           </div>
-        ))}
+
+          <p className="text-xl">
+            Total:
+            <span>
+              {totalTime.hours}h {totalTime.minutes}m {totalTime.seconds}s
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto rounded-box">
+        <TimestampTable timestamps={timestamps} />
       </div>
     </div>
   );
@@ -123,15 +152,14 @@ function Timer({ startUnix, paused }: { startUnix: number; paused: boolean }) {
   const [timer, setTimer] = useState<TimeCounter>(() => secondsToCounter(0));
 
   useEffect(() => {
-    if (!startUnix) {
-      setTimer(secondsToCounter(0));
-      return;
-    }
-
-    const tick = () => {
+    function tick() {
+      // if (startUnix === 0) {
+      //   setTimer(secondsToCounter(0));
+      //   return;
+      // }
       const elapsedSeconds = (Date.now() - startUnix) / 1000;
       setTimer(secondsToCounter(elapsedSeconds));
-    };
+    }
 
     tick();
 
@@ -142,8 +170,46 @@ function Timer({ startUnix, paused }: { startUnix: number; paused: boolean }) {
   }, [startUnix, paused]);
 
   return (
-    <div>
+    <div className="text-2xl text-center">
       {timer.hours}h {timer.minutes}m {timer.seconds}s
     </div>
+  );
+}
+
+function TimestampTable({ timestamps }: { timestamps: Timestamp[] }) {
+  return (
+    <table className="table bg-base-300">
+      <thead>
+        <tr>
+          <th>Start</th>
+          <th>End</th>
+          <th>Duration</th>
+        </tr>
+      </thead>
+      <tbody className="">
+        {timestamps.map((t) => {
+          const start = new Date(t.start_time);
+          const end = t.end_time && new Date(t.end_time);
+          const duration = end
+            ? secondsToCounter((end.getTime() - start.getTime()) / 1000)
+            : { hours: 0, minutes: 0, seconds: 0 };
+
+          return (
+            <tr key={t.id} className="hover:bg-base-300 bg-base-100">
+              <td>
+                {new Date(t.start_time).toLocaleString().replaceAll("/", ".")}
+              </td>
+              <td>
+                {t.end_time &&
+                  new Date(t.end_time).toLocaleString().replaceAll("/", ".")}
+              </td>
+              <td>
+                {duration.hours}h {duration.minutes}m {duration.seconds}s
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
   );
 }

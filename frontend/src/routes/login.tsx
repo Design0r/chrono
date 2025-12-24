@@ -16,6 +16,7 @@ function LoginComponent() {
   const { register, handleSubmit } = useForm<LoginRequest>();
   const { addToast, addErrorToast } = useToast();
   const mutation = useMutation({
+    mutationKey: ["login"],
     mutationFn: async (data: LoginRequest) => await auth.login(data),
     onSuccess: async () => {
       addToast("Successfully logged in", "success");
@@ -33,12 +34,12 @@ function LoginComponent() {
           <h1 className="font-bold text-xl">Log in</h1>
           <br />
           <form
-            className="w-max"
+            className="w-xs md:w-max"
             onSubmit={handleSubmit((data: LoginRequest) =>
-              mutation.mutate(data)
+              mutation.mutate(data),
             )}
           >
-            <div className="w-lg">
+            <div className="w-xs md:w-lg">
               <label htmlFor="email">Email</label>
               <br />
               <input

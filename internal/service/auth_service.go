@@ -16,6 +16,7 @@ type AuthService struct {
 	session         domain.SessionRepository
 	pw              auth.PasswordHasher
 	sessionDuration time.Duration
+	secureCookies   bool
 	log             *slog.Logger
 }
 
@@ -23,10 +24,18 @@ func NewAuthService(
 	u domain.UserRepository,
 	s domain.SessionRepository,
 	sessionDuration time.Duration,
+	secureCookies bool,
 	pw auth.PasswordHasher,
 	log *slog.Logger,
 ) AuthService {
-	return AuthService{user: u, session: s, log: log, sessionDuration: sessionDuration, pw: pw}
+	return AuthService{
+		user:            u,
+		session:         s,
+		log:             log,
+		sessionDuration: sessionDuration,
+		secureCookies:   secureCookies,
+		pw:              pw,
+	}
 }
 
 func (svc *AuthService) createSessionCookie(session domain.Session) *http.Cookie {
@@ -35,19 +44,19 @@ func (svc *AuthService) createSessionCookie(session domain.Session) *http.Cookie
 		Name:     "session",
 		Value:    session.ID,
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   svc.secureCookies,
 		Expires:  session.ValidUntil,
 		SameSite: http.SameSiteStrictMode,
 	}
 }
 
-func (svc *AuthService) deleteSessionCookie() *http.Cookie {
+func (svc *AuthService) DeleteSessionCookie() *http.Cookie {
 	return &http.Cookie{
 		Path:     "/",
 		Name:     "session",
 		Value:    "",
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   svc.secureCookies,
 		Expires:  time.Unix(0, 0),
 		MaxAge:   -1,
 		SameSite: http.SameSiteStrictMode,
@@ -90,7 +99,7 @@ func (svc *AuthService) Logout(ctx context.Context, cookie string) (*http.Cookie
 		return nil, err
 	}
 
-	return svc.deleteSessionCookie(), nil
+	return svc.DeleteSessionCookie(), nil
 }
 
 func (svc *AuthService) Signup(

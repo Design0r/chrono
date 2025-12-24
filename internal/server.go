@@ -87,6 +87,7 @@ func (s *Server) InitMiddleware() {
 				AllowOrigins: []string{
 					"http://localhost:8080",
 					"http://localhost:5173",
+					"http://192.168.0.35:5173",
 					"https://chrono.theapic.com",
 				},
 				AllowCredentials: true,
@@ -152,6 +153,7 @@ func (s *Server) InitServices() {
 		s.repos.user,
 		s.repos.session,
 		time.Hour*24*7,
+		!s.cfg.Debug,
 		&passwordHasher,
 		s.log,
 	)
@@ -223,7 +225,7 @@ func (s *Server) InitAPIRoutes() {
 	apiGrp := s.Router.Group("/api/v1")
 	authGrp := apiGrp.Group(
 		"",
-		mw.SessionMiddleware(s.services.session),
+		mw.SessionMiddleware(s.services.session, s.services.auth),
 		mw.AuthenticationMiddleware(s.services.auth),
 	)
 

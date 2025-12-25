@@ -1,5 +1,5 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { QueryClient } from "@tanstack/react-query";
+import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -9,7 +9,6 @@ import { ErrorPage } from "./components/ErrorPage";
 import "./css/index.css";
 import { routeTree } from "./routeTree.gen";
 
-const queryClient = new QueryClient();
 const chrono = new ChronoClient();
 
 export type RouterContext = {
@@ -18,6 +17,7 @@ export type RouterContext = {
   chrono: ChronoClient;
 };
 
+const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
 // Set up a Router instance
 const router = createRouter({
   routeTree,
@@ -26,8 +26,10 @@ const router = createRouter({
   context: {
     auth: undefined! as unknown as AuthContext,
     chrono: chrono,
-    queryClient: queryClient,
+    ...TanStackQueryProviderContext,
   },
+  defaultStructuralSharing: true,
+  defaultPreloadStaleTime: 0,
 
   defaultNotFoundComponent: () => (
     <ErrorPage error={{ name: "404", message: "Not Found" }} />
@@ -57,17 +59,16 @@ function InnerApp() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
       <AuthProvider>
-        <ReactQueryDevtools />
         <InnerApp />
       </AuthProvider>
-    </QueryClientProvider>
+    </TanStackQueryProvider.Provider>
   );
 }
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
-  </StrictMode>
+  </StrictMode>,
 );

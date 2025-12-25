@@ -109,3 +109,17 @@ func (r *SQLTimestampsRepo) GetLatest(ctx context.Context, userId int64) (domain
 
 	return (domain.Timestamp)(t), nil
 }
+
+func (r *SQLTimestampsRepo) Update(
+	ctx context.Context,
+	ts *domain.Timestamp,
+) (domain.Timestamp, error) {
+	params := repo.UpdateTimestampParams{ID: ts.ID, StartTime: ts.StartTime, EndTime: ts.EndTime}
+	t, err := r.q.UpdateTimestamp(ctx, params)
+	if err != nil {
+		r.log.Error("repo.UpdateTimestamp failed:", slog.String("error", err.Error()))
+		return domain.Timestamp{}, err
+	}
+
+	return (domain.Timestamp)(t), nil
+}

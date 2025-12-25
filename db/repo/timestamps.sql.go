@@ -162,3 +162,29 @@ func (q *Queries) StopTimestamp(ctx context.Context, id int64) (Timestamp, error
 	)
 	return i, err
 }
+
+const UpdateTimestamp = `-- name: UpdateTimestamp :one
+UPDATE timestamps
+SET start_time = ?,
+end_time = ?
+WHERE id = ?
+RETURNING id, start_time, end_time, user_id
+`
+
+type UpdateTimestampParams struct {
+	StartTime time.Time  `json:"start_time"`
+	EndTime   *time.Time `json:"end_time"`
+	ID        int64      `json:"id"`
+}
+
+func (q *Queries) UpdateTimestamp(ctx context.Context, arg UpdateTimestampParams) (Timestamp, error) {
+	row := q.db.QueryRowContext(ctx, UpdateTimestamp, arg.StartTime, arg.EndTime, arg.ID)
+	var i Timestamp
+	err := row.Scan(
+		&i.ID,
+		&i.StartTime,
+		&i.EndTime,
+		&i.UserID,
+	)
+	return i, err
+}

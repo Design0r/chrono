@@ -22,6 +22,7 @@ func (s *APITimestampsHandler) RegisterRoutes(group *echo.Group) {
 	g := group.Group("/timestamps")
 	g.POST("", s.Start)
 	g.PATCH("/:id", s.Stop)
+	g.PUT("/:id", s.Update)
 	g.GET("/day", s.GetTimestampsForToday)
 	g.GET("/latest", s.GetLatestTimestamp)
 }
@@ -71,6 +72,22 @@ func (h *APITimestampsHandler) GetLatestTimestamp(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	t, err := h.timestamps.GetLatest(ctx, currUser.ID)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusNotFound, err.Error())
+	}
+
+	return NewJsonResponse(c, t)
+}
+
+func (h *APITimestampsHandler) Update(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	var tsForm domain.Timestamp
+	if err := c.Bind(&tsForm); err != nil {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid form parameters")
+	}
+
+	t, err := h.timestamps.Update(ctx, &tsForm)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusNotFound, err.Error())
 	}

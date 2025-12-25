@@ -16,11 +16,14 @@ export class ApiTimestamps {
   async update(ts: Timestamp): Promise<Timestamp> {
     const form = new FormData();
     form.append("id", ts.id.toString());
-    // form.append("start_time", new Date(ts.start_time))
+    form.append("start_time", ts.start_time);
+    form.append("end_time", ts.end_time || "");
+    form.append("user_id", ts.user_id.toString());
 
-    const response = await fetch(CHRONO_URL + `/timestamps`, {
-      method: "POST",
+    const response = await fetch(CHRONO_URL + `/timestamps/${ts.id}`, {
+      method: "PUT",
       credentials: "include",
+      body: form,
     });
 
     const r = await returnOrError(response);

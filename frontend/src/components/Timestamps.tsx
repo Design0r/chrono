@@ -11,7 +11,7 @@ export function Timestamps() {
   const [paused, setPaused] = useState<boolean>(true);
   const { addToast, addErrorToast } = useToast();
   const [currTimer, setCurrTimer] = useState<Timestamp | null>(null);
-  const [startTime, setStartTime] = useState<number>(0);
+  const [startTime, setStartTime] = useState<number>(Date.now());
 
   const queryClient = useQueryClient();
 
@@ -88,7 +88,6 @@ export function Timestamps() {
         return end ? (end.getTime() - start.getTime()) / 1000 : 0;
       })
       .reduce((acc, curr) => {
-        console.log(curr);
         return acc + curr;
       }, 0),
   );
@@ -118,7 +117,7 @@ export function Timestamps() {
             </button>
           </div>
 
-          <p className="text-xl">
+          <p className="text-center text-xl">
             Total:
             <span>
               {totalTime.hours}h {totalTime.minutes}m {totalTime.seconds}s
@@ -153,10 +152,6 @@ function Timer({ startUnix, paused }: { startUnix: number; paused: boolean }) {
 
   useEffect(() => {
     function tick() {
-      // if (startUnix === 0) {
-      //   setTimer(secondsToCounter(0));
-      //   return;
-      // }
       const elapsedSeconds = (Date.now() - startUnix) / 1000;
       setTimer(secondsToCounter(elapsedSeconds));
     }
@@ -240,9 +235,10 @@ function isoToDatetimeLocal(iso: string) {
 
 // datetime-local ("2025-12-23T21:44") -> ISO UTC ("2025-12-23T20:44:00Z")
 function datetimeLocalToIso(value: string) {
-  // value has no timezone -> interpreted as local time
   const d = new Date(value);
-  return d.toISOString();
+  const iso = d.toISOString();
+  const fixed = `${iso.split(".")[0]}Z`;
+  return fixed;
 }
 
 export function EditModal({
@@ -252,16 +248,18 @@ export function EditModal({
   timestamp: Timestamp;
   onClose: () => void;
 }) {
-  const [startDate, setStartDate] = useState(() =>
+  const queryClient = useQueryClient();
+  const [startDate, setStartDate] = useState(
     isoToDatetimeLocal(timestamp.start_time),
   );
-  const [endDate, setEndDate] = useState(() =>
-    isoToDatetimeLocal(timestamp.end_time),
+  const [endDate, setEndDate] = useState<string | null>(
+    timestamp.end_time ? isoToDatetimeLocal(timestamp.end_time) : null,
   );
 
   useEffect(() => {
     setStartDate(isoToDatetimeLocal(timestamp.start_time));
-    setEndDate(isoToDatetimeLocal(timestamp.end_time));
+    if (timestamp.end_time) setEndDate(isoToDatetimeLocal(timestamp.end_time));
+    else setEndDate(null);
   }, [timestamp.start_time, timestamp.end_time]);
 
   const chrono = new ChronoClient();
@@ -269,13 +267,19 @@ export function EditModal({
 
   const mutation = useMutation({
     mutationKey: ["timestamps", timestamp.id],
-    mutationFn: () =>
-      chrono.timestamps.update(timestamp.id, {
-        start_time: datetimeLocalToIso(startDate),
-        end_time: datetimeLocalToIso(endDate),
+    mutationFn: ({ start, end }: { start: string; end: string | null }) =>
+      chrono.timestamps.update({
+        id: timestamp.id,
+        user_id: timestamp.user_id,
+        start_time: datetimeLocalToIso(start),
+        end_time: end ? datetimeLocalToIso(end) : null,
       }),
     onError: (e) => addErrorToast(e),
-    onSuccess: () => addToast("Updated Timestamp"),
+    onSuccess: () => {
+      addToast("Updated Timestamp", "success");
+      queryClient.invalidateQueries({ queryKey: ["timestamps"] });
+      onClose();
+    },
     retry: false,
   });
 
@@ -323,7 +327,7 @@ export function EditModal({
               <input
                 type="datetime-local"
                 className="input"
-                value={endDate}
+                value={endDate || ""}
                 onChange={(e) => setEndDate(e.target.value)}
               />
             </label>
@@ -341,7 +345,7 @@ export function EditModal({
           <button
             type="button"
             className="btn btn-soft btn-success"
-            onClick={() => mutation.mutate()}
+            onClick={() => mutation.mutate({ start: startDate, end: endDate })}
             disabled={mutation.isPending}
           >
             {mutation.isPending ? "Saving..." : "Save"}

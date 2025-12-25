@@ -94,7 +94,5 @@ func (svc *KrankheitsExport) ExportAll(ctx context.Context, year int) (string, e
 		csv = append(csv, processed)
 	}
 
-	fmt.Println(csv)
-
 	return strings.Join(csv, "\n"), nil
 }

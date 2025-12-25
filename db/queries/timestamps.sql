@@ -3,6 +3,13 @@ INSERT INTO timestamps (user_id)
 VALUES (?)
 RETURNING *;
 
+-- name: UpdateTimestamp :one
+UPDATE timestamps
+SET start_time = ?,
+end_time = ?
+WHERE id = ?
+RETURNING *;
+
 -- name: StopTimestamp :one
 UPDATE timestamps
 SET end_time = CURRENT_TIMESTAMP

@@ -13,6 +13,44 @@ export class ApiTimestamps {
     return r.data as Timestamp;
   }
 
+  async getAllForUser(year?: number, month?: number): Promise<Timestamp[]> {
+    let url = "";
+    if (year && month) url = `?year=${year}&month${month}`;
+    else if (year) url = `?year=${year}`;
+    else if (month) url = `?month${month}`;
+
+    const response = await fetch(CHRONO_URL + `/timestamps${url}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const r = await returnOrError(response);
+    return r.data as Timestamp[];
+  }
+
+  async getForYear(year: number): Promise<Timestamp[]> {
+    const response = await fetch(CHRONO_URL + `/timestamps/year/${year}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const r = await returnOrError(response);
+    return r.data as Timestamp[];
+  }
+
+  async getForMonth(year: number, month: number): Promise<Timestamp[]> {
+    const response = await fetch(
+      CHRONO_URL + `/timestamps/year/${year}/month/${month}`,
+      {
+        method: "GET",
+        credentials: "include",
+      },
+    );
+
+    const r = await returnOrError(response);
+    return r.data as Timestamp[];
+  }
+
   async update(ts: Timestamp): Promise<Timestamp> {
     const form = new FormData();
     form.append("id", ts.id.toString());

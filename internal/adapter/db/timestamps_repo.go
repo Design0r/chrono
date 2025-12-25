@@ -123,3 +123,21 @@ func (r *SQLTimestampsRepo) Update(
 
 	return (domain.Timestamp)(t), nil
 }
+
+func (r *SQLTimestampsRepo) GetAllForUser(
+	ctx context.Context,
+	userId int64,
+) ([]domain.Timestamp, error) {
+	t, err := r.q.GetAllTimestampsForUser(ctx, userId)
+	if err != nil {
+		r.log.Error("repo.GetAllTimestampsForUser failed:", slog.String("error", err.Error()))
+		return []domain.Timestamp{}, err
+	}
+
+	timestamps := make([]domain.Timestamp, len(t))
+	for i, x := range t {
+		timestamps[i] = (domain.Timestamp)(x)
+	}
+
+	return timestamps, nil
+}

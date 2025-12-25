@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth.index'
+import { Route as AuthTimestampsRouteImport } from './routes/_auth.timestamps'
 import { Route as AuthTeamRouteImport } from './routes/_auth.team'
 import { Route as AuthProfileRouteImport } from './routes/_auth.profile'
 import { Route as AuthAdminRouteImport } from './routes/_auth._admin'
@@ -40,6 +41,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthIndexRoute = AuthIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthTimestampsRoute = AuthTimestampsRouteImport.update({
+  id: '/timestamps',
+  path: '/timestamps',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthTeamRoute = AuthTeamRouteImport.update({
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/profile': typeof AuthProfileRoute
   '/team': typeof AuthTeamRoute
+  '/timestamps': typeof AuthTimestampsRoute
   '/': typeof AuthIndexRoute
   '/debug': typeof AuthAdminDebugRoute
   '/export': typeof AuthAdminExportRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/profile': typeof AuthProfileRoute
   '/team': typeof AuthTeamRoute
+  '/timestamps': typeof AuthTimestampsRoute
   '/': typeof AuthIndexRoute
   '/debug': typeof AuthAdminDebugRoute
   '/export': typeof AuthAdminExportRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/_auth/_admin': typeof AuthAdminRouteWithChildren
   '/_auth/profile': typeof AuthProfileRoute
   '/_auth/team': typeof AuthTeamRoute
+  '/_auth/timestamps': typeof AuthTimestampsRoute
   '/_auth/': typeof AuthIndexRoute
   '/_auth/_admin/debug': typeof AuthAdminDebugRoute
   '/_auth/_admin/export': typeof AuthAdminExportRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/profile'
     | '/team'
+    | '/timestamps'
     | '/'
     | '/debug'
     | '/export'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/profile'
     | '/team'
+    | '/timestamps'
     | '/'
     | '/debug'
     | '/export'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/_auth/_admin'
     | '/_auth/profile'
     | '/_auth/team'
+    | '/_auth/timestamps'
     | '/_auth/'
     | '/_auth/_admin/debug'
     | '/_auth/_admin/export'
@@ -207,6 +219,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/timestamps': {
+      id: '/_auth/timestamps'
+      path: '/timestamps'
+      fullPath: '/timestamps'
+      preLoaderRoute: typeof AuthTimestampsRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/team': {
@@ -299,6 +318,7 @@ interface AuthRouteChildren {
   AuthAdminRoute: typeof AuthAdminRouteWithChildren
   AuthProfileRoute: typeof AuthProfileRoute
   AuthTeamRoute: typeof AuthTeamRoute
+  AuthTimestampsRoute: typeof AuthTimestampsRoute
   AuthIndexRoute: typeof AuthIndexRoute
   AuthCalendarYearMonthRoute: typeof AuthCalendarYearMonthRoute
 }
@@ -307,6 +327,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthAdminRoute: AuthAdminRouteWithChildren,
   AuthProfileRoute: AuthProfileRoute,
   AuthTeamRoute: AuthTeamRoute,
+  AuthTimestampsRoute: AuthTimestampsRoute,
   AuthIndexRoute: AuthIndexRoute,
   AuthCalendarYearMonthRoute: AuthCalendarYearMonthRoute,
 }

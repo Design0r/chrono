@@ -20,6 +20,79 @@ func (q *Queries) DeleteTimestamp(ctx context.Context, id int64) error {
 	return err
 }
 
+const GetAllTimestampsForUser = `-- name: GetAllTimestampsForUser :many
+SELECT id, start_time, end_time, user_id FROM timestamps
+WHERE user_id = ?
+`
+
+func (q *Queries) GetAllTimestampsForUser(ctx context.Context, userID int64) ([]Timestamp, error) {
+	rows, err := q.db.QueryContext(ctx, GetAllTimestampsForUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Timestamp
+	for rows.Next() {
+		var i Timestamp
+		if err := rows.Scan(
+			&i.ID,
+			&i.StartTime,
+			&i.EndTime,
+			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const GetAllTimestampsInRange = `-- name: GetAllTimestampsInRange :many
+SELECT id, start_time, end_time, user_id FROM timestamps
+WHERE start_time < ?1
+AND end_time IS NOT NULL
+AND end_time > ?2
+`
+
+type GetAllTimestampsInRangeParams struct {
+	EndTime   time.Time  `json:"end_time"`
+	StartTime *time.Time `json:"start_time"`
+}
+
+func (q *Queries) GetAllTimestampsInRange(ctx context.Context, arg GetAllTimestampsInRangeParams) ([]Timestamp, error) {
+	rows, err := q.db.QueryContext(ctx, GetAllTimestampsInRange, arg.EndTime, arg.StartTime)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Timestamp
+	for rows.Next() {
+		var i Timestamp
+		if err := rows.Scan(
+			&i.ID,
+			&i.StartTime,
+			&i.EndTime,
+			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const GetLatestTimestamp = `-- name: GetLatestTimestamp :one
 SELECT id, start_time, end_time, user_id FROM timestamps
 WHERE user_id = ?

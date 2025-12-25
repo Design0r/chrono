@@ -31,4 +31,5 @@ type TimestampsRepository interface {
 		stop time.Time,
 	) (float64, error)
 	GetLatest(ctx context.Context, userId int64) (Timestamp, error)
+	GetAllForUser(ctx context.Context, userId int64) ([]Timestamp, error)
 }

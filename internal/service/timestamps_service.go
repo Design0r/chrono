@@ -62,6 +62,29 @@ func (r *TimestampsService) GetForToday(
 	return r.timestamps.GetInRange(ctx, userId, start, stop)
 }
 
+func (r *TimestampsService) GetForYear(
+	ctx context.Context,
+	userId int64,
+	year int,
+) ([]domain.Timestamp, error) {
+	start := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
+	stop := start.AddDate(1, 0, 0)
+
+	return r.timestamps.GetInRange(ctx, userId, start, stop)
+}
+
+func (r *TimestampsService) GetForMonth(
+	ctx context.Context,
+	userId int64,
+	year int,
+	month int,
+) ([]domain.Timestamp, error) {
+	start := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	stop := start.AddDate(0, 1, 0)
+
+	return r.timestamps.GetInRange(ctx, userId, start, stop)
+}
+
 func (r *TimestampsService) GetTotalSecondsInRange(
 	ctx context.Context,
 	userId int64,
@@ -82,4 +105,11 @@ func (r *TimestampsService) Update(
 	ts *domain.Timestamp,
 ) (domain.Timestamp, error) {
 	return r.timestamps.Update(ctx, ts)
+}
+
+func (r *TimestampsService) GetAllForUser(
+	ctx context.Context,
+	userId int64,
+) ([]domain.Timestamp, error) {
+	return r.timestamps.GetAllForUser(ctx, userId)
 }

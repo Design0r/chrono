@@ -171,7 +171,7 @@ function Timer({ startUnix, paused }: { startUnix: number; paused: boolean }) {
   );
 }
 
-function TimestampTable({ timestamps }: { timestamps: Timestamp[] }) {
+export function TimestampTable({ timestamps }: { timestamps: Timestamp[] }) {
   const [modal, setModal] = useState<Timestamp | null>(null);
 
   return (

@@ -24,10 +24,20 @@ WHERE id = ?;
 SELECT * FROM timestamps
 WHERE id = ?;
 
+-- name: GetAllTimestampsForUser :many
+SELECT * FROM timestamps
+WHERE user_id = ?;
+
 -- name: GetTimestampsInRange :many
 SELECT * FROM timestamps
 WHERE user_id = ?
 AND start_time < @end_time
+AND end_time IS NOT NULL
+AND end_time > @start_time;
+
+-- name: GetAllTimestampsInRange :many
+SELECT * FROM timestamps
+WHERE start_time < @end_time
 AND end_time IS NOT NULL
 AND end_time > @start_time;
 

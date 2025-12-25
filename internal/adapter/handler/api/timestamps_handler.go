@@ -24,6 +24,7 @@ func (s *APITimestampsHandler) RegisterRoutes(group *echo.Group) {
 	g.PATCH("/:id", s.Stop)
 	g.PUT("/:id", s.Update)
 	g.GET("/day", s.GetTimestampsForToday)
+	g.GET("", s.GetTimestamps)
 	g.GET("/latest", s.GetLatestTimestamp)
 }
 
@@ -93,4 +94,63 @@ func (h *APITimestampsHandler) Update(c echo.Context) error {
 	}
 
 	return NewJsonResponse(c, t)
+}
+
+func (h *APITimestampsHandler) GetTimestamps(c echo.Context) error {
+	currUser := c.Get("user").(domain.User)
+	ctx := c.Request().Context()
+
+	yearParam := c.QueryParam("year")
+	monthParam := c.QueryParam("month")
+
+	if yearParam != "" && monthParam != "" {
+		year, err := strconv.Atoi(yearParam)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid id")
+		}
+
+		month, err := strconv.Atoi(monthParam)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid id")
+		}
+
+		t, err := h.timestamps.GetForMonth(ctx, currUser.ID, year, month)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusNotFound, err.Error())
+		}
+
+		return NewJsonResponse(c, t)
+	} else if yearParam != "" {
+		year, err := strconv.Atoi(yearParam)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid id")
+		}
+
+		t, err := h.timestamps.GetForYear(ctx, currUser.ID, year)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusNotFound, err.Error())
+		}
+
+		return NewJsonResponse(c, t)
+	} else if monthParam != "" {
+		year := domain.CurrentYear()
+		month, err := strconv.Atoi(monthParam)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid id")
+		}
+
+		t, err := h.timestamps.GetForMonth(ctx, currUser.ID, year, month)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusNotFound, err.Error())
+		}
+
+		return NewJsonResponse(c, t)
+	} else {
+		t, err := h.timestamps.GetAllForUser(ctx, currUser.ID)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusNotFound, err.Error())
+		}
+
+		return NewJsonResponse(c, t)
+	}
 }

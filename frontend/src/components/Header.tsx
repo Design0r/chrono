@@ -36,12 +36,14 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
 
           {auth.isAuthenticated && (
             <div
-              className="z-20! max-lg:dock max-lg:border-t max-lg:border-accent/15 max-lg:bg-base-100/50! backdrop-blur-xl overflow-x-auto flex gap-4 lg:w-fit 
+              className="z-20! max-lg:dock max-lg:border-t max-lg:border-accent/15 max-lg:bg-base-100/50! backdrop-blur-xl overflow-x-auto flex gap-1 md:gap-2 lg:w-fit 
 						*:flex *:flex-col! *:lg:flex-row! *:lg:gap-2 *:lg:items-center"
             >
               <MenuButton to="/">
                 <span className="icon-outlined">home</span>
-                <span className="font-medium text-base">Home</span>
+                <span className="hidden md:block font-medium text-base">
+                  Home
+                </span>
               </MenuButton>
               <MenuButton
                 to="/calendar/$year/$month"
@@ -51,11 +53,24 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
                 }}
               >
                 <span className="icon-outlined">calendar_today</span>
-                <span className="font-medium text-base">Calendar</span>
+                <span className="hidden md:block font-medium text-base">
+                  Calendar
+                </span>
+              </MenuButton>
+              <MenuButton
+                to="/timestamps"
+                search={{ year: date.getFullYear().toString() }}
+              >
+                <span className="icon-outlined">timer</span>
+                <span className="hidden md:block font-medium text-base">
+                  Timestamps
+                </span>
               </MenuButton>
               <MenuButton to="/team">
                 <span className="icon-outlined">group</span>
-                <span className="font-medium text-base">Team</span>
+                <span className="hidden md:block font-medium text-base">
+                  Team
+                </span>
               </MenuButton>
               {userQ.data?.is_superuser && (
                 <>
@@ -119,11 +134,7 @@ export function MenuButton({ children, to, ...props }: MenuButtonProps) {
       {...props}
       className={`btn btn-ghost py-6 hover:bg-accent/5 border-0 max-lg:min-w-24 ${pathname === to && "text-primary"}`}
     >
-      {children && Array.isArray(children) ? (
-        <>{...children}</>
-      ) : (
-        <>{children}</>
-      )}
+      {children}
     </Link>
   );
 }

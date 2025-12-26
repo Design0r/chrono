@@ -27,6 +27,7 @@ func (s *APITimestampsHandler) RegisterRoutes(group *echo.Group) {
 	g.GET("/day", s.GetTimestampsForToday)
 	g.GET("", s.GetTimestamps)
 	g.GET("/latest", s.GetLatestTimestamp)
+	g.GET("/worked/:year", s.GetWorkHoursForYear)
 }
 
 func (h *APITimestampsHandler) Start(c echo.Context) error {
@@ -129,4 +130,22 @@ func (h *APITimestampsHandler) GetTimestamps(c echo.Context) error {
 	}
 
 	return NewJsonResponse(c, t)
+}
+
+func (h *APITimestampsHandler) GetWorkHoursForYear(c echo.Context) error {
+	currUser := c.Get("user").(domain.User)
+	ctx := c.Request().Context()
+
+	yearParam := c.Param("year")
+	year, err := strconv.Atoi(yearParam)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "year parameter is missing")
+	}
+
+	work, err := h.timestamps.GetWorkHoursForYear(ctx, currUser.ID, year)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return NewJsonResponse(c, work)
 }

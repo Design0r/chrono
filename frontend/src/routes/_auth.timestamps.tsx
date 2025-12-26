@@ -74,27 +74,29 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
-      <label>
-        Start Date
-        <input
-          type="date"
-          className="input"
-          defaultValue={startDate && isoToDateLocal(startDate)}
-          onChange={(e) => setStartDate(e.target.value)}
-        />
-      </label>
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <label className="space-x-2 flex flex-col lg:flex-row items-center">
+          <span>Start Date</span>
+          <input
+            type="date"
+            className="input"
+            defaultValue={startDate && isoToDateLocal(startDate)}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </label>
 
-      <label>
-        End Date
-        <input
-          type="date"
-          className="input"
-          defaultValue={endDate && isoToDateLocal(endDate)}
-          onChange={(e) => setEndDate(e.target.value)}
-        />
-      </label>
+        <label className="space-x-2 flex flex-col lg:flex-row items-center">
+          <span>End Date</span>
+          <input
+            type="date"
+            className="input"
+            defaultValue={endDate && isoToDateLocal(endDate)}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </label>
+      </div>
 
-      <h2 className="text-lg">
+      <h2 className="text-lg text-center xl:text-left">
         Total Duration: {counter.hours}h {counter.minutes}m {counter.seconds}s
       </h2>
 

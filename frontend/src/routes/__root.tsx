@@ -18,6 +18,7 @@ function RootComponent() {
         <Header chrono={chrono} />
         <div className="container h-full justify-center mx-auto ">
           <Outlet />
+          <div className="h-20 md:h-0"></div>
         </div>
         <TanStackDevtools
           config={{

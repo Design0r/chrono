@@ -1,4 +1,4 @@
-import type { Timestamp } from "../../types/response";
+import type { Timestamp, WorkTime } from "../../types/response";
 import { returnOrError } from "../error";
 import { CHRONO_URL } from "./chrono";
 
@@ -96,5 +96,15 @@ export class ApiTimestamps {
 
     const r = await returnOrError(response);
     return r.data as Timestamp;
+  }
+
+  async getWorkHours(year: number): Promise<WorkTime> {
+    const response = await fetch(CHRONO_URL + `/timestamps/worked/${year}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const r = await returnOrError(response);
+    return r.data as WorkTime;
   }
 }

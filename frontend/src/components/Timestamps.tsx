@@ -108,7 +108,7 @@ export function Timestamps() {
           </div>
 
           <p className="text-center text-xl">
-            Total:
+            Today:{" "}
             <span>
               {totalTime.hours}h {totalTime.minutes}m {totalTime.seconds}s
             </span>

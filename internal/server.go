@@ -162,7 +162,7 @@ func (s *Server) InitServices() {
 	settingSvc := service.NewSettingsService(s.repos.settings, s.log)
 	krankSvc := service.NewKrankheitsExportService(&eventSvc, &userSvc)
 	aworkSvc := service.NewAworkService(&eventSvc, &userSvc, s.log)
-	timestampSvc := service.NewTimestampsService(s.repos.timestamps, s.log)
+	timestampSvc := service.NewTimestampsService(s.repos.timestamps, &eventSvc, s.log)
 
 	s.services = services{
 		refresh:    &refreshTokenSvc,

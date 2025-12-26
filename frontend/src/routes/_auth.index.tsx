@@ -51,9 +51,17 @@ function Home() {
     retry: false,
   });
 
+  const worktimeQ = useQuery({
+    queryKey: ["timestamps", "worked", year],
+    queryFn: () => chrono.timestamps.getWorkHours(year),
+    staleTime: 1000 * 60 * 60, // 1h
+    gcTime: 1000 * 60 * 60 * 2, // 2h
+    retry: false,
+  });
+
   const [awork, setAwork] = useState<WorkTime | undefined>();
 
-  const queries = [userQ, vacationQ];
+  const queries = [userQ, vacationQ, worktimeQ];
   const anyPending = queries.some((q) => q.isPending);
   const firstError = queries.find((q) => q.isError)?.error;
 
@@ -71,6 +79,7 @@ function Home() {
 
   const user = userQ.data! as UserWithVacation;
   const vacation = vacationQ.data!;
+  const worktimes = worktimeQ.data! as WorkTime;
 
   const daysYear = daysInYear(year);
   const currDay = dayOfYear();
@@ -83,7 +92,7 @@ function Home() {
         100
       : 100 - vacRemainingPercent;
 
-  const workRemaining = awork ? awork.expected - awork.worked : 0;
+  const aworkWorkRemaining = awork ? awork.expected - awork.worked : 0;
 
   return (
     <div className="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
@@ -93,6 +102,92 @@ function Home() {
       </div>
       <TitleSection title="Timestamps">
         <Timestamps />
+      </TitleSection>
+
+      <TitleSection title="Your worktimes">
+        <StatCard>
+          <StatCardElement
+            title="Work done this year"
+            subtitle={`${(worktimes.expected - worktimes.worked).toFixed(2)} h ${worktimes.expected - worktimes.worked > 0 ? "remaining" : "over"}`}
+          >
+            <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-primary">
+              {worktimes.worked.toFixed(2)} h
+            </span>
+          </StatCardElement>
+          <StatCardElement
+            title="Expected work"
+            subtitle={`${(worktimes.expected / 8).toFixed(2)} days`}
+          >
+            <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-accent">
+              {worktimes.expected} h
+            </span>
+          </StatCardElement>
+          <StatCardElement
+            title="Vacation taken"
+            subtitle={`${(worktimes.vacation / 8).toFixed(2)} days`}
+          >
+            <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">
+              {worktimes.vacation} h
+            </span>
+          </StatCardElement>
+          <StatCardElement
+            title="Holidays"
+            subtitle={`${(worktimes.holidays / 8).toFixed(2)} days`}
+          >
+            <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">
+              {worktimes.holidays} h
+            </span>
+          </StatCardElement>
+        </StatCard>
+      </TitleSection>
+
+      <TitleSection title="Awork">
+        {aworkQ.isPending ? (
+          <div className="skeleton h-30 flex justify-center w-full">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <>
+            {awork && (
+              <>
+                <StatCard>
+                  <StatCardElement
+                    title="Work done this year"
+                    subtitle={`${aworkWorkRemaining.toFixed(2)} h ${aworkWorkRemaining > 0 ? "remaining" : "over"}`}
+                  >
+                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-primary">
+                      {awork.worked.toFixed(2)} h
+                    </span>
+                  </StatCardElement>
+                  <StatCardElement
+                    title="Expected work"
+                    subtitle={`${(awork.expected / 8).toFixed(2)} days`}
+                  >
+                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-accent">
+                      {awork.expected} h
+                    </span>
+                  </StatCardElement>
+                  <StatCardElement
+                    title="Vacation taken"
+                    subtitle={`${(awork.vacation / 8).toFixed(2)} days`}
+                  >
+                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">
+                      {awork.vacation} h
+                    </span>
+                  </StatCardElement>
+                  <StatCardElement
+                    title="Holidays"
+                    subtitle={`${(awork.holidays / 8).toFixed(2)} days`}
+                  >
+                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">
+                      {awork.holidays} h
+                    </span>
+                  </StatCardElement>
+                </StatCard>
+              </>
+            )}
+          </>
+        )}
       </TitleSection>
       <TitleSection title="Your vacation">
         <StatCard>
@@ -134,54 +229,6 @@ function Home() {
         </StatCard>
       </TitleSection>
 
-      <TitleSection title="Your worktimes">
-        {aworkQ.isPending ? (
-          <div className="skeleton h-30 flex justify-center w-full">
-            <LoadingSpinner />
-          </div>
-        ) : (
-          <>
-            {awork && (
-              <>
-                <StatCard>
-                  <StatCardElement
-                    title="Work done this year"
-                    subtitle={`${workRemaining.toFixed(2)} h ${workRemaining > 0 ? "remaining" : "over"}`}
-                  >
-                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-primary">
-                      {awork.worked.toFixed(2)} h
-                    </span>
-                  </StatCardElement>
-                  <StatCardElement
-                    title="Expected work"
-                    subtitle={`${(awork.expected / 8).toFixed(2)} days`}
-                  >
-                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-accent">
-                      {awork.expected} h
-                    </span>
-                  </StatCardElement>
-                  <StatCardElement
-                    title="Vacation taken"
-                    subtitle={`${(awork.vacation / 8).toFixed(2)} days`}
-                  >
-                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">
-                      {awork.vacation} h
-                    </span>
-                  </StatCardElement>
-                  <StatCardElement
-                    title="Holidays"
-                    subtitle={`${(awork.holidays / 8).toFixed(2)} days`}
-                  >
-                    <span className="-mb-1 pt-1.5 stat-value max-sm:text-2xl text-secondary opacity-40">
-                      {awork.holidays} h
-                    </span>
-                  </StatCardElement>
-                </StatCard>
-              </>
-            )}
-          </>
-        )}
-      </TitleSection>
       <TitleSection title="Year progession">
         <StatCard>
           <StatCardElement

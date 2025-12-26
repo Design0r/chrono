@@ -10,11 +10,16 @@ import (
 
 type TimestampsService struct {
 	timestamps domain.TimestampsRepository
+	event      *EventService
 	log        *slog.Logger
 }
 
-func NewTimestampsService(r domain.TimestampsRepository, log *slog.Logger) TimestampsService {
-	return TimestampsService{timestamps: r, log: log}
+func NewTimestampsService(
+	r domain.TimestampsRepository,
+	e *EventService,
+	log *slog.Logger,
+) TimestampsService {
+	return TimestampsService{timestamps: r, log: log, event: e}
 }
 
 func (r *TimestampsService) GetById(ctx context.Context, id int64) (domain.Timestamp, error) {
@@ -112,4 +117,109 @@ func (r *TimestampsService) GetAllForUser(
 	userId int64,
 ) ([]domain.Timestamp, error) {
 	return r.timestamps.GetAllForUser(ctx, userId)
+}
+
+func (r *TimestampsService) GetWorkHoursForYear(
+	ctx context.Context,
+	userId int64,
+	year int,
+) (domain.WorkHours, error) {
+	now := time.Now()
+	loc := now.Location()
+
+	// Start: Jan 1 of the given year
+	yearStart := time.Date(year, time.January, 1, 0, 0, 0, 0, loc)
+
+	var periodEnd time.Time
+
+	switch {
+	case year < now.Year():
+		// Past year: full year until Dec 31 23:59:59
+		periodEnd = time.Date(year, time.December, 31, 23, 59, 59, 0, loc)
+
+	case year == now.Year():
+		// Current year: until "yesterday evening"
+		yesterday := now.AddDate(0, 0, -1)
+		// If it's Jan 1, yesterday is previous year → no days in this year yet
+		if yesterday.Before(yearStart) {
+			return domain.WorkHours{}, nil
+		}
+		periodEnd = time.Date(
+			yesterday.Year(),
+			yesterday.Month(),
+			yesterday.Day(),
+			23,
+			59,
+			59,
+			0,
+			loc,
+		)
+
+	default: // year > now.Year()
+		// Future year: nothing to count yet
+		return domain.WorkHours{}, nil
+	}
+
+	// If somehow end is before start, just bail out
+	if periodEnd.Before(yearStart) {
+		return domain.WorkHours{}, nil
+	}
+	// ---- HOLIDAYS / VACATION / SICKNESS ----
+	// NOTE: these must use the same period (yearStart..periodEnd) to be fully consistent.
+	holidays, err := r.event.GetNonWeekendCountHolidays(ctx, yearStart, periodEnd)
+	if err != nil {
+		return domain.WorkHours{}, err
+	}
+
+	vacation, err := r.event.GetUsedVacation(ctx, userId, yearStart, periodEnd)
+	if err != nil {
+		return domain.WorkHours{}, err
+	}
+
+	sickDays := 0
+	allEvents, err := r.event.GetAllByUserId(ctx, userId)
+	if err != nil {
+		return domain.WorkHours{}, err
+	}
+
+	for _, e := range allEvents {
+		if e.Name != "krank" {
+			continue
+		}
+		// only count sick days in [yearStart, periodEnd]
+		if !e.ScheduledAt.Before(yearStart) && !e.ScheduledAt.After(periodEnd) {
+			sickDays++
+		}
+	}
+
+	// ---- WORKED HOURS ----
+
+	worked, err := r.timestamps.GetTotalSecondsInRange(ctx, userId, yearStart, periodEnd)
+	if err != nil {
+		return domain.WorkHours{}, err
+	}
+
+	workedHours := worked / 60 / 60
+
+	// ---- EXPECTED HOURS (weekdays between yearStart and periodEnd) ----
+
+	expectedDays := 0
+	for d := yearStart; !d.After(periodEnd); d = d.AddDate(0, 0, 1) {
+		wd := d.Weekday()
+		if wd != time.Saturday && wd != time.Sunday {
+			expectedDays++
+		}
+	}
+
+	// final numbers (assuming 8h per working day)
+	expectedHours := (float64(expectedDays-holidays) - vacation - float64(sickDays)) * 8
+	holidayHours := float64(holidays) * 8
+	vacationHours := vacation * 8
+
+	return domain.WorkHours{
+		Worked:   workedHours,
+		Expected: expectedHours,
+		Holidays: holidayHours,
+		Vacation: vacationHours,
+	}, nil
 }

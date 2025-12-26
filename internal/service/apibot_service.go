@@ -36,8 +36,7 @@ func NewAPIBotFromEnv(log *slog.Logger) *APIBot {
 	return &APIBot{Name: name, Email: email, Password: pw, IsSuperuser: true, log: log}
 }
 
-func (a *APIBot) Register(svc *UserService, pw auth.PasswordHasher) {
-	ctx := context.Background()
+func (a *APIBot) Register(ctx context.Context, svc *UserService, pw auth.PasswordHasher) {
 	_, err := svc.GetByEmail(ctx, a.Email)
 	if err == nil {
 		a.log.Error("User with email already exists", slog.String("email", a.Email))

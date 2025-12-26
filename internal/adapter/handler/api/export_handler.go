@@ -27,12 +27,12 @@ func (h *APIExportHandler) ExportYear(c echo.Context) error {
 	yearParam := c.Param("year")
 	year, err := strconv.Atoi(yearParam)
 	if err != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
 
 	s, err := h.krank.ExportAll(c.Request().Context(), year)
 	if err != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
 
 	filename := fmt.Sprintf("chrono-krankheitstage-export-%v.csv", year)

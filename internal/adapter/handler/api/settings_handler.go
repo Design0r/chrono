@@ -27,7 +27,7 @@ func (s *APISettingsHandler) RegisterRoutes(group *echo.Group) {
 func (h *APISettingsHandler) Settings(c echo.Context) error {
 	s, err := h.settings.GetFirst(c.Request().Context())
 	if err != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
 
 	return NewJsonResponse(c, s)

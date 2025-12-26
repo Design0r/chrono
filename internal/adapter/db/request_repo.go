@@ -135,7 +135,7 @@ func (r *SQLRequestRepo) UpdateInRange(
 		ScheduledAt_2: end,
 	}
 
-	reqId, err := r.r.UpdateRequestStateRange(context.Background(), params)
+	reqId, err := r.r.UpdateRequestStateRange(ctx, params)
 	if err != nil {
 		r.log.Error(
 			"UpdateRequestStateRange failed",

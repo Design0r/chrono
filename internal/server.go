@@ -271,7 +271,7 @@ func (s *Server) PreStart() error {
 	}
 
 	bot := service.NewAPIBotFromEnv(s.log)
-	bot.Register(s.services.user, s.services.pwHasher)
+	bot.Register(context.Background(), s.services.user, s.services.pwHasher)
 
 	return nil
 }

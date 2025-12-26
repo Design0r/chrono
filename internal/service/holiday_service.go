@@ -115,5 +115,5 @@ func (svc *HolidayService) CreateCache(ctx context.Context, year int) error {
 }
 
 func (svc *HolidayService) GetAPICacheYears(ctx context.Context) ([]int64, error) {
-	return svc.api.GetAll(context.Background())
+	return svc.api.GetAll(ctx)
 }

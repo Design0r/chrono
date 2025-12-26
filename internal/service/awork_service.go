@@ -146,12 +146,11 @@ func (a *AworkService) ConvertAworkTime(aworkTime string) (time.Time, error) {
 }
 
 func (a *AworkService) GetWorkHoursForYear(
+	ctx context.Context,
 	aworkUserId string,
 	userId int64,
 	year int,
 ) (domain.WorkHours, error) {
-	ctx := context.Background()
-
 	now := time.Now()
 	loc := now.Location()
 

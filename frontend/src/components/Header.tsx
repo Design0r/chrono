@@ -9,6 +9,7 @@ import type { ChronoClient } from "../api/chrono/client";
 import { useAuth } from "../auth";
 import { Avatar } from "./Avatar";
 import { Notifications } from "./Notifications";
+import { isoToDateLocal } from "./Timestamps";
 
 export function Header({ chrono }: { chrono: ChronoClient }) {
   const auth = useAuth();
@@ -25,6 +26,8 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
   });
 
   const date = new Date();
+  const startDate = new Date(`01.01.${date.getFullYear()}Z`);
+  const endDate = new Date(`01.01.${date.getFullYear() + 1}Z`);
 
   return (
     <div className="mb-4 mx-auto p-4 lg:px-4">
@@ -59,7 +62,10 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
               </MenuButton>
               <MenuButton
                 to="/timestamps"
-                search={{ year: date.getFullYear().toString() }}
+                search={{
+                  startDate: isoToDateLocal(startDate.toISOString()),
+                  endDate: isoToDateLocal(endDate.toISOString()),
+                }}
               >
                 <span className="icon-outlined">timer</span>
                 <span className="hidden md:block font-medium text-base">

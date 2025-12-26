@@ -1,35 +1,61 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { ErrorPage } from "../components/ErrorPage";
 import type { Timestamp } from "../types/response";
-import { TimestampTable } from "../components/Timestamps";
+import {
+  durationFromTimestamps,
+  isoToDateLocal,
+  secondsToCounter,
+  TimestampTable,
+} from "../components/Timestamps";
+import { useEffect, useState } from "react";
 
 type TimestampsSearchParams = {
-  year?: string;
-  month?: string;
+  startDate?: string;
+  endDate?: string;
 };
 
 export const Route = createFileRoute("/_auth/timestamps")({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>): TimestampsSearchParams => {
     return {
-      year: search.user as string,
-      month: search.event as string,
+      startDate: search.startDate as string,
+      endDate: search.endDate as string,
     };
   },
 });
 
 function RouteComponent() {
   const { chrono } = Route.useRouteContext();
+  const navigate = useNavigate();
 
   const params = Route.useSearch();
-  const year = params.year ? Number(params.year) : undefined;
-  const month = params.month ? Number(params.month) : undefined;
+
+  const [startDate, setStartDate] = useState<string | undefined>();
+  const [endDate, setEndDate] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (params.startDate) setStartDate(params.startDate);
+    else setStartDate(undefined);
+
+    if (params.endDate) setEndDate(params.endDate);
+    else setEndDate(undefined);
+  }, [params]);
+
+  useEffect(() => {
+    navigate({
+      to: "/timestamps",
+      search: {
+        startDate: startDate,
+        endDate: endDate,
+      },
+    });
+  }, [startDate, endDate]);
 
   const timestampQ = useQuery({
-    queryKey: ["timestamps", "all"],
-    queryFn: () => chrono.timestamps.getAllForUser(year, month),
+    queryKey: ["timestamps", startDate, endDate],
+    queryFn: () => chrono.timestamps.getAllForUser(startDate, endDate),
     staleTime: 1000 * 60 * 1, // 1min
     gcTime: 1000 * 60 * 30, // 30min
     retry: false,
@@ -44,8 +70,34 @@ function RouteComponent() {
 
   const timestamps = timestampQ.data! as Timestamp[];
 
+  const counter = secondsToCounter(durationFromTimestamps(timestamps));
+
   return (
     <div className="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
+      <label>
+        Start Date
+        <input
+          type="date"
+          className="input"
+          defaultValue={startDate && isoToDateLocal(startDate)}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
+      </label>
+
+      <label>
+        End Date
+        <input
+          type="date"
+          className="input"
+          defaultValue={endDate && isoToDateLocal(endDate)}
+          onChange={(e) => setEndDate(e.target.value)}
+        />
+      </label>
+
+      <h2 className="text-lg">
+        Total Duration: {counter.hours}h {counter.minutes}m {counter.seconds}s
+      </h2>
+
       <TimestampTable timestamps={timestamps} />
     </div>
   );

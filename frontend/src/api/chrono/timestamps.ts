@@ -13,11 +13,11 @@ export class ApiTimestamps {
     return r.data as Timestamp;
   }
 
-  async getAllForUser(year?: number, month?: number): Promise<Timestamp[]> {
+  async getAllForUser(start?: string, end?: string): Promise<Timestamp[]> {
     let url = "";
-    if (year && month) url = `?year=${year}&month${month}`;
-    else if (year) url = `?year=${year}`;
-    else if (month) url = `?month${month}`;
+    if (start && end) url = `?startDate=${start}&endDate=${end}`;
+    else if (start) url = `?startDate=${start}`;
+    else if (end) url = `?endDate=${end}`;
 
     const response = await fetch(CHRONO_URL + `/timestamps${url}`, {
       method: "GET",

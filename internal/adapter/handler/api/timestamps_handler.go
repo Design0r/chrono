@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -100,57 +101,32 @@ func (h *APITimestampsHandler) GetTimestamps(c echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
-	yearParam := c.QueryParam("year")
-	monthParam := c.QueryParam("month")
+	startParam := c.QueryParam("startDate")
+	endParam := c.QueryParam("endDate")
 
-	if yearParam != "" && monthParam != "" {
-		year, err := strconv.Atoi(yearParam)
+	startDate := time.UnixMilli(0)
+	endDate := time.Now()
+
+	if startParam != "" {
+		s, err := time.Parse(time.DateOnly, startParam)
 		if err != nil {
-			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid id")
+			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid startDate")
 		}
-
-		month, err := strconv.Atoi(monthParam)
-		if err != nil {
-			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid id")
-		}
-
-		t, err := h.timestamps.GetForMonth(ctx, currUser.ID, year, month)
-		if err != nil {
-			return NewErrorResponse(c, http.StatusNotFound, err.Error())
-		}
-
-		return NewJsonResponse(c, t)
-	} else if yearParam != "" {
-		year, err := strconv.Atoi(yearParam)
-		if err != nil {
-			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid id")
-		}
-
-		t, err := h.timestamps.GetForYear(ctx, currUser.ID, year)
-		if err != nil {
-			return NewErrorResponse(c, http.StatusNotFound, err.Error())
-		}
-
-		return NewJsonResponse(c, t)
-	} else if monthParam != "" {
-		year := domain.CurrentYear()
-		month, err := strconv.Atoi(monthParam)
-		if err != nil {
-			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid id")
-		}
-
-		t, err := h.timestamps.GetForMonth(ctx, currUser.ID, year, month)
-		if err != nil {
-			return NewErrorResponse(c, http.StatusNotFound, err.Error())
-		}
-
-		return NewJsonResponse(c, t)
-	} else {
-		t, err := h.timestamps.GetAllForUser(ctx, currUser.ID)
-		if err != nil {
-			return NewErrorResponse(c, http.StatusNotFound, err.Error())
-		}
-
-		return NewJsonResponse(c, t)
+		startDate = s
 	}
+
+	if endParam != "" {
+		e, err := time.Parse(time.DateOnly, endParam)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid startDate")
+		}
+		endDate = e
+	}
+
+	t, err := h.timestamps.GetInRange(ctx, currUser.ID, startDate, endDate)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusNotFound, err.Error())
+	}
+
+	return NewJsonResponse(c, t)
 }

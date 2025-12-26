@@ -80,17 +80,7 @@ export function Timestamps() {
     if (timestampsQ.isError) addErrorToast(timestampsQ.error);
   }, [timestampsQ.isError]);
 
-  const totalTime = secondsToCounter(
-    timestamps
-      .map((t) => {
-        const start = new Date(t.start_time);
-        const end = t.end_time && new Date(t.end_time);
-        return end ? (end.getTime() - start.getTime()) / 1000 : 0;
-      })
-      .reduce((acc, curr) => {
-        return acc + curr;
-      }, 0),
-  );
+  const totalTime = secondsToCounter(durationFromTimestamps(timestamps));
 
   return (
     <div className="flex flex-col space-y-4 lg:space-y-8">
@@ -133,13 +123,25 @@ export function Timestamps() {
   );
 }
 
+export function durationFromTimestamps(timestamps: Timestamp[]): number {
+  return timestamps
+    .map((t) => {
+      const start = new Date(t.start_time);
+      const end = t.end_time && new Date(t.end_time);
+      return end ? (end.getTime() - start.getTime()) / 1000 : 0;
+    })
+    .reduce((acc, curr) => {
+      return acc + curr;
+    }, 0);
+}
+
 type TimeCounter = {
   hours: number;
   minutes: number;
   seconds: number;
 };
 
-function secondsToCounter(totalSeconds: number): TimeCounter {
+export function secondsToCounter(totalSeconds: number): TimeCounter {
   const seconds = Math.max(0, Math.floor(totalSeconds));
   const hours = Math.floor(seconds / 60 / 60);
   const minutes = Math.floor(seconds / 60) % 60;
@@ -219,7 +221,7 @@ export function TimestampTable({ timestamps }: { timestamps: Timestamp[] }) {
 }
 
 // ISO ("2025-12-23T20:44:00Z") -> datetime-local ("2025-12-23T20:44")
-function isoToDatetimeLocal(iso: string) {
+export function isoToDatetimeLocal(iso: string) {
   const d = new Date(iso);
   const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -233,8 +235,19 @@ function isoToDatetimeLocal(iso: string) {
   return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
 }
 
+export function isoToDateLocal(iso: string) {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  const yyyy = d.getFullYear();
+  const mm = pad(d.getMonth() + 1);
+  const dd = pad(d.getDate());
+
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 // datetime-local ("2025-12-23T21:44") -> ISO UTC ("2025-12-23T20:44:00Z")
-function datetimeLocalToIso(value: string) {
+export function datetimeLocalToIso(value: string) {
   const d = new Date(value);
   const iso = d.toISOString();
   const fixed = `${iso.split(".")[0]}Z`;

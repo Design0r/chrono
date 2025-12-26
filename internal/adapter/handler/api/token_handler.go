@@ -14,19 +14,19 @@ import (
 )
 
 type APITokenHandler struct {
-	user     *service.UserService
-	vacation *service.VacationTokenService
-	notif    *service.NotificationService
-	log      *slog.Logger
+	user  *service.UserService
+	token *service.TokenService
+	notif *service.NotificationService
+	log   *slog.Logger
 }
 
 func NewAPITokenHandler(
-	v *service.VacationTokenService,
+	t *service.TokenService,
 	u *service.UserService,
 	n *service.NotificationService,
 	log *slog.Logger,
 ) APITokenHandler {
-	return APITokenHandler{vacation: v, user: u, notif: n, log: log}
+	return APITokenHandler{token: t, user: u, notif: n, log: log}
 }
 
 func (h *APITokenHandler) RegisterRoutes(group *echo.Group) {
@@ -58,7 +58,7 @@ func (h *APITokenHandler) CreateTokens(c echo.Context) error {
 		return NewErrorResponse(c, http.StatusInternalServerError, "Failed to get user.")
 	}
 
-	_, err = h.vacation.Create(ctx, tokenNum, time.Now().Year(), user.ID)
+	_, err = h.token.CreateVacationToken(ctx, tokenNum, time.Now().Year(), user.ID)
 	if err != nil {
 		return NewErrorResponse(
 			c,

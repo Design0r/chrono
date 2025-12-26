@@ -13,21 +13,21 @@ import (
 )
 
 type EventService struct {
-	log      *slog.Logger
-	event    domain.EventRepository
-	vacation *VacationTokenService
-	request  *RequestService
-	user     *UserService
+	log     *slog.Logger
+	event   domain.EventRepository
+	token   *TokenService
+	request *RequestService
+	user    *UserService
 }
 
 func NewEventService(
 	e domain.EventRepository,
 	r *RequestService,
 	u *UserService,
-	v *VacationTokenService,
+	t *TokenService,
 	log *slog.Logger,
 ) EventService {
-	return EventService{log: log, event: e, request: r, user: u, vacation: v}
+	return EventService{log: log, event: e, request: r, user: u, token: t}
 }
 
 func (svc *EventService) Create(
@@ -39,7 +39,7 @@ func (svc *EventService) Create(
 	evt := domain.Event{Name: eventType}
 
 	if evt.IsVacation() && user.IsSuperuser {
-		_, err := svc.vacation.Create(ctx, -1, data.Year, user.ID)
+		_, err := svc.token.CreateVacationToken(ctx, -1, data.Year, user.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +91,7 @@ func (svc *EventService) Delete(
 	}
 
 	if event.IsVacation() && event.IsAccepted() {
-		_, err := svc.vacation.Create(ctx, 1.0, event.ScheduledAt.Year(), event.UserID)
+		_, err := svc.token.CreateVacationToken(ctx, 1.0, event.ScheduledAt.Year(), event.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -183,7 +183,7 @@ func (svc *EventService) GetUserWithVacation(
 	month int,
 ) (domain.UserWithVacation, error) {
 	start := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
-	remaining, err := svc.vacation.GetRemainingVacationForUser(ctx, userId, start, start)
+	remaining, err := svc.token.GetRemainingVacationForUser(ctx, userId, start, start)
 	if err != nil {
 		return domain.UserWithVacation{}, err
 	}

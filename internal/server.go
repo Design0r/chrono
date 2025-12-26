@@ -41,13 +41,10 @@ type services struct {
 	event      *service.EventService
 	holiday    *service.HolidayService
 	notif      *service.NotificationService
-	refresh    *service.RefreshTokenService
 	request    *service.RequestService
-	session    *service.SessionService
 	settings   *service.SettingsService
 	token      *service.TokenService
 	user       *service.UserService
-	vac        *service.VacationTokenService
 	pwHasher   auth.PasswordHasher
 	krank      *service.KrankheitsExport
 	awork      *service.AworkService
@@ -130,9 +127,7 @@ func (s *Server) InitRepos() {
 }
 
 func (s *Server) InitServices() {
-	refreshTokenSvc := service.NewRefreshTokenService(s.repos.refresh, s.log)
-	vacationTokenSvc := service.NewVacationTokenService(s.repos.vac, s.log)
-	tokenSvc := service.NewTokenService(&refreshTokenSvc, &vacationTokenSvc, s.log)
+	tokenSvc := service.NewTokenService(s.repos.refresh, s.repos.vac, s.log)
 	notificationSvc := service.NewNotificationService(
 		s.repos.notif,
 		s.repos.notifUser,
@@ -140,12 +135,11 @@ func (s *Server) InitServices() {
 	)
 	userSvc := service.NewUserService(s.repos.user, &notificationSvc, &tokenSvc, s.log)
 	requestSvc := service.NewRequestService(s.repos.request, s.repos.user, &notificationSvc, s.log)
-	sessionSvc := service.NewSessionService(s.repos.session, s.log)
 	eventSvc := service.NewEventService(
 		s.repos.event,
 		&requestSvc,
 		&userSvc,
-		&vacationTokenSvc,
+		&tokenSvc,
 		s.log,
 	)
 	passwordHasher := auth.NewBcryptHasher(10)
@@ -165,13 +159,10 @@ func (s *Server) InitServices() {
 	timestampSvc := service.NewTimestampsService(s.repos.timestamps, &eventSvc, s.log)
 
 	s.services = services{
-		refresh:    &refreshTokenSvc,
-		vac:        &vacationTokenSvc,
 		token:      &tokenSvc,
 		notif:      &notificationSvc,
 		user:       &userSvc,
 		request:    &requestSvc,
-		session:    &sessionSvc,
 		event:      &eventSvc,
 		pwHasher:   &passwordHasher,
 		auth:       &authSvc,
@@ -207,10 +198,15 @@ func (s *Server) InitAPIRoutes() {
 	requestHandler := api.NewAPIRequestsHandler(
 		s.services.request,
 		s.services.event,
-		s.services.vac,
+		s.services.token,
 		s.log,
 	)
-	tokenHandler := api.NewAPITokenHandler(s.services.vac, s.services.user, s.services.notif, s.log)
+	tokenHandler := api.NewAPITokenHandler(
+		s.services.token,
+		s.services.user,
+		s.services.notif,
+		s.log,
+	)
 	settingsHandler := api.NewAPISettingsHandler(s.services.settings)
 	exportHander := api.NewAPIExportHandler(s.services.krank)
 	aworkHandler := api.NewAPIAworkHandler(
@@ -225,7 +221,7 @@ func (s *Server) InitAPIRoutes() {
 	apiGrp := s.Router.Group("/api/v1")
 	authGrp := apiGrp.Group(
 		"",
-		mw.SessionMiddleware(s.services.session, s.services.auth),
+		mw.SessionMiddleware(s.services.auth),
 		mw.AuthenticationMiddleware(s.services.auth),
 	)
 

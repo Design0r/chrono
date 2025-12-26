@@ -38,7 +38,7 @@ func NewAuthService(
 	}
 }
 
-func (svc *AuthService) createSessionCookie(session domain.Session) *http.Cookie {
+func (svc *AuthService) CreateSessionCookie(session domain.Session) *http.Cookie {
 	return &http.Cookie{
 		Path:     "/",
 		Name:     "session",
@@ -80,7 +80,7 @@ func (svc *AuthService) Login(ctx context.Context, email, pw string) (*http.Cook
 		return nil, errors.New("passwords do not match")
 	}
 
-	session, err := svc.session.Create(ctx, user.ID, svc.pw.SecureRandom64(), svc.sessionDuration)
+	session, err := svc.CreateSession(ctx, user.ID, svc.pw.SecureRandom64(), svc.sessionDuration)
 	if err != nil {
 		svc.log.Error(
 			"Login failed",
@@ -90,7 +90,7 @@ func (svc *AuthService) Login(ctx context.Context, email, pw string) (*http.Cook
 		return nil, err
 	}
 
-	return svc.createSessionCookie(*session), nil
+	return svc.CreateSessionCookie(*session), nil
 }
 
 func (svc *AuthService) Logout(ctx context.Context, cookie string) (*http.Cookie, error) {
@@ -134,7 +134,7 @@ func (svc *AuthService) Signup(
 		return nil, err
 	}
 
-	session, err := svc.session.Create(ctx, user.ID, svc.pw.SecureRandom64(), svc.sessionDuration)
+	session, err := svc.CreateSession(ctx, user.ID, svc.pw.SecureRandom64(), svc.sessionDuration)
 	if err != nil {
 		svc.log.Error(
 			"Login failed",
@@ -144,7 +144,7 @@ func (svc *AuthService) Signup(
 		return nil, err
 	}
 
-	return svc.createSessionCookie(*session), nil
+	return svc.CreateSessionCookie(*session), nil
 }
 
 func (svc *AuthService) GetCurrentUser(ctx context.Context, cookie string) (*domain.User, error) {
@@ -153,4 +153,41 @@ func (svc *AuthService) GetCurrentUser(ctx context.Context, cookie string) (*dom
 
 func (svc *AuthService) HashPassword(password string) (string, error) {
 	return svc.pw.Hash(password)
+}
+
+func (svc *AuthService) CreateSession(
+	ctx context.Context,
+	userId int64,
+	secureRand string,
+	duration time.Duration,
+) (*domain.Session, error) {
+	return svc.session.Create(ctx, userId, secureRand, duration)
+}
+
+func (svc *AuthService) DeleteSession(ctx context.Context, cookie string) error {
+	return svc.session.Delete(ctx, cookie)
+}
+
+func (svc *AuthService) DeleteAllSessions(ctx context.Context) error {
+	return svc.session.DeleteAll(ctx)
+}
+
+func (svc *AuthService) IsValidSession(
+	ctx context.Context,
+	cookie string,
+	timestamp time.Time,
+) bool {
+	session, err := svc.session.GetById(ctx, cookie)
+	if err != nil {
+		return false
+	}
+
+	return timestamp.Compare(session.ValidUntil) <= 0
+}
+
+func (svc *AuthService) GetUserFromSession(
+	ctx context.Context,
+	cookie string,
+) (*domain.User, error) {
+	return svc.session.GetSessionUser(ctx, cookie)
 }

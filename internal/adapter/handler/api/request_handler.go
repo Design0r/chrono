@@ -11,19 +11,19 @@ import (
 )
 
 type APIRequestsHandler struct {
-	request  *service.RequestService
-	event    *service.EventService
-	vacation *service.VacationTokenService
-	log      *slog.Logger
+	request *service.RequestService
+	event   *service.EventService
+	token   *service.TokenService
+	log     *slog.Logger
 }
 
 func NewAPIRequestsHandler(
 	r *service.RequestService,
 	e *service.EventService,
-	v *service.VacationTokenService,
+	t *service.TokenService,
 	log *slog.Logger,
 ) APIRequestsHandler {
-	return APIRequestsHandler{request: r, event: e, vacation: v, log: log}
+	return APIRequestsHandler{request: r, event: e, token: t, log: log}
 }
 
 func (h *APIRequestsHandler) RegisterRoutes(group *echo.Group) {
@@ -83,7 +83,7 @@ func (h *APIRequestsHandler) PatchRequests(c echo.Context) error {
 		if eventName == "urlaub halbtags" {
 			days /= 2
 		}
-		h.vacation.Create(ctx, days, form.StartDate.Year(), form.UserID)
+		h.token.CreateVacationToken(ctx, days, form.StartDate.Year(), form.UserID)
 	}
 
 	return NewJsonResponse(c, nil)

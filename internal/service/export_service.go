@@ -14,8 +14,8 @@ type KrankheitsExport struct {
 	user  *UserService
 }
 
-func NewKrankheitsExportService(e *EventService, u *UserService) KrankheitsExport {
-	return KrankheitsExport{
+func NewKrankheitsExportService(e *EventService, u *UserService) *KrankheitsExport {
+	return &KrankheitsExport{
 		event: e,
 		user:  u,
 	}

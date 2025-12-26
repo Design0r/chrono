@@ -27,8 +27,8 @@ func NewAuthService(
 	secureCookies bool,
 	pw auth.PasswordHasher,
 	log *slog.Logger,
-) AuthService {
-	return AuthService{
+) *AuthService {
+	return &AuthService{
 		user:            u,
 		session:         s,
 		log:             log,

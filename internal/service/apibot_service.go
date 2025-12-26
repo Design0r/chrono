@@ -17,7 +17,7 @@ type APIBot struct {
 	log         *slog.Logger
 }
 
-func NewAPIBotFromEnv(log *slog.Logger) APIBot {
+func NewAPIBotFromEnv(log *slog.Logger) *APIBot {
 	name, exists := os.LookupEnv("BOT_NAME")
 	if !exists {
 		log.Error("BOT_NAME env var missing.")
@@ -33,7 +33,7 @@ func NewAPIBotFromEnv(log *slog.Logger) APIBot {
 		log.Error("BOT_EMAIL env var missing.")
 	}
 
-	return APIBot{Name: name, Email: email, Password: pw, IsSuperuser: true, log: log}
+	return &APIBot{Name: name, Email: email, Password: pw, IsSuperuser: true, log: log}
 }
 
 func (a *APIBot) Register(svc *UserService, pw auth.PasswordHasher) {

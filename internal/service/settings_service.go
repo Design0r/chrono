@@ -12,8 +12,8 @@ type SettingsService struct {
 	log      *slog.Logger
 }
 
-func NewSettingsService(r domain.SettingsRepository, log *slog.Logger) SettingsService {
-	return SettingsService{settings: r, log: log}
+func NewSettingsService(r domain.SettingsRepository, log *slog.Logger) *SettingsService {
+	return &SettingsService{settings: r, log: log}
 }
 
 func (svc *SettingsService) Create(

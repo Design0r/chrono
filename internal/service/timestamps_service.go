@@ -18,8 +18,8 @@ func NewTimestampsService(
 	r domain.TimestampsRepository,
 	e *EventService,
 	log *slog.Logger,
-) TimestampsService {
-	return TimestampsService{timestamps: r, log: log, event: e}
+) *TimestampsService {
+	return &TimestampsService{timestamps: r, log: log, event: e}
 }
 
 func (r *TimestampsService) GetById(ctx context.Context, id int64) (domain.Timestamp, error) {

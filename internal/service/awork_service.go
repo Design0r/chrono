@@ -25,8 +25,8 @@ type AworkService struct {
 	user   *UserService
 }
 
-func NewAworkService(e *EventService, u *UserService, s *slog.Logger) AworkService {
-	return AworkService{client: http.Client{}, event: e, user: u, log: s}
+func NewAworkService(e *EventService, u *UserService, s *slog.Logger) *AworkService {
+	return &AworkService{client: http.Client{}, event: e, user: u, log: s}
 }
 
 func (a *AworkService) GetUsers() ([]domain.AworkUser, error) {

@@ -25,8 +25,8 @@ func NewHolidayService(
 	event *EventService,
 	api domain.ApiCacheRepository,
 	log *slog.Logger,
-) HolidayService {
-	return HolidayService{user: user, event: event, api: api, log: log}
+) *HolidayService {
+	return &HolidayService{user: user, event: event, api: api, log: log}
 }
 
 func (svc *HolidayService) Update(ctx context.Context, year int) error {

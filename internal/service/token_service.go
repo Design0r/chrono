@@ -18,8 +18,8 @@ func NewTokenService(
 	r domain.RefreshTokenRepository,
 	v domain.VacationTokenRepository,
 	log *slog.Logger,
-) TokenService {
-	return TokenService{refresh: r, vac: v, log: log}
+) *TokenService {
+	return &TokenService{refresh: r, vac: v, log: log}
 }
 
 func (svc *TokenService) InitYearlyTokens(ctx context.Context, user *domain.User, year int) error {

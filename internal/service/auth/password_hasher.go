@@ -18,8 +18,8 @@ type bcryptHasher struct {
 	cost int
 }
 
-func NewBcryptHasher(cost int) bcryptHasher {
-	return bcryptHasher{cost: cost}
+func NewBcryptHasher(cost int) *bcryptHasher {
+	return &bcryptHasher{cost: cost}
 }
 
 func (svc *bcryptHasher) SecureRandom(length int) string {

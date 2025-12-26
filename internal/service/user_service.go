@@ -21,8 +21,8 @@ func NewUserService(
 	n *NotificationService,
 	t *TokenService,
 	log *slog.Logger,
-) UserService {
-	return UserService{user: r, notif: n, token: t, log: log}
+) *UserService {
+	return &UserService{user: r, notif: n, token: t, log: log}
 }
 
 func (svc *UserService) Create(ctx context.Context, user *domain.CreateUser) (*domain.User, error) {

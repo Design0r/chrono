@@ -26,8 +26,8 @@ func NewEventService(
 	u *UserService,
 	t *TokenService,
 	log *slog.Logger,
-) EventService {
-	return EventService{log: log, event: e, request: r, user: u, token: t}
+) *EventService {
+	return &EventService{log: log, event: e, request: r, user: u, token: t}
 }
 
 func (svc *EventService) Create(

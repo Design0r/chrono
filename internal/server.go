@@ -133,13 +133,13 @@ func (s *Server) InitServices() {
 		s.repos.notifUser,
 		s.log,
 	)
-	userSvc := service.NewUserService(s.repos.user, &notificationSvc, &tokenSvc, s.log)
-	requestSvc := service.NewRequestService(s.repos.request, s.repos.user, &notificationSvc, s.log)
+	userSvc := service.NewUserService(s.repos.user, notificationSvc, tokenSvc, s.log)
+	requestSvc := service.NewRequestService(s.repos.request, s.repos.user, notificationSvc, s.log)
 	eventSvc := service.NewEventService(
 		s.repos.event,
-		&requestSvc,
-		&userSvc,
-		&tokenSvc,
+		requestSvc,
+		userSvc,
+		tokenSvc,
 		s.log,
 	)
 	passwordHasher := auth.NewBcryptHasher(10)
@@ -148,29 +148,29 @@ func (s *Server) InitServices() {
 		s.repos.session,
 		time.Hour*24*7,
 		!s.cfg.Debug,
-		&passwordHasher,
+		passwordHasher,
 		s.log,
 	)
 
-	holidaySvc := service.NewHolidayService(&userSvc, &eventSvc, s.repos.apiCache, s.log)
+	holidaySvc := service.NewHolidayService(userSvc, eventSvc, s.repos.apiCache, s.log)
 	settingSvc := service.NewSettingsService(s.repos.settings, s.log)
-	krankSvc := service.NewKrankheitsExportService(&eventSvc, &userSvc)
-	aworkSvc := service.NewAworkService(&eventSvc, &userSvc, s.log)
-	timestampSvc := service.NewTimestampsService(s.repos.timestamps, &eventSvc, s.log)
+	krankSvc := service.NewKrankheitsExportService(eventSvc, userSvc)
+	aworkSvc := service.NewAworkService(eventSvc, userSvc, s.log)
+	timestampSvc := service.NewTimestampsService(s.repos.timestamps, eventSvc, s.log)
 
 	s.services = services{
-		token:      &tokenSvc,
-		notif:      &notificationSvc,
-		user:       &userSvc,
-		request:    &requestSvc,
-		event:      &eventSvc,
-		pwHasher:   &passwordHasher,
-		auth:       &authSvc,
-		holiday:    &holidaySvc,
-		settings:   &settingSvc,
-		krank:      &krankSvc,
-		awork:      &aworkSvc,
-		timestamps: &timestampSvc,
+		token:      tokenSvc,
+		notif:      notificationSvc,
+		user:       userSvc,
+		request:    requestSvc,
+		event:      eventSvc,
+		pwHasher:   passwordHasher,
+		auth:       authSvc,
+		holiday:    holidaySvc,
+		settings:   settingSvc,
+		krank:      krankSvc,
+		awork:      aworkSvc,
+		timestamps: timestampSvc,
 	}
 
 	s.log.Info("Initialized services.")

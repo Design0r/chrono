@@ -21,8 +21,8 @@ func NewRequestService(
 	u domain.UserRepository,
 	n *NotificationService,
 	log *slog.Logger,
-) RequestService {
-	return RequestService{request: r, notif: n, log: log, user: u}
+) *RequestService {
+	return &RequestService{request: r, notif: n, log: log, user: u}
 }
 
 func (svc *RequestService) Create(

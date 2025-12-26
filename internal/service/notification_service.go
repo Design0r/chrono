@@ -17,8 +17,8 @@ func NewNotificationService(
 	n domain.NotificationRepository,
 	un domain.NotificationUserRepository,
 	log *slog.Logger,
-) NotificationService {
-	return NotificationService{notif: n, userNotif: un, log: log}
+) *NotificationService {
+	return &NotificationService{notif: n, userNotif: un, log: log}
 }
 
 func (svc *NotificationService) Create(

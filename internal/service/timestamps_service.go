@@ -56,6 +56,14 @@ func (r *TimestampsService) GetInRange(
 	return r.timestamps.GetInRange(ctx, userId, start, stop)
 }
 
+func (r *TimestampsService) GetAllInRange(
+	ctx context.Context,
+	start time.Time,
+	stop time.Time,
+) ([]domain.Timestamp, error) {
+	return r.timestamps.GetAllInRange(ctx, start, stop)
+}
+
 func (r *TimestampsService) GetForToday(
 	ctx context.Context,
 	userId int64,

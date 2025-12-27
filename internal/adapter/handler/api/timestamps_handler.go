@@ -19,8 +19,8 @@ func NewAPITimestampsHandler(t *service.TimestampsService) APITimestampsHandler 
 	return APITimestampsHandler{timestamps: t}
 }
 
-func (s *APITimestampsHandler) RegisterRoutes(group *echo.Group) {
-	g := group.Group("/timestamps")
+func (s *APITimestampsHandler) RegisterRoutes(auth *echo.Group, admin *echo.Group) {
+	g := auth.Group("/timestamps")
 	g.POST("", s.Start)
 	g.PATCH("/:id", s.Stop)
 	g.PUT("/:id", s.Update)
@@ -28,6 +28,8 @@ func (s *APITimestampsHandler) RegisterRoutes(group *echo.Group) {
 	g.GET("", s.GetTimestamps)
 	g.GET("/latest", s.GetLatestTimestamp)
 	g.GET("/worked/:year", s.GetWorkHoursForYear)
+
+	admin.GET("/timestamps/all", s.GetAllTimestamps)
 }
 
 func (h *APITimestampsHandler) Start(c echo.Context) error {
@@ -153,4 +155,37 @@ func (h *APITimestampsHandler) GetWorkHoursForYear(c echo.Context) error {
 	}
 
 	return NewJsonResponse(c, work)
+}
+
+func (h *APITimestampsHandler) GetAllTimestamps(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	startParam := c.QueryParam("startDate")
+	endParam := c.QueryParam("endDate")
+
+	startDate := time.UnixMilli(0)
+	endDate := time.Now()
+
+	if startParam != "" {
+		s, err := time.Parse(time.DateOnly, startParam)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid startDate")
+		}
+		startDate = s
+	}
+
+	if endParam != "" {
+		e, err := time.Parse(time.DateOnly, endParam)
+		if err != nil {
+			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid startDate")
+		}
+		endDate = e
+	}
+
+	t, err := h.timestamps.GetAllInRange(ctx, startDate, endDate)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusNotFound, err.Error())
+	}
+
+	return NewJsonResponse(c, t)
 }

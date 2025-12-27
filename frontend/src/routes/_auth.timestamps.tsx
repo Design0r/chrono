@@ -7,6 +7,7 @@ import {
   durationFromTimestamps,
   isoToDateLocal,
   secondsToCounter,
+  TeamTimestamps,
   TimestampTable,
 } from "../components/Timestamps";
 import { useEffect, useState } from "react";
@@ -101,6 +102,11 @@ function RouteComponent() {
       </h2>
 
       <TimestampTable timestamps={timestamps} />
+
+      <hr />
+      <h2>Team Timestamps</h2>
+
+      <TeamTimestamps startDate={startDate} endDate={endDate} />
     </div>
   );
 }

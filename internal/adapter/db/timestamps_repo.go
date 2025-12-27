@@ -79,6 +79,26 @@ func (r *SQLTimestampsRepo) GetInRange(
 	return timestamps, nil
 }
 
+func (r *SQLTimestampsRepo) GetAllInRange(
+	ctx context.Context,
+	start time.Time,
+	stop time.Time,
+) ([]domain.Timestamp, error) {
+	params := repo.GetAllTimestampsInRangeParams{StartTime: &start, EndTime: stop}
+	t, err := r.q.GetAllTimestampsInRange(ctx, params)
+	if err != nil {
+		r.log.Error("repo.GetTimestampsInRange failed:", slog.String("error", err.Error()))
+		return []domain.Timestamp{}, err
+	}
+
+	timestamps := make([]domain.Timestamp, len(t))
+	for i, x := range t {
+		timestamps[i] = (domain.Timestamp)(x)
+	}
+
+	return timestamps, nil
+}
+
 func (r *SQLTimestampsRepo) GetTotalSecondsInRange(
 	ctx context.Context,
 	userId int64,

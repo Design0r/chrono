@@ -233,7 +233,7 @@ func (s *Server) InitAPIRoutes() {
 	eventHandler.RegisterRoutes(authGrp)
 	aworkHandler.RegisterRoutes(authGrp)
 	notificationHandler.RegisterRoutes(authGrp)
-	timestampsHandler.RegisterRoutes(authGrp)
+	timestampsHandler.RegisterRoutes(authGrp, adminGrp)
 
 	requestHandler.RegisterRoutes(adminGrp)
 	tokenHandler.RegisterRoutes(adminGrp)

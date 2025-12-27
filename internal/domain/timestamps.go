@@ -24,6 +24,11 @@ type TimestampsRepository interface {
 		start time.Time,
 		stop time.Time,
 	) ([]Timestamp, error)
+	GetAllInRange(
+		ctx context.Context,
+		start time.Time,
+		stop time.Time,
+	) ([]Timestamp, error)
 	GetTotalSecondsInRange(
 		ctx context.Context,
 		userId int64,

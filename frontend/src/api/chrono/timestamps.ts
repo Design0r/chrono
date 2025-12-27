@@ -28,6 +28,21 @@ export class ApiTimestamps {
     return r.data as Timestamp[];
   }
 
+  async getAll(start?: string, end?: string): Promise<Timestamp[]> {
+    let url = "";
+    if (start && end) url = `?startDate=${start}&endDate=${end}`;
+    else if (start) url = `?startDate=${start}`;
+    else if (end) url = `?endDate=${end}`;
+
+    const response = await fetch(CHRONO_URL + `/timestamps/all${url}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const r = await returnOrError(response);
+    return r.data as Timestamp[];
+  }
+
   async getForYear(year: number): Promise<Timestamp[]> {
     const response = await fetch(CHRONO_URL + `/timestamps/year/${year}`, {
       method: "GET",

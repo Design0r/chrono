@@ -3,6 +3,8 @@ import { ChronoClient } from "../api/chrono/client";
 import { useEffect, useMemo, useState } from "react";
 import type { Timestamp } from "../types/response";
 import { useToast } from "./Toast";
+import { LoadingSpinnerPage } from "./LoadingSpinner";
+import type { User } from "../types/auth";
 
 export function Timestamps() {
   const chrono = useMemo(() => new ChronoClient(), []);
@@ -365,6 +367,87 @@ export function EditModal({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+export function TeamTimestamps({
+  startDate,
+  endDate,
+}: {
+  startDate?: string;
+  endDate?: string;
+}) {
+  const chrono = new ChronoClient();
+
+  const allTimestampsQ = useQuery({
+    queryKey: ["timestamps", "all", startDate, endDate],
+    queryFn: () => chrono.timestamps.getAll(startDate, endDate),
+    staleTime: 1000 * 60 * 1, // 1min
+    gcTime: 1000 * 60 * 30, // 30min
+    retry: false,
+  });
+
+  const usersQ = useQuery({
+    queryKey: ["users"],
+    queryFn: () => chrono.users.getUsers(),
+    staleTime: 1000 * 60 * 1, // 1min
+    gcTime: 1000 * 60 * 30, // 30min
+    retry: false,
+  });
+
+  const queries = [allTimestampsQ, usersQ];
+  const anyPending = queries.some((q) => q.isPending);
+  const firstError = queries.find((q) => q.isError)?.error;
+
+  const usersMap = useMemo(() => {
+    const users = (usersQ.data ?? []) as User[];
+    return users.reduce(
+      (map, u) => {
+        map[u.id] = u;
+        return map;
+      },
+      {} as Record<number, User>,
+    );
+  }, [usersQ.data]);
+
+  const timestampsMap = useMemo(() => {
+    const timestamps = (allTimestampsQ.data ?? []) as Timestamp[];
+    return timestamps.reduce(
+      (map, ts) => {
+        (map[ts.user_id] ??= []).push(ts);
+        return map;
+      },
+      {} as Record<number, Timestamp[]>,
+    );
+  }, [allTimestampsQ.data]);
+
+  if (anyPending || firstError) return <></>;
+
+  return (
+    <div className="w-full">
+      {Object.entries(timestampsMap).map(([k, v]) => {
+        const user = usersMap[Number(k)];
+        const counter = secondsToCounter(durationFromTimestamps(v));
+
+        return (
+          <div>
+            <details className="collapse bg-base-300 border-base-300 border">
+              <summary className="collapse-title collapse-arrow font-semibold">
+                {user.username}
+              </summary>
+              <div className="collapse-content bg-base-200 px-0 text-sm">
+                <h2 className="text-md text-center py-4 xl:text-left">
+                  Total Duration: {counter.hours}h {counter.minutes}m{" "}
+                  {counter.seconds}s
+                </h2>
+
+                <TimestampTable timestamps={v} />
+              </div>
+            </details>
+          </div>
+        );
+      })}
     </div>
   );
 }

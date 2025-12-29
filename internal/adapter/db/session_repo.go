@@ -12,11 +12,11 @@ import (
 )
 
 type SQLSessionRepo struct {
-	q   *repo.Queries
+	q   repo.Querier
 	log *slog.Logger
 }
 
-func NewSQLSessionRepo(q *repo.Queries, log *slog.Logger) domain.SessionRepository {
+func NewSQLSessionRepo(q repo.Querier, log *slog.Logger) domain.SessionRepository {
 	return &SQLSessionRepo{q: q, log: log}
 }
 

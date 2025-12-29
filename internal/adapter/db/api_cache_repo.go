@@ -8,11 +8,11 @@ import (
 )
 
 type SQLAPICacheRepo struct {
-	r   *repo.Queries
+	r   repo.Querier
 	log *slog.Logger
 }
 
-func NewSQLAPICacheRepo(r *repo.Queries, log *slog.Logger) domain.ApiCacheRepository {
+func NewSQLAPICacheRepo(r repo.Querier, log *slog.Logger) domain.ApiCacheRepository {
 	return &SQLAPICacheRepo{r: r, log: log}
 }
 

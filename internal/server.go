@@ -10,6 +10,7 @@ import (
 	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"golang.org/x/time/rate"
 
 	"chrono/config"
 	"chrono/db/repo"
@@ -54,7 +55,7 @@ type services struct {
 type Server struct {
 	Router   *echo.Echo
 	Db       *sql.DB
-	Repo     *repo.Queries
+	Repo     repo.Querier
 	log      *slog.Logger
 	cfg      *config.Config
 	repos    repos
@@ -72,11 +73,10 @@ func NewServer(router *echo.Echo, db *sql.DB, cfg *config.Config, log *slog.Logg
 }
 
 func (s *Server) InitMiddleware() {
-	s.Router.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format:           "${time_custom} ${method} ${status} ${uri} ${error} ${latency_human}\n",
-		CustomTimeFormat: "2006/01/02 15:04:05",
-	}))
+	s.Router.Use(middleware.RequestLogger())
+	s.Router.Use(middleware.RequestID())
 	s.Router.Use(middleware.Secure())
+	s.Router.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(20))))
 	s.Router.Use(middleware.Recover())
 	s.Router.Use(
 		middleware.CORSWithConfig(

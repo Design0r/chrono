@@ -9,20 +9,20 @@ import (
 )
 
 type SQLNotificationRepo struct {
-	r   *repo.Queries
+	r   repo.Querier
 	log *slog.Logger
 }
 
 type SQLUserNotificationRepo struct {
-	r   *repo.Queries
+	r   repo.Querier
 	log *slog.Logger
 }
 
-func NewSQLNotificationRepo(r *repo.Queries, log *slog.Logger) domain.NotificationRepository {
+func NewSQLNotificationRepo(r repo.Querier, log *slog.Logger) domain.NotificationRepository {
 	return &SQLNotificationRepo{r: r, log: log}
 }
 
-func NewSQLUserNotificationRepo(r *repo.Queries, log *slog.Logger) domain.NotificationUserRepository {
+func NewSQLUserNotificationRepo(r repo.Querier, log *slog.Logger) domain.NotificationUserRepository {
 	return &SQLUserNotificationRepo{r: r, log: log}
 }
 

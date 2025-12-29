@@ -9,11 +9,11 @@ import (
 )
 
 type SQLSettingsRepo struct {
-	q   *repo.Queries
+	q   repo.Querier
 	log *slog.Logger
 }
 
-func NewSQLSettingsRepo(q *repo.Queries, log *slog.Logger) domain.SettingsRepository {
+func NewSQLSettingsRepo(q repo.Querier, log *slog.Logger) domain.SettingsRepository {
 	return &SQLSettingsRepo{q: q, log: log}
 }
 

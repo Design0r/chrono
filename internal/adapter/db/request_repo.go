@@ -10,11 +10,11 @@ import (
 )
 
 type SQLRequestRepo struct {
-	r   *repo.Queries
+	r   repo.Querier
 	log *slog.Logger
 }
 
-func NewSQLRequestRepo(r *repo.Queries, log *slog.Logger) domain.RequestRepository {
+func NewSQLRequestRepo(r repo.Querier, log *slog.Logger) domain.RequestRepository {
 	return &SQLRequestRepo{r: r, log: log}
 }
 

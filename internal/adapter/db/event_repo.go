@@ -11,11 +11,11 @@ import (
 )
 
 type SQLEventRepo struct {
-	r   *repo.Queries
+	r   repo.Querier
 	log *slog.Logger
 }
 
-func NewSQLEventUserRepo(r *repo.Queries, log *slog.Logger) domain.EventRepository {
+func NewSQLEventUserRepo(r repo.Querier, log *slog.Logger) domain.EventRepository {
 	return &SQLEventRepo{r: r, log: log}
 }
 

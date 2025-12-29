@@ -10,11 +10,11 @@ import (
 )
 
 type SQLUserRepo struct {
-	q   *repo.Queries
+	q   repo.Querier
 	log *slog.Logger
 }
 
-func NewSQLUserRepo(q *repo.Queries, l *slog.Logger) domain.UserRepository {
+func NewSQLUserRepo(q repo.Querier, l *slog.Logger) domain.UserRepository {
 	return &SQLUserRepo{q: q, log: l}
 }
 

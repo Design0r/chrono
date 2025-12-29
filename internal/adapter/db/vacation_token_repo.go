@@ -10,11 +10,11 @@ import (
 )
 
 type SQLVacationTokenRepo struct {
-	q   *repo.Queries
+	q   repo.Querier
 	log *slog.Logger
 }
 
-func NewSQLVacationTokenRepo(q *repo.Queries, log *slog.Logger) domain.VacationTokenRepository {
+func NewSQLVacationTokenRepo(q repo.Querier, log *slog.Logger) domain.VacationTokenRepository {
 	return &SQLVacationTokenRepo{q: q, log: log}
 }
 

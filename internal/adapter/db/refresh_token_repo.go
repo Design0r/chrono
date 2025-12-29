@@ -9,11 +9,11 @@ import (
 )
 
 type SQLRefreshTokenRepo struct {
-	q   *repo.Queries
+	q   repo.Querier
 	log *slog.Logger
 }
 
-func NewSQLRefreshTokenRepo(q *repo.Queries, log *slog.Logger) domain.RefreshTokenRepository {
+func NewSQLRefreshTokenRepo(q repo.Querier, log *slog.Logger) domain.RefreshTokenRepository {
 	return &SQLRefreshTokenRepo{q: q, log: log}
 }
 

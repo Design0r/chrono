@@ -10,11 +10,11 @@ import (
 )
 
 type SQLTimestampsRepo struct {
-	q   *repo.Queries
+	q   repo.Querier
 	log *slog.Logger
 }
 
-func NewSQLTimestampsRepo(q *repo.Queries, log *slog.Logger) domain.TimestampsRepository {
+func NewSQLTimestampsRepo(q repo.Querier, log *slog.Logger) domain.TimestampsRepository {
 	return &SQLTimestampsRepo{q: q, log: log}
 }
 

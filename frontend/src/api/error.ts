@@ -8,7 +8,6 @@ export async function returnOrError(
 
   if (!response.ok) {
     if (response.status === 401) {
-      console.log(logoutOutsideReact);
       await logoutOutsideReact();
     }
     throw new Error(data.message);

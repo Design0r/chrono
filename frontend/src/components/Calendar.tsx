@@ -17,12 +17,13 @@ export function CalendarNavigation({
   monthName: string;
 }) {
   let year = currYear;
+  let prevYear = currYear;
   let nextYear = currYear;
   let nextMonth = currMonth + 1;
   let prevMonth = currMonth - 1;
   if (prevMonth <= 0) {
     prevMonth = 12;
-    year--;
+    prevYear--;
   }
 
   if (nextMonth > 12) {
@@ -36,7 +37,7 @@ export function CalendarNavigation({
         <div className="flex justify-center items-center">
           <Link
             to="/calendar/$year/$month"
-            params={{ year: year.toString(), month: prevMonth.toString() }}
+            params={{ year: prevYear.toString(), month: prevMonth.toString() }}
             className="btn btn-sm btn-soft btn-primary hover:text-neutral icon-outlined animate-color duration-500"
             search={(prev) => prev}
           >

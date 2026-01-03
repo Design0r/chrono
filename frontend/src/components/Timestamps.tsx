@@ -3,7 +3,6 @@ import { ChronoClient } from "../api/chrono/client";
 import { useEffect, useMemo, useState } from "react";
 import type { Timestamp } from "../types/response";
 import { useToast } from "./Toast";
-import { LoadingSpinnerPage } from "./LoadingSpinner";
 import type { User } from "../types/auth";
 
 export function Timestamps() {

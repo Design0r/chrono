@@ -103,9 +103,6 @@ function RouteComponent() {
 
       <TimestampTable timestamps={timestamps} />
 
-      <hr />
-      <h2>Team Timestamps</h2>
-
       <TeamTimestamps startDate={startDate} endDate={endDate} />
     </div>
   );

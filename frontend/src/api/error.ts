@@ -2,12 +2,13 @@ import { logoutOutsideReact } from "../auth";
 import type { ChronoResponse } from "../types/response";
 
 export async function returnOrError(
-  response: Response
+  response: Response,
 ): Promise<ChronoResponse> {
   const data: ChronoResponse = await response.json();
 
   if (!response.ok) {
     if (response.status === 401) {
+      console.log(logoutOutsideReact);
       await logoutOutsideReact();
     }
     throw new Error(data.message);

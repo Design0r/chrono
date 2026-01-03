@@ -424,29 +424,33 @@ export function TeamTimestamps({
   if (anyPending || firstError) return <></>;
 
   return (
-    <div className="w-full">
-      {Object.entries(timestampsMap).map(([k, v]) => {
-        const user = usersMap[Number(k)];
-        const counter = secondsToCounter(durationFromTimestamps(v));
+    <>
+      <hr />
+      <h2>Team Timestamps</h2>
+      <div className="w-full">
+        {Object.entries(timestampsMap).map(([k, v]) => {
+          const user = usersMap[Number(k)];
+          const counter = secondsToCounter(durationFromTimestamps(v));
 
-        return (
-          <div>
-            <details className="collapse bg-base-300 border-base-300 border">
-              <summary className="collapse-title collapse-arrow font-semibold">
-                {user.username}
-              </summary>
-              <div className="collapse-content bg-base-200 px-0 text-sm">
-                <h2 className="text-md text-center py-4 xl:text-left">
-                  Total Duration: {counter.hours}h {counter.minutes}m{" "}
-                  {counter.seconds}s
-                </h2>
+          return (
+            <div>
+              <details className="collapse bg-base-300 border-base-300 border">
+                <summary className="collapse-title collapse-arrow font-semibold">
+                  {user.username}
+                </summary>
+                <div className="collapse-content bg-base-200 px-0 text-sm">
+                  <h2 className="text-md text-center py-4 xl:text-left">
+                    Total Duration: {counter.hours}h {counter.minutes}m{" "}
+                    {counter.seconds}s
+                  </h2>
 
-                <TimestampTable timestamps={v} />
-              </div>
-            </details>
-          </div>
-        );
-      })}
-    </div>
+                  <TimestampTable timestamps={v} />
+                </div>
+              </details>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }

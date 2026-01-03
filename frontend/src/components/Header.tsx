@@ -26,8 +26,8 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
   });
 
   const date = new Date();
-  const startDate = new Date(`01.01.${date.getFullYear()}Z`);
-  const endDate = new Date(`01.01.${date.getFullYear() + 1}Z`);
+  const startDate = new Date(Date.UTC(date.getFullYear(), 0, 1, 0, 0, 0, 0));
+  const endDate = new Date(Date.UTC(date.getFullYear() + 1, 0, 1, 0, 0, 0, 0));
 
   return (
     <div className="mb-4 mx-auto p-4 lg:px-4">

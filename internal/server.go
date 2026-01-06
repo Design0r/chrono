@@ -73,8 +73,41 @@ func NewServer(router *echo.Echo, db *sql.DB, cfg *config.Config, log *slog.Logg
 }
 
 func (s *Server) InitMiddleware() {
-	s.Router.Use(middleware.RequestLogger())
 	s.Router.Use(middleware.RequestID())
+	s.Router.Use(
+		middleware.RequestLoggerWithConfig(
+			middleware.RequestLoggerConfig{
+				LogURI:       true,
+				LogMethod:    true,
+				LogLatency:   true,
+				LogError:     true,
+				LogStatus:    true,
+				LogRequestID: true,
+				LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+					if v.Error == nil {
+						slog.LogAttrs(context.Background(), slog.LevelInfo, "REQUEST",
+							slog.String("method", v.Method),
+							slog.String("uri", v.URI),
+							slog.Int("status", v.Status),
+							slog.Duration("latency", v.Latency),
+							slog.String("request_id", v.RequestID),
+						)
+					} else {
+						slog.LogAttrs(context.Background(), slog.LevelError, "REQUEST_ERROR",
+							slog.String("method", v.Method),
+							slog.String("uri", v.URI),
+							slog.Int("status", v.Status),
+							slog.Duration("latency", v.Latency),
+							slog.String("request_id", v.RequestID),
+
+							slog.String("error", v.Error.Error()),
+						)
+					}
+					return nil
+				},
+			},
+		),
+	)
 	s.Router.Use(middleware.Secure())
 	s.Router.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(20))))
 	s.Router.Use(middleware.Recover())

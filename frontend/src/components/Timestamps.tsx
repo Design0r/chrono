@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChronoClient } from "../api/chrono/client";
 import { useEffect, useMemo, useState } from "react";
+import { ChronoClient } from "../api/chrono/client";
+import type { User } from "../types/auth";
 import type { Timestamp } from "../types/response";
 import { useToast } from "./Toast";
-import type { User } from "../types/auth";
 
 export function Timestamps() {
   const chrono = useMemo(() => new ChronoClient(), []);
@@ -13,6 +13,7 @@ export function Timestamps() {
   const { addToast, addErrorToast } = useToast();
   const [currTimer, setCurrTimer] = useState<Timestamp | null>(null);
   const [startTime, setStartTime] = useState<number>(Date.now());
+  const [runningTimer, setRunningTimer] = useState<number>(0);
 
   const queryClient = useQueryClient();
 
@@ -81,13 +82,21 @@ export function Timestamps() {
     if (timestampsQ.isError) addErrorToast(timestampsQ.error);
   }, [timestampsQ.isError]);
 
-  const totalTime = secondsToCounter(durationFromTimestamps(timestamps));
+  const totalTime = secondsToCounter(
+    durationFromTimestamps(timestamps) + runningTimer
+  );
 
   return (
     <div className="flex flex-col space-y-4 lg:space-y-8">
       <div className="mx-auto justify-center">
         <div className="space-y-4">
-          <Timer paused={paused} startUnix={startTime} />
+          <Timer
+            paused={paused}
+            startUnix={startTime}
+            onUpdate={(seconds: number) => {
+              setRunningTimer(seconds);
+            }}
+          />
           <div className="justify-center flex space-x-2">
             <button
               disabled={!paused}
@@ -150,12 +159,21 @@ export function secondsToCounter(totalSeconds: number): TimeCounter {
   return { hours, minutes, seconds: s };
 }
 
-function Timer({ startUnix, paused }: { startUnix: number; paused: boolean }) {
+function Timer({
+  startUnix,
+  paused,
+  onUpdate,
+}: {
+  startUnix: number;
+  paused: boolean;
+  onUpdate: (seconds: number) => void;
+}) {
   const [timer, setTimer] = useState<TimeCounter>(() => secondsToCounter(0));
 
   useEffect(() => {
     function tick() {
       const elapsedSeconds = (Date.now() - startUnix) / 1000;
+      onUpdate(elapsedSeconds);
       setTimer(secondsToCounter(elapsedSeconds));
     }
 
@@ -264,10 +282,10 @@ export function EditModal({
 }) {
   const queryClient = useQueryClient();
   const [startDate, setStartDate] = useState(
-    isoToDatetimeLocal(timestamp.start_time),
+    isoToDatetimeLocal(timestamp.start_time)
   );
   const [endDate, setEndDate] = useState<string | null>(
-    timestamp.end_time ? isoToDatetimeLocal(timestamp.end_time) : null,
+    timestamp.end_time ? isoToDatetimeLocal(timestamp.end_time) : null
   );
 
   useEffect(() => {
@@ -406,7 +424,7 @@ export function TeamTimestamps({
         map[u.id] = u;
         return map;
       },
-      {} as Record<number, User>,
+      {} as Record<number, User>
     );
   }, [usersQ.data]);
 
@@ -417,7 +435,7 @@ export function TeamTimestamps({
         (map[ts.user_id] ??= []).push(ts);
         return map;
       },
-      {} as Record<number, Timestamp[]>,
+      {} as Record<number, Timestamp[]>
     );
   }, [allTimestampsQ.data]);
 

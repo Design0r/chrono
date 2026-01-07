@@ -131,6 +131,7 @@ func (r *TimestampsService) GetWorkHoursForYear(
 	ctx context.Context,
 	userId int64,
 	year int,
+	workDayHours float64,
 ) (domain.WorkHours, error) {
 	now := time.Now()
 	loc := now.Location()
@@ -219,10 +220,9 @@ func (r *TimestampsService) GetWorkHoursForYear(
 		}
 	}
 
-	// final numbers (assuming 8h per working day)
-	expectedHours := (float64(expectedDays-holidays) - vacation - float64(sickDays)) * 8
-	holidayHours := float64(holidays) * 8
-	vacationHours := vacation * 8
+	expectedHours := (float64(expectedDays-holidays) - vacation - float64(sickDays)) * workDayHours
+	holidayHours := float64(holidays) * workDayHours
+	vacationHours := vacation * workDayHours
 
 	return domain.WorkHours{
 		Worked:   workedHours,

@@ -87,6 +87,8 @@ type User struct {
 	Role         string    `json:"role"`
 	Enabled      bool      `json:"enabled"`
 	AworkID      *string   `json:"awork_id"`
+	WorkdayHours float64   `json:"workday_hours"`
+	WorkdaysWeek float64   `json:"workdays_week"`
 }
 
 type VacationToken struct {

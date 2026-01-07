@@ -147,8 +147,7 @@ func (a *AworkService) ConvertAworkTime(aworkTime string) (time.Time, error) {
 
 func (a *AworkService) GetWorkHoursForYear(
 	ctx context.Context,
-	aworkUserId string,
-	userId int64,
+	user *domain.User,
 	year int,
 ) (domain.WorkHours, error) {
 	now := time.Now()
@@ -194,7 +193,7 @@ func (a *AworkService) GetWorkHoursForYear(
 
 	// ---- TIME ENTRIES (with basic pagination) ----
 
-	entries, err := a.GetTimeEntries(aworkUserId, yearStart, periodEnd)
+	entries, err := a.GetTimeEntries(*user.AworkID, yearStart, periodEnd)
 	if err != nil {
 		return domain.WorkHours{}, err
 	}
@@ -217,7 +216,7 @@ func (a *AworkService) GetWorkHoursForYear(
 			return domain.WorkHours{}, err
 		}
 
-		page, err := a.GetTimeEntries(aworkUserId, newStartDate, periodEnd)
+		page, err := a.GetTimeEntries(*user.AworkID, newStartDate, periodEnd)
 		if err != nil {
 			return domain.WorkHours{}, err
 		}
@@ -245,13 +244,13 @@ func (a *AworkService) GetWorkHoursForYear(
 		return domain.WorkHours{}, err
 	}
 
-	vacation, err := a.event.GetUsedVacation(ctx, userId, yearStart, periodEnd)
+	vacation, err := a.event.GetUsedVacation(ctx, user.ID, yearStart, periodEnd)
 	if err != nil {
 		return domain.WorkHours{}, err
 	}
 
 	sickDays := 0
-	allEvents, err := a.event.GetAllByUserId(ctx, userId)
+	allEvents, err := a.event.GetAllByUserId(ctx, user.ID)
 	if err != nil {
 		return domain.WorkHours{}, err
 	}
@@ -292,9 +291,9 @@ func (a *AworkService) GetWorkHoursForYear(
 	}
 
 	// final numbers (assuming 8h per working day)
-	expectedHours := (float64(expectedDays-holidays) - vacation - float64(sickDays)) * 8
-	holidayHours := float64(holidays) * 8
-	vacationHours := vacation * 8
+	expectedHours := (float64(expectedDays-holidays) - vacation - float64(sickDays)) * user.WorkdayHours
+	holidayHours := float64(holidays) * user.WorkdayHours
+	vacationHours := vacation * user.WorkdayHours
 
 	return domain.WorkHours{
 		Worked:   workedHours,

@@ -21,6 +21,8 @@ export type User = {
   role: string;
   enabled: boolean;
   awork_id: string | null;
+  workday_hours: number;
+  workdays_week: number;
 };
 
 export type UserWithVacation = User & {

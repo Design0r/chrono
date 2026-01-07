@@ -55,6 +55,6 @@ func (svc *SettingsService) Init(
 		svc.log.Info("Initialized new settings.")
 	}
 
-	svc.log.Info("Initialized existing settings.")
+	svc.log.Info("Using existing settings.")
 	return s, nil
 }

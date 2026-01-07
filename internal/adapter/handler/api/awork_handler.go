@@ -46,7 +46,7 @@ func (h *APIAworkHandler) GetWorkHoursForYear(c echo.Context) error {
 		return NewErrorResponse(c, http.StatusUnprocessableEntity, "awork id is missing")
 	}
 
-	work, err := h.awork.GetWorkHoursForYear(ctx, *currUser.AworkID, currUser.ID, year)
+	work, err := h.awork.GetWorkHoursForYear(ctx, &currUser, year)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}

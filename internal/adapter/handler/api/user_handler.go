@@ -191,6 +191,8 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		IsSuperuser:  superuser,
 		VacationDays: vacDays,
 		Password:     userToEdit.Password,
+		WorkdayHours: patchedData.WorkdayHours,
+		WorkdaysWeek: patchedData.WorkdaysWeek,
 	}
 
 	if patchedData.Password != "" {

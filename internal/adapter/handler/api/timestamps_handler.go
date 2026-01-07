@@ -149,7 +149,7 @@ func (h *APITimestampsHandler) GetWorkHoursForYear(c echo.Context) error {
 		return NewErrorResponse(c, http.StatusUnprocessableEntity, "year parameter is missing")
 	}
 
-	work, err := h.timestamps.GetWorkHoursForYear(ctx, currUser.ID, year)
+	work, err := h.timestamps.GetWorkHoursForYear(ctx, currUser.ID, year, currUser.WorkdayHours)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}

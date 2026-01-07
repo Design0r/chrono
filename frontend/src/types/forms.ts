@@ -4,6 +4,8 @@ export type ProfileEditForm = {
   email: string;
   color: string;
   awork_id: string;
+  workday_hours: number;
+  workdays_week: number;
 };
 
 export type TeamEditForm = {

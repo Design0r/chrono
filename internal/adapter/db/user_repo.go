@@ -28,6 +28,8 @@ func (r *SQLUserRepo) Create(ctx context.Context, user *domain.CreateUser) (*dom
 			Email:        user.Email,
 			Password:     user.Password,
 			IsSuperuser:  user.IsSuperuser,
+			WorkdayHours: 8.0,
+			WorkdaysWeek: 5.0,
 		},
 	)
 	if err != nil {
@@ -55,6 +57,8 @@ func (r *SQLUserRepo) Update(ctx context.Context, user *domain.User) (*domain.Us
 			Password:     user.Password,
 			IsSuperuser:  user.IsSuperuser,
 			ID:           user.ID,
+			WorkdayHours: user.WorkdayHours,
+			WorkdaysWeek: user.WorkdaysWeek,
 		},
 	)
 	if err != nil {

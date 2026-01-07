@@ -35,6 +35,8 @@ type User struct {
 	Role         string    `json:"role"`
 	Enabled      bool      `json:"enabled"`
 	AworkID      *string   `json:"awork_id"`
+	WorkdayHours float64   `json:"workday_hours"`
+	WorkdaysWeek float64   `json:"workdays_week"`
 }
 
 func (u *User) IsAdmin() bool {
@@ -66,6 +68,8 @@ type ApiPatchUser struct {
 	Enabled      *bool   `form:"enabled"`
 	VacationDays *int64  `form:"vacation_days"`
 	AworkID      *string `form:"awork_id"`
+	WorkdayHours float64 `form:"workday_hours"`
+	WorkdaysWeek float64 `form:"workdays_week"`
 }
 
 type CreateUser struct {

@@ -54,7 +54,7 @@ func (q *Queries) DeleteEvent(ctx context.Context, id int64) error {
 }
 
 const GetConflictingEventUsers = `-- name: GetConflictingEventUsers :many
-SELECT DISTINCT u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at, u.color, u.role, u.enabled, u.awork_id FROM events e
+SELECT DISTINCT u.id, u.username, u.email, u.password, u.vacation_days, u.is_superuser, u.created_at, u.edited_at, u.color, u.role, u.enabled, u.awork_id, u.workday_hours, u.workdays_week FROM events e
 JOIN users u on e.user_id = u.id
 WHERE u.id != ? 
 AND e.scheduled_at >= ?
@@ -89,6 +89,8 @@ func (q *Queries) GetConflictingEventUsers(ctx context.Context, arg GetConflicti
 			&i.Role,
 			&i.Enabled,
 			&i.AworkID,
+			&i.WorkdayHours,
+			&i.WorkdaysWeek,
 		); err != nil {
 			return nil, err
 		}
@@ -196,7 +198,7 @@ func (q *Queries) GetEventsForDay(ctx context.Context, scheduledAt time.Time) ([
 }
 
 const GetEventsForMonth = `-- name: GetEventsForMonth :many
-SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color, role, enabled, awork_id
+SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color, role, enabled, awork_id, workday_hours, workdays_week
 FROM events e
 JOIN users u ON e.user_id = u.id
 WHERE scheduled_at >= ? AND scheduled_at < ?
@@ -228,6 +230,8 @@ type GetEventsForMonthRow struct {
 	Role         string    `json:"role"`
 	Enabled      bool      `json:"enabled"`
 	AworkID      *string   `json:"awork_id"`
+	WorkdayHours float64   `json:"workday_hours"`
+	WorkdaysWeek float64   `json:"workdays_week"`
 }
 
 func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthParams) ([]GetEventsForMonthRow, error) {
@@ -259,6 +263,8 @@ func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthPa
 			&i.Role,
 			&i.Enabled,
 			&i.AworkID,
+			&i.WorkdayHours,
+			&i.WorkdaysWeek,
 		); err != nil {
 			return nil, err
 		}
@@ -274,7 +280,7 @@ func (q *Queries) GetEventsForMonth(ctx context.Context, arg GetEventsForMonthPa
 }
 
 const GetEventsForYear = `-- name: GetEventsForYear :many
-SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color, role, enabled, awork_id FROM events e
+SELECT e.id, scheduled_at, name, state, e.created_at, e.edited_at, user_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color, role, enabled, awork_id, workday_hours, workdays_week FROM events e
 JOIN users u ON e.user_id = u.id
 WHERE e.scheduled_at >= ? 
   AND e.scheduled_at < ?
@@ -309,6 +315,8 @@ type GetEventsForYearRow struct {
 	Role         string    `json:"role"`
 	Enabled      bool      `json:"enabled"`
 	AworkID      *string   `json:"awork_id"`
+	WorkdayHours float64   `json:"workday_hours"`
+	WorkdaysWeek float64   `json:"workdays_week"`
 }
 
 func (q *Queries) GetEventsForYear(ctx context.Context, arg GetEventsForYearParams) ([]GetEventsForYearRow, error) {
@@ -340,6 +348,8 @@ func (q *Queries) GetEventsForYear(ctx context.Context, arg GetEventsForYearPara
 			&i.Role,
 			&i.Enabled,
 			&i.AworkID,
+			&i.WorkdayHours,
+			&i.WorkdaysWeek,
 		); err != nil {
 			return nil, err
 		}

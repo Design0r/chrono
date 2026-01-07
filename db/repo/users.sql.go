@@ -10,9 +10,9 @@ import (
 )
 
 const CreateUser = `-- name: CreateUser :one
-INSERT INTO users (username, color, vacation_days, email, password, is_superuser, awork_id)
-VALUES (?, ?, ?, ?, ?, ?, ?)
-RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id
+INSERT INTO users (username, color, vacation_days, email, password, is_superuser, awork_id, workday_hours, workdays_week)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id, workday_hours, workdays_week
 `
 
 type CreateUserParams struct {
@@ -23,6 +23,8 @@ type CreateUserParams struct {
 	Password     string  `json:"password"`
 	IsSuperuser  bool    `json:"is_superuser"`
 	AworkID      *string `json:"awork_id"`
+	WorkdayHours float64 `json:"workday_hours"`
+	WorkdaysWeek float64 `json:"workdays_week"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -34,6 +36,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.Password,
 		arg.IsSuperuser,
 		arg.AworkID,
+		arg.WorkdayHours,
+		arg.WorkdaysWeek,
 	)
 	var i User
 	err := row.Scan(
@@ -49,6 +53,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Role,
 		&i.Enabled,
 		&i.AworkID,
+		&i.WorkdayHours,
+		&i.WorkdaysWeek,
 	)
 	return i, err
 }
@@ -64,7 +70,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const GetAdmins = `-- name: GetAdmins :many
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id, workday_hours, workdays_week FROM users
 WHERE is_superuser = true
 `
 
@@ -90,6 +96,8 @@ func (q *Queries) GetAdmins(ctx context.Context) ([]User, error) {
 			&i.Role,
 			&i.Enabled,
 			&i.AworkID,
+			&i.WorkdayHours,
+			&i.WorkdaysWeek,
 		); err != nil {
 			return nil, err
 		}
@@ -105,7 +113,7 @@ func (q *Queries) GetAdmins(ctx context.Context) ([]User, error) {
 }
 
 const GetAllUsers = `-- name: GetAllUsers :many
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id, workday_hours, workdays_week FROM users
 WHERE id != 1
 `
 
@@ -131,6 +139,8 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 			&i.Role,
 			&i.Enabled,
 			&i.AworkID,
+			&i.WorkdayHours,
+			&i.WorkdaysWeek,
 		); err != nil {
 			return nil, err
 		}
@@ -146,7 +156,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const GetUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id, workday_hours, workdays_week FROM users
 WHERE email = ?
 `
 
@@ -166,12 +176,14 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Role,
 		&i.Enabled,
 		&i.AworkID,
+		&i.WorkdayHours,
+		&i.WorkdaysWeek,
 	)
 	return i, err
 }
 
 const GetUserByID = `-- name: GetUserByID :one
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id, workday_hours, workdays_week FROM users
 WHERE id = ?
 `
 
@@ -191,12 +203,14 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 		&i.Role,
 		&i.Enabled,
 		&i.AworkID,
+		&i.WorkdayHours,
+		&i.WorkdaysWeek,
 	)
 	return i, err
 }
 
 const GetUserByName = `-- name: GetUserByName :one
-SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id FROM users
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id, workday_hours, workdays_week FROM users
 WHERE username = ?
 `
 
@@ -216,6 +230,8 @@ func (q *Queries) GetUserByName(ctx context.Context, username string) (User, err
 		&i.Role,
 		&i.Enabled,
 		&i.AworkID,
+		&i.WorkdayHours,
+		&i.WorkdaysWeek,
 	)
 	return i, err
 }
@@ -230,9 +246,11 @@ role = ?,
 awork_id = ?,
 vacation_days = ?,
 is_superuser = ?,
+workday_hours = ?,
+workdays_week = ?,
 edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
-RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id
+RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id, workday_hours, workdays_week
 `
 
 type UpdateUserParams struct {
@@ -244,6 +262,8 @@ type UpdateUserParams struct {
 	AworkID      *string `json:"awork_id"`
 	VacationDays int64   `json:"vacation_days"`
 	IsSuperuser  bool    `json:"is_superuser"`
+	WorkdayHours float64 `json:"workday_hours"`
+	WorkdaysWeek float64 `json:"workdays_week"`
 	ID           int64   `json:"id"`
 }
 
@@ -257,6 +277,8 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.AworkID,
 		arg.VacationDays,
 		arg.IsSuperuser,
+		arg.WorkdayHours,
+		arg.WorkdaysWeek,
 		arg.ID,
 	)
 	var i User
@@ -273,6 +295,8 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.Role,
 		&i.Enabled,
 		&i.AworkID,
+		&i.WorkdayHours,
+		&i.WorkdaysWeek,
 	)
 	return i, err
 }

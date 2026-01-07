@@ -58,7 +58,7 @@ func (q *Queries) GetEventNameFromRequest(ctx context.Context, id int64) (string
 }
 
 const GetPendingRequests = `-- name: GetPendingRequests :many
-SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color, role, enabled, awork_id, e.id, scheduled_at, name, e.state, e.created_at, e.edited_at, e.user_id FROM requests r
+SELECT r.id, message, r.state, r.created_at, r.edited_at, r.user_id, edited_by, event_id, u.id, username, email, password, vacation_days, is_superuser, u.created_at, u.edited_at, color, role, enabled, awork_id, workday_hours, workdays_week, e.id, scheduled_at, name, e.state, e.created_at, e.edited_at, e.user_id FROM requests r
 JOIN users u ON r.user_id = u.id
 JOIN events e ON r.event_id = e.id
 WHERE r.state = "pending"
@@ -86,6 +86,8 @@ type GetPendingRequestsRow struct {
 	Role         string    `json:"role"`
 	Enabled      bool      `json:"enabled"`
 	AworkID      *string   `json:"awork_id"`
+	WorkdayHours float64   `json:"workday_hours"`
+	WorkdaysWeek float64   `json:"workdays_week"`
 	ID_3         int64     `json:"id_3"`
 	ScheduledAt  time.Time `json:"scheduled_at"`
 	Name         string    `json:"name"`
@@ -125,6 +127,8 @@ func (q *Queries) GetPendingRequests(ctx context.Context) ([]GetPendingRequestsR
 			&i.Role,
 			&i.Enabled,
 			&i.AworkID,
+			&i.WorkdayHours,
+			&i.WorkdaysWeek,
 			&i.ID_3,
 			&i.ScheduledAt,
 			&i.Name,

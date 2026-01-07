@@ -99,7 +99,6 @@ func (s *Server) InitMiddleware() {
 							slog.Int("status", v.Status),
 							slog.Duration("latency", v.Latency),
 							slog.String("request_id", v.RequestID),
-
 							slog.String("error", v.Error.Error()),
 						)
 					}

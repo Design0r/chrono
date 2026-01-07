@@ -39,7 +39,6 @@ func NewAPIBotFromEnv(log *slog.Logger) *APIBot {
 func (a *APIBot) Register(ctx context.Context, svc *UserService, pw auth.PasswordHasher) {
 	_, err := svc.GetByEmail(ctx, a.Email)
 	if err == nil {
-		a.log.Error("User with email already exists", slog.String("email", a.Email))
 		return
 	}
 
@@ -60,7 +59,7 @@ func (a *APIBot) Register(ctx context.Context, svc *UserService, pw auth.Passwor
 		},
 	)
 	if err != nil {
-		a.log.Error("User with email already exists", slog.String("email", a.Email))
+		a.log.Error("Failed to create api bot", slog.String("email", a.Email))
 		return
 	}
 	a.log.Info("Created Bot user", slog.String("name", a.Name))

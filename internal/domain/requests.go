@@ -65,6 +65,8 @@ type RequestEventUser struct {
 	Role         string    `json:"role"`
 	Enabled      bool      `json:"enabled"`
 	AworkID      *string   `json:"awork_id"`
+	WorkdayHours float64   `json:"workday_hours"`
+	WorkdaysWeek float64   `json:"workdays_week"`
 	ID_3         int64     `json:"event_id"`
 	ScheduledAt  time.Time `json:"scheduled_at"`
 	Name         string    `json:"name"`

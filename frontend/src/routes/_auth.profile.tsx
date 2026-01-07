@@ -102,6 +102,24 @@ function ProfileComponent() {
                     ))}
                   </select>
 
+                  <label htmlFor="workday_hours">Workday Hours</label>
+                  <input
+                    className="input input-bordered"
+                    type="number"
+                    defaultValue={user.workday_hours}
+                    required
+                    {...register("workday_hours")}
+                  />
+
+                  <label htmlFor="workday_hours">Workdays / Week </label>
+                  <input
+                    className="input input-bordered"
+                    type="number"
+                    defaultValue={user.workdays_week}
+                    required
+                    {...register("workdays_week")}
+                  />
+
                   <label htmlFor="password">New Password</label>
                   <input
                     className="input input-bordered"
@@ -152,6 +170,10 @@ function ProfileComponent() {
                 <p>{user.email}</p>
                 <p>Awork ID</p>
                 <p>{user.awork_id}</p>
+                <p>Workday Hours</p>
+                <p>{user.workday_hours}</p>
+                <p>Workdays / Week</p>
+                <p>{user.workdays_week}</p>
                 <p>Admin</p>
                 <p>{String(user.is_superuser)}</p>
                 <p>Yearly Vacation</p>

@@ -11,17 +11,19 @@ import (
 )
 
 type APIAuthHandler struct {
-	user *service.UserService
-	auth *service.AuthService
-	log  *slog.Logger
+	user     *service.UserService
+	auth     *service.AuthService
+	settings *service.SettingsService
+	log      *slog.Logger
 }
 
 func NewAPIAuthHandler(
 	u *service.UserService,
 	a *service.AuthService,
+	s *service.SettingsService,
 	log *slog.Logger,
 ) APIAuthHandler {
-	return APIAuthHandler{user: u, auth: a, log: log}
+	return APIAuthHandler{user: u, auth: a, settings: s, log: log}
 }
 
 func (h *APIAuthHandler) RegisterRoutes(group *echo.Group) {
@@ -55,7 +57,11 @@ func (h *APIAuthHandler) Login(c echo.Context) error {
 
 func (h *APIAuthHandler) Signup(c echo.Context) error {
 	ctx := c.Request().Context()
-	settings := c.Get("settings").(domain.Settings)
+
+	settings, err := h.settings.GetFirst(ctx)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusInternalServerError, "Failed to load settings.")
+	}
 	if !settings.SignupEnabled {
 		return NewErrorResponse(c, http.StatusForbidden, "Signups are currently disabled.")
 	}

@@ -213,6 +213,7 @@ func (s *Server) InitAPIRoutes() {
 	authHandler := api.NewAPIAuthHandler(
 		s.services.user,
 		s.services.auth,
+		s.services.settings,
 		s.log,
 	)
 	userHandler := api.NewAPIUserHandler(

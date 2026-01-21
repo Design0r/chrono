@@ -16,9 +16,8 @@ function RouteComponent() {
   const mutation = useMutation({
     mutationKey: ["export", year],
     mutationFn: (y: number) => chrono.export.download(y),
-    onSuccess: () => toast.addToast("Created report"),
-    onError: (error) =>
-      toast.addToast(`${error.name}: ${error.message}`, "error"),
+    onSuccess: () => toast.addToast("Created report", "success"),
+    onError: (error) => toast.addErrorToast(error),
     retry: false,
   });
 
@@ -33,7 +32,7 @@ function RouteComponent() {
               type="number"
               step="1"
               defaultValue={currYear}
-              onChange={(e) => setYear(Number(e))}
+              onChange={(e) => setYear(Number(e.target.value))}
             />
           </label>
           <button

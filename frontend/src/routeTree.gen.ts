@@ -94,12 +94,12 @@ const AuthCalendarYearMonthRoute = AuthCalendarYearMonthRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof AuthIndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/profile': typeof AuthProfileRoute
   '/team': typeof AuthTeamRoute
   '/timestamps': typeof AuthTimestampsRoute
-  '/': typeof AuthIndexRoute
   '/debug': typeof AuthAdminDebugRoute
   '/export': typeof AuthAdminExportRoute
   '/requests': typeof AuthAdminRequestsRoute
@@ -110,10 +110,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/': typeof AuthIndexRoute
   '/profile': typeof AuthProfileRoute
   '/team': typeof AuthTeamRoute
   '/timestamps': typeof AuthTimestampsRoute
-  '/': typeof AuthIndexRoute
   '/debug': typeof AuthAdminDebugRoute
   '/export': typeof AuthAdminExportRoute
   '/requests': typeof AuthAdminRequestsRoute
@@ -141,12 +141,12 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/login'
     | '/signup'
     | '/profile'
     | '/team'
     | '/timestamps'
-    | '/'
     | '/debug'
     | '/export'
     | '/requests'
@@ -157,10 +157,10 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/signup'
+    | '/'
     | '/profile'
     | '/team'
     | '/timestamps'
-    | '/'
     | '/debug'
     | '/export'
     | '/requests'
@@ -210,7 +210,7 @@ declare module '@tanstack/react-router' {
     '/_auth': {
       id: '/_auth'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -245,7 +245,7 @@ declare module '@tanstack/react-router' {
     '/_auth/_admin': {
       id: '/_auth/_admin'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthAdminRouteImport
       parentRoute: typeof AuthRoute
     }

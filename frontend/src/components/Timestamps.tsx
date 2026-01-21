@@ -41,7 +41,7 @@ export function Timestamps() {
       setCurrTimer(data);
       setPaused(false);
       setStartTime(Date.now());
-      addToast("Started Timer");
+      addToast("Started Timer", "success");
     },
     retry: false,
   });
@@ -55,7 +55,7 @@ export function Timestamps() {
       setStartTime(Date.now());
       setPaused(true);
       queryClient.invalidateQueries({ queryKey: ["timestamps"] });
-      addToast("Stopped Timer");
+      addToast("Stopped Timer", "success");
     },
     retry: false,
   });
@@ -83,7 +83,7 @@ export function Timestamps() {
   }, [timestampsQ.isError]);
 
   const totalTime = secondsToCounter(
-    durationFromTimestamps(timestamps) + runningTimer
+    durationFromTimestamps(timestamps) + runningTimer,
   );
 
   return (
@@ -282,10 +282,10 @@ export function EditModal({
 }) {
   const queryClient = useQueryClient();
   const [startDate, setStartDate] = useState(
-    isoToDatetimeLocal(timestamp.start_time)
+    isoToDatetimeLocal(timestamp.start_time),
   );
   const [endDate, setEndDate] = useState<string | null>(
-    timestamp.end_time ? isoToDatetimeLocal(timestamp.end_time) : null
+    timestamp.end_time ? isoToDatetimeLocal(timestamp.end_time) : null,
   );
 
   useEffect(() => {
@@ -424,7 +424,7 @@ export function TeamTimestamps({
         map[u.id] = u;
         return map;
       },
-      {} as Record<number, User>
+      {} as Record<number, User>,
     );
   }, [usersQ.data]);
 
@@ -435,7 +435,7 @@ export function TeamTimestamps({
         (map[ts.user_id] ??= []).push(ts);
         return map;
       },
-      {} as Record<number, Timestamp[]>
+      {} as Record<number, Timestamp[]>,
     );
   }, [allTimestampsQ.data]);
 
@@ -450,8 +450,10 @@ export function TeamTimestamps({
           const user = usersMap[Number(k)];
           const counter = secondsToCounter(durationFromTimestamps(v));
 
+          if (!user) return <div key={0}></div>;
+
           return (
-            <div>
+            <div key={user.id} className="my-2">
               <details className="collapse bg-base-300 border-base-300 border">
                 <summary className="collapse-title collapse-arrow font-semibold">
                   {user.username}

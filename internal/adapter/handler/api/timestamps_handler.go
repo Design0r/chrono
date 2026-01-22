@@ -88,13 +88,13 @@ func (h *APITimestampsHandler) Update(c echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
+	if !currUser.IsAdmin() {
+		return NewErrorResponse(c, http.StatusForbidden, "only allowed for admins")
+	}
+
 	var tsForm domain.Timestamp
 	if err := c.Bind(&tsForm); err != nil {
 		return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid form parameters")
-	}
-
-	if !currUser.IsAdmin() && tsForm.UserID != currUser.ID {
-		return NewErrorResponse(c, http.StatusMethodNotAllowed, "not allowed")
 	}
 
 	t, err := h.timestamps.Update(ctx, &tsForm)

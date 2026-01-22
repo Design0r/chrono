@@ -7,13 +7,13 @@ import {
   LoadingSpinnerPage,
 } from "../components/LoadingSpinner";
 import { StatCard, StatCardElement } from "../components/StatCard";
+import { Timestamps } from "../components/Timestamps";
 import { TitleSection } from "../components/TitleSection";
 import { useToast } from "../components/Toast";
 import { VacationGraph } from "../components/VacationGraph";
 import type { UserWithVacation } from "../types/auth";
 import type { WorkTime } from "../types/response";
 import { dayOfYear, daysInYear } from "../utils/calendar";
-import { Timestamps } from "../components/Timestamps";
 
 export const Route = createFileRoute("/_auth/")({
   component: Home,
@@ -101,7 +101,7 @@ function Home() {
         {user?.username}
       </div>
       <TitleSection title="Timestamps">
-        <Timestamps />
+        <Timestamps user={user} />
       </TitleSection>
 
       <TitleSection title="Your worktimes">

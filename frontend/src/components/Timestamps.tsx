@@ -5,7 +5,7 @@ import type { User } from "../types/auth";
 import type { Timestamp } from "../types/response";
 import { useToast } from "./Toast";
 
-export function Timestamps() {
+export function Timestamps({ user }: { user: User }) {
   const chrono = useMemo(() => new ChronoClient(), []);
 
   const [timestamps, setTimestemps] = useState<Timestamp[]>([]);
@@ -127,7 +127,7 @@ export function Timestamps() {
       </div>
 
       <div className="overflow-x-auto rounded-box">
-        <TimestampTable timestamps={timestamps} />
+        <TimestampTable timestamps={timestamps} user={user} />
       </div>
     </div>
   );
@@ -192,8 +192,16 @@ function Timer({
   );
 }
 
-export function TimestampTable({ timestamps }: { timestamps: Timestamp[] }) {
+export function TimestampTable({
+  timestamps,
+  user,
+}: {
+  timestamps: Timestamp[];
+  user: User;
+}) {
   const [modal, setModal] = useState<Timestamp | null>(null);
+
+  const { addErrorToast } = useToast();
 
   return (
     <>
@@ -215,7 +223,17 @@ export function TimestampTable({ timestamps }: { timestamps: Timestamp[] }) {
 
             return (
               <tr
-                onClick={() => setModal(t)}
+                onClick={() => {
+                  if (!user.is_superuser) {
+                    addErrorToast({
+                      name: "Permission Error",
+                      message: "Only for Admins",
+                    });
+
+                    return;
+                  }
+                  setModal(t);
+                }}
                 key={t.id}
                 className="hover:bg-base-300 bg-base-100"
               >
@@ -234,7 +252,9 @@ export function TimestampTable({ timestamps }: { timestamps: Timestamp[] }) {
           })}
         </tbody>
       </table>
-      {modal && <EditModal timestamp={modal} onClose={() => setModal(null)} />}
+      {modal && user.is_superuser && (
+        <EditModal timestamp={modal} onClose={() => setModal(null)} />
+      )}
     </>
   );
 }
@@ -391,9 +411,11 @@ export function EditModal({
 export function TeamTimestamps({
   startDate,
   endDate,
+  user: currUser,
 }: {
   startDate?: string;
   endDate?: string;
+  user: User;
 }) {
   const chrono = new ChronoClient();
 
@@ -464,7 +486,7 @@ export function TeamTimestamps({
                     {counter.seconds}s
                   </h2>
 
-                  <TimestampTable timestamps={v} />
+                  <TimestampTable timestamps={v} user={currUser} />
                 </div>
               </details>
             </div>

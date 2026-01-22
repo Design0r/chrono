@@ -1,8 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { LoadingSpinnerPage } from "../components/LoadingSpinner";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ErrorPage } from "../components/ErrorPage";
-import type { Timestamp } from "../types/response";
+import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import {
   durationFromTimestamps,
   isoToDateLocal,
@@ -10,7 +10,8 @@ import {
   TeamTimestamps,
   TimestampTable,
 } from "../components/Timestamps";
-import { useEffect, useState } from "react";
+import type { User } from "../types/auth";
+import type { Timestamp } from "../types/response";
 
 type TimestampsSearchParams = {
   startDate?: string;
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/_auth/timestamps")({
 });
 
 function RouteComponent() {
-  const { chrono } = Route.useRouteContext();
+  const { auth, chrono } = Route.useRouteContext();
   const navigate = useNavigate();
 
   const params = Route.useSearch();
@@ -62,7 +63,15 @@ function RouteComponent() {
     retry: false,
   });
 
-  const queries = [timestampQ];
+  const userQ = useQuery({
+    queryKey: ["user", auth.userId],
+    queryFn: () => chrono.users.getUserById(auth.userId!),
+    staleTime: 1000 * 60 * 60 * 6, // 6h
+    gcTime: 1000 * 60 * 60 * 7, // 7h
+    retry: false,
+  });
+
+  const queries = [timestampQ, userQ];
   const anyPending = queries.some((q) => q.isPending);
   const firstError = queries.find((q) => q.isError)?.error;
 
@@ -70,6 +79,7 @@ function RouteComponent() {
   if (firstError) return <ErrorPage error={firstError} />;
 
   const timestamps = timestampQ.data! as Timestamp[];
+  const user = userQ.data! as User;
 
   const counter = secondsToCounter(durationFromTimestamps(timestamps));
 
@@ -101,9 +111,9 @@ function RouteComponent() {
         Total Duration: {counter.hours}h {counter.minutes}m {counter.seconds}s
       </h2>
 
-      <TimestampTable timestamps={timestamps} />
+      <TimestampTable timestamps={timestamps} user={user} />
 
-      <TeamTimestamps startDate={startDate} endDate={endDate} />
+      <TeamTimestamps startDate={startDate} endDate={endDate} user={user} />
     </div>
   );
 }

@@ -127,6 +127,25 @@ func (r *TimestampsService) GetAllForUser(
 	return r.timestamps.GetAllForUser(ctx, userId)
 }
 
+func (r *TimestampsService) GetWorkHoursForYearForAllUsers(
+	ctx context.Context,
+	users []domain.User,
+	year int,
+	workDayHours float64,
+) map[int64]domain.WorkHours {
+	workHours := map[int64]domain.WorkHours{}
+
+	for _, user := range users {
+		result, err := r.GetWorkHoursForYear(ctx, user.ID, year, workDayHours)
+		if err != nil {
+			continue
+		}
+		workHours[user.ID] = result
+	}
+
+	return workHours
+}
+
 func (r *TimestampsService) GetWorkHoursForYear(
 	ctx context.Context,
 	userId int64,

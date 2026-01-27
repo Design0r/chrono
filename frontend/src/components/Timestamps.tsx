@@ -238,11 +238,15 @@ export function TimestampTable({
                 className="hover:bg-base-300 bg-base-100"
               >
                 <td>
-                  {new Date(t.start_time).toLocaleString().replaceAll("/", ".")}
+                  {new Date(t.start_time)
+                    .toLocaleString("de-DE", { dateStyle: "medium" })
+                    .replaceAll("/", ".")}
                 </td>
                 <td>
                   {t.end_time &&
-                    new Date(t.end_time).toLocaleString().replaceAll("/", ".")}
+                    new Date(t.end_time)
+                      .toLocaleString("de-DE", { dateStyle: "medium" })
+                      .replaceAll("/", ".")}
                 </td>
                 <td>
                   {duration.hours}h {duration.minutes}m {duration.seconds}s
@@ -418,6 +422,9 @@ export function TeamTimestamps({
   user: User;
 }) {
   const chrono = new ChronoClient();
+  const currYear = startDate
+    ? new Date(startDate).getFullYear()
+    : new Date().getFullYear();
 
   const allTimestampsQ = useQuery({
     queryKey: ["timestamps", "all", startDate, endDate],
@@ -435,7 +442,15 @@ export function TeamTimestamps({
     retry: false,
   });
 
-  const queries = [allTimestampsQ, usersQ];
+  const allWorktimesQ = useQuery({
+    queryKey: ["worktimes", "all", startDate, endDate],
+    queryFn: () => chrono.timestamps.getWorkHoursForAllUsers(currYear),
+    staleTime: 1000 * 60 * 1, // 1min
+    gcTime: 1000 * 60 * 30, // 30min
+    retry: false,
+  });
+
+  const queries = [allTimestampsQ, usersQ, allWorktimesQ];
   const anyPending = queries.some((q) => q.isPending);
   const firstError = queries.find((q) => q.isError)?.error;
 
@@ -463,16 +478,30 @@ export function TeamTimestamps({
 
   if (anyPending || firstError) return <></>;
 
+  const worktimes = allWorktimesQ.data!;
+
   return (
     <>
       <hr />
       <h2>Team Timestamps</h2>
       <div className="w-full">
         {Object.entries(timestampsMap).map(([k, v]) => {
+          let overtimeLabel = "Overtime";
           const user = usersMap[Number(k)];
           const counter = secondsToCounter(durationFromTimestamps(v));
 
           if (!user) return <div key={0}></div>;
+
+          const worktime = worktimes[user.id];
+          const expectedCounter = secondsToCounter(worktime.expected * 3600);
+          let overtime = (worktime.worked - worktime.expected) * 3600;
+          if (overtime > 0) {
+            overtimeLabel = "Overtime";
+          } else {
+            overtime *= -1;
+            overtimeLabel = "Missing Worktime";
+          }
+          const overtimeCounter = secondsToCounter(overtime);
 
           return (
             <div key={user.id} className="my-2">
@@ -480,11 +509,25 @@ export function TeamTimestamps({
                 <summary className="collapse-title collapse-arrow font-semibold">
                   {user.username}
                 </summary>
-                <div className="collapse-content bg-base-200 px-0 text-sm">
-                  <h2 className="text-md text-center py-4 xl:text-left">
-                    Total Duration: {counter.hours}h {counter.minutes}m{" "}
-                    {counter.seconds}s
-                  </h2>
+                <div className="collapse-content bg-base-200 px-0 flex flex-col text-sm">
+                  <div className="grid grid-cols-2 lg:grid-cols-6 text-center py-2">
+                    <h2>Worked</h2>
+                    <h2 className="text-left">
+                      {counter.hours}h {counter.minutes}m {counter.seconds}s
+                    </h2>
+
+                    <h2>Expected</h2>
+                    <h2 className="text-left">
+                      {expectedCounter.hours}h {expectedCounter.minutes}m{" "}
+                      {expectedCounter.seconds}s
+                    </h2>
+
+                    <h2>{overtimeLabel}</h2>
+                    <h2 className="text-left">
+                      {overtimeCounter.hours}h {overtimeCounter.minutes}m{" "}
+                      {overtimeCounter.seconds}s
+                    </h2>
+                  </div>
 
                   <TimestampTable timestamps={v} user={currUser} />
                 </div>

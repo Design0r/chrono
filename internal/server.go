@@ -249,7 +249,7 @@ func (s *Server) InitAPIRoutes() {
 		s.log,
 	)
 	notificationHandler := api.NewAPINotificationHandler(s.services.notif, s.log)
-	timestampsHandler := api.NewAPITimestampsHandler(s.services.timestamps)
+	timestampsHandler := api.NewAPITimestampsHandler(s.services.timestamps, s.services.user)
 
 	apiGrp := s.Router.Group("/api/v1")
 	authGrp := apiGrp.Group(

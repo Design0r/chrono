@@ -13,10 +13,11 @@ import (
 
 type APITimestampsHandler struct {
 	timestamps *service.TimestampsService
+	user       *service.UserService
 }
 
-func NewAPITimestampsHandler(t *service.TimestampsService) APITimestampsHandler {
-	return APITimestampsHandler{timestamps: t}
+func NewAPITimestampsHandler(t *service.TimestampsService, u *service.UserService) APITimestampsHandler {
+	return APITimestampsHandler{timestamps: t, user: u}
 }
 
 func (s *APITimestampsHandler) RegisterRoutes(auth *echo.Group, admin *echo.Group) {
@@ -28,6 +29,7 @@ func (s *APITimestampsHandler) RegisterRoutes(auth *echo.Group, admin *echo.Grou
 	g.GET("", s.GetTimestamps)
 	g.GET("/latest", s.GetLatestTimestamp)
 	g.GET("/worked/:year", s.GetWorkHoursForYear)
+	g.GET("/worked/:year/all", s.GetWorkHoursForYearForAllUsers)
 
 	admin.GET("/timestamps/all", s.GetAllTimestamps)
 }
@@ -153,6 +155,26 @@ func (h *APITimestampsHandler) GetWorkHoursForYear(c echo.Context) error {
 	if err != nil {
 		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
+
+	return NewJsonResponse(c, work)
+}
+
+func (h *APITimestampsHandler) GetWorkHoursForYearForAllUsers(c echo.Context) error {
+	currUser := c.Get("user").(domain.User)
+	ctx := c.Request().Context()
+
+	yearParam := c.Param("year")
+	year, err := strconv.Atoi(yearParam)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "year parameter is missing")
+	}
+
+	users, err := h.user.GetAll(ctx)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusInternalServerError, "failed to get users")
+	}
+
+	work := h.timestamps.GetWorkHoursForYearForAllUsers(ctx, users, year, currUser.WorkdayHours)
 
 	return NewJsonResponse(c, work)
 }

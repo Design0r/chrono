@@ -122,4 +122,19 @@ export class ApiTimestamps {
     const r = await returnOrError(response);
     return r.data as WorkTime;
   }
+
+  async getWorkHoursForAllUsers(
+    year: number,
+  ): Promise<Record<number, WorkTime>> {
+    const response = await fetch(
+      CHRONO_URL + `/timestamps/worked/${year}/all`,
+      {
+        method: "GET",
+        credentials: "include",
+      },
+    );
+
+    const r = await returnOrError(response);
+    return r.data as Record<number, WorkTime>;
+  }
 }

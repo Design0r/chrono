@@ -492,7 +492,6 @@ export function TeamTimestamps({
       <h2>Team Timestamps</h2>
       <div className="w-full">
         {Object.entries(timestampsMap).map(([k, v]) => {
-          let overtimeLabel = "Overtime";
           const user = usersMap[Number(k)];
           const counter = secondsToCounter(durationFromTimestamps(v));
 
@@ -501,9 +500,8 @@ export function TeamTimestamps({
           const worktime = worktimes[user.id];
           const expectedCounter = secondsToCounter(worktime.expected * 3600);
           let overtime = (worktime.worked - worktime.expected) * 3600;
-          if (overtime > 0) {
-            overtimeLabel = "Overtime";
-          } else {
+          let overtimeLabel = "Overtime";
+          if (overtime < 0) {
             overtime *= -1;
             overtimeLabel = "Missing Worktime";
           }
@@ -512,7 +510,7 @@ export function TeamTimestamps({
           return (
             <div key={user.id} className="my-2">
               <details className="collapse bg-base-300 border-base-300 border">
-                <summary className="collapse-title collapse-arrow font-semibold">
+                <summary className="collapse-title hover:bg-base-100 collapse-arrow font-semibold">
                   {user.username}
                 </summary>
                 <div className="collapse-content bg-base-200 px-0 flex flex-col text-sm">

@@ -131,12 +131,11 @@ func (r *TimestampsService) GetWorkHoursForYearForAllUsers(
 	ctx context.Context,
 	users []domain.User,
 	year int,
-	workDayHours float64,
 ) map[int64]domain.WorkHours {
 	workHours := map[int64]domain.WorkHours{}
 
 	for _, user := range users {
-		result, err := r.GetWorkHoursForYear(ctx, user.ID, year, workDayHours)
+		result, err := r.GetWorkHoursForYear(ctx, user.ID, year, user.WorkdayHours)
 		if err != nil {
 			continue
 		}

@@ -161,6 +161,11 @@ func (h *APITimestampsHandler) GetWorkHoursForYear(c echo.Context) error {
 
 func (h *APITimestampsHandler) GetWorkHoursForYearForAllUsers(c echo.Context) error {
 	currUser := c.Get("user").(domain.User)
+
+	if !currUser.IsAdmin() {
+		return NewErrorResponse(c, http.StatusForbidden, "only allowed for admins")
+	}
+
 	ctx := c.Request().Context()
 
 	yearParam := c.Param("year")
@@ -174,7 +179,7 @@ func (h *APITimestampsHandler) GetWorkHoursForYearForAllUsers(c echo.Context) er
 		return NewErrorResponse(c, http.StatusInternalServerError, "failed to get users")
 	}
 
-	work := h.timestamps.GetWorkHoursForYearForAllUsers(ctx, users, year, currUser.WorkdayHours)
+	work := h.timestamps.GetWorkHoursForYearForAllUsers(ctx, users, year)
 
 	return NewJsonResponse(c, work)
 }

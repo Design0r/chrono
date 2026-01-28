@@ -239,13 +239,19 @@ export function TimestampTable({
               >
                 <td>
                   {new Date(t.start_time)
-                    .toLocaleString("de-DE", { dateStyle: "medium" })
+                    .toLocaleString("de-DE", {
+                      dateStyle: "medium",
+                      timeStyle: "medium",
+                    })
                     .replaceAll("/", ".")}
                 </td>
                 <td>
                   {t.end_time &&
                     new Date(t.end_time)
-                      .toLocaleString("de-DE", { dateStyle: "medium" })
+                      .toLocaleString("de-DE", {
+                        dateStyle: "medium",
+                        timeStyle: "medium",
+                      })
                       .replaceAll("/", ".")}
                 </td>
                 <td>

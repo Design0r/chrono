@@ -298,6 +298,10 @@ export function isoToDateLocal(iso: string) {
 // datetime-local ("2025-12-23T21:44") -> ISO UTC ("2025-12-23T20:44:00Z")
 export function datetimeLocalToIso(value: string) {
   const d = new Date(value);
+  if (d.getSeconds() === 0) {
+    d.setSeconds(new Date().getSeconds());
+  }
+
   const iso = d.toISOString();
   const fixed = `${iso.split(".")[0]}Z`;
   return fixed;

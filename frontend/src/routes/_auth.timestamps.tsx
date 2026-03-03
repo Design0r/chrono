@@ -8,7 +8,7 @@ import {
   isoToDateLocal,
   secondsToCounter,
   TeamTimestamps,
-  TimestampTable,
+  TimestampTableByWeek,
 } from "../components/Timestamps";
 import type { User } from "../types/auth";
 import type { Timestamp } from "../types/response";
@@ -34,8 +34,12 @@ function RouteComponent() {
 
   const params = Route.useSearch();
 
-  const [startDate, setStartDate] = useState<string | undefined>();
-  const [endDate, setEndDate] = useState<string | undefined>();
+  const [startDate, setStartDate] = useState<string | undefined>(
+    () => params.startDate,
+  );
+  const [endDate, setEndDate] = useState<string | undefined>(
+    () => params.endDate,
+  );
 
   useEffect(() => {
     if (params.startDate) setStartDate(params.startDate);
@@ -43,17 +47,17 @@ function RouteComponent() {
 
     if (params.endDate) setEndDate(params.endDate);
     else setEndDate(undefined);
-  }, [params]);
+  }, [params.startDate, params.endDate]);
 
   useEffect(() => {
     navigate({
       to: "/timestamps",
       search: {
-        startDate: startDate,
-        endDate: endDate,
+        startDate: startDate ?? undefined,
+        endDate: endDate ?? undefined,
       },
     });
-  }, [startDate, endDate]);
+  }, [startDate, endDate, navigate]);
 
   const timestampQ = useQuery({
     queryKey: ["timestamps", startDate, endDate],
@@ -111,7 +115,7 @@ function RouteComponent() {
         Total Duration: {counter.hours}h {counter.minutes}m {counter.seconds}s
       </h2>
 
-      <TimestampTable timestamps={timestamps} user={user} />
+      <TimestampTableByWeek timestamps={timestamps} user={user} />
 
       <TeamTimestamps startDate={startDate} endDate={endDate} user={user} />
     </div>

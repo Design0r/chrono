@@ -86,7 +86,7 @@ export function Timestamps({user}: {user: User}) {
 
 	return (
 		<div className='mx-auto flex lg:flex-row flex-col w-full gap-4 justify-center '>
-			<div className='flex items-center flex-1 rounded-2xl bg-base-200/60 border border-base-300/80 p-6 lg:p-8'>
+			<div className='flex items-center justify-center flex-1 rounded-2xl bg-base-200/60 border border-base-300/80 p-6 lg:p-8'>
 				<div className='flex flex-col items-center justify-center gap-4'>
 					<Timer
 						paused={paused}

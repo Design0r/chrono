@@ -117,18 +117,30 @@ export function Timestamps({user}: {user: User}) {
 						</button>
 					</div>{' '}
 					<div className='flex whitespace-nowrap items-center gap-2 mt-0 text-base-content/70'>
-						<span className='font-mono font-semibold text-success'>
+						<span
+							className={`font-mono font-semibold ${paused ? 'text-success' : 'text-accent/80'}`}
+						>
 							{(() => {
 								const f = formatCounter(totalTime)
 								return (
 									<>
 										<span>{f.hours}</span>
-										<span className='text-success/90 animate-pulse'>:</span>
+										<span
+											className={
+												paused ? 'text-success/90 animate-pulse' : 'text-accent/80 animate-pulse'
+											}
+										>
+											:
+										</span>
 										<span>{f.minutes} h</span>
 									</>
 								)
 							})()}
-							<span className='text-success/50 pl-2.5'>Today</span>
+							<span
+								className={`pl-2.5 ${paused ? 'text-success/50' : 'text-accent/60'}`}
+							>
+								Today
+							</span>
 						</span>
 					</div>
 				</div>

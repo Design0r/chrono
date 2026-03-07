@@ -46,7 +46,7 @@ export function CalendarNavigation({
 					<Link
 						to='/calendar/$year/$month'
 						params={{year: prevYear.toString(), month: prevMonth.toString()}}
-						className='btn btn-sm btn-soft btn-primary hover:bg-primary/25 hover:text-primary w-9 h-9 rounded-lg border justify-center items-center icon-outlined animate-color duration-300'
+						className='btn btn-sm btn-soft btn-primary bg-primary/10 hover:bg-primary/25 hover:text-primary w-9 h-9 rounded-lg border justify-center items-center icon-outlined animate-color duration-300'
 						search={(prev) => prev}
 					>
 						arrow_back
@@ -56,7 +56,7 @@ export function CalendarNavigation({
 					<Link
 						to='/calendar/$year/$month'
 						params={{year: nextYear.toString(), month: nextMonth.toString()}}
-						className='btn btn-sm btn-soft btn-primary hover:bg-primary/25 hover:text-primary w-9 h-9 rounded-lg border icon-outlined animate-all duration-300'
+						className='btn btn-sm btn-soft btn-primary bg-primary/10 hover:bg-primary/25 hover:text-primary w-9 h-9 rounded-lg border icon-outlined animate-all duration-300'
 						search={(prev) => prev}
 					>
 						arrow_forward

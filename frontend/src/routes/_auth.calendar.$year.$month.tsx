@@ -76,7 +76,7 @@ function CalendarComponent() {
 	return (
 		<div className='pb-24 lg:pb-0'>
 			<div className='grid grid-cols-7'>
-				<div className='px-6 col-span-7 grid grid-cols-1 grid-rows-4 lg:grid-rows-1 items-center gap-y-2 lg:gap-y-0 lg:gap-x-2 mt-2 lg:mb-16 lg:grid-cols-7 lg:px-4 '>
+				<div className='px-6 col-span-7 grid grid-cols-1 grid-rows-3  lg:grid-rows-1 items-center gap-y-2 lg:gap-y-0 lg:gap-x-2 mt-2 lg:mb-16 lg:grid-cols-7 lg:px-4 '>
 					<select
 						onChange={(e) => setSelectedEvent(e.target.value)}
 						className='hidden lg:min-h-12 lg:flex w-full col-span-1 cursor-pointer bg-base-300 select hover:text-white focus-within:text-white text-center focus-within:outline-0 h-full pl-4 text-base border-0 rounded-lg animate-all'

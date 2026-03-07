@@ -85,9 +85,9 @@ export function Timestamps({user}: {user: User}) {
 	const totalTime = secondsToCounter(durationFromTimestamps(timestamps) + runningTimer)
 
 	return (
-		<div className='flex flex-col space-y-4 lg:space-y-8'>
-			<div className='mx-auto justify-center'>
-				<div className='space-y-4'>
+		<div className='mx-auto flex lg:flex-row flex-col w-full gap-4 justify-center '>
+			<div className='flex items-center flex-1 rounded-2xl bg-base-200/60 border border-base-300/80 p-6 lg:p-8'>
+				<div className='flex flex-col items-center justify-center flex-1 gap-6'>
 					<Timer
 						paused={paused}
 						startUnix={startTime}
@@ -95,38 +95,36 @@ export function Timestamps({user}: {user: User}) {
 							setRunningTimer(seconds)
 						}}
 					/>
-					<div className='justify-center flex space-x-2'>
+					<div className='flex gap-3'>
 						<button
 							disabled={!paused}
-							className='btn btn-soft btn-success icon-outlined'
+							className='btn btn-circle btn-lg btn-success shadow-md hover:shadow-lg transition-shadow disabled:opacity-40 disabled:shadow-none icon-outlined'
 							onClick={() => startMut.mutate()}
+							title='Timer starten'
 						>
-							play_arrow
+							<span className='text-2xl icon-outlined'>play_arrow</span>
 						</button>
 						<button
 							disabled={paused}
-							className='btn btn-error btn-soft icon-outlined'
+							className='btn btn-circle btn-lg btn-error shadow-md hover:shadow-lg transition-shadow disabled:opacity-40 disabled:shadow-none icon-outlined'
 							onClick={() => {
 								if (!currTimer) return
 								stopMut.mutate(currTimer.id)
 							}}
+							title='Timer stoppen'
 						>
-							stop
+							<span className='text-2xl icon-outlined'>stop</span>
 						</button>
 					</div>
-
-					<p className='text-center text-xl'>
-						Today:{' '}
-						<span>
+					<div className='flex whitespace-nowrap items-center gap-2 text-base-content/70'>
+						<span className='text-sm font-medium'>Today</span>
+						<span className='font-mono text-lg tabular-nums font-semibold text-base-content'>
 							{totalTime.hours}h {totalTime.minutes}m {totalTime.seconds}s
 						</span>
-					</p>
+					</div>
 				</div>
 			</div>
-
-			<div className='overflow-x-auto rounded-box'>
-				<TimestampTable timestamps={timestamps} user={user} />
-			</div>
+			<TimestampTable timestamps={timestamps} user={user} />
 		</div>
 	)
 }
@@ -232,8 +230,16 @@ function Timer({
 	}, [startUnix, paused])
 
 	return (
-		<div className='text-2xl text-center'>
-			{timer.hours}h {timer.minutes}m {timer.seconds}s
+		<div
+			className={`font-mono text-4xl tabular-nums tracking-tight text-center transition-opacity duration-300 ${
+				paused ? 'text-base-content/60' : 'text-primary'
+			}`}
+		>
+			<span>{String(timer.hours).padStart(2, '0')}</span>
+			<span className='text-base-content/50'>:</span>
+			<span>{String(timer.minutes).padStart(2, '0')}</span>
+			<span className='text-base-content/50'>:</span>
+			<span>{String(timer.seconds).padStart(2, '0')}</span>
 		</div>
 	)
 }
@@ -250,7 +256,7 @@ export function TimestampTableByWeek({timestamps, user}: {timestamps: Timestamp[
 		<div className='space-y-6'>
 			{groups.map((g) => (
 				<section key={g.weekMonday.getTime()}>
-					<h3 className='text-base font-semibold mb-2 px-4'>
+					<h3 className='text-base font-semibold mb-4 px-4'>
 						{formatWeekRange(g.weekMonday, g.weekSunday)}
 					</h3>
 					<TimestampTable
@@ -282,9 +288,9 @@ export function TimestampTable({
 
 	return (
 		<>
-			<table className='table bg-base-300'>
+			<table className='table bg-base-300/50'>
 				<thead>
-					<tr>
+					<tr className='text-accent/80 *:w-1/3 *:font-normal'>
 						<th>Start</th>
 						<th>End</th>
 						<th>Duration</th>
@@ -312,24 +318,30 @@ export function TimestampTable({
 									setModal(t)
 								}}
 								key={t.id}
-								className='hover:bg-base-300 bg-base-100'
+								className='hover:bg-base-300 *:font-extralight *:text-info/80 bg-base-200/40'
 							>
 								<td>
 									{new Date(t.start_time)
 										.toLocaleString('de-DE', {
-											dateStyle: 'medium',
-											timeStyle: 'medium',
+											day: '2-digit',
+											month: '2-digit',
+											hour: '2-digit',
+											minute: '2-digit',
 										})
-										.replaceAll('/', '.')}
+										.replaceAll('/', '.')
+										.replace(', ', ' - ')}
 								</td>
 								<td>
 									{t.end_time &&
 										new Date(t.end_time)
 											.toLocaleString('de-DE', {
-												dateStyle: 'medium',
-												timeStyle: 'medium',
+												day: '2-digit',
+												month: '2-digit',
+												hour: '2-digit',
+												minute: '2-digit',
 											})
-											.replaceAll('/', '.')}
+											.replaceAll('/', '.')
+											.replace(', ', ' - ')}
 								</td>
 								<td>
 									{duration.hours}h {duration.minutes}m {duration.seconds}s
@@ -340,10 +352,10 @@ export function TimestampTable({
 				</tbody>
 				{footerCounter !== null && (
 					<tfoot>
-						<tr className='bg-base-200 font-semibold'>
+						<tr className='bg-base-200/70 border-b-lg font-semibold'>
 							<td></td>
 							<td></td>
-							<td className='text-primary underline underline-offset-6'>
+							<td className='text-primary '>
 								{footerCounter.hours}h {footerCounter.minutes}m{' '}
 								{footerCounter.seconds}s
 							</td>

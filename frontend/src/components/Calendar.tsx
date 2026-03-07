@@ -63,7 +63,7 @@ export function CalendarNavigation({
 					</Link>
 				</div>
 				<div className='pl-4'>
-					<p className='text-sm whitespace-nowrap'>
+					<p className='text-sm lg:text-base whitespace-nowrap'>
 						{monthName.substring(0, 3)} {year}
 					</p>
 				</div>
@@ -155,26 +155,17 @@ export function VacationCounter({
 }) {
 	return (
 		<div className='flex px-3 w-full justify-center text-base bg-base-300 items-center rounded-lg align-middle h-12 lg:h-full text-center'>
-			<div
-				className='flex flex-wrap justify-center tooltip text-primary cursor-help'
-				data-tip='pending'
-			>
-				{pending}
-				<span className='text-primary/80 pl-2'>pending</span>
+			<div className='w-1/3 truncate! tooltip text-accent/90' data-tip='remaining'>
+				{remaining} remaining
 			</div>
-			<span className='text-info/30 px-2'>|</span>
 			<div
-				className='flex flex-wrap justify-center tooltip text-warning cursor-help'
+				className='w-1/3 lg:w-fit border-x border-info/15 px-2 mx-2 truncate! tooltip text-warning'
 				data-tip='used'
 			>
-				{used} <span className='truncate! text-warning/80 pl-2'>used</span>
+				{used} used
 			</div>{' '}
-			<span className='text-info/30 px-2'>|</span>
-			<div
-				className='flex flex-wrap justify-center tooltip text-secondary cursor-help'
-				data-tip='remaining'
-			>
-				{remaining} <span className='truncate! text-secondary/80 px-2'>remaining</span>
+			<div className='w-1/3 truncate! tooltip text-primary' data-tip='pending'>
+				{pending} pending
 			</div>
 		</div>
 	)

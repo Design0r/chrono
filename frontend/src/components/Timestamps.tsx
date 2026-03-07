@@ -87,7 +87,7 @@ export function Timestamps({user}: {user: User}) {
 	return (
 		<div className='mx-auto flex lg:flex-row flex-col w-full gap-4 justify-center '>
 			<div className='flex items-center flex-1 rounded-2xl bg-base-200/60 border border-base-300/80 p-6 lg:p-8'>
-				<div className='flex flex-col items-center justify-center flex-1 gap-6'>
+				<div className='flex flex-col items-center justify-center gap-4'>
 					<Timer
 						paused={paused}
 						startUnix={startTime}
@@ -95,14 +95,14 @@ export function Timestamps({user}: {user: User}) {
 							setRunningTimer(seconds)
 						}}
 					/>
-					<div className='flex gap-3'>
+					<div className='flex mt-1 gap-3 justify-center items-center'>
 						<button
 							disabled={!paused}
-							className='btn btn-circle btn-lg btn-success shadow-md hover:shadow-lg transition-shadow disabled:opacity-40 disabled:shadow-none icon-outlined'
+							className='btn btn-lg btn-success w-22 rounded-full shadow-md hover:shadow-lg transition-shadow disabled:opacity-40 disabled:shadow-none icon-filled'
 							onClick={() => startMut.mutate()}
 							title='Timer starten'
 						>
-							<span className='text-2xl icon-outlined'>play_arrow</span>
+							<span className='text-xl icon-filled scale-145'>play_arrow</span>
 						</button>
 						<button
 							disabled={paused}
@@ -113,16 +113,22 @@ export function Timestamps({user}: {user: User}) {
 							}}
 							title='Timer stoppen'
 						>
-							<span className='text-2xl icon-outlined'>stop</span>
+							<span className='text-xl icon-filled scale-125'>stop</span>
 						</button>
-					</div>
-					<div className='flex whitespace-nowrap items-center gap-2 text-base-content/70'>
-						<span className='text-sm font-medium'>Today</span>
-						<span className='font-mono text-lg tabular-nums font-semibold text-base-content'>
+					</div>{' '}
+					<div className='flex whitespace-nowrap items-center gap-2 mt-0 text-base-content/70'>
+						<span className='font-mono font-semibold text-success'>
 							{(() => {
 								const f = formatCounter(totalTime)
-								return `${f.hours}h ${f.minutes}m ${f.seconds}s`
+								return (
+									<>
+										<span>{f.hours}</span>
+										<span className='text-success/90 animate-pulse'>:</span>
+										<span>{f.minutes} h</span>
+									</>
+								)
 							})()}
+							<span className='text-success/50 pl-2.5'>Today</span>
 						</span>
 					</div>
 				</div>
@@ -252,14 +258,16 @@ function Timer({
 
 	return (
 		<div
-			className={`font-mono text-4xl tabular-nums tracking-tight text-center transition-opacity duration-300 ${
-				paused ? 'text-base-content/60' : 'text-primary'
+			className={`font-mono text-3xl tabular-nums tracking-tight text-center transition-opacity duration-300 ${
+				paused
+					? 'text-base-content/60'
+					: 'text-error *:even:text-error/70 *:even:animate-pulse'
 			}`}
 		>
 			<span>{String(timer.hours).padStart(2, '0')}</span>
-			<span className='text-base-content/50'>:</span>
+			<span className=''>:</span>
 			<span>{String(timer.minutes).padStart(2, '0')}</span>
-			<span className='text-base-content/50'>:</span>
+			<span className=''>:</span>
 			<span>{String(timer.seconds).padStart(2, '0')}</span>
 		</div>
 	)

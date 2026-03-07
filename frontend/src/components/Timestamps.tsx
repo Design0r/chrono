@@ -127,7 +127,9 @@ export function Timestamps({user}: {user: User}) {
 										<span>{f.hours}</span>
 										<span
 											className={
-												paused ? 'text-success/90 animate-pulse' : 'text-accent/80 animate-pulse'
+												paused
+													? 'text-success/90 animate-pulse'
+													: 'text-accent/80 animate-pulse'
 											}
 										>
 											:

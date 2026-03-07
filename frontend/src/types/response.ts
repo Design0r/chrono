@@ -46,6 +46,7 @@ export type VacationGraphMonth = {
   count: number;
   last_day_of_month: number;
   is_current_week: boolean;
+  is_current_day: boolean;
   usernames: string[] | null;
   date: string;
 };

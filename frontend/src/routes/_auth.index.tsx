@@ -108,13 +108,13 @@ function Home() {
 					>
 						<span className='pt-1.5 stat-value max-sm:text-2xl text-primary/85'>
 							{(Math.abs(overtimeDiff) / 8).toFixed(1)}{' '}
-							<span className='text-neutral-content/15'>d</span>
+							<span className='text-accent/15'>d</span>
 						</span>
 					</StatCardElement>
 					<StatCardElement title='Expected work' subtitle={`${worktimes.expected} hours`}>
 						<span className=' pt-1.5 stat-value max-sm:text-2xl'>
 							{(worktimes.expected / 8).toFixed(1)}{' '}
-							<span className='text-neutral-content/15'>d</span>
+							<span className='text-accent/15'>d</span>
 						</span>
 					</StatCardElement>
 					<StatCardElement
@@ -123,13 +123,13 @@ function Home() {
 					>
 						<span className='pt-1.5 stat-value max-sm:text-2xl'>
 							{(worktimes.vacation / 8).toFixed(1)}{' '}
-							<span className='text-neutral-content/15'>d</span>
+							<span className='text-accent/15'>d</span>
 						</span>
 					</StatCardElement>
 					<StatCardElement title='Holidays' subtitle={`${worktimes.holidays} hours`}>
 						<span className='pt-1.5 stat-value max-sm:text-2xl'>
 							{(worktimes.holidays / 8).toFixed(1)}{' '}
-							<span className='text-neutral-content/15'>d</span>
+							<span className='text-accent/15'>d</span>
 						</span>
 					</StatCardElement>
 				</StatCard>
@@ -151,7 +151,7 @@ function Home() {
 									>
 										<span className='pt-1.5 stat-value max-sm:text-2xl'>
 											{awork.worked.toFixed(2)}{' '}
-											<span className='text-neutral-content/15'>h</span>
+											<span className='text-accent/15'>h</span>
 										</span>
 									</StatCardElement>
 									<StatCardElement
@@ -160,7 +160,7 @@ function Home() {
 									>
 										<span className='pt-1.5 stat-value max-sm:text-2xl'>
 											{awork.expected}{' '}
-											<span className='text-neutral-content/15'>h</span>
+											<span className='text-accent/15'>h</span>
 										</span>
 									</StatCardElement>
 									<StatCardElement
@@ -169,7 +169,7 @@ function Home() {
 									>
 										<span className='pt-1.5 stat-value max-sm:text-2xl'>
 											{awork.vacation}{' '}
-											<span className='text-neutral-content/15'>h</span>
+											<span className='text-accent/15'>h</span>
 										</span>
 									</StatCardElement>
 									<StatCardElement
@@ -178,7 +178,7 @@ function Home() {
 									>
 										<span className='pt-1.5 stat-value max-sm:text-2xl'>
 											{awork.holidays}{' '}
-											<span className='text-neutral-content/15'>h</span>
+											<span className='text-accent/15'>h</span>
 										</span>
 									</StatCardElement>
 								</StatCard>
@@ -195,8 +195,7 @@ function Home() {
 						subtitle={`${vacRemainingPercent.toFixed(2)}% remaining`}
 					>
 						<span className='pt-1.5 stat-value max-sm:text-2xl'>
-							{user.vacation_remaining}{' '}
-							<span className='text-neutral-content/15'>d</span>
+							{user.vacation_remaining} <span className='text-accent/15'>d</span>
 						</span>
 					</StatCardElement>
 					<StatCardElement
@@ -204,7 +203,7 @@ function Home() {
 						subtitle={`${vacTakenPercent.toFixed(2)}% taken`}
 					>
 						<span className='pt-1.5 stat-value max-sm:text-2xl'>
-							{user.vacation_used} <span className='text-neutral-content/15'>d</span>
+							{user.vacation_used} <span className='text-accent/15'>d</span>
 						</span>
 					</StatCardElement>
 					<StatCardElement
@@ -212,7 +211,7 @@ function Home() {
 						subtitle={`${user.vacation_days} days total`}
 					>
 						<span className='pt-1.5 stat-value max-sm:text-2xl'>
-							{user.vacation_days} <span className='text-neutral-content/15'>d</span>
+							{user.vacation_days} <span className='text-accent/15'>d</span>
 						</span>
 					</StatCardElement>
 					<StatCardElement
@@ -223,7 +222,7 @@ function Home() {
 							<span className='animate-pulse text-primary'>
 								{user.pending_events}
 							</span>{' '}
-							<span className='text-neutral-content/15'>d</span>
+							<span className='text-accent/15'>d</span>
 						</span>
 					</StatCardElement>
 				</StatCard>
@@ -232,17 +231,22 @@ function Home() {
 			<TitleSection title='Year progession'>
 				<StatCard>
 					<StatCardElement title='Days this year' subtitle={`${daysYear} days total`}>
-						<span className='pt-1.5 stat-value max-sm:text-2xl'>{daysYear} d</span>
+						<span className='pt-1.5 stat-value max-sm:text-2xl'>
+							{daysYear} <span className='text-accent/15'>d</span>
+						</span>
 					</StatCardElement>
 					<StatCardElement title='Days passed' subtitle={`${currDay} days passed`}>
-						<span className='pt-1.5 stat-value max-sm:text-2xl'>{currDay} d</span>
+						<span className='pt-1.5 stat-value max-sm:text-2xl'>
+							{currDay} <span className='text-accent/15'>d</span>
+						</span>
 					</StatCardElement>
 					<StatCardElement
 						title='Days completed'
 						subtitle={`${(100 - yearRemainingPercent).toFixed(2)}% remaining`}
 					>
 						<span className='pt-1.5 stat-value max-sm:text-2xl'>
-							{yearRemainingPercent.toFixed(2)} %
+							{yearRemainingPercent.toFixed(2)}{' '}
+							<span className='text-accent/15'>%</span>
 						</span>
 					</StatCardElement>
 					<StatCardElement

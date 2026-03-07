@@ -216,7 +216,7 @@ export function secondsToCounter(totalSeconds: number): TimeCounter {
 	return {hours, minutes, seconds: s}
 }
 
-function formatCounter(c: TimeCounter): {hours: string; minutes: string; seconds: string} {
+export function formatCounter(c: TimeCounter): {hours: string; minutes: string; seconds: string} {
 	return {
 		hours: String(c.hours).padStart(2, '0'),
 		minutes: String(c.minutes).padStart(2, '0'),
@@ -278,7 +278,9 @@ export function TimestampTableByWeek({timestamps, user}: {timestamps: Timestamp[
 			{groups.map((g) => (
 				<section key={g.weekMonday.getTime()}>
 					<h3 className='text-base font-semibold mb-3.5 px-4'>
-						KW {getWeekNumber(g.weekMonday)} – {formatWeekRange(g.weekMonday, g.weekSunday)}
+						{getWeekNumber(g.weekMonday)}. KW{' '}
+						<span className='text-accent/50 font-normal pl-1 pr-1.5'>|</span>
+						{formatWeekRange(g.weekMonday, g.weekSunday)}
 					</h3>
 					<TimestampTable
 						timestamps={g.timestamps}
@@ -309,7 +311,7 @@ export function TimestampTable({
 
 	return (
 		<>
-			<table className='table bg-base-300/50 rounded-none'>
+			<table className='table bg-base-300/50 lg:rounded-none'>
 				<thead>
 					<tr className='text-accent/80 *:w-1/3 *:font-normal'>
 						<th>Start</th>
@@ -339,7 +341,7 @@ export function TimestampTable({
 									setModal(t)
 								}}
 								key={t.id}
-								className='hover:bg-base-300 *:font-extralight *:text-info/80 bg-base-200/40'
+								className='hover:bg-base-300 *:font-extralight *:text-info/70 bg-base-200/40'
 							>
 								<td>
 									<div className='flex gap-1.5 items-center'>
@@ -349,7 +351,7 @@ export function TimestampTable({
 												.slice(0, 2)}
 											.
 										</span>
-										<span className='text-info/50 w-8.5'>
+										<span className='text-info/50 w-6 md:w-8.5'>
 											{start
 												.toLocaleDateString('de-DE', {
 													day: '2-digit',
@@ -358,7 +360,7 @@ export function TimestampTable({
 												.replaceAll('/', '.')
 												.slice(0, -1)}
 										</span>
-										<span className='block border-l border-primary/20 pl-1.75 text-info/90'>
+										<span className='block md:border-l border-primary/20 pl-1.75 text-info/90'>
 											{start.toLocaleTimeString('de-DE', {
 												hour: '2-digit',
 												minute: '2-digit',
@@ -375,7 +377,7 @@ export function TimestampTable({
 													.slice(0, 2)}
 												.
 											</span>
-											<span className='text-info/50 w-8.5'>
+											<span className='text-info/50 w-6 md:w-8.5'>
 												{' '}
 												{end
 													.toLocaleDateString('de-DE', {
@@ -385,7 +387,7 @@ export function TimestampTable({
 													.replaceAll('/', '.')
 													.slice(0, -1)}
 											</span>
-											<span className='block border-l border-primary/20 pl-1.75 text-info/90'>
+											<span className='block md:border-l border-primary/20 pl-1.75 text-info/90'>
 												{end.toLocaleTimeString('de-DE', {
 													hour: '2-digit',
 													minute: '2-digit',
@@ -425,7 +427,8 @@ export function TimestampTable({
 										<>
 											<span>{f.hours}</span>
 											<span>:</span>
-											<span>{f.minutes}</span> h{/* <span>:</span> */}
+											<span>{f.minutes}</span>{' '}
+											<span className='text-primary/80'>h</span>
 											{/* <span>{f.seconds}</span> */}
 										</>
 									)
@@ -670,7 +673,7 @@ export function TeamTimestamps({
 								<summary className='collapse-title bg-base-300/50 focus-within:bg-info/25 focus:text-white hover:bg-info/25 font-semibold '>
 									{user.username}
 								</summary>
-								<div className='collapse-content px-0 mt-8 flex flex-col text-sm'>
+								<div className='collapse-content px-0 pt-6 pb-0 bg-black/20 flex flex-col text-sm'>
 									<h3 className='text-base font-semibold mb-3.5 px-4'>
 										Overview
 									</h3>{' '}
@@ -683,7 +686,7 @@ export function TeamTimestamps({
 											</tr>
 										</thead>
 										<tbody>
-											<tr className='hover:bg-base-300 text-info/80 bg-base-200/40'>
+											<tr className='hover:bg-base-300 text-info/70 bg-base-200/40'>
 												<td className='*:text-info'>
 													{(() => {
 														const f = formatCounter(counter)

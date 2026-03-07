@@ -30,7 +30,7 @@ export function StatCardElement({
 	return (
 		<div className={`stat ${skeleton && 'skeleton'}`}>
 			<div className='stat-figure'></div>
-			<div className='stat-title mb-0.75 truncate text-neutral-content/90 font-normal text-base'>
+			<div className='stat-title mb-0.75 truncate text-accent/80 font-normal text-base'>
 				{title}
 			</div>
 			{children ? (
@@ -38,7 +38,7 @@ export function StatCardElement({
 			) : (
 				<div className={`font-medium text-accent/60 ${statClassName}`}>{stat}</div>
 			)}
-			<div className='-mt-0.5 pl-0.25 stat-desc text-[13px] text-neutral-content/30'>
+			<div className='-mt-0.5 pl-0.25 stat-desc text-[13px] text-neutral-content/40'>
 				{subtitle}
 			</div>
 		</div>

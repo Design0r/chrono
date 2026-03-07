@@ -2,6 +2,7 @@ import {useQuery} from '@tanstack/react-query'
 import {createFileRoute, useNavigate} from '@tanstack/react-router'
 import {useEffect, useState} from 'react'
 import {ErrorPage} from '../components/ErrorPage'
+import {formatCounter} from '../components/Timestamps'
 import {LoadingSpinnerPage} from '../components/LoadingSpinner'
 import {
 	durationFromTimestamps,
@@ -112,12 +113,16 @@ function RouteComponent() {
 						Total Time
 					</span>
 					<h2 className='w-fit text-lg text-primary bg-base-200 px-4 py-1.5 rounded-lg border '>
-						{counter.hours}h{' '}
-						{/* <span className='text-secondary/15 text-md pl-0.5 pr-2'>h</span> */}
-						{counter.minutes}m
-						{/* <span className='text-secondary/15 text-md pl-0.5 pr-2'>m</span> */}
-						{/* {counter.seconds}
-				<span className='text-secondary/15  text-md pl-0.5 pr-2'>s</span> */}
+						{(() => {
+							const f = formatCounter(counter)
+							return (
+								<>
+									<span>{f.hours}</span>
+									<span>:</span>
+									<span>{f.minutes}</span> h
+								</>
+							)
+						})()}
 					</h2>
 				</div>
 			</div>

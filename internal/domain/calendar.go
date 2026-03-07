@@ -62,6 +62,7 @@ type YearHistogram struct {
 	Count          int      `json:"count"`
 	LastDayOfMonth bool     `json:"last_day_of_month"`
 	IsCurrentWeek  bool     `json:"is_current_week"`
+	IsCurrentDay   bool     `json:"is_current_day"`
 	Usernames      []string `json:"usernames"`
 	Date           string   `json:"date"`
 }

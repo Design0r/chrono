@@ -119,7 +119,10 @@ export function Timestamps({user}: {user: User}) {
 					<div className='flex whitespace-nowrap items-center gap-2 text-base-content/70'>
 						<span className='text-sm font-medium'>Today</span>
 						<span className='font-mono text-lg tabular-nums font-semibold text-base-content'>
-							{totalTime.hours}h {totalTime.minutes}m {totalTime.seconds}s
+							{(() => {
+								const f = formatCounter(totalTime)
+								return `${f.hours}h ${f.minutes}m ${f.seconds}s`
+							})()}
 						</span>
 					</div>
 				</div>
@@ -139,6 +142,16 @@ export function durationFromTimestamps(timestamps: Timestamp[]): number {
 		.reduce((acc, curr) => {
 			return acc + curr
 		}, 0)
+}
+
+/** ISO 8601 week number (1–53) for the given date. Week = Mon–Sun, week 1 = week with first Thursday. */
+function getWeekNumber(date: Date): number {
+	const d = new Date(date)
+	d.setHours(0, 0, 0, 0)
+	const day = d.getDay() || 7 // 1 = Mon, 7 = Sun
+	d.setDate(d.getDate() + 4 - day) // Thursday of this week
+	const jan1 = new Date(d.getFullYear(), 0, 1)
+	return 1 + Math.floor((d.getTime() - jan1.getTime()) / 86400000 / 7)
 }
 
 /** Returns the Monday 00:00:00 (local) of the week containing the given date. Week = Mon–Sun. */
@@ -203,6 +216,14 @@ export function secondsToCounter(totalSeconds: number): TimeCounter {
 	return {hours, minutes, seconds: s}
 }
 
+function formatCounter(c: TimeCounter): {hours: string; minutes: string; seconds: string} {
+	return {
+		hours: String(c.hours).padStart(2, '0'),
+		minutes: String(c.minutes).padStart(2, '0'),
+		seconds: String(c.seconds).padStart(2, '0'),
+	}
+}
+
 function Timer({
 	startUnix,
 	paused,
@@ -256,8 +277,8 @@ export function TimestampTableByWeek({timestamps, user}: {timestamps: Timestamp[
 		<div className='space-y-6'>
 			{groups.map((g) => (
 				<section key={g.weekMonday.getTime()}>
-					<h3 className='text-base font-semibold mb-4 px-4'>
-						{formatWeekRange(g.weekMonday, g.weekSunday)}
+					<h3 className='text-base font-semibold mb-3.5 px-4'>
+						KW {getWeekNumber(g.weekMonday)} – {formatWeekRange(g.weekMonday, g.weekSunday)}
 					</h3>
 					<TimestampTable
 						timestamps={g.timestamps}
@@ -288,7 +309,7 @@ export function TimestampTable({
 
 	return (
 		<>
-			<table className='table bg-base-300/50'>
+			<table className='table bg-base-300/50 rounded-none'>
 				<thead>
 					<tr className='text-accent/80 *:w-1/3 *:font-normal'>
 						<th>Start</th>
@@ -321,30 +342,72 @@ export function TimestampTable({
 								className='hover:bg-base-300 *:font-extralight *:text-info/80 bg-base-200/40'
 							>
 								<td>
-									{new Date(t.start_time)
-										.toLocaleString('de-DE', {
-											day: '2-digit',
-											month: '2-digit',
-											hour: '2-digit',
-											minute: '2-digit',
-										})
-										.replaceAll('/', '.')
-										.replace(', ', ' - ')}
-								</td>
-								<td>
-									{t.end_time &&
-										new Date(t.end_time)
-											.toLocaleString('de-DE', {
-												day: '2-digit',
-												month: '2-digit',
+									<div className='flex gap-1.5 items-center'>
+										<span className='text-info/50 w-6'>
+											{start
+												.toLocaleDateString('de-DE', {weekday: 'short'})
+												.slice(0, 2)}
+											.
+										</span>
+										<span className='text-info/50 w-8.5'>
+											{start
+												.toLocaleDateString('de-DE', {
+													day: '2-digit',
+													month: '2-digit',
+												})
+												.replaceAll('/', '.')
+												.slice(0, -1)}
+										</span>
+										<span className='block border-l border-primary/20 pl-1.75 text-info/90'>
+											{start.toLocaleTimeString('de-DE', {
 												hour: '2-digit',
 												minute: '2-digit',
-											})
-											.replaceAll('/', '.')
-											.replace(', ', ' - ')}
+											})}
+										</span>
+									</div>
 								</td>
 								<td>
-									{duration.hours}h {duration.minutes}m {duration.seconds}s
+									{end ? (
+										<div className='flex gap-1.5 items-center'>
+											<span className='text-info/50 w-6'>
+												{end
+													.toLocaleDateString('de-DE', {weekday: 'short'})
+													.slice(0, 2)}
+												.
+											</span>
+											<span className='text-info/50 w-8.5'>
+												{' '}
+												{end
+													.toLocaleDateString('de-DE', {
+														day: '2-digit',
+														month: '2-digit',
+													})
+													.replaceAll('/', '.')
+													.slice(0, -1)}
+											</span>
+											<span className='block border-l border-primary/20 pl-1.75 text-info/90'>
+												{end.toLocaleTimeString('de-DE', {
+													hour: '2-digit',
+													minute: '2-digit',
+												})}
+											</span>
+										</div>
+									) : (
+										'–'
+									)}
+								</td>
+								<td className='*:text-info/90'>
+									{(() => {
+										const f = formatCounter(duration)
+										return (
+											<>
+												<span>{f.hours}</span>
+												<span>:</span>
+												<span>{f.minutes}</span> h{/* <span>:</span> */}
+												{/* <span>{f.seconds}</span> */}
+											</>
+										)
+									})()}
 								</td>
 							</tr>
 						)
@@ -355,9 +418,18 @@ export function TimestampTable({
 						<tr className='bg-base-200/70 border-b-lg font-semibold'>
 							<td></td>
 							<td></td>
-							<td className='text-primary '>
-								{footerCounter.hours}h {footerCounter.minutes}m{' '}
-								{footerCounter.seconds}s
+							<td className='text-primary'>
+								{(() => {
+									const f = formatCounter(footerCounter)
+									return (
+										<>
+											<span>{f.hours}</span>
+											<span>:</span>
+											<span>{f.minutes}</span> h{/* <span>:</span> */}
+											{/* <span>{f.seconds}</span> */}
+										</>
+									)
+								})()}
 							</td>
 						</tr>
 					</tfoot>
@@ -593,50 +665,70 @@ export function TeamTimestamps({
 					const overtimeCounter = secondsToCounter(overtime)
 
 					return (
-						<div key={user.id} className='my-2'>
+						<div key={user.id} className='my-4'>
 							<details className='collapse border-base-300 border collapse-arrow'>
-								<summary className='collapse-title bg-base-300 focus:bg-primary/20 focus:text-white hover:bg-base-100 font-semibold '>
+								<summary className='collapse-title bg-base-300/50 focus-within:bg-info/25 focus:text-white hover:bg-info/25 font-semibold '>
 									{user.username}
 								</summary>
-								<div className='collapse-content px-0 flex flex-col text-sm'>
-									<table className='bg-base-100 rounded-none table mb-12'>
+								<div className='collapse-content px-0 mt-8 flex flex-col text-sm'>
+									<h3 className='text-base font-semibold mb-3.5 px-4'>
+										Overview
+									</h3>{' '}
+									<table className='bg-base-300/50 rounded-none table mb-12'>
 										<thead>
-											<tr>
+											<tr className='text-accent/80 *:w-1/3 *:font-normal'>
 												<th>Worked</th>
 												<th>Expected</th>
 												<th>{overtimeLabel}</th>
 											</tr>
 										</thead>
 										<tbody>
-											<tr className='*:text-xs *:lg:text-base'>
-												<td>
-													{counter.hours}
-													<span className='font-normal px-1'>h</span>{' '}
-													{'  '}
-													{counter.minutes}
-													<span className='font-normal px-1'>m</span>{' '}
-													{'  '}
+											<tr className='hover:bg-base-300 text-info/80 bg-base-200/40'>
+												<td className='*:text-info'>
+													{(() => {
+														const f = formatCounter(counter)
+														return (
+															<>
+																<span>{f.hours}</span>
+																<span>:</span>
+																<span>{f.minutes}</span> h
+																{/* <span>:</span> */}
+																{/* <span>{f.seconds}</span> */}
+															</>
+														)
+													})()}
 												</td>
-												<td>
-													{expectedCounter.hours}
-													<span className='font-normal px-1'>h</span>{' '}
-													{'  '}
-													{expectedCounter.minutes}
-													<span className='font-normal px-1'>m</span>{' '}
-													{'  '}
+												<td className='*:text-info/90'>
+													{(() => {
+														const f = formatCounter(expectedCounter)
+														return (
+															<>
+																<span>{f.hours}</span>
+																<span>:</span>
+																<span>{f.minutes}</span> h
+																{/* <span>:</span> */}
+																{/* <span>{f.seconds}</span> */}
+															</>
+														)
+													})()}
 												</td>
-												<td>
-													{overtimeCounter.hours}
-													<span className='font-normal px-1'>h</span>{' '}
-													{'  '}
-													{overtimeCounter.minutes}
-													<span className='font-normal px-1'>m</span>{' '}
-													{'  '}
+												<td className='*:text-info/90'>
+													{(() => {
+														const f = formatCounter(overtimeCounter)
+														return (
+															<>
+																<span>{f.hours}</span>
+																<span>:</span>
+																<span>{f.minutes}</span> h
+																{/* <span>:</span> */}
+																{/* <span>{f.seconds}</span> */}
+															</>
+														)
+													})()}
 												</td>
 											</tr>
 										</tbody>
 									</table>
-
 									<TimestampTableByWeek timestamps={v} user={currUser} />
 								</div>
 							</details>

@@ -139,6 +139,7 @@ func (svc *EventService) GetHistogramForYear(
 	for i := range eventList {
 		date := time.Date(year, time.Month(1), i+1, 0, 0, 0, 0, time.Local)
 		days := domain.GetNumDaysOfMonth(date.Month(), date.Year())
+		eventList[i].FirstDayOfMonth = date.Day() == 1
 		eventList[i].LastDayOfMonth = date.Day() == days
 		eventList[i].IsCurrentDay = date.Year() == now.Year() && date.Month() == now.Month() && date.Day() == now.Day()
 

@@ -7,19 +7,20 @@ import {clamp} from '../utils/math'
 dayjs.extend(isoWeek)
 
 export function OverviewDay({day}: {day: VacationGraphMonth}) {
+	// Grün → Gelb → Rot (OKLCH, 8 Stufen)
 	const greens = [
-		'#313745',
-		'#a7f3d0',
-		'#6ee7b7',
-		'#34d399',
-		'#10b981',
-		'#059669',
-		'#047857',
-		'#065f46',
-		'#064e3b',
+		'oklch(0.273 0.028 265)', // Grün
+		'oklch(0.40 0.035 230)',
+		'oklch(0.50 0.07 185)', // Gelbgrün
+		'oklch(0.70 0.09 150)', // Gelb
+		'oklch(0.85 0.15 122)', // Orange-Gelb
+		'oklch(0.87 0.19 100)', // Orange-Gelb
+		'oklch(0.90 0.29 55)', // Orange-Gelb
+		'oklch(0.75 0.23 40)', // Orange-Gelb
+		'oklch(0.60 0.22 0)', // Orange-Gelb
 	]
-	const holidayColor = '#7C85FF'
-	const color = day.is_holiday ? holidayColor : greens[clamp(day.count, 0, 8)]
+	const holidayColor = 'oklch(0.74 0.22 260)'
+	const color = day.is_holiday ? holidayColor : greens[clamp(day.count, 0, greens.length - 1)]
 
 	return (
 		<div className='tooltip'>
@@ -33,10 +34,12 @@ export function OverviewDay({day}: {day: VacationGraphMonth}) {
 				</>
 			</div>
 			<div
-				className={`w-3 h-3 mx-0.25 rounded-full ${day.is_current_week ? 'border border-primary' : ''} ${day.is_current_day ? 'ring-2 ring-warning ring-offset-1 ring-offset-base-300' : ''}`}
+				className={`w-4 h-1/3 rounded-sm ${day.is_current_week ? '' : ''} ${day.is_current_day ? 'ring-2 ring-primary animate-pulse ring-offset-0.5 ring-offset-base-300' : ''} ${day.first_day_of_month ? 'after:content-[""] after:absolute after:-top-2.5 after:left-1.25 after:bg-info/30 after:w-1.5 after:h-0.75 after:rounded-xl' : ''}`}
 				style={
-					day.last_day_of_month
-						? {boxShadow: '0 1.5rem 0 -0.125rem ', backgroundColor: color}
+					day.first_day_of_month
+						? {
+								backgroundColor: color,
+							}
 						: {backgroundColor: color}
 				}
 			></div>
@@ -73,13 +76,13 @@ export function VacationGraph({
 	}, [gaps])
 
 	return (
-		<div className='grid grid-cols-12 p-5 bg-base-300/50 rounded-2xl xl:overflow-x-hidden overflow-x-auto mb-12'>
+		<div className='grid grid-cols-[2.5rem_repeat(11,minmax(0,1fr))] p-5 bg-base-300/50 rounded-2xl xl:overflow-x-hidden overflow-x-auto mb-12'>
 			<div className='col-span-1' />
 			<div className='col-span-11 grid grid-rows-1 grid-flow-col h-7 gap-1 text-accent/80'>
 				{gaps.map((g, i) => (
 					<div key={`top-${i}`} className='contents'>
 						<p
-							className={`h-3.5 w-3.5 text-center text-sm ${currMonth === i + 1 ? 'text-warning font-light' : 'font-light text-accent/80'}`}
+							className={`h-3.5 w-3.5 text-center text-sm ${currMonth === i + 1 ? 'text-primary font-light' : 'font-light text-accent/80'}`}
 						>
 							{i + 1}
 						</p>
@@ -95,14 +98,14 @@ export function VacationGraph({
 				{cells.map((week) => (
 					<p
 						key={week}
-						className={`w-3.5 h-3.5 text-center ${currWeek === week ? 'text-warning font-light' : 'font-light text-accent/40'}`}
+						className={`w-3.5 h-3.5 text-center ${currWeek === week ? 'text-primary font-light' : 'font-light text-accent/40'}`}
 					>
 						{week}
 					</p>
 				))}
 			</div>
 
-			<div className='col-span-1 grid grid-rows-7 text-accent/45 pl-2.5 text-sm'>
+			<div className='col-span-1 grid grid-rows-7 text-accent/45 text-sm'>
 				<p className='truncate'>Mon</p>
 				<p className='truncate'>Tue</p>
 				<p className='truncate'>Wed</p>

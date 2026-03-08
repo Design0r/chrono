@@ -39,7 +39,7 @@ export function Header({chrono}: {chrono: ChronoClient}) {
 						>
 							<MenuButton to='/'>
 								<span className='icon-outlined'>home</span>
-								<span className='hidden md:block font-medium text-base'>Home</span>
+								<span className='font-medium text-base'>Home</span>
 							</MenuButton>
 							<MenuButton
 								to='/calendar/$year/$month'
@@ -49,9 +49,7 @@ export function Header({chrono}: {chrono: ChronoClient}) {
 								}}
 							>
 								<span className='icon-outlined'>calendar_today</span>
-								<span className='hidden md:block font-medium text-base'>
-									Calendar
-								</span>
+								<span className='font-medium text-base'>Calendar</span>
 							</MenuButton>
 							<MenuButton
 								to='/timestamps'
@@ -61,13 +59,11 @@ export function Header({chrono}: {chrono: ChronoClient}) {
 								}}
 							>
 								<span className='icon-outlined'>timer</span>
-								<span className='hidden md:block font-medium text-base'>
-									Timestamps
-								</span>
+								<span className='font-medium text-base'>Timestamps</span>
 							</MenuButton>
 							<MenuButton to='/team'>
 								<span className='icon-outlined'>group</span>
-								<span className='hidden md:block font-medium text-base'>Team</span>
+								<span className='font-medium text-base'>Team</span>
 							</MenuButton>
 							{userQ.data?.is_superuser && (
 								<>

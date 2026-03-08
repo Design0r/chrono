@@ -147,7 +147,9 @@ export function Timestamps({user}: {user: User}) {
 					</div>
 				</div>
 			</div>
-			<TimestampTable timestamps={timestamps} user={user} />
+			<div className='rounded-xl overflow-hidden w-full h-full'>
+				<TimestampTable timestamps={timestamps} user={user} />
+			</div>
 		</div>
 	)
 }

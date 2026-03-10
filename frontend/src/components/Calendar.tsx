@@ -401,25 +401,8 @@ export function Calendar({
 	selectedEvent: string
 	currUser: User
 }) {
-	const isHighlighted = (day: number) => {
-		const now = new Date()
-		return (
-			now.getDay() === day &&
-			now.getMonth() + 1 === month.number &&
-			now.getFullYear() === month.year
-		)
-	}
-
 	return (
 		<div className='my-12 rounded-xl *:border *:border-base-200 *:backdrop-brightness-115 lg:my-8 lg:mt-0 mx-auto grid grid-cols-1 max-lg:gap-y-4 lg:gap-px lg:grid-cols-7 overflow-x-scroll'>
-			{/* <div className='mt-12 mb-12 lg:mb-16 lg:mt-0 gap-y-4 mx-auto grid px-6 grid-cols-1 lg:grid-cols-7 lg:px-4 lg:gap-y-2 lg:gap-x-1.5 overflow-x-scroll'> */}
-			{/* <WeekdayHeader highlighted={isHighlighted(1)} label='Monday' />
-			<WeekdayHeader highlighted={isHighlighted(2)} label='Tuesday' />
-			<WeekdayHeader highlighted={isHighlighted(3)} label='Wednesday' />
-			<WeekdayHeader highlighted={isHighlighted(4)} label='Thursday' />
-			<WeekdayHeader highlighted={isHighlighted(5)} label='Friday' />
-			<WeekdayHeader highlighted={isHighlighted(6)} label='Saturday' />
-			<WeekdayHeader highlighted={isHighlighted(7)} label='Sunday' /> */}
 			{Array.from({length: month.offset}).map((_, i) => (
 				<div key={i} className='hidden lg:block'></div>
 			))}

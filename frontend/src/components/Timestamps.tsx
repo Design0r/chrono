@@ -473,7 +473,9 @@ export function TimestampTable({
 export function isoToDatetimeLocal(iso: string) {
 	const d = new Date(iso)
 	const pad = (n: number) => String(n).padStart(2, '0')
-
+	if (d.getSeconds() === 0) {
+		d.setSeconds(new Date().getSeconds())
+	}
 	// datetime-local is *local time* by spec
 	const yyyy = d.getFullYear()
 	const mm = pad(d.getMonth() + 1)

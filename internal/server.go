@@ -116,7 +116,12 @@ func (s *Server) InitMiddleware() {
 				AllowOrigins: []string{
 					"http://localhost:8080",
 					"http://localhost:5173",
+					"http://localhost:5174",
+					"http://localhost:5175",
 					"http://192.168.0.35:5173",
+					"http://192.168.0.35:5174",
+					"http://192.168.178.159:5173",
+					"http://192.168.178.159:5174",
 					"https://chrono.theapic.com",
 				},
 				AllowCredentials: true,

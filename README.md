@@ -23,6 +23,8 @@ make install
 
 ## Start Dev Environment
 
+Starts backend (API on port 8080) and frontend (Vite on port 5173, or 5174 if 5173 is in use) in parallel. Open the frontend URL in your browser.
+
 ```bash
 make dev
 ```

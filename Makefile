@@ -22,8 +22,9 @@ migrate:
 	$(eval args=$(filter-out $@,$(MAKECMDGOALS)))
 	@goose sqlite3 ${DB_DIR} -dir=${MIGRATION_DIR} create ${args} sql
 
+GOBIN := $(shell go env GOPATH)/bin
 live/server:
-	air
+	$(GOBIN)/air
 
 live/frontend:
 	cd frontend && npm install && npm run dev

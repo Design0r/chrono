@@ -44,8 +44,10 @@ export type EventUser = { event: Event; user: User };
 export type VacationGraphMonth = {
   is_holiday: boolean;
   count: number;
+  first_day_of_month: boolean;
   last_day_of_month: number;
   is_current_week: boolean;
+  is_current_day: boolean;
   usernames: string[] | null;
   date: string;
 };

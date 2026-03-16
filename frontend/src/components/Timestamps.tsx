@@ -1,5 +1,5 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
-import {useEffect, useMemo, useState} from 'react'
+import {Fragment, useEffect, useMemo, useState} from 'react'
 import {ChronoClient} from '../api/chrono/client'
 import type {User} from '../types/auth'
 import type {Timestamp} from '../types/response'
@@ -193,6 +193,44 @@ export type WeekGroup = {
 	totalSeconds: number
 }
 
+export type DayGroup = {
+	dayDate: Date
+	dateKey: string
+	timestamps: Timestamp[]
+	totalSeconds: number
+}
+
+/** Groups timestamps by calendar day (local date), newest first. */
+export function groupTimestampsByDay(timestamps: Timestamp[]): DayGroup[] {
+	const byDay = new Map<string, Timestamp[]>()
+	for (const t of timestamps) {
+		const start = new Date(t.start_time)
+		const key =
+			start.getFullYear() +
+			'-' +
+			String(start.getMonth() + 1).padStart(2, '0') +
+			'-' +
+			String(start.getDate()).padStart(2, '0')
+		if (!byDay.has(key)) byDay.set(key, [])
+		byDay.get(key)!.push(t)
+	}
+	const groups: DayGroup[] = []
+	byDay.forEach((ts, key) => {
+		const [y, m, d] = key.split('-').map(Number)
+		const dayDate = new Date(y, m - 1, d)
+		groups.push({
+			dayDate,
+			dateKey: key,
+			timestamps: ts.sort(
+				(a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
+			),
+			totalSeconds: durationFromTimestamps(ts),
+		})
+	})
+	groups.sort((a, b) => b.dayDate.getTime() - a.dayDate.getTime())
+	return groups
+}
+
 /** Groups timestamps by calendar week (Mon–Sun), newest week first. */
 export function groupTimestampsByWeek(timestamps: Timestamp[]): WeekGroup[] {
 	const byWeek = new Map<number, Timestamp[]>()
@@ -317,6 +355,83 @@ export function TimestampTableByWeek({timestamps, user}: {timestamps: Timestamp[
 	)
 }
 
+function TimestampRow({
+	t,
+	user,
+	onRowClick,
+}: {
+	t: Timestamp
+	user: User
+	onRowClick: (t: Timestamp) => void
+}) {
+	const start = new Date(t.start_time)
+	const end = t.end_time && new Date(t.end_time)
+	const duration = end
+		? secondsToCounter((end.getTime() - start.getTime()) / 1000)
+		: {hours: 0, minutes: 0, seconds: 0}
+	const {addErrorToast} = useToast()
+
+	return (
+		<tr
+			onClick={() => {
+				if (!user.is_superuser) {
+					addErrorToast({
+						name: 'Permission Error',
+						message: 'Only for Admins',
+					})
+					return
+				}
+				onRowClick(t)
+			}}
+			key={t.id}
+			className='hover:bg-base-300 *:font-extralight *:text-info/70 bg-base-200/40'
+		>
+			<td>
+				<div className='flex gap-1.5 items-center pl-6 text-info/60'>
+					<span className='w-6 '>
+						{start.toLocaleDateString('de-DE', {weekday: 'short'}).slice(0, 2)}.,
+					</span>
+					<span className='block'>
+						{start.toLocaleTimeString('de-DE', {
+							hour: '2-digit',
+							minute: '2-digit',
+						})}
+					</span>
+				</div>
+			</td>
+			<td>
+				{end ? (
+					<div className='flex gap-1.5 items-center text-info/60'>
+						<span className='w-6'>
+							{end.toLocaleDateString('de-DE', {weekday: 'short'}).slice(0, 2)}.,
+						</span>
+						<span className='block'>
+							{end.toLocaleTimeString('de-DE', {
+								hour: '2-digit',
+								minute: '2-digit',
+							})}
+						</span>
+					</div>
+				) : (
+					'–'
+				)}
+			</td>
+			<td className='text-info/60'>
+				{(() => {
+					const f = formatCounter(duration)
+					return (
+						<div className='text-info/60'>
+							<span>{f.hours}</span>
+							<span>:</span>
+							<span>{f.minutes}</span> h
+						</div>
+					)
+				})()}
+			</td>
+		</tr>
+	)
+}
+
 export function TimestampTable({
 	timestamps,
 	user,
@@ -327,8 +442,18 @@ export function TimestampTable({
 	footerTotalSeconds?: number
 }) {
 	const [modal, setModal] = useState<Timestamp | null>(null)
+	const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set())
 
-	const {addErrorToast} = useToast()
+	const dayGroups = useMemo(() => groupTimestampsByDay(timestamps), [timestamps])
+
+	const toggleDay = (dateKey: string) => {
+		setExpandedDays((prev) => {
+			const next = new Set(prev)
+			if (next.has(dateKey)) next.delete(dateKey)
+			else next.add(dateKey)
+			return next
+		})
+	}
 
 	const footerCounter =
 		footerTotalSeconds !== undefined ? secondsToCounter(footerTotalSeconds) : null
@@ -337,105 +462,68 @@ export function TimestampTable({
 		<>
 			<table className='table bg-base-300/50 lg:rounded-none'>
 				<thead>
-					<tr className='text-accent/80 *:w-1/3 *:font-normal'>
+					<tr className='text-accent/80 *:w-1/3 *:font-semibold'>
 						<th>Start</th>
 						<th>End</th>
 						<th>Duration</th>
 					</tr>
 				</thead>
 				<tbody>
-					{timestamps.map((t) => {
-						const start = new Date(t.start_time)
-						const end = t.end_time && new Date(t.end_time)
-						const duration = end
-							? secondsToCounter((end.getTime() - start.getTime()) / 1000)
-							: {hours: 0, minutes: 0, seconds: 0}
-
+					{dayGroups.map((group) => {
+						const isExpanded = expandedDays.has(group.dateKey)
+						const dayCounter = secondsToCounter(group.totalSeconds)
+						const dayFmt = formatCounter(dayCounter)
 						return (
-							<tr
-								onClick={() => {
-									if (!user.is_superuser) {
-										addErrorToast({
-											name: 'Permission Error',
-											message: 'Only for Admins',
-										})
-
-										return
-									}
-									setModal(t)
-								}}
-								key={t.id}
-								className='hover:bg-base-300 *:font-extralight *:text-info/70 bg-base-200/40'
-							>
-								<td>
-									<div className='flex gap-1.5 items-center'>
-										<span className='text-info/50 w-6'>
-											{start
-												.toLocaleDateString('de-DE', {weekday: 'short'})
-												.slice(0, 2)}
-											.
-										</span>
-										<span className='text-info/50 w-6 md:w-8.5'>
-											{start
-												.toLocaleDateString('de-DE', {
-													day: '2-digit',
-													month: '2-digit',
-												})
-												.replaceAll('/', '.')
-												.slice(0, -1)}
-										</span>
-										<span className='block md:border-l border-primary/20 pl-1.75 text-info/90'>
-											{start.toLocaleTimeString('de-DE', {
-												hour: '2-digit',
-												minute: '2-digit',
+							<Fragment key={group.dateKey}>
+								<tr
+									onClick={() => toggleDay(group.dateKey)}
+									className={`cursor-pointer hover:bg-base-300/80 bg-base-200/60 select-none border-b border-base-300/60`}
+									role='button'
+									tabIndex={0}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault()
+											toggleDay(group.dateKey)
+										}
+									}}
+								>
+									<td colSpan={2} className={`text-info/90`}>
+										<span className='inline-flex items-center gap-2'>
+											<span
+												className='icon-outlined -ml-1 text-lg transition-transform'
+												style={{
+													transform: isExpanded
+														? 'rotate(90deg)'
+														: 'rotate(0deg)',
+												}}
+											>
+												chevron_right
+											</span>
+											{group.dayDate.toLocaleDateString('de-DE', {
+												weekday: 'short',
+												day: '2-digit',
+												month: '2-digit',
+												year: 'numeric',
 											})}
 										</span>
-									</div>
-								</td>
-								<td>
-									{end ? (
-										<div className='flex gap-1.5 items-center'>
-											<span className='text-info/50 w-6'>
-												{end
-													.toLocaleDateString('de-DE', {weekday: 'short'})
-													.slice(0, 2)}
-												.
-											</span>
-											<span className='text-info/50 w-6 md:w-8.5'>
-												{' '}
-												{end
-													.toLocaleDateString('de-DE', {
-														day: '2-digit',
-														month: '2-digit',
-													})
-													.replaceAll('/', '.')
-													.slice(0, -1)}
-											</span>
-											<span className='block md:border-l border-primary/20 pl-1.75 text-info/90'>
-												{end.toLocaleTimeString('de-DE', {
-													hour: '2-digit',
-													minute: '2-digit',
-												})}
-											</span>
-										</div>
-									) : (
-										'–'
-									)}
-								</td>
-								<td className='*:text-info/90'>
-									{(() => {
-										const f = formatCounter(duration)
-										return (
-											<>
-												<span>{f.hours}</span>
-												<span>:</span>
-												<span>{f.minutes}</span> h{/* <span>:</span> */}
-												{/* <span>{f.seconds}</span> */}
-											</>
-										)
-									})()}
-								</td>
-							</tr>
+									</td>
+									<td className='text-info/90'>
+										<span>{dayFmt.hours}</span>
+										<span>:</span>
+										<span>{dayFmt.minutes}</span>{' '}
+										<span className='text-info/70'>h</span>
+									</td>
+								</tr>
+								{isExpanded &&
+									group.timestamps.map((t) => (
+										<TimestampRow
+											key={t.id}
+											t={t}
+											user={user}
+											onRowClick={setModal}
+										/>
+									))}
+							</Fragment>
 						)
 					})}
 				</tbody>
@@ -453,7 +541,6 @@ export function TimestampTable({
 											<span>:</span>
 											<span>{f.minutes}</span>{' '}
 											<span className='text-primary/80'>h</span>
-											{/* <span>{f.seconds}</span> */}
 										</>
 									)
 								})()}

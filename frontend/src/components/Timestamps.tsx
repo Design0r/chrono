@@ -360,14 +360,14 @@ function DayBar({totalSeconds}: {totalSeconds: number}) {
 		<div className='w-[80%] min-h-6 flex items-center' aria-hidden>
 			{/* Track: 8h-Zone einheitlich #323F5D (Standard), rechter Teil leer bis Überstunden gezeichnet */}
 			<div
-				className='relative h-5 w-full border-l-2 border-[#F8F8F8]'
+				className='relative h-5 w-full border-l border-info/50'
 				style={{
-					background: `linear-gradient(90deg, #1C2334 0%, #242C41 ${normalZonePercent}%, transparent ${normalZonePercent}%)`,
+					background: `linear-gradient(90deg, #1B213344 0%, #242C41 ${normalZonePercent}%, transparent ${normalZonePercent}%)`,
 				}}
 			>
 				{/* Gestrichelte Linie bei 8h */}
 				<div
-					className='absolute top-0 bottom-0 w-0 border-l border-dashed border-[#F8F8F8]'
+					className='absolute top-0 bottom-0 w-0 border-l border-dashed border-white'
 					style={{left: `${normalZonePercent}%`}}
 				/>
 				{/* Türkis: Rest bis 8h (zwischen Ende erbrachter Zeit und gestrichelter Linie); bei >=8h nicht sichtbar */}

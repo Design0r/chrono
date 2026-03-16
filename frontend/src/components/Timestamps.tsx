@@ -339,10 +339,18 @@ const BAR_TOTAL_HOURS = NORMAL_HOURS + OVERTIME_CAP_HOURS // 12h
 const NORMAL_FRACTION = NORMAL_HOURS / BAR_TOTAL_HOURS // 8/12
 const OVERTIME_FRACTION = OVERTIME_CAP_HOURS / BAR_TOTAL_HOURS // 4/12
 
-/** Horizontal bar: 8h Regelarbeitszeit (solid left, dashed right) einheitlich #323F5D. Bei <8h: Türkis zwischen Ende erbrachter Zeit und gestrichelter Linie. Bei >8h: Überstunden-Balken (HSL-Verlauf) mit hellem Rand rechts. */
-function DayBar({totalSeconds}: {totalSeconds: number}) {
+function isWeekend(date: Date): boolean {
+	const day = date.getDay()
+	return day === 0 || day === 6 // Sonntag, Samstag
+}
+
+/** Horizontal bar: 8h Regelarbeitszeit (solid left, dashed right) einheitlich #323F5D. Bei <8h: Türkis zwischen Ende erbrachter Zeit und gestrichelter Linie. Bei >8h: Überstunden-Balken. Sa/So: nur Überstunden-Balken, repräsentiert die gesamte Tageszeit. */
+function DayBar({totalSeconds, dayDate}: {totalSeconds: number; dayDate: Date}) {
+	const weekend = isWeekend(dayDate)
 	const normalSeconds = NORMAL_HOURS * 3600
 	const overtimeCapSeconds = OVERTIME_CAP_HOURS * 3600
+	const barTotalSeconds = BAR_TOTAL_HOURS * 3600
+
 	const workedNormal = Math.min(totalSeconds, normalSeconds)
 	const workedOvertime = Math.min(Math.max(0, totalSeconds - normalSeconds), overtimeCapSeconds)
 
@@ -355,6 +363,31 @@ function DayBar({totalSeconds}: {totalSeconds: number}) {
 	const turquoiseWidthPercent = underEight
 		? ((normalSeconds - workedNormal) / normalSeconds) * NORMAL_FRACTION * 100
 		: 0
+
+	// Wochenende: gesamter Balken = Überstunden-Balken, Skala 12h, gesamte Zeit dargestellt
+	const weekendBarWidthPercent = weekend
+		? Math.min(100, (totalSeconds / barTotalSeconds) * 100)
+		: 0
+
+	if (weekend) {
+		return (
+			<div className='w-[80%] min-h-6 flex items-center' aria-hidden>
+				<div className='relative h-5 w-full'>
+					{/* Sa/So: nur Überstunden-Balken von links, gesamte Zeit (Skala 12h) */}
+					{weekendBarWidthPercent > 0 && (
+						<div
+							className='absolute top-0 left-0 bottom-0 rounded-r-sm border-r-2 border-[hsl(344,84%,60%)]'
+							style={{
+								width: `${weekendBarWidthPercent}%`,
+								background:
+									'linear-gradient(90deg, hsl(222 30% 28% / 0.0) 0%, hsl(344 63% 36% / 1) 100%)',
+							}}
+						/>
+					)}
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<div className='w-[80%] min-h-6 flex items-center' aria-hidden>
@@ -574,7 +607,7 @@ export function TimestampTable({
 										</span>
 									</td>
 									<td className='py-1.5'>
-										<DayBar totalSeconds={group.totalSeconds} />
+										<DayBar totalSeconds={group.totalSeconds} dayDate={group.dayDate} />
 									</td>
 									<td className='text-info/90'>
 										<span>{dayFmt.hours}</span>

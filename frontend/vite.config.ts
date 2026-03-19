@@ -14,6 +14,7 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     react({
+      //@ts-expect-error
       babel: {
         plugins: [["babel-plugin-react-compiler"]],
       },

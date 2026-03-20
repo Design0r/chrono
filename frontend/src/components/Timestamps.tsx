@@ -1,35 +1,41 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
-import {Fragment, useEffect, useMemo, useState} from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import {ChronoClient} from '../api/chrono/client'
 import type {User} from '../types/auth'
 import type {Timestamp} from '../types/response'
+import {
+	durationFromTimestamps,
+	formatCounter,
+	secondsToCounter,
+} from '../lib/timestamp-utils'
+import {Timer} from './timestamps/Timer'
+import {TimestampTable} from './timestamps/TimestampTable'
+import {TimestampTableByWeek} from './timestamps/TimestampTableByWeek'
 import {useToast} from './Toast'
 
 export function Timestamps({user}: {user: User}) {
 	const chrono = useMemo(() => new ChronoClient(), [])
-
 	const [timestamps, setTimestemps] = useState<Timestamp[]>([])
 	const [paused, setPaused] = useState<boolean>(true)
 	const {addToast, addErrorToast} = useToast()
 	const [currTimer, setCurrTimer] = useState<Timestamp | null>(null)
 	const [startTime, setStartTime] = useState<number>(Date.now())
 	const [runningTimer, setRunningTimer] = useState<number>(0)
-
 	const queryClient = useQueryClient()
 
 	const latestTimestampQ = useQuery({
 		queryKey: ['timestamps', 'latest'],
 		queryFn: () => chrono.timestamps.getLatest(),
-		staleTime: 1000 * 60 * 10, // 10min
-		gcTime: 1000 * 60 * 20, // 20min
+		staleTime: 1000 * 60 * 10,
+		gcTime: 1000 * 60 * 20,
 		retry: false,
 	})
 
 	const timestampsQ = useQuery({
 		queryKey: ['timestamps'],
 		queryFn: () => chrono.timestamps.getForToday(),
-		staleTime: 1000 * 60 * 10, // 10min
-		gcTime: 1000 * 60 * 20, // 20min
+		staleTime: 1000 * 60 * 10,
+		gcTime: 1000 * 60 * 20,
 		retry: false,
 	})
 
@@ -91,9 +97,7 @@ export function Timestamps({user}: {user: User}) {
 					<Timer
 						paused={paused}
 						startUnix={startTime}
-						onUpdate={(seconds: number) => {
-							setRunningTimer(seconds)
-						}}
+						onUpdate={(seconds: number) => setRunningTimer(seconds)}
 					/>
 					<div className='flex mt-1 gap-3 justify-center items-center'>
 						<button
@@ -107,15 +111,12 @@ export function Timestamps({user}: {user: User}) {
 						<button
 							disabled={paused}
 							className='btn btn-circle btn-lg btn-error shadow-md hover:shadow-lg transition-shadow disabled:opacity-40 disabled:shadow-none icon-outlined'
-							onClick={() => {
-								if (!currTimer) return
-								stopMut.mutate(currTimer.id)
-							}}
+							onClick={() => currTimer && stopMut.mutate(currTimer.id)}
 							title='Timer stoppen'
 						>
 							<span className='text-xl icon-filled scale-125'>stop</span>
 						</button>
-					</div>{' '}
+					</div>
 					<div className='flex whitespace-nowrap items-center gap-2 mt-0 text-base-content/70'>
 						<span
 							className={`font-mono font-semibold ${paused ? 'text-success' : 'text-accent/80'}`}
@@ -154,684 +155,39 @@ export function Timestamps({user}: {user: User}) {
 	)
 }
 
-export function durationFromTimestamps(timestamps: Timestamp[]): number {
-	return timestamps
-		.map((t) => {
-			const start = new Date(t.start_time)
-			const end = t.end_time && new Date(t.end_time)
-			return end ? (end.getTime() - start.getTime()) / 1000 : 0
-		})
-		.reduce((acc, curr) => {
-			return acc + curr
-		}, 0)
-}
-
-/** ISO 8601 week number (1–53) for the given date. Week = Mon–Sun, week 1 = week with first Thursday. */
-function getWeekNumber(date: Date): number {
-	const d = new Date(date)
-	d.setHours(0, 0, 0, 0)
-	const day = d.getDay() || 7 // 1 = Mon, 7 = Sun
-	d.setDate(d.getDate() + 4 - day) // Thursday of this week
-	const jan1 = new Date(d.getFullYear(), 0, 1)
-	return 1 + Math.floor((d.getTime() - jan1.getTime()) / 86400000 / 7)
-}
-
-/** Returns the Monday 00:00:00 (local) of the week containing the given date. Week = Mon–Sun. */
-function getWeekMonday(date: Date): Date {
-	const d = new Date(date)
-	d.setHours(0, 0, 0, 0)
-	const day = d.getDay() // 0 = Sun, 1 = Mon, ...
-	const diff = day === 0 ? -6 : 1 - day
-	d.setDate(d.getDate() + diff)
-	return d
-}
-
-export type WeekGroup = {
-	weekMonday: Date
-	weekSunday: Date
-	timestamps: Timestamp[]
-	totalSeconds: number
-}
-
-export type DayGroup = {
-	dayDate: Date
-	dateKey: string
-	timestamps: Timestamp[]
-	totalSeconds: number
-}
-
-/** Groups timestamps by calendar day (local date), newest first. */
-export function groupTimestampsByDay(timestamps: Timestamp[]): DayGroup[] {
-	const byDay = new Map<string, Timestamp[]>()
-	for (const t of timestamps) {
-		const start = new Date(t.start_time)
-		const key =
-			start.getFullYear() +
-			'-' +
-			String(start.getMonth() + 1).padStart(2, '0') +
-			'-' +
-			String(start.getDate()).padStart(2, '0')
-		if (!byDay.has(key)) byDay.set(key, [])
-		byDay.get(key)!.push(t)
-	}
-	const groups: DayGroup[] = []
-	byDay.forEach((ts, key) => {
-		const [y, m, d] = key.split('-').map(Number)
-		const dayDate = new Date(y, m - 1, d)
-		groups.push({
-			dayDate,
-			dateKey: key,
-			timestamps: ts.sort(
-				(a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
-			),
-			totalSeconds: durationFromTimestamps(ts),
-		})
-	})
-	groups.sort((a, b) => b.dayDate.getTime() - a.dayDate.getTime())
-	return groups
-}
-
-/** Groups timestamps by calendar week (Mon–Sun), newest week first. */
-export function groupTimestampsByWeek(timestamps: Timestamp[]): WeekGroup[] {
-	const byWeek = new Map<number, Timestamp[]>()
-	for (const t of timestamps) {
-		const start = new Date(t.start_time)
-		const weekMonday = getWeekMonday(start)
-		const key = weekMonday.getTime()
-		if (!byWeek.has(key)) byWeek.set(key, [])
-		byWeek.get(key)!.push(t)
-	}
-	const weekSunday = (m: Date) => {
-		const s = new Date(m)
-		s.setDate(s.getDate() + 6)
-		return s
-	}
-	const groups: WeekGroup[] = []
-	byWeek.forEach((ts, key) => {
-		const weekMonday = new Date(key)
-		groups.push({
-			weekMonday,
-			weekSunday: weekSunday(weekMonday),
-			timestamps: ts.sort(
-				(a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
-			),
-			totalSeconds: durationFromTimestamps(ts),
-		})
-	})
-	groups.sort((a, b) => b.weekMonday.getTime() - a.weekMonday.getTime())
-	return groups
-}
-
-type TimeCounter = {
-	hours: number
-	minutes: number
-	seconds: number
-}
-
-export function secondsToCounter(totalSeconds: number): TimeCounter {
-	const seconds = Math.max(0, Math.floor(totalSeconds))
-	const hours = Math.floor(seconds / 60 / 60)
-	const minutes = Math.floor(seconds / 60) % 60
-	const s = seconds % 60
-	return {hours, minutes, seconds: s}
-}
-
-export function formatCounter(c: TimeCounter): {hours: string; minutes: string; seconds: string} {
-	return {
-		hours: String(c.hours).padStart(2, '0'),
-		minutes: String(c.minutes).padStart(2, '0'),
-		seconds: String(c.seconds).padStart(2, '0'),
-	}
-}
-
-function Timer({
-	startUnix,
-	paused,
-	onUpdate,
-}: {
-	startUnix: number
-	paused: boolean
-	onUpdate: (seconds: number) => void
-}) {
-	const [timer, setTimer] = useState<TimeCounter>(() => secondsToCounter(0))
-
-	useEffect(() => {
-		function tick() {
-			const elapsedSeconds = (Date.now() - startUnix) / 1000
-			onUpdate(elapsedSeconds)
-			setTimer(secondsToCounter(elapsedSeconds))
-		}
-
-		tick()
-
-		if (paused) return // no interval while paused
-
-		const interval = setInterval(tick, 1000)
-		return () => clearInterval(interval)
-	}, [startUnix, paused])
-
-	return (
-		<div
-			className={`font-mono text-3xl tabular-nums tracking-tight text-center transition-opacity duration-300 ${
-				paused
-					? 'text-base-content/60'
-					: 'text-error *:even:text-error/70 *:even:animate-pulse'
-			}`}
-		>
-			<span>{String(timer.hours).padStart(2, '0')}</span>
-			<span className=''>:</span>
-			<span>{String(timer.minutes).padStart(2, '0')}</span>
-			<span className=''>:</span>
-			<span>{String(timer.seconds).padStart(2, '0')}</span>
-		</div>
-	)
-}
-
-function formatWeekRange(monday: Date, sunday: Date): string {
-	const fmt = (d: Date) =>
-		d.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'})
-	return `${fmt(monday)} – ${fmt(sunday)}`
-}
-
-const NORMAL_HOURS = 8
-const OVERTIME_CAP_HOURS = 4
-const BAR_TOTAL_HOURS = NORMAL_HOURS + OVERTIME_CAP_HOURS // 12h
-const NORMAL_FRACTION = NORMAL_HOURS / BAR_TOTAL_HOURS // 8/12
-const OVERTIME_FRACTION = OVERTIME_CAP_HOURS / BAR_TOTAL_HOURS // 4/12
-
-function isWeekend(date: Date): boolean {
-	const day = date.getDay()
-	return day === 0 || day === 6 // Sonntag, Samstag
-}
-
-/** Horizontal bar: 8h Regelarbeitszeit (solid left, dashed right) einheitlich #323F5D. Bei <8h: Türkis zwischen Ende erbrachter Zeit und gestrichelter Linie. Bei >8h: Überstunden-Balken. Sa/So: nur Überstunden-Balken, repräsentiert die gesamte Tageszeit. */
-function DayBar({totalSeconds, dayDate}: {totalSeconds: number; dayDate: Date}) {
-	const weekend = isWeekend(dayDate)
-	const normalSeconds = NORMAL_HOURS * 3600
-	const overtimeCapSeconds = OVERTIME_CAP_HOURS * 3600
-	const barTotalSeconds = BAR_TOTAL_HOURS * 3600
-
-	const workedNormal = Math.min(totalSeconds, normalSeconds)
-	const workedOvertime = Math.min(Math.max(0, totalSeconds - normalSeconds), overtimeCapSeconds)
-
-	const normalZonePercent = NORMAL_FRACTION * 100
-	const redWidthPercent = (workedOvertime / overtimeCapSeconds) * OVERTIME_FRACTION * 100
-
-	// Türkis: nur wenn < 8h, zwischen Ende erbrachter Zeit und gestrichelter Linie (Rest der 8h-Zone)
-	const underEight = workedNormal < normalSeconds
-	const turquoiseStartPercent = (workedNormal / normalSeconds) * NORMAL_FRACTION * 100
-	const turquoiseWidthPercent = underEight
-		? ((normalSeconds - workedNormal) / normalSeconds) * NORMAL_FRACTION * 100
-		: 0
-
-	// Wochenende: gesamter Balken = Überstunden-Balken, Skala 12h, gesamte Zeit dargestellt
-	const weekendBarWidthPercent = weekend
-		? Math.min(100, (totalSeconds / barTotalSeconds) * 100)
-		: 0
-
-	if (weekend) {
-		return (
-			<div className='w-[80%] min-h-6 flex items-center' aria-hidden>
-				<div className='relative h-5 w-full'>
-					{/* Sa/So: nur Überstunden-Balken von links, gesamte Zeit (Skala 12h) */}
-					{weekendBarWidthPercent > 0 && (
-						<div
-							className='absolute top-0 left-0 bottom-0 rounded-r-sm border-r-2 border-[hsl(344,84%,60%)]'
-							style={{
-								width: `${weekendBarWidthPercent}%`,
-								background:
-									'linear-gradient(90deg, hsl(222 30% 28% / 0.0) 0%, hsl(344 63% 36% / 1) 100%)',
-							}}
-						/>
-					)}
-				</div>
-			</div>
-		)
-	}
-
-	return (
-		<div className='w-[80%] min-h-6 flex items-center' aria-hidden>
-			{/* Track: 8h-Zone einheitlich #323F5D (Standard), rechter Teil leer bis Überstunden gezeichnet */}
-			<div
-				className='relative h-5 w-full border-l border-info/50'
-				style={{
-					background: `linear-gradient(90deg, #1B213344 0%, #242C41 ${normalZonePercent}%, transparent ${normalZonePercent}%)`,
-				}}
-			>
-				{/* Gestrichelte Linie bei 8h */}
-				<div
-					className='absolute top-0 bottom-0 w-0 border-l border-dashed border-white'
-					style={{left: `${normalZonePercent}%`}}
-				/>
-				{/* Türkis: Rest bis 8h (zwischen Ende erbrachter Zeit und gestrichelter Linie); bei >=8h nicht sichtbar */}
-				{turquoiseWidthPercent > 0 && (
-					<div
-						className='absolute top-0 bottom-0'
-						style={{
-							left: `${turquoiseStartPercent}%`,
-							width: `${turquoiseWidthPercent}%`,
-							background:
-								'linear-gradient(90deg, #44E1EF 0%, #44E1EF 2px, #227495 2px, #12161f 100%)',
-						}}
-					/>
-				)}
-				{/* Überstunden-Balken: Verlauf HSL 222 30% 28% 50 → HSL 344 63% 36% 100, Border rechts HSL 344 84% 60% 100 */}
-				{redWidthPercent > 0 && (
-					<div
-						className='absolute top-0 bottom-0 border-r-2 border-[hsl(344,84%,60%)]'
-						style={{
-							left: `${normalZonePercent}%`,
-							width: `${redWidthPercent}%`,
-							background:
-								'linear-gradient(90deg, hsl(222 30% 28% / 0.0) 0%, hsl(344 63% 36% / 1) 100%)',
-						}}
-					/>
-				)}
-			</div>
-		</div>
-	)
-}
-
-export function TimestampTableByWeek({timestamps, user}: {timestamps: Timestamp[]; user: User}) {
-	const groups = groupTimestampsByWeek(timestamps)
-	return (
-		<div className='space-y-6'>
-			{groups.map((g) => (
-				<section key={g.weekMonday.getTime()}>
-					<h3 className='text-base font-semibold mb-3.5 px-4'>
-						{getWeekNumber(g.weekMonday)}. KW{' '}
-						<span className='text-accent/50 font-normal pl-1 pr-1.5'>|</span>
-						{formatWeekRange(g.weekMonday, g.weekSunday)}
-					</h3>
-					<TimestampTable
-						timestamps={g.timestamps}
-						user={user}
-						footerTotalSeconds={g.totalSeconds}
-					/>
-				</section>
-			))}
-		</div>
-	)
-}
-
-function TimestampRow({
-	t,
-	user,
-	onRowClick,
-}: {
-	t: Timestamp
-	user: User
-	onRowClick: (t: Timestamp) => void
-}) {
-	const start = new Date(t.start_time)
-	const end = t.end_time && new Date(t.end_time)
-	const duration = end
-		? secondsToCounter((end.getTime() - start.getTime()) / 1000)
-		: {hours: 0, minutes: 0, seconds: 0}
-	const {addErrorToast} = useToast()
-
-	return (
-		<tr
-			onClick={() => {
-				if (!user.is_superuser) {
-					addErrorToast({
-						name: 'Permission Error',
-						message: 'Only for Admins',
-					})
-					return
-				}
-				onRowClick(t)
-			}}
-			key={t.id}
-			className='hover:bg-base-300 *:font-extralight *:text-info/70 bg-base-200/40'
-		>
-			<td>
-				<div className='flex gap-1.5 items-center pl-6 text-info/60'>
-					<span className='w-6 '>
-						{start.toLocaleDateString('de-DE', {weekday: 'short'}).slice(0, 2)}.,
-					</span>
-					<span className='block'>
-						{start.toLocaleTimeString('de-DE', {
-							hour: '2-digit',
-							minute: '2-digit',
-						})}
-					</span>
-				</div>
-			</td>
-			<td>
-				{end ? (
-					<div className='flex gap-1.5 items-center text-info/60'>
-						<span className='w-6'>
-							{end.toLocaleDateString('de-DE', {weekday: 'short'}).slice(0, 2)}.,
-						</span>
-						<span className='block'>
-							{end.toLocaleTimeString('de-DE', {
-								hour: '2-digit',
-								minute: '2-digit',
-							})}
-						</span>
-					</div>
-				) : (
-					'–'
-				)}
-			</td>
-			<td className='text-info/60'>
-				{(() => {
-					const f = formatCounter(duration)
-					return (
-						<div className='text-info/60'>
-							<span>{f.hours}</span>
-							<span>:</span>
-							<span>{f.minutes}</span> h
-						</div>
-					)
-				})()}
-			</td>
-		</tr>
-	)
-}
-
-export function TimestampTable({
-	timestamps,
-	user,
-	footerTotalSeconds,
-}: {
-	timestamps: Timestamp[]
-	user: User
-	footerTotalSeconds?: number
-}) {
-	const [modal, setModal] = useState<Timestamp | null>(null)
-	const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set())
-
-	const dayGroups = useMemo(() => groupTimestampsByDay(timestamps), [timestamps])
-
-	const toggleDay = (dateKey: string) => {
-		setExpandedDays((prev) => {
-			const next = new Set(prev)
-			if (next.has(dateKey)) next.delete(dateKey)
-			else next.add(dateKey)
-			return next
-		})
-	}
-
-	const footerCounter =
-		footerTotalSeconds !== undefined ? secondsToCounter(footerTotalSeconds) : null
-
-	return (
-		<>
-			<table className='table bg-base-300/50 lg:rounded-none'>
-				<thead>
-					<tr className='text-accent/80 *:w-1/3 *:font-semibold'>
-						<th>Start</th>
-						<th>End</th>
-						<th>Duration</th>
-					</tr>
-				</thead>
-				<tbody>
-					{dayGroups.map((group) => {
-						const isExpanded = expandedDays.has(group.dateKey)
-						const dayCounter = secondsToCounter(group.totalSeconds)
-						const dayFmt = formatCounter(dayCounter)
-						return (
-							<Fragment key={group.dateKey}>
-								<tr
-									onClick={() => toggleDay(group.dateKey)}
-									className={`cursor-pointer hover:bg-base-300/80 bg-base-200/60 select-none border-b border-base-300/60`}
-									role='button'
-									tabIndex={0}
-									onKeyDown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											e.preventDefault()
-											toggleDay(group.dateKey)
-										}
-									}}
-								>
-									<td className='text-info/90'>
-										<span className='inline-flex items-center gap-2'>
-											<span
-												className='icon-outlined -ml-1 text-lg transition-transform'
-												style={{
-													transform: isExpanded
-														? 'rotate(90deg)'
-														: 'rotate(0deg)',
-												}}
-											>
-												chevron_right
-											</span>
-											{group.dayDate.toLocaleDateString('de-DE', {
-												weekday: 'short',
-												day: '2-digit',
-												month: '2-digit',
-												year: 'numeric',
-											})}
-										</span>
-									</td>
-									<td className='py-1.5'>
-										<DayBar totalSeconds={group.totalSeconds} dayDate={group.dayDate} />
-									</td>
-									<td className='text-info/90'>
-										<span>{dayFmt.hours}</span>
-										<span>:</span>
-										<span>{dayFmt.minutes}</span>{' '}
-										<span className='text-info/70'>h</span>
-									</td>
-								</tr>
-								{isExpanded &&
-									group.timestamps.map((t) => (
-										<TimestampRow
-											key={t.id}
-											t={t}
-											user={user}
-											onRowClick={setModal}
-										/>
-									))}
-							</Fragment>
-						)
-					})}
-				</tbody>
-				{footerCounter !== null && (
-					<tfoot>
-						<tr className='bg-base-200/70 border-b-lg font-semibold'>
-							<td></td>
-							<td></td>
-							<td className='text-primary'>
-								{(() => {
-									const f = formatCounter(footerCounter)
-									return (
-										<>
-											<span>{f.hours}</span>
-											<span>:</span>
-											<span>{f.minutes}</span>{' '}
-											<span className='text-primary/80'>h</span>
-										</>
-									)
-								})()}
-							</td>
-						</tr>
-					</tfoot>
-				)}
-			</table>
-			{modal && user.is_superuser && (
-				<EditModal timestamp={modal} onClose={() => setModal(null)} />
-			)}
-		</>
-	)
-}
-
-// ISO ("2025-12-23T20:44:00Z") -> datetime-local ("2025-12-23T20:44")
-export function isoToDatetimeLocal(iso: string) {
-	const d = new Date(iso)
-	const pad = (n: number) => String(n).padStart(2, '0')
-	if (d.getSeconds() === 0) {
-		d.setSeconds(new Date().getSeconds())
-	}
-	// datetime-local is *local time* by spec
-	const yyyy = d.getFullYear()
-	const mm = pad(d.getMonth() + 1)
-	const dd = pad(d.getDate())
-	const hh = pad(d.getHours())
-	const min = pad(d.getMinutes())
-
-	return `${yyyy}-${mm}-${dd}T${hh}:${min}`
-}
-
-export function isoToDateLocal(iso: string) {
-	const d = new Date(iso)
-	const pad = (n: number) => String(n).padStart(2, '0')
-
-	const yyyy = d.getFullYear()
-	const mm = pad(d.getMonth() + 1)
-	const dd = pad(d.getDate())
-
-	return `${yyyy}-${mm}-${dd}`
-}
-
-// datetime-local ("2025-12-23T21:44") -> ISO UTC ("2025-12-23T20:44:00Z")
-export function datetimeLocalToIso(value: string) {
-	const d = new Date(value)
-	if (d.getSeconds() === 0) {
-		d.setSeconds(new Date().getSeconds())
-	}
-
-	const iso = d.toISOString()
-	const fixed = `${iso.split('.')[0]}Z`
-	return fixed
-}
-
-export function EditModal({timestamp, onClose}: {timestamp: Timestamp; onClose: () => void}) {
-	const queryClient = useQueryClient()
-	const [startDate, setStartDate] = useState(isoToDatetimeLocal(timestamp.start_time))
-	const [endDate, setEndDate] = useState<string | null>(
-		timestamp.end_time ? isoToDatetimeLocal(timestamp.end_time) : null,
-	)
-
-	useEffect(() => {
-		setStartDate(isoToDatetimeLocal(timestamp.start_time))
-		if (timestamp.end_time) setEndDate(isoToDatetimeLocal(timestamp.end_time))
-		else setEndDate(null)
-	}, [timestamp.start_time, timestamp.end_time])
-
-	const chrono = new ChronoClient()
-	const {addToast, addErrorToast} = useToast()
-
-	const mutation = useMutation({
-		mutationKey: ['timestamps', timestamp.id],
-		mutationFn: ({start, end}: {start: string; end: string | null}) =>
-			chrono.timestamps.update({
-				id: timestamp.id,
-				user_id: timestamp.user_id,
-				start_time: datetimeLocalToIso(start),
-				end_time: end ? datetimeLocalToIso(end) : null,
-			}),
-		onError: (e) => addErrorToast(e),
-		onSuccess: () => {
-			addToast('Updated Timestamp', 'success')
-			queryClient.invalidateQueries({queryKey: ['timestamps']})
-			onClose()
-		},
-		retry: false,
-	})
-
-	return (
-		<div className='fixed inset-0 z-50 flex text-white items-center justify-center p-4'>
-			<button
-				aria-label='Close modal'
-				onClick={onClose}
-				className='absolute inset-0 bg-black/50 backdrop-blur-sm'
-			/>
-
-			<div
-				role='dialog'
-				aria-modal='true'
-				className='relative w-full max-w-lg rounded-2xl bg-base-100 shadow-2xl ring-1 ring-black/10'
-			>
-				<div className='flex items-center justify-between px-5 py-4 border-b border-black/10'>
-					<h2 className='text-base font-semibold'>Edit Timestamp</h2>
-
-					<button
-						type='button'
-						onClick={onClose}
-						className='inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400'
-					>
-						<span className='icon-outlined text-[20px] leading-none'>close</span>
-					</button>
-				</div>
-
-				<div className='px-5 py-4 space-y-4'>
-					<div className='grid gap-4 sm:grid-cols-2'>
-						<label className='space-y-2'>
-							<span className='text-sm font-medium'>Start</span>
-							<input
-								type='datetime-local'
-								className='input'
-								value={startDate}
-								onChange={(e) => setStartDate(e.target.value)}
-							/>
-						</label>
-
-						<label className='space-y-2'>
-							<span className='text-sm font-medium'>End</span>
-							<input
-								type='datetime-local'
-								className='input'
-								value={endDate || ''}
-								onChange={(e) => setEndDate(e.target.value)}
-							/>
-						</label>
-					</div>
-				</div>
-
-				<div className='flex items-center justify-end gap-2 px-5 py-4 border-t border-black/10'>
-					<button type='button' onClick={onClose} className='btn btn-soft btn-error'>
-						Cancel
-					</button>
-					<button
-						type='button'
-						className='btn btn-soft btn-success'
-						onClick={() => mutation.mutate({start: startDate, end: endDate})}
-						disabled={mutation.isPending}
-					>
-						{mutation.isPending ? 'Saving...' : 'Save'}
-					</button>
-				</div>
-			</div>
-		</div>
-	)
-}
-
 export function TeamTimestamps({
 	startDate,
 	endDate,
-	user: currUser,
+	user: _currUser,
 }: {
 	startDate?: string
 	endDate?: string
 	user: User
 }) {
-	const chrono = new ChronoClient()
+	const chrono = useMemo(() => new ChronoClient(), [])
 	const currYear = startDate ? new Date(startDate).getFullYear() : new Date().getFullYear()
 
 	const allTimestampsQ = useQuery({
 		queryKey: ['timestamps', 'all', startDate, endDate],
 		queryFn: () => chrono.timestamps.getAll(startDate, endDate),
-		staleTime: 1000 * 60 * 1, // 1min
-		gcTime: 1000 * 60 * 30, // 30min
+		staleTime: 1000 * 60 * 1,
+		gcTime: 1000 * 60 * 30,
 		retry: false,
 	})
 
 	const usersQ = useQuery({
 		queryKey: ['users'],
 		queryFn: () => chrono.users.getUsers(),
-		staleTime: 1000 * 60 * 1, // 1min
-		gcTime: 1000 * 60 * 30, // 30min
+		staleTime: 1000 * 60 * 1,
+		gcTime: 1000 * 60 * 30,
 		retry: false,
 	})
 
 	const allWorktimesQ = useQuery({
 		queryKey: ['worktimes', 'all', startDate, endDate],
 		queryFn: () => chrono.timestamps.getWorkHoursForAllUsers(currYear),
-		staleTime: 1000 * 60 * 1, // 1min
-		gcTime: 1000 * 60 * 30, // 30min
+		staleTime: 1000 * 60 * 1,
+		gcTime: 1000 * 60 * 30,
 		retry: false,
 	})
 
@@ -872,10 +228,9 @@ export function TeamTimestamps({
 			<div className='w-full'>
 				{Object.entries(timestampsMap).map(([k, v]) => {
 					const user = usersMap[Number(k)]
+					if (!user) return <div key={0} />
+
 					const counter = secondsToCounter(durationFromTimestamps(v))
-
-					if (!user) return <div key={0}></div>
-
 					const worktime = worktimes[user.id]
 					const expectedCounter = secondsToCounter(worktime.expected * 3600)
 					let overtime = (worktime.worked - worktime.expected) * 3600
@@ -885,17 +240,18 @@ export function TeamTimestamps({
 						overtimeLabel = 'Missing Time'
 					}
 					const overtimeCounter = secondsToCounter(overtime)
+					const fCounter = formatCounter(counter)
+					const fExpected = formatCounter(expectedCounter)
+					const fOvertime = formatCounter(overtimeCounter)
 
 					return (
 						<div key={user.id} className='my-4'>
 							<details className='collapse border-base-300 border collapse-arrow'>
-								<summary className='collapse-title bg-base-300/50 focus-within:bg-info/25 focus:text-white hover:bg-info/25 font-semibold '>
+								<summary className='collapse-title bg-base-300/50 focus-within:bg-info/25 focus:text-white hover:bg-info/25 font-semibold'>
 									{user.username}
 								</summary>
 								<div className='collapse-content px-0 pt-6 pb-0 bg-black/20 flex flex-col text-sm'>
-									<h3 className='text-base font-semibold mb-3.5 px-4'>
-										Overview
-									</h3>{' '}
+									<h3 className='text-base font-semibold mb-3.5 px-4'>Overview</h3>
 									<table className='bg-base-300/50 rounded-none table mb-12'>
 										<thead>
 											<tr className='text-accent/80 *:w-1/3 *:font-normal'>
@@ -907,51 +263,24 @@ export function TeamTimestamps({
 										<tbody>
 											<tr className='hover:bg-base-300 text-info/70 bg-base-200/40'>
 												<td className='*:text-info'>
-													{(() => {
-														const f = formatCounter(counter)
-														return (
-															<>
-																<span>{f.hours}</span>
-																<span>:</span>
-																<span>{f.minutes}</span> h
-																{/* <span>:</span> */}
-																{/* <span>{f.seconds}</span> */}
-															</>
-														)
-													})()}
+													<span>{fCounter.hours}</span>
+													<span>:</span>
+													<span>{fCounter.minutes}</span> h
 												</td>
 												<td className='*:text-info/90'>
-													{(() => {
-														const f = formatCounter(expectedCounter)
-														return (
-															<>
-																<span>{f.hours}</span>
-																<span>:</span>
-																<span>{f.minutes}</span> h
-																{/* <span>:</span> */}
-																{/* <span>{f.seconds}</span> */}
-															</>
-														)
-													})()}
+													<span>{fExpected.hours}</span>
+													<span>:</span>
+													<span>{fExpected.minutes}</span> h
 												</td>
 												<td className='*:text-info/90'>
-													{(() => {
-														const f = formatCounter(overtimeCounter)
-														return (
-															<>
-																<span>{f.hours}</span>
-																<span>:</span>
-																<span>{f.minutes}</span> h
-																{/* <span>:</span> */}
-																{/* <span>{f.seconds}</span> */}
-															</>
-														)
-													})()}
+													<span>{fOvertime.hours}</span>
+													<span>:</span>
+													<span>{fOvertime.minutes}</span> h
 												</td>
 											</tr>
 										</tbody>
 									</table>
-									<TimestampTableByWeek timestamps={v} user={currUser} />
+									<TimestampTableByWeek timestamps={v} user={user} />
 								</div>
 							</details>
 						</div>
@@ -961,3 +290,17 @@ export function TeamTimestamps({
 		</>
 	)
 }
+
+// Re-exports for routes and other components
+export {
+	durationFromTimestamps,
+	formatCounter,
+	secondsToCounter,
+	isoToDateLocal,
+	isoToDatetimeLocal,
+	datetimeLocalToIso,
+	groupTimestampsByDay,
+	groupTimestampsByWeek,
+} from '../lib/timestamp-utils'
+export type {WeekGroup, DayGroup, TimeCounter} from '../lib/timestamp-utils'
+export {TimestampTableByWeek} from './timestamps/TimestampTableByWeek'

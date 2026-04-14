@@ -203,19 +203,22 @@ func (r *TimestampsService) GetWorkHoursForYear(
 		return domain.WorkHours{}, err
 	}
 
-	sickDays := 0
+	sickDays := 0.0
 	allEvents, err := r.event.GetAllByUserId(ctx, userId)
 	if err != nil {
 		return domain.WorkHours{}, err
 	}
 
 	for _, e := range allEvents {
-		if e.Name != "krank" {
+		if !e.IsSickday() {
 			continue
 		}
-		// only count sick days in [yearStart, periodEnd]
 		if !e.ScheduledAt.Before(yearStart) && !e.ScheduledAt.After(periodEnd) {
-			sickDays++
+			if e.Name == "krank halbtags" {
+				sickDays += 0.5
+			} else {
+				sickDays++
+			}
 		}
 	}
 
@@ -238,7 +241,7 @@ func (r *TimestampsService) GetWorkHoursForYear(
 		}
 	}
 
-	expectedHours := (float64(expectedDays-holidays) - vacation - float64(sickDays)) * workDayHours
+	expectedHours := (float64(expectedDays-holidays) - vacation - sickDays) * workDayHours
 	holidayHours := float64(holidays) * workDayHours
 	vacationHours := vacation * workDayHours
 

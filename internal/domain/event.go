@@ -8,6 +8,7 @@ import (
 )
 
 var vacationNames = []string{"urlaub", "urlaub halbtags"}
+var sickdayNames = []string{"krank", "krank halbtags"}
 
 type Event struct {
 	ID          int64     `json:"id"`
@@ -21,6 +22,10 @@ type Event struct {
 
 func (e *Event) IsVacation() bool {
 	return slices.Contains(vacationNames, e.Name)
+}
+
+func (e *Event) IsSickday() bool {
+	return slices.Contains(sickdayNames, e.Name)
 }
 
 func (e *Event) IsAccepted() bool {

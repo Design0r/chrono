@@ -1,55 +1,41 @@
-%:
-	@:
-
-.PHONY: build dev test
+.PHONY: build dev test generate migrate install backup deploy live/server live/frontend
 
 ifeq ($(OS),Windows_NT)
   BIN_SUFFIX := .exe
+  SET_CGO := set CGO_ENABLED=1&&
 else
   BIN_SUFFIX :=
+  SET_CGO := CGO_ENABLED=1
 endif
 
-MIGRATION_DIR = ./db/migrations/
-DB_DIR = ./db/chrono.db/
-TIMESTAMP := $(date +%Y-%m-%d_%H-%M-%S)
+MIGRATION_DIR := ./db/migrations
+DB_DIR := ./db/chrono.db
+GOBIN := $(shell go env GOPATH)/bin
 
 generate:
-	@echo "Generating sqlc repositoy..."
+	@echo "Generating sqlc repository..."
 	@sqlc generate
 
 migrate:
-	@-mkdir ${MIGRATION_DIR}
+	@mkdir -p $(MIGRATION_DIR)
 	$(eval args=$(filter-out $@,$(MAKECMDGOALS)))
-	@goose sqlite3 ${DB_DIR} -dir=${MIGRATION_DIR} create ${args} sql
+	@goose sqlite3 $(DB_DIR) -dir=$(MIGRATION_DIR) create $(args) sql
 
-GOBIN := $(shell go env GOPATH)/bin
 live/server:
-	$(GOBIN)/air
+	$(SET_CGO) $(GOBIN)/air
 
 live/frontend:
 	cd frontend && npm install && npm run dev
 
-dev: 
-	make -j2 live/server  live/frontend
+dev:
+	$(MAKE) -j2 live/server live/frontend
 
 build:
-	go build -o ./build/chrono$(BIN_SUFFIX) -ldflags='-s -w -extldflags "-static"' ./cmd/main.go
+	$(SET_CGO) go build -o ./build/chrono$(BIN_SUFFIX) ./cmd/main.go
 
 install:
 	@go install github.com/air-verse/air@latest
 	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-
-backup:
-	@docker compose down
-	@mkdir -p /home/apic/backup
-	@bash -c 'timestamp=$$(date +%Y-%m-%d_%H-%M-%S); \
-		echo "Backing up to chrono_$$timestamp.db"; \
-		sudo cp /var/lib/docker/volumes/chrono_db/_data/chrono.db /home/apic/backup/chrono_$$timestamp.db'
-	@COMPOSE_BAKE=true docker compose up -d
-
-deploy: backup
-	@git pull origin main
-	@COMPOSE_BAKE=true docker compose up --build -d
 
 test:
 	@go test ./... -v

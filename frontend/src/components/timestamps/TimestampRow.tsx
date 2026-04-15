@@ -1,23 +1,20 @@
 import { formatCounter, secondsToCounter } from "../../lib/timestamp-utils";
 import type { User } from "../../types/auth";
 import type { Timestamp } from "../../types/response";
-import { useToast } from "../Toast";
 
 export function TimestampRow({
   t,
-  user,
   onRowClick,
 }: {
   t: Timestamp;
   user: User;
-  onRowClick: (t: Timestamp) => void;
+  onRowClick: () => void;
 }) {
   const start = new Date(t.start_time);
   const end = t.end_time && new Date(t.end_time);
   const duration = end
     ? secondsToCounter((end.getTime() - start.getTime()) / 1000)
     : { hours: 0, minutes: 0, seconds: 0 };
-  const { addErrorToast } = useToast();
   const f = formatCounter(duration);
 
   return (

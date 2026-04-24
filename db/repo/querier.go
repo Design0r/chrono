@@ -21,6 +21,7 @@ type Querier interface {
 	CreateRequest(ctx context.Context, arg CreateRequestParams) (Request, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateSettings(ctx context.Context, signupEnabled bool) (Setting, error)
+	CreateTimestamp(ctx context.Context, arg CreateTimestampParams) (Timestamp, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateVacationToken(ctx context.Context, arg CreateVacationTokenParams) (VacationToken, error)
 	DeleteAllRefreshTokens(ctx context.Context) error

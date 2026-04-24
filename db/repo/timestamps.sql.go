@@ -10,6 +10,30 @@ import (
 	"time"
 )
 
+const CreateTimestamp = `-- name: CreateTimestamp :one
+INSERT INTO timestamps (user_id, start_time, end_time)
+VALUES (?,?,?)
+RETURNING id, start_time, end_time, user_id
+`
+
+type CreateTimestampParams struct {
+	UserID    int64      `json:"user_id"`
+	StartTime time.Time  `json:"start_time"`
+	EndTime   *time.Time `json:"end_time"`
+}
+
+func (q *Queries) CreateTimestamp(ctx context.Context, arg CreateTimestampParams) (Timestamp, error) {
+	row := q.db.QueryRowContext(ctx, CreateTimestamp, arg.UserID, arg.StartTime, arg.EndTime)
+	var i Timestamp
+	err := row.Scan(
+		&i.ID,
+		&i.StartTime,
+		&i.EndTime,
+		&i.UserID,
+	)
+	return i, err
+}
+
 const DeleteTimestamp = `-- name: DeleteTimestamp :exec
 DELETE FROM timestamps
 WHERE id = ?

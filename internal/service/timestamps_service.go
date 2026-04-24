@@ -113,6 +113,13 @@ func (r *TimestampsService) GetLatest(
 	return r.timestamps.GetLatest(ctx, userId)
 }
 
+func (r *TimestampsService) Create(
+	ctx context.Context,
+	ts *domain.Timestamp,
+) (domain.Timestamp, error) {
+	return r.timestamps.Create(ctx, ts)
+}
+
 func (r *TimestampsService) Update(
 	ctx context.Context,
 	ts *domain.Timestamp,

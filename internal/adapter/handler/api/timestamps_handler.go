@@ -23,6 +23,7 @@ func NewAPITimestampsHandler(t *service.TimestampsService, u *service.UserServic
 func (s *APITimestampsHandler) RegisterRoutes(auth *echo.Group, admin *echo.Group) {
 	g := auth.Group("/timestamps")
 	g.POST("", s.Start)
+	g.POST("/new", s.Create)
 	g.PATCH("/:id", s.Stop)
 	g.PUT("/:id", s.Update)
 	g.GET("/day", s.GetTimestampsForToday)
@@ -79,6 +80,31 @@ func (h *APITimestampsHandler) GetLatestTimestamp(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	t, err := h.timestamps.GetLatest(ctx, currUser.ID)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusNotFound, err.Error())
+	}
+
+	return NewJsonResponse(c, t)
+}
+
+func (h *APITimestampsHandler) Create(c echo.Context) error {
+	currUser := c.Get("user").(domain.User)
+	ctx := c.Request().Context()
+
+	if !currUser.IsAdmin() {
+		return NewErrorResponse(c, http.StatusForbidden, "only allowed for admins")
+	}
+
+	var tsForm domain.Timestamp
+	if err := c.Bind(&tsForm); err != nil {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid form parameters")
+	}
+
+	if tsForm.UserID == 0 {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "select a valid user id")
+	}
+
+	t, err := h.timestamps.Create(ctx, &tsForm)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusNotFound, err.Error())
 	}

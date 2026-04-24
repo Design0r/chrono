@@ -13,6 +13,23 @@ export class ApiTimestamps {
     return r.data as Timestamp;
   }
 
+  async create(ts: Timestamp): Promise<Timestamp> {
+    const form = new FormData();
+    form.append("id", ts.id.toString());
+    form.append("start_time", ts.start_time);
+    form.append("end_time", ts.end_time || "");
+    form.append("user_id", ts.user_id.toString());
+
+    const response = await fetch(CHRONO_URL + `/timestamps/new`, {
+      method: "POST",
+      credentials: "include",
+      body: form,
+    });
+
+    const r = await returnOrError(response);
+    return r.data as Timestamp;
+  }
+
   async getAllForUser(start?: string, end?: string): Promise<Timestamp[]> {
     let url = "";
     if (start && end) url = `?startDate=${start}&endDate=${end}`;

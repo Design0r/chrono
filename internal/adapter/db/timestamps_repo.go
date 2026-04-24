@@ -144,6 +144,20 @@ func (r *SQLTimestampsRepo) Update(
 	return (domain.Timestamp)(t), nil
 }
 
+func (r *SQLTimestampsRepo) Create(
+	ctx context.Context,
+	ts *domain.Timestamp,
+) (domain.Timestamp, error) {
+	params := repo.CreateTimestampParams{UserID: ts.ID, StartTime: ts.StartTime, EndTime: ts.EndTime}
+	t, err := r.q.CreateTimestamp(ctx, params)
+	if err != nil {
+		r.log.Error("repo.CreateTimestamp failed:", slog.String("error", err.Error()))
+		return domain.Timestamp{}, err
+	}
+
+	return (domain.Timestamp)(t), nil
+}
+
 func (r *SQLTimestampsRepo) GetAllForUser(
 	ctx context.Context,
 	userId int64,

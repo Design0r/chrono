@@ -1,3 +1,8 @@
+-- name: CreateTimestamp :one
+INSERT INTO timestamps (user_id, start_time, end_time)
+VALUES (?,?,?)
+RETURNING *;
+
 -- name: StartTimestamp :one
 INSERT INTO timestamps (user_id)
 VALUES (?)

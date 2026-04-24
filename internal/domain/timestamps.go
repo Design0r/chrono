@@ -14,6 +14,7 @@ type Timestamp struct {
 
 type TimestampsRepository interface {
 	GetById(ctx context.Context, id int64) (Timestamp, error)
+	Create(ctx context.Context, ts *Timestamp) (Timestamp, error)
 	Start(ctx context.Context, userId int64) (Timestamp, error)
 	Stop(ctx context.Context, id int64) (Timestamp, error)
 	Delete(ctx context.Context, id int64) error

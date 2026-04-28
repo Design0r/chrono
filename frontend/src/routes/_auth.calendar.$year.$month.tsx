@@ -45,7 +45,7 @@ function CalendarComponent() {
 
   const usersQ = useQuery({
     queryKey: ["users", "vacation", year],
-    queryFn: () => chrono.users.getUsers({ year: year }),
+    queryFn: () => chrono.users.getUsers({ vacation: { year: year } }),
     staleTime: 1000 * 60 * 30, // 30min
     gcTime: 1000 * 60 * 60 * 1, // 1h
     retry: false,

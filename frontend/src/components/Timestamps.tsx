@@ -184,7 +184,7 @@ export function TeamTimestamps({
 
   const usersQ = useQuery({
     queryKey: ["users"],
-    queryFn: () => chrono.users.getUsers(),
+    queryFn: () => chrono.users.getUsers({ includeInactiveUsers: false }),
     staleTime: 1000 * 60 * 1,
     gcTime: 1000 * 60 * 30,
     retry: false,

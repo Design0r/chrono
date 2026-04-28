@@ -27,8 +27,8 @@ export class ApiUsers {
     vacation = null,
     includeInactiveUsers = false,
   }: {
-    vacation: null | { year: number };
-    includeInactiveUsers: boolean;
+    vacation?: null | { year: number };
+    includeInactiveUsers?: boolean;
   }): Promise<User[] | UserWithVacation[]> {
     const params = new URLSearchParams(
       vacation

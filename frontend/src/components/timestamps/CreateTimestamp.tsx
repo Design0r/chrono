@@ -26,7 +26,7 @@ export function CreateTimestampModal({ onClose }: { onClose: () => void }) {
 
   const usersQ = useQuery({
     queryKey: ["users"],
-    queryFn: () => chrono.users.getUsers(),
+    queryFn: () => chrono.users.getUsers({ includeInactiveUsers: false }),
     staleTime: 1000 * 60 * 30, // 30min
     gcTime: 1000 * 60 * 60 * 1, // 1h
     retry: false,

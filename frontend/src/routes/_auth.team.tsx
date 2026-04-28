@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ErrorPage } from "../components/ErrorPage";
 import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { useToast } from "../components/Toast";
@@ -91,8 +91,8 @@ function TeamTable({
           </tr>
         </thead>
         <tbody>
-          {users.map((u, i) => (
-            <TableRow key={i} user={u} currUser={currUser} />
+          {users.map((u) => (
+            <TableRow key={u.id} user={u} currUser={currUser} />
           ))}
         </tbody>
       </table>
@@ -113,14 +113,6 @@ function TableRow({
   const [vacDays, setVacDays] = useState(user.vacation_days);
   const [role, setRole] = useState(user.role);
   const [enabled, setEnabled] = useState(user.enabled);
-
-  useEffect(() => {
-    setVacDays(user.vacation_days);
-    setRole(user.role);
-    setEnabled(user.enabled);
-
-    console.log(user.username, enabled, user.enabled);
-  }, [user]);
 
   const mutation = useMutation({
     mutationKey: ["user", "update", user.id],

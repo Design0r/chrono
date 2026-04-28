@@ -6,25 +6,17 @@ WORKDIR /app
 RUN apk add --no-cache gcc musl-dev ca-certificates
 
 COPY go.mod go.sum ./
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    go mod download
+RUN go mod download
 
-COPY cmd ./cmd
-COPY config ./config
-COPY db/*.go ./db/
-COPY db/migrations ./db/migrations
-COPY db/repo ./db/repo
-COPY internal ./internal
+COPY . .
 
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    go build -o /out/chrono -ldflags="-s -w" ./cmd/main.go
+RUN go build -o /app/build/chrono -ldflags="-s -w" ./cmd/main.go
+
 
 FROM alpine:latest
 
+WORKDIR /app
 RUN apk add --no-cache ca-certificates tzdata
 
-WORKDIR /app
-COPY --from=build /out/chrono ./chrono
+COPY --from=build /app/build/chrono .
 ENTRYPOINT ["./chrono"]

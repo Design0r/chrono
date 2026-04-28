@@ -1,21 +1,30 @@
-FROM golang:1.25-alpine AS build
+FROM golang:alpine AS build
 
 ENV CGO_ENABLED=1
-RUN apk add --no-cache gcc musl-dev ca-certificates
-
 WORKDIR /app
 
+RUN apk add --no-cache gcc musl-dev ca-certificates
+
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
 
-COPY . .
-RUN go build -o /app/build/chrono -ldflags="-s -w" ./cmd/main.go
+COPY cmd ./cmd
+COPY config ./config
+COPY db/*.go ./db/
+COPY db/migrations ./db/migrations
+COPY db/repo ./db/repo
+COPY internal ./internal
 
-# Runtime image
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go build -o /out/chrono -ldflags="-s -w" ./cmd/main.go
+
 FROM alpine:latest
 
 RUN apk add --no-cache ca-certificates tzdata
 
 WORKDIR /app
-COPY --from=build /app/build/chrono .
+COPY --from=build /out/chrono ./chrono
 ENTRYPOINT ["./chrono"]

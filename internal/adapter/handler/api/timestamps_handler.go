@@ -200,7 +200,13 @@ func (h *APITimestampsHandler) GetWorkHoursForYearForAllUsers(c echo.Context) er
 		return NewErrorResponse(c, http.StatusUnprocessableEntity, "year parameter is missing")
 	}
 
-	users, err := h.user.GetAll(ctx)
+	inactiveParam := c.QueryParam("includeInactive")
+	includeInactive, err := strconv.ParseBool(inactiveParam)
+	if err != nil {
+		includeInactive = false
+	}
+
+	users, err := h.user.GetAll(ctx, includeInactive)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusInternalServerError, "failed to get users")
 	}

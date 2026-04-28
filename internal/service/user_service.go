@@ -49,8 +49,12 @@ func (svc *UserService) GetByEmail(ctx context.Context, email string) (*domain.U
 	return svc.user.GetByEmail(ctx, email)
 }
 
-func (svc *UserService) GetAll(ctx context.Context) ([]domain.User, error) {
-	return svc.user.GetAll(ctx)
+func (svc *UserService) GetAll(ctx context.Context, includeInactive bool) ([]domain.User, error) {
+	return svc.user.GetAll(ctx, includeInactive)
+}
+
+func (svc *UserService) GetAllByEnabled(ctx context.Context, enabled bool) ([]domain.User, error) {
+	return svc.user.GetAllByEnabled(ctx, enabled)
 }
 
 func (svc *UserService) GetUsersWithVacation(

@@ -31,6 +31,7 @@ vacation_days = ?,
 is_superuser = ?,
 workday_hours = ?,
 workdays_week = ?,
+enabled = ?,
 edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING *;
@@ -42,3 +43,12 @@ WHERE is_superuser = true;
 -- name: GetAllUsers :many
 SELECT * FROM users
 WHERE id != 1;
+
+-- name: GetAllEnabledUsers :many
+SELECT * FROM users
+WHERE id != 1 AND enabled = 1;
+
+-- name: GetAllDisabledUsers :many
+SELECT * FROM users
+WHERE id != 1 AND enabled = 0;
+

@@ -99,14 +99,20 @@ func (h *APIUserHandler) GetUsers(c echo.Context) error {
 		vacation = false
 	}
 
+	inactiveParam := c.QueryParam("includeInactive")
+	includeInactive, err := strconv.ParseBool(inactiveParam)
+	if err != nil {
+		includeInactive = false
+	}
+
 	var users any
 	if vacation {
-		users, err = h.event.GetAllUsersWithVacation(ctx, year)
+		users, err = h.event.GetAllUsersWithVacation(ctx, year, includeInactive)
 		if err != nil {
 			return NewErrorResponse(c, http.StatusNotFound, "user not found")
 		}
 	} else {
-		users, err = h.user.GetAll(ctx)
+		users, err = h.user.GetAll(ctx, includeInactive)
 		if err != nil {
 			return NewErrorResponse(c, http.StatusInternalServerError, "failed to fetch users")
 		}

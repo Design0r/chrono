@@ -59,6 +59,7 @@ func (r *SQLUserRepo) Update(ctx context.Context, user *domain.User) (*domain.Us
 			ID:           user.ID,
 			WorkdayHours: user.WorkdayHours,
 			WorkdaysWeek: user.WorkdaysWeek,
+			Enabled:      user.Enabled,
 		},
 	)
 	if err != nil {
@@ -129,8 +130,42 @@ func (r *SQLUserRepo) GetByEmail(ctx context.Context, email string) (*domain.Use
 	return (*domain.User)(&u), nil
 }
 
-func (r *SQLUserRepo) GetAll(ctx context.Context) ([]domain.User, error) {
-	u, err := r.q.GetAllUsers(ctx)
+func (r *SQLUserRepo) GetAll(ctx context.Context, includeInactive bool) ([]domain.User, error) {
+	var u []repo.User
+	var err error
+
+	r.log.Debug("Get All:", slog.Bool("include inactive", includeInactive))
+
+	if includeInactive {
+		u, err = r.q.GetAllUsers(ctx)
+	} else {
+		u, err = r.q.GetAllEnabledUsers(ctx)
+	}
+
+	if err != nil {
+		r.log.Error(
+			"GetAllUsers failed:",
+			slog.String("error", err.Error()),
+		)
+		return []domain.User{}, err
+	}
+
+	users := make([]domain.User, len(u))
+	for i := range u {
+		users[i] = (domain.User)(u[i])
+	}
+
+	return users, nil
+}
+
+func (r *SQLUserRepo) GetAllByEnabled(ctx context.Context, enabled bool) ([]domain.User, error) {
+	var u []repo.User
+	var err error
+	if enabled {
+		u, err = r.q.GetAllEnabledUsers(ctx)
+	} else {
+		u, err = r.q.GetAllDisabledUsers(ctx)
+	}
 	if err != nil {
 		r.log.Error(
 			"GetAllUsers failed:",

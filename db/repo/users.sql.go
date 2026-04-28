@@ -112,6 +112,92 @@ func (q *Queries) GetAdmins(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const GetAllDisabledUsers = `-- name: GetAllDisabledUsers :many
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id, workday_hours, workdays_week FROM users
+WHERE id != 1 AND enabled = 0
+`
+
+func (q *Queries) GetAllDisabledUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, GetAllDisabledUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.VacationDays,
+			&i.IsSuperuser,
+			&i.CreatedAt,
+			&i.EditedAt,
+			&i.Color,
+			&i.Role,
+			&i.Enabled,
+			&i.AworkID,
+			&i.WorkdayHours,
+			&i.WorkdaysWeek,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const GetAllEnabledUsers = `-- name: GetAllEnabledUsers :many
+SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id, workday_hours, workdays_week FROM users
+WHERE id != 1 AND enabled = 1
+`
+
+func (q *Queries) GetAllEnabledUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, GetAllEnabledUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.VacationDays,
+			&i.IsSuperuser,
+			&i.CreatedAt,
+			&i.EditedAt,
+			&i.Color,
+			&i.Role,
+			&i.Enabled,
+			&i.AworkID,
+			&i.WorkdayHours,
+			&i.WorkdaysWeek,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const GetAllUsers = `-- name: GetAllUsers :many
 SELECT id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id, workday_hours, workdays_week FROM users
 WHERE id != 1
@@ -248,6 +334,7 @@ vacation_days = ?,
 is_superuser = ?,
 workday_hours = ?,
 workdays_week = ?,
+enabled = ?,
 edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING id, username, email, password, vacation_days, is_superuser, created_at, edited_at, color, role, enabled, awork_id, workday_hours, workdays_week
@@ -264,6 +351,7 @@ type UpdateUserParams struct {
 	IsSuperuser  bool    `json:"is_superuser"`
 	WorkdayHours float64 `json:"workday_hours"`
 	WorkdaysWeek float64 `json:"workdays_week"`
+	Enabled      bool    `json:"enabled"`
 	ID           int64   `json:"id"`
 }
 
@@ -279,6 +367,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.IsSuperuser,
 		arg.WorkdayHours,
 		arg.WorkdaysWeek,
+		arg.Enabled,
 		arg.ID,
 	)
 	var i User

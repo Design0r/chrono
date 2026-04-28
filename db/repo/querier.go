@@ -34,6 +34,8 @@ type Querier interface {
 	DeleteUser(ctx context.Context, id int64) error
 	DeleteVacationToken(ctx context.Context, id int64) error
 	GetAdmins(ctx context.Context) ([]User, error)
+	GetAllDisabledUsers(ctx context.Context) ([]User, error)
+	GetAllEnabledUsers(ctx context.Context) ([]User, error)
 	GetAllTimestampsForUser(ctx context.Context, userID int64) ([]Timestamp, error)
 	GetAllTimestampsInRange(ctx context.Context, arg GetAllTimestampsInRangeParams) ([]Timestamp, error)
 	GetAllUsers(ctx context.Context) ([]User, error)

@@ -117,7 +117,8 @@ type UserRepository interface {
 	GetById(ctx context.Context, id int64) (*User, error)
 	GetByName(ctx context.Context, name string) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
-	GetAll(ctx context.Context) ([]User, error)
+	GetAll(ctx context.Context, includeInactive bool) ([]User, error)
+	GetAllByEnabled(ctx context.Context, enabled bool) ([]User, error)
 	GetAdmins(ctx context.Context) ([]User, error)
 	Delete(ctx context.Context, id int64) error
 	GetConflicting(

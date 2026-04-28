@@ -217,8 +217,9 @@ func (svc *EventService) GetUserWithVacation(
 func (svc *EventService) GetAllUsersWithVacation(
 	ctx context.Context,
 	year int,
+	includeInactiveUsers bool,
 ) ([]domain.UserWithVacation, error) {
-	allUsers, err := svc.user.GetAll(ctx)
+	allUsers, err := svc.user.GetAll(ctx, includeInactiveUsers)
 	if err != nil {
 		return nil, err
 	}

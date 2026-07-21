@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import {formatCounter, secondsToCounter, type TimeCounter} from '../../lib/timestamp-utils'
 
 export function Timer({
@@ -12,10 +12,16 @@ export function Timer({
 }) {
 	const [timer, setTimer] = useState<TimeCounter>(() => secondsToCounter(0))
 
+	// Ref, damit ein neu erzeugter Callback das Interval nicht neu aufsetzt.
+	const onUpdateRef = useRef(onUpdate)
+	useEffect(() => {
+		onUpdateRef.current = onUpdate
+	})
+
 	useEffect(() => {
 		function tick() {
-			const elapsedSeconds = (Date.now() - startUnix) / 1000
-			onUpdate(elapsedSeconds)
+			const elapsedSeconds = paused ? 0 : (Date.now() - startUnix) / 1000
+			onUpdateRef.current(elapsedSeconds)
 			setTimer(secondsToCounter(elapsedSeconds))
 		}
 
@@ -24,7 +30,20 @@ export function Timer({
 		if (paused) return
 
 		const interval = setInterval(tick, 1000)
-		return () => clearInterval(interval)
+
+		// Hintergrund-Tabs drosseln Intervalle; beim Zurückkehren sofort neu rechnen,
+		// damit die Anzeige nicht kurzzeitig veraltet wirkt.
+		function onVisible() {
+			if (document.visibilityState === 'visible') tick()
+		}
+		document.addEventListener('visibilitychange', onVisible)
+		window.addEventListener('focus', onVisible)
+
+		return () => {
+			clearInterval(interval)
+			document.removeEventListener('visibilitychange', onVisible)
+			window.removeEventListener('focus', onVisible)
+		}
 	}, [startUnix, paused])
 
 	const f = formatCounter(timer)

@@ -9,24 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthIndexRouteImport } from './routes/_auth.index'
-import { Route as AuthTimestampsRouteImport } from './routes/_auth.timestamps'
-import { Route as AuthTeamRouteImport } from './routes/_auth.team'
-import { Route as AuthProfileRouteImport } from './routes/_auth.profile'
 import { Route as AuthAdminRouteImport } from './routes/_auth._admin'
-import { Route as AuthAdminTokensRouteImport } from './routes/_auth._admin.tokens'
-import { Route as AuthAdminSettingsRouteImport } from './routes/_auth._admin.settings'
-import { Route as AuthAdminRequestsRouteImport } from './routes/_auth._admin.requests'
-import { Route as AuthAdminExportRouteImport } from './routes/_auth._admin.export'
+import { Route as AuthProfileRouteImport } from './routes/_auth.profile'
+import { Route as AuthTeamRouteImport } from './routes/_auth.team'
+import { Route as AuthTimestampsRouteImport } from './routes/_auth.timestamps'
 import { Route as AuthAdminDebugRouteImport } from './routes/_auth._admin.debug'
+import { Route as AuthAdminExportRouteImport } from './routes/_auth._admin.export'
+import { Route as AuthAdminRequestsRouteImport } from './routes/_auth._admin.requests'
+import { Route as AuthAdminSettingsRouteImport } from './routes/_auth._admin.settings'
+import { Route as AuthAdminTokensRouteImport } from './routes/_auth._admin.tokens'
 import { Route as AuthCalendarYearMonthRouteImport } from './routes/_auth.calendar.$year.$month'
 
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -34,8 +33,9 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/_auth',
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthIndexRoute = AuthIndexRouteImport.update({
@@ -43,14 +43,8 @@ const AuthIndexRoute = AuthIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthTimestampsRoute = AuthTimestampsRouteImport.update({
-  id: '/timestamps',
-  path: '/timestamps',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthTeamRoute = AuthTeamRouteImport.update({
-  id: '/team',
-  path: '/team',
+const AuthAdminRoute = AuthAdminRouteImport.update({
+  id: '/_admin',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthProfileRoute = AuthProfileRouteImport.update({
@@ -58,23 +52,19 @@ const AuthProfileRoute = AuthProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthAdminRoute = AuthAdminRouteImport.update({
-  id: '/_admin',
+const AuthTeamRoute = AuthTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthAdminTokensRoute = AuthAdminTokensRouteImport.update({
-  id: '/tokens',
-  path: '/tokens',
-  getParentRoute: () => AuthAdminRoute,
+const AuthTimestampsRoute = AuthTimestampsRouteImport.update({
+  id: '/timestamps',
+  path: '/timestamps',
+  getParentRoute: () => AuthRoute,
 } as any)
-const AuthAdminSettingsRoute = AuthAdminSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthAdminRoute,
-} as any)
-const AuthAdminRequestsRoute = AuthAdminRequestsRouteImport.update({
-  id: '/requests',
-  path: '/requests',
+const AuthAdminDebugRoute = AuthAdminDebugRouteImport.update({
+  id: '/debug',
+  path: '/debug',
   getParentRoute: () => AuthAdminRoute,
 } as any)
 const AuthAdminExportRoute = AuthAdminExportRouteImport.update({
@@ -82,9 +72,19 @@ const AuthAdminExportRoute = AuthAdminExportRouteImport.update({
   path: '/export',
   getParentRoute: () => AuthAdminRoute,
 } as any)
-const AuthAdminDebugRoute = AuthAdminDebugRouteImport.update({
-  id: '/debug',
-  path: '/debug',
+const AuthAdminRequestsRoute = AuthAdminRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
+const AuthAdminSettingsRoute = AuthAdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
+const AuthAdminTokensRoute = AuthAdminTokensRouteImport.update({
+  id: '/tokens',
+  path: '/tokens',
   getParentRoute: () => AuthAdminRoute,
 } as any)
 const AuthCalendarYearMonthRoute = AuthCalendarYearMonthRouteImport.update({
@@ -193,11 +193,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -207,11 +207,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_auth': {
-      id: '/_auth'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthRouteImport
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth/': {
@@ -221,18 +221,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/timestamps': {
-      id: '/_auth/timestamps'
-      path: '/timestamps'
-      fullPath: '/timestamps'
-      preLoaderRoute: typeof AuthTimestampsRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/_auth/team': {
-      id: '/_auth/team'
-      path: '/team'
-      fullPath: '/team'
-      preLoaderRoute: typeof AuthTeamRouteImport
+    '/_auth/_admin': {
+      id: '/_auth/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthAdminRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/profile': {
@@ -242,32 +235,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthProfileRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/_admin': {
-      id: '/_auth/_admin'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthAdminRouteImport
+    '/_auth/team': {
+      id: '/_auth/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof AuthTeamRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/_admin/tokens': {
-      id: '/_auth/_admin/tokens'
-      path: '/tokens'
-      fullPath: '/tokens'
-      preLoaderRoute: typeof AuthAdminTokensRouteImport
-      parentRoute: typeof AuthAdminRoute
+    '/_auth/timestamps': {
+      id: '/_auth/timestamps'
+      path: '/timestamps'
+      fullPath: '/timestamps'
+      preLoaderRoute: typeof AuthTimestampsRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/_auth/_admin/settings': {
-      id: '/_auth/_admin/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthAdminSettingsRouteImport
-      parentRoute: typeof AuthAdminRoute
-    }
-    '/_auth/_admin/requests': {
-      id: '/_auth/_admin/requests'
-      path: '/requests'
-      fullPath: '/requests'
-      preLoaderRoute: typeof AuthAdminRequestsRouteImport
+    '/_auth/_admin/debug': {
+      id: '/_auth/_admin/debug'
+      path: '/debug'
+      fullPath: '/debug'
+      preLoaderRoute: typeof AuthAdminDebugRouteImport
       parentRoute: typeof AuthAdminRoute
     }
     '/_auth/_admin/export': {
@@ -277,11 +263,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAdminExportRouteImport
       parentRoute: typeof AuthAdminRoute
     }
-    '/_auth/_admin/debug': {
-      id: '/_auth/_admin/debug'
-      path: '/debug'
-      fullPath: '/debug'
-      preLoaderRoute: typeof AuthAdminDebugRouteImport
+    '/_auth/_admin/requests': {
+      id: '/_auth/_admin/requests'
+      path: '/requests'
+      fullPath: '/requests'
+      preLoaderRoute: typeof AuthAdminRequestsRouteImport
+      parentRoute: typeof AuthAdminRoute
+    }
+    '/_auth/_admin/settings': {
+      id: '/_auth/_admin/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthAdminSettingsRouteImport
+      parentRoute: typeof AuthAdminRoute
+    }
+    '/_auth/_admin/tokens': {
+      id: '/_auth/_admin/tokens'
+      path: '/tokens'
+      fullPath: '/tokens'
+      preLoaderRoute: typeof AuthAdminTokensRouteImport
       parentRoute: typeof AuthAdminRoute
     }
     '/_auth/calendar/$year/$month': {

@@ -1,6 +1,6 @@
 import {useQuery} from '@tanstack/react-query'
 import {createFileRoute} from '@tanstack/react-router'
-import {useEffect, useState} from 'react'
+import {useEffect} from 'react'
 import {ErrorPage} from '../components/ErrorPage'
 import {LoadingSpinner, LoadingSpinnerPage} from '../components/LoadingSpinner'
 import {StatCard, StatCardElement} from '../components/StatCard'
@@ -56,20 +56,16 @@ function Home() {
 		retry: false,
 	})
 
-	const [awork, setAwork] = useState<WorkTime | undefined>()
+	// awork ist optional: ohne verknüpfte awork-ID antwortet der Server mit 422.
+	const awork: WorkTime | undefined = aworkQ.isError ? undefined : aworkQ.data
 
 	const queries = [userQ, vacationQ, worktimeQ]
 	const anyPending = queries.some((q) => q.isPending)
 	const firstError = queries.find((q) => q.isError)?.error
 
 	useEffect(() => {
-		if (aworkQ.isError) {
-			addErrorToast(aworkQ.error)
-			return
-		}
-		if (aworkQ.isPending) return
-		setAwork(aworkQ.data)
-	}, [aworkQ.isError, aworkQ.isPending, aworkQ.data])
+		if (aworkQ.isError) addErrorToast(aworkQ.error)
+	}, [aworkQ.isError, aworkQ.error, addErrorToast])
 
 	if (anyPending) return <LoadingSpinnerPage />
 	if (firstError) return <ErrorPage error={firstError} />

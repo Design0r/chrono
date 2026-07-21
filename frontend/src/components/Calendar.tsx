@@ -19,7 +19,7 @@ export function CalendarNavigation({
   monthName: string;
   compact?: boolean;
 }) {
-  let year = currYear;
+  const year = currYear;
   let prevYear = currYear;
   let nextYear = currYear;
   let nextMonth = currMonth + 1;

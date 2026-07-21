@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChronoClient } from "../api/chrono/client";
 import {
   durationFromTimestamps,
@@ -16,19 +16,17 @@ import { useToast } from "./Toast";
 
 export function Timestamps({ user }: { user: User }) {
   const chrono = useMemo(() => new ChronoClient(), []);
-  const [timestamps, setTimestemps] = useState<Timestamp[]>([]);
-  const [paused, setPaused] = useState<boolean>(true);
   const { addToast, addErrorToast } = useToast();
-  const [currTimer, setCurrTimer] = useState<Timestamp | null>(null);
-  const [startTime, setStartTime] = useState<number>(Date.now());
   const [runningTimer, setRunningTimer] = useState<number>(0);
   const queryClient = useQueryClient();
 
   const latestTimestampQ = useQuery({
     queryKey: ["timestamps", "latest"],
     queryFn: () => chrono.timestamps.getLatest(),
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 30,
     gcTime: 1000 * 60 * 20,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     retry: false,
   });
 
@@ -40,14 +38,39 @@ export function Timestamps({ user }: { user: User }) {
     retry: false,
   });
 
+  const timestamps = useMemo(
+    () => (timestampsQ.isError ? [] : (timestampsQ.data ?? [])),
+    [timestampsQ.data, timestampsQ.isError],
+  );
+
+  // Single source of truth: der neueste Timestamp ohne end_time läuft.
+  // Direkt aus den Query-Daten abgeleitet, damit ein Refetch den
+  // angezeigten Zustand nie aus dem Tritt bringen kann.
+  const currTimer = useMemo(() => {
+    const latest = latestTimestampQ.data;
+    if (!latest || latest.end_time !== null) return null;
+    // Unlesbare start_time würde eine sinnlose Laufzeit anzeigen.
+    if (Number.isNaN(Date.parse(latest.start_time))) return null;
+    return latest;
+  }, [latestTimestampQ.data]);
+
+  const paused = currTimer === null;
+
+  // Bei pausiertem Timer ungenutzt: die Anzeige steht dann fest auf 0.
+  const startTime = currTimer ? Date.parse(currTimer.start_time) : 0;
+
+  // Timer, die wir selbst gestartet haben, sollen keinen "Resuming"-Toast auslösen.
+  const startedTimerId = useRef<number | null>(null);
+  const announcedTimerId = useRef<number | null>(null);
+
   const startMut = useMutation({
     mutationKey: ["timestamps", "start"],
     mutationFn: () => chrono.timestamps.start(),
     onError: (e) => addErrorToast(e),
     onSuccess: (data) => {
-      setCurrTimer(data);
-      setPaused(false);
-      setStartTime(Date.now());
+      startedTimerId.current = data.id;
+      queryClient.setQueryData(["timestamps", "latest"], data);
+      queryClient.invalidateQueries({ queryKey: ["timestamps"] });
       addToast("Started Timer", "success");
     },
     retry: false,
@@ -57,10 +80,8 @@ export function Timestamps({ user }: { user: User }) {
     mutationKey: ["timestamps", "stop"],
     mutationFn: (id: number) => chrono.timestamps.stop(id),
     onError: (e) => addErrorToast(e),
-    onSuccess: () => {
-      setCurrTimer(null);
-      setStartTime(Date.now());
-      setPaused(true);
+    onSuccess: (data) => {
+      queryClient.setQueryData(["timestamps", "latest"], data);
       queryClient.invalidateQueries({ queryKey: ["timestamps"] });
       addToast("Stopped Timer", "success");
     },
@@ -68,29 +89,24 @@ export function Timestamps({ user }: { user: User }) {
   });
 
   useEffect(() => {
-    if (timestampsQ.isError) return;
-    setTimestemps(timestampsQ.data || []);
-  }, [timestampsQ.data, timestampsQ.isError]);
-
-  useEffect(() => {
-    if (latestTimestampQ.isError) return;
-    const latest = latestTimestampQ.data;
-    if (!latest) return;
-    const hasEnded = latest.end_time !== null;
-    if (!hasEnded && latest.id !== currTimer?.id) {
-      addToast("Resuming latest unfinished Timer", "info");
-      setCurrTimer(latest);
-      setStartTime(Date.parse(latest.start_time));
-      setPaused(false);
-    } else setPaused(true);
-  }, [latestTimestampQ.data, latestTimestampQ.isError]);
+    if (!currTimer) {
+      announcedTimerId.current = null;
+      return;
+    }
+    if (announcedTimerId.current === currTimer.id) return;
+    const isOwnStart = startedTimerId.current === currTimer.id;
+    announcedTimerId.current = currTimer.id;
+    if (!isOwnStart) addToast("Resuming latest unfinished Timer", "info");
+  }, [currTimer, addToast]);
 
   useEffect(() => {
     if (timestampsQ.isError) addErrorToast(timestampsQ.error);
-  }, [timestampsQ.isError]);
+  }, [timestampsQ.isError, timestampsQ.error, addErrorToast]);
 
+  // Bei pausiertem Timer zählt nur die abgeschlossene Zeit, unabhängig davon,
+  // was der letzte Tick noch gemeldet hat.
   const totalTime = secondsToCounter(
-    durationFromTimestamps(timestamps) + runningTimer,
+    durationFromTimestamps(timestamps) + (paused ? 0 : runningTimer),
   );
 
   return (
@@ -100,11 +116,13 @@ export function Timestamps({ user }: { user: User }) {
           <Timer
             paused={paused}
             startUnix={startTime}
-            onUpdate={(seconds: number) => setRunningTimer(seconds)}
+            onUpdate={(seconds: number) =>
+              setRunningTimer(paused ? 0 : seconds)
+            }
           />
           <div className="flex mt-1 gap-3 justify-center items-center">
             <button
-              disabled={!paused}
+              disabled={!paused || startMut.isPending}
               className="btn btn-lg btn-success w-22 rounded-full shadow-md hover:shadow-lg transition-shadow disabled:opacity-40 disabled:shadow-none icon-filled"
               onClick={() => startMut.mutate()}
               title="Timer starten"
@@ -112,7 +130,7 @@ export function Timestamps({ user }: { user: User }) {
               <span className="text-xl icon-filled scale-145">play_arrow</span>
             </button>
             <button
-              disabled={paused}
+              disabled={paused || stopMut.isPending}
               className="btn btn-circle btn-lg btn-error shadow-md hover:shadow-lg transition-shadow disabled:opacity-40 disabled:shadow-none icon-outlined"
               onClick={() => currTimer && stopMut.mutate(currTimer.id)}
               title="Timer stoppen"
@@ -161,7 +179,6 @@ export function Timestamps({ user }: { user: User }) {
 export function TeamTimestamps({
   startDate,
   endDate,
-  user: _currUser,
 }: {
   startDate?: string;
   endDate?: string;
@@ -312,17 +329,3 @@ export function TeamTimestamps({
     </>
   );
 }
-
-// Re-exports for routes and other components
-export {
-  datetimeLocalToIso,
-  durationFromTimestamps,
-  formatCounter,
-  groupTimestampsByDay,
-  groupTimestampsByWeek,
-  isoToDateLocal,
-  isoToDatetimeLocal,
-  secondsToCounter,
-} from "../lib/timestamp-utils";
-export type { DayGroup, TimeCounter, WeekGroup } from "../lib/timestamp-utils";
-export { TimestampTableByWeek } from "./timestamps/TimestampTableByWeek";

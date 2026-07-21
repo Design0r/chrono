@@ -206,7 +206,11 @@ export function TimestampTable({
         )}
       </table>
       {modal && (
-        <EditTimestampModal timestamp={modal} onClose={() => setModal(null)} />
+        <EditTimestampModal
+          key={modal.id}
+          timestamp={modal}
+          onClose={() => setModal(null)}
+        />
       )}
     </>
   );

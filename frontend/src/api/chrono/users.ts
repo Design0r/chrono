@@ -49,7 +49,7 @@ export class ApiUsers {
     );
 
     const r = await returnOrError(response);
-    return r.data;
+    return r.data as User[] | UserWithVacation[];
   }
 
   async updateUser(
@@ -66,7 +66,7 @@ export class ApiUsers {
     });
 
     const r = await returnOrError(response);
-    return r.data;
+    return r.data as User;
   }
 
   getRoles() {

@@ -33,6 +33,9 @@ export interface AuthContext {
 
 const AuthContext = createContext<AuthContext | null>(null);
 
+// Zustandslos, daher eine Instanz für die ganze App statt einer pro Render.
+const chrono = new ChronoClient();
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const uid = localStorage.getItem("user");
   const [userId, setUserId] = useState<number | null>(
@@ -42,7 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
   const [isAuthenticated, setIsAuthenticated] = useState(!!uid);
-  const chrono = new ChronoClient();
 
   const getUser = useCallback(async () => {
     if (!isAuthenticated || !userId) return null;
@@ -54,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       retry: false,
     });
     return u;
-  }, []);
+  }, [isAuthenticated, userId, queryClient]);
 
   const logout = useCallback(async () => {
     try {
@@ -66,18 +68,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.clear();
       window.location.href = "/login";
     }
-  }, []);
+  }, [queryClient]);
 
   const login = useCallback(async (data: LoginRequest) => {
-    const user = (await chrono.auth.login(data)).data;
-    localStorage.setItem("user", user.id);
+    const user = (await chrono.auth.login(data)).data as User;
+    localStorage.setItem("user", String(user.id));
     setUserId(user.id);
     setIsAuthenticated(true);
   }, []);
 
   const signup = useCallback(async (data: SignupRequest) => {
-    const user = (await chrono.auth.signup(data)).data;
-    localStorage.setItem("user", user.id);
+    const user = (await chrono.auth.signup(data)).data as User;
+    localStorage.setItem("user", String(user.id));
     setUserId(user.id);
     setIsAuthenticated(true);
   }, []);

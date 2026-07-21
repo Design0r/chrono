@@ -12,12 +12,27 @@ export default defineConfig([
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
-      reactHooks.configs['recommended-latest'],
+      reactHooks.configs.flat['recommended-latest'],
       reactRefresh.configs.vite,
     ],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+  },
+  {
+    // Route-Dateien exportieren per Konvention `Route` neben der Komponente,
+    // Provider-Dateien ihren Hook. Fast Refresh verliert dort etwas Komfort,
+    // vermeiden lässt es sich bei diesen Frameworks aber nicht.
+    files: [
+      'src/routes/**/*.tsx',
+      'src/main.tsx',
+      'src/auth.tsx',
+      'src/components/Toast.tsx',
+      'src/integrations/**/*.tsx',
+    ],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
 ])

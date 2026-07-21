@@ -1,7 +1,9 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type JSX,
 } from "react";
@@ -94,25 +96,38 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const addToast = (
-    message: string,
-    type: "info" | "success" | "warning" | "error" = "info",
-    timer?: number,
-  ) => {
-    const id = Date.now() + Math.random();
-    setToasts((prevToasts) => [...prevToasts, { id, message, type, timer }]);
-  };
+  // Stabile Referenzen: sonst ist jeder Effect, der auf addToast lauscht,
+  // bei jedem Render neu und der Context erzwingt Re-Renders aller Konsumenten.
+  const addToast = useCallback(
+    (
+      message: string,
+      type: "info" | "success" | "warning" | "error" = "info",
+      timer?: number,
+    ) => {
+      const id = Date.now() + Math.random();
+      setToasts((prevToasts) => [...prevToasts, { id, message, type, timer }]);
+    },
+    [],
+  );
 
-  const removeToast = (id: number) => {
+  const removeToast = useCallback((id: number) => {
     setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
-  };
+  }, []);
 
-  const addErrorToast = (error: { name: string; message: string }) => {
-    addToast(`${error.name}: ${error.message}`, "error");
-  };
+  const addErrorToast = useCallback(
+    (error: { name: string; message: string }) => {
+      addToast(`${error.name}: ${error.message}`, "error");
+    },
+    [addToast],
+  );
+
+  const value = useMemo(
+    () => ({ addToast, addErrorToast }),
+    [addToast, addErrorToast],
+  );
 
   return (
-    <ToastContext.Provider value={{ addToast, addErrorToast }}>
+    <ToastContext.Provider value={value}>
       {children}
       <div className="toast toast-bottom bottom-18 md:bottom-4 toast-start flex flex-col gap-2">
         {toasts.map((toast) => (

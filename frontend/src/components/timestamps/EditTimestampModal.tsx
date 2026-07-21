@@ -1,5 +1,5 @@
 import {useMutation, useQueryClient} from '@tanstack/react-query'
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 import {ChronoClient} from '../../api/chrono/client'
 import type {Timestamp} from '../../types/response'
 import {
@@ -21,11 +21,8 @@ export function EditTimestampModal({
 		timestamp.end_time ? isoToDatetimeLocal(timestamp.end_time) : null,
 	)
 
-	useEffect(() => {
-		setStartDate(isoToDatetimeLocal(timestamp.start_time))
-		if (timestamp.end_time) setEndDate(isoToDatetimeLocal(timestamp.end_time))
-		else setEndDate(null)
-	}, [timestamp.start_time, timestamp.end_time])
+	// Kein Sync-Effect nötig: der Aufrufer rendert den Modal mit key={id},
+	// der Formularzustand startet also pro Timestamp frisch.
 
 	const chrono = new ChronoClient()
 	const {addToast, addErrorToast} = useToast()

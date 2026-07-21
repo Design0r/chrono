@@ -3,16 +3,13 @@ export function daysInYear(year: number): number {
 }
 
 export function dayOfYear(): number {
-  var now = new Date();
-  var start = new Date(now.getFullYear(), 0, 0);
-  var diff =
-    //@ts-expect-error
-    now -
-    //@ts-expect-error
-    start +
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff =
+    now.getTime() -
+    start.getTime() +
     (start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000;
-  var oneDay = 1000 * 60 * 60 * 24;
-  var day = Math.floor(diff / oneDay);
+  const oneDay = 1000 * 60 * 60 * 24;
 
-  return day;
+  return Math.floor(diff / oneDay);
 }

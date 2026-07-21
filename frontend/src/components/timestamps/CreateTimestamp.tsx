@@ -32,15 +32,6 @@ export function CreateTimestampModal({ onClose }: { onClose: () => void }) {
     retry: false,
   });
 
-  const queries = [usersQ];
-  const anyPending = queries.some((q) => q.isPending);
-  const firstError = queries.find((q) => q.isError)?.error;
-
-  if (anyPending) return <LoadingSpinnerPage />;
-  if (firstError) return <ErrorPage error={firstError} />;
-
-  const users = usersQ.data! as User[];
-
   const mutation = useMutation({
     mutationKey: ["timestamps", startDate, endDate, selectedUserId],
     mutationFn: ({
@@ -67,6 +58,15 @@ export function CreateTimestampModal({ onClose }: { onClose: () => void }) {
     },
     retry: false,
   });
+
+  const queries = [usersQ];
+  const anyPending = queries.some((q) => q.isPending);
+  const firstError = queries.find((q) => q.isError)?.error;
+
+  if (anyPending) return <LoadingSpinnerPage />;
+  if (firstError) return <ErrorPage error={firstError} />;
+
+  const users = usersQ.data! as User[];
 
   return (
     <div className="fixed inset-0 z-50 flex text-white items-center justify-center p-4">

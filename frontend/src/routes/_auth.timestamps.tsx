@@ -1,16 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { ErrorPage } from "../components/ErrorPage";
 import { LoadingSpinnerPage } from "../components/LoadingSpinner";
+import { TeamTimestamps } from "../components/Timestamps";
+import { TimestampTableByWeek } from "../components/timestamps/TimestampTableByWeek";
 import {
   durationFromTimestamps,
   formatCounter,
   isoToDateLocal,
   secondsToCounter,
-  TeamTimestamps,
-  TimestampTableByWeek,
-} from "../components/Timestamps";
+} from "../lib/timestamp-utils";
 import type { User } from "../types/auth";
 import type { Timestamp } from "../types/response";
 
@@ -35,30 +34,20 @@ function RouteComponent() {
 
   const params = Route.useSearch();
 
-  const [startDate, setStartDate] = useState<string | undefined>(
-    () => params.startDate,
-  );
-  const [endDate, setEndDate] = useState<string | undefined>(
-    () => params.endDate,
-  );
+  // Die Search-Params sind die Wahrheitsquelle. Vorher spiegelte lokaler State
+  // sie und navigierte per Effect zurück in die URL — eine Rückkopplung, die
+  // bei jedem Render-Durchlauf eine Navigation auslösen konnte.
+  const startDate = params.startDate;
+  const endDate = params.endDate;
 
-  useEffect(() => {
-    if (params.startDate) setStartDate(params.startDate);
-    else setStartDate(undefined);
-
-    if (params.endDate) setEndDate(params.endDate);
-    else setEndDate(undefined);
-  }, [params.startDate, params.endDate]);
-
-  useEffect(() => {
+  const setRange = (range: { startDate?: string; endDate?: string }) =>
     navigate({
       to: "/timestamps",
       search: {
-        startDate: startDate ?? undefined,
-        endDate: endDate ?? undefined,
+        startDate: range.startDate || undefined,
+        endDate: range.endDate || undefined,
       },
     });
-  }, [startDate, endDate, navigate]);
 
   const timestampQ = useQuery({
     queryKey: ["timestamps", startDate, endDate],
@@ -98,7 +87,7 @@ function RouteComponent() {
               type="date"
               className="input border-info/15"
               defaultValue={startDate && isoToDateLocal(startDate)}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => setRange({ startDate: e.target.value, endDate })}
             />
           </label>
           <label className="gap-1 flex flex-col ">
@@ -107,7 +96,7 @@ function RouteComponent() {
               type="date"
               className="input border-info/15"
               defaultValue={endDate && isoToDateLocal(endDate)}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => setRange({ startDate, endDate: e.target.value })}
             />
           </label>
         </div>

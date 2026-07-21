@@ -1,16 +1,18 @@
-import {useMutation, useQuery} from '@tanstack/react-query'
-import {useEffect, useState} from 'react'
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
+import {useEffect, useMemo} from 'react'
 import {ChronoClient} from '../api/chrono/client'
 import type {Notification} from '../types/response'
 import {useToast} from './Toast'
 
+const NOTIFICATIONS_KEY = ['notifcations']
+
 export function Notifications() {
-	const chrono = new ChronoClient()
+	const chrono = useMemo(() => new ChronoClient(), [])
 	const {addErrorToast} = useToast()
-	const [notifications, setNotifications] = useState<Notification[]>([])
+	const queryClient = useQueryClient()
 
 	const notifs = useQuery({
-		queryKey: ['notifcations'],
+		queryKey: NOTIFICATIONS_KEY,
 		queryFn: () => chrono.notifications.get(),
 		staleTime: 1000 * 60 * 10, // 10min
 		gcTime: 1000 * 60 * 20, // 20min
@@ -21,18 +23,15 @@ export function Notifications() {
 		mutationKey: ['notifications', 'clear'],
 		mutationFn: () => chrono.notifications.clearAll(),
 		onError: (e) => addErrorToast(e),
-		onSuccess: () => setNotifications([]),
+		onSuccess: () => queryClient.setQueryData(NOTIFICATIONS_KEY, []),
 		retry: false,
 	})
 
-	useEffect(() => {
-		if (notifs.isError) return
-		setNotifications(notifs.data || [])
-	}, [notifs.data, notifs.isError])
+	const notifications: Notification[] = notifs.isError ? [] : (notifs.data ?? [])
 
 	useEffect(() => {
 		if (notifs.isError) addErrorToast(notifs.error)
-	}, [notifs.isError])
+	}, [notifs.isError, notifs.error, addErrorToast])
 
 	return (
 		<div className='indicator'>
@@ -59,7 +58,11 @@ export function Notifications() {
 						<NotificationElement
 							key={i}
 							onClear={(id: number) =>
-								setNotifications((prev) => prev.filter((n) => n.id !== id))
+								queryClient.setQueryData(
+									NOTIFICATIONS_KEY,
+									(prev: Notification[] | undefined) =>
+										(prev ?? []).filter((n) => n.id !== id),
+								)
 							}
 							notification={n}
 						/>

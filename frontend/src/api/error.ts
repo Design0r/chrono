@@ -1,4 +1,4 @@
-import { logoutOutsideReact } from "../auth";
+import { logoutOutsideReact } from "../lib/logout";
 import type { ChronoResponse } from "../types/response";
 
 export async function returnOrError(

@@ -8,19 +8,8 @@ import {
   type ReactNode,
 } from "react";
 import { ChronoClient } from "./api/chrono/client";
+import { registerLogout } from "./lib/logout";
 import type { LoginRequest, SignupRequest, User } from "./types/auth";
-
-let logoutFn: (() => Promise<void>) | null = null;
-
-export function registerLogout(fn: () => Promise<void>) {
-  logoutFn = fn;
-}
-
-export async function logoutOutsideReact() {
-  if (logoutFn) {
-    await logoutFn();
-  }
-}
 
 export interface AuthContext {
   isAuthenticated: boolean;

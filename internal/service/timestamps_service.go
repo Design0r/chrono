@@ -12,14 +12,16 @@ type TimestampsService struct {
 	timestamps domain.TimestampsRepository
 	event      *EventService
 	log        *slog.Logger
+	user       *UserService
 }
 
 func NewTimestampsService(
 	r domain.TimestampsRepository,
 	e *EventService,
 	log *slog.Logger,
+	user *UserService,
 ) *TimestampsService {
-	return &TimestampsService{timestamps: r, log: log, event: e}
+	return &TimestampsService{timestamps: r, log: log, event: e, user: user}
 }
 
 func (r *TimestampsService) GetById(ctx context.Context, id int64) (domain.Timestamp, error) {
@@ -161,8 +163,16 @@ func (r *TimestampsService) GetWorkHoursForYear(
 	now := time.Now()
 	loc := now.Location()
 
-	// Start: Jan 1 of the given year
+	user, err := r.user.GetById(ctx, userId)
+	if err != nil {
+		return domain.WorkHours{}, nil
+	}
+
+	// if user account was created after Jan 1st query with account creation time instead to avoid negative expected worktime
 	yearStart := time.Date(year, time.January, 1, 0, 0, 0, 0, loc)
+	if user.CreatedAt.After(yearStart) {
+		yearStart = user.CreatedAt
+	}
 
 	var periodEnd time.Time
 

@@ -16,7 +16,7 @@ func NewSQLAPICacheRepo(r repo.Querier, log *slog.Logger) domain.ApiCacheReposit
 	return &SQLAPICacheRepo{r: r, log: log}
 }
 
-func (r *SQLAPICacheRepo) Exists(ctx context.Context, year int64) (int64, error) {
+func (r *SQLAPICacheRepo) Exists(ctx context.Context, year int64) (bool, error) {
 	return r.r.CacheExists(ctx, year)
 }
 

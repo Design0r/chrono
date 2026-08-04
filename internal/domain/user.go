@@ -37,6 +37,7 @@ type User struct {
 	AworkID      *string   `json:"awork_id"`
 	WorkdayHours float64   `json:"workday_hours"`
 	WorkdaysWeek float64   `json:"workdays_week"`
+	StartDate    time.Time `json:"start_date"`
 }
 
 func (u *User) IsAdmin() bool {
@@ -60,16 +61,17 @@ type PatchUser struct {
 }
 
 type ApiPatchUser struct {
-	Name         string  `form:"username"`
-	Email        string  `form:"email"`
-	Color        string  `form:"color"`
-	Password     string  `form:"password"`
-	Role         string  `form:"role"`
-	Enabled      *bool   `form:"enabled"`
-	VacationDays *int64  `form:"vacation_days"`
-	AworkID      *string `form:"awork_id"`
-	WorkdayHours float64 `form:"workday_hours"`
-	WorkdaysWeek float64 `form:"workdays_week"`
+	Name         string     `form:"username"`
+	Email        string     `form:"email"`
+	Color        string     `form:"color"`
+	Password     string     `form:"password"`
+	Role         string     `form:"role"`
+	Enabled      *bool      `form:"enabled"`
+	VacationDays *int64     `form:"vacation_days"`
+	AworkID      *string    `form:"awork_id"`
+	WorkdayHours *float64   `form:"workday_hours"`
+	WorkdaysWeek *float64   `form:"workdays_week"`
+	StartDate    *time.Time `form:"start_date"`
 }
 
 type CreateUser struct {

@@ -60,6 +60,7 @@ func (r *SQLUserRepo) Update(ctx context.Context, user *domain.User) (*domain.Us
 			WorkdayHours: user.WorkdayHours,
 			WorkdaysWeek: user.WorkdaysWeek,
 			Enabled:      user.Enabled,
+			StartDate:    user.StartDate,
 		},
 	)
 	if err != nil {

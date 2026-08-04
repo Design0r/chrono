@@ -170,7 +170,7 @@ func (r *TimestampsService) GetWorkHoursForYear(
 
 	// if user account was created after Jan 1st query with account creation time instead to avoid negative expected worktime
 	yearStart := time.Date(year, time.January, 1, 0, 0, 0, 0, loc)
-	if user.CreatedAt.After(yearStart) {
+	if user.StartDate.After(yearStart) {
 		yearStart = user.CreatedAt
 	}
 

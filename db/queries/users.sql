@@ -1,6 +1,6 @@
 -- name: CreateUser :one
-INSERT INTO users (username, color, vacation_days, email, password, is_superuser, awork_id, workday_hours, workdays_week)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO users (username, color, vacation_days, email, password, is_superuser, awork_id, workday_hours, workdays_week, start_date)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 RETURNING *;
 
 -- name: GetUserByID :one
@@ -32,6 +32,7 @@ is_superuser = ?,
 workday_hours = ?,
 workdays_week = ?,
 enabled = ?,
+start_date = ?,
 edited_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING *;

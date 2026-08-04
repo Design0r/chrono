@@ -131,6 +131,10 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid user id")
 	}
 
+	if userId != currUser.ID && !currUser.IsAdmin() {
+		return NewErrorResponse(c, http.StatusForbidden, "not allowed to edit this user")
+	}
+
 	userToEdit, err := h.user.GetById(ctx, userId)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusNotFound, "user id does not exist")
@@ -186,6 +190,27 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		enabled = *patchedData.Enabled
 	}
 
+	startDate := patchedData.StartDate
+	if startDate == nil {
+		startDate = &userToEdit.StartDate
+	}
+
+	workdayHours := userToEdit.WorkdayHours
+	if patchedData.WorkdayHours != nil {
+		if *patchedData.WorkdayHours <= 0 {
+			return NewErrorResponse(c, http.StatusUnprocessableEntity, "Invalid workday hours")
+		}
+		workdayHours = *patchedData.WorkdayHours
+	}
+
+	workdaysWeek := userToEdit.WorkdaysWeek
+	if patchedData.WorkdaysWeek != nil {
+		if *patchedData.WorkdaysWeek <= 0 {
+			return NewErrorResponse(c, http.StatusUnprocessableEntity, "Invalid workdays per week")
+		}
+		workdaysWeek = *patchedData.WorkdaysWeek
+	}
+
 	u := &domain.User{
 		ID:           userToEdit.ID,
 		Username:     username,
@@ -197,8 +222,9 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		IsSuperuser:  superuser,
 		VacationDays: vacDays,
 		Password:     userToEdit.Password,
-		WorkdayHours: patchedData.WorkdayHours,
-		WorkdaysWeek: patchedData.WorkdaysWeek,
+		WorkdayHours: workdayHours,
+		WorkdaysWeek: workdaysWeek,
+		StartDate:    *startDate,
 	}
 
 	if patchedData.Password != "" {

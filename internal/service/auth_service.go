@@ -14,8 +14,8 @@ import (
 type AuthService struct {
 	user            domain.UserRepository
 	session         domain.SessionRepository
-	pw              auth.PasswordHasher
-	sessionDuration time.Duration
+	Pw              auth.PasswordHasher
+	SessionDuration time.Duration
 	secureCookies   bool
 	log             *slog.Logger
 }
@@ -32,9 +32,9 @@ func NewAuthService(
 		user:            u,
 		session:         s,
 		log:             log,
-		sessionDuration: sessionDuration,
+		SessionDuration: sessionDuration,
 		secureCookies:   secureCookies,
-		pw:              pw,
+		Pw:              pw,
 	}
 }
 
@@ -74,13 +74,13 @@ func (svc *AuthService) Login(ctx context.Context, email, pw string) (*http.Cook
 		return nil, err
 	}
 
-	ok := svc.pw.Compare(user.Password, pw)
+	ok := svc.Pw.Compare(user.Password, pw)
 	if !ok {
 		svc.log.Error("Login failed, incorrect password or email", slog.String("email", email))
 		return nil, errors.New("passwords do not match")
 	}
 
-	session, err := svc.CreateSession(ctx, user.ID, svc.pw.SecureRandom64(), svc.sessionDuration)
+	session, err := svc.CreateSession(ctx, user.ID, svc.Pw.SecureRandom64(), svc.SessionDuration)
 	if err != nil {
 		svc.log.Error(
 			"Login failed",
@@ -112,7 +112,7 @@ func (svc *AuthService) Signup(
 		return nil, errors.New("User with this email already exists")
 	}
 
-	hashedPw, err := svc.pw.Hash(userParams.Password)
+	hashedPw, err := svc.Pw.Hash(userParams.Password)
 	if err != nil {
 		svc.log.Error(
 			"Signup failed",
@@ -134,7 +134,7 @@ func (svc *AuthService) Signup(
 		return nil, err
 	}
 
-	session, err := svc.CreateSession(ctx, user.ID, svc.pw.SecureRandom64(), svc.sessionDuration)
+	session, err := svc.CreateSession(ctx, user.ID, svc.Pw.SecureRandom64(), svc.SessionDuration)
 	if err != nil {
 		svc.log.Error(
 			"Login failed",
@@ -152,7 +152,7 @@ func (svc *AuthService) GetCurrentUser(ctx context.Context, cookie string) (*dom
 }
 
 func (svc *AuthService) HashPassword(password string) (string, error) {
-	return svc.pw.Hash(password)
+	return svc.Pw.Hash(password)
 }
 
 func (svc *AuthService) CreateSession(

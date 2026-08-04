@@ -9,8 +9,7 @@ WHERE id = ?;
 
 -- name: GetRemainingVacationForUser :one
 SELECT SUM(value) FROM vacation_tokens
-WHERE user_id = ? 
-AND enabled = 1
+WHERE user_id = ?
 AND start_date <= ?
 AND end_date >= ?;
 

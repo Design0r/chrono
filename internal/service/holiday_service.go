@@ -103,11 +103,11 @@ func (svc *HolidayService) filterHolidays(holidays domain.Holidays) domain.Holid
 }
 
 func (svc *HolidayService) HolidayCacheExists(ctx context.Context, year int) bool {
-	count, err := svc.api.Exists(ctx, int64(year))
+	exists, err := svc.api.Exists(ctx, int64(year))
 	if err != nil {
 		return false
 	}
-	return count > 0
+	return exists
 }
 
 func (svc *HolidayService) CreateCache(ctx context.Context, year int) error {

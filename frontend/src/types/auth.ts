@@ -23,6 +23,7 @@ export type User = {
   awork_id: string | null;
   workday_hours: number;
   workdays_week: number;
+  start_date: string;
 };
 
 export type UserWithVacation = User & {

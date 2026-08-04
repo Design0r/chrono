@@ -178,6 +178,11 @@ export function isoToDateLocal(iso: string): string {
 	return `${yyyy}-${mm}-${dd}`
 }
 
+/** date ("2025-12-23") → ISO UTC ("2025-12-23T00:00:00Z") */
+export function dateLocalToIso(value: string): string {
+	return `${value}T00:00:00Z`
+}
+
 /** datetime-local ("2025-12-23T21:44") → ISO UTC ("2025-12-23T20:44:00Z") */
 export function datetimeLocalToIso(value: string): string {
 	const d = new Date(value)

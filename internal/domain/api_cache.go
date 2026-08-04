@@ -14,7 +14,7 @@ type ApiCache struct {
 type Holidays = map[string]map[string]string
 
 type ApiCacheRepository interface {
-	Exists(ctx context.Context, year int64) (int64, error)
+	Exists(ctx context.Context, year int64) (bool, error)
 	GetAll(ctx context.Context) ([]int64, error)
 	Create(ctx context.Context, year int64) error
 }

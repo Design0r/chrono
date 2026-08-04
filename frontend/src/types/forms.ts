@@ -6,6 +6,7 @@ export type ProfileEditForm = {
   awork_id: string;
   workday_hours: number;
   workdays_week: number;
+  start_date: string;
 };
 
 export type TeamEditForm = {

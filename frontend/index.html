@@ -19,7 +19,11 @@
   </style>
 </head>
 
-<body class="overflow-x-hidden">
+<!-- pt: black-translucent + viewport-fit=cover zeichnen die App unter die
+     Statusbar/Notch. Die Safe-Area oben bleibt so frei, in Browsern ist der
+     Inset 0 und die Darstellung unverändert. -->
+
+<body class="overflow-x-hidden pt-[env(safe-area-inset-top,0px)]">
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>

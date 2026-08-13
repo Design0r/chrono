@@ -129,7 +129,10 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="toast toast-bottom bottom-18 md:bottom-4 toast-start flex flex-col gap-2">
+      {/* Solange das Dock sichtbar ist (unter lg), muss der Offset dessen Höhe
+          plus iOS-Safe-Area einrechnen, sonst liegen Toasts als PWA hinter dem
+          Dock. In Browsern ist der Inset 0 und die Position unverändert. */}
+      <div className="toast toast-bottom bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] lg:bottom-4 toast-start flex flex-col gap-2">
         {toasts.map((toast) => (
           <Toast
             key={toast.id}

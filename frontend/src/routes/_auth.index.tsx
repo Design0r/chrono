@@ -8,7 +8,6 @@ import {
 import { StatCard, StatCardElement } from "../components/StatCard";
 import { Timestamps } from "../components/Timestamps";
 import { TitleSection } from "../components/TitleSection";
-import { useToast } from "../components/Toast";
 import { VacationGraph } from "../components/VacationGraph";
 import type { UserWithVacation } from "../types/auth";
 import type { WorkTime } from "../types/response";
@@ -21,7 +20,6 @@ export const Route = createFileRoute("/_auth/")({
 function Home() {
   const { chrono, auth } = Route.useRouteContext();
   const year = new Date().getFullYear();
-  const { addErrorToast } = useToast();
 
   const userQ = useQuery({
     queryKey: ["user", auth.userId, "vacation", year],

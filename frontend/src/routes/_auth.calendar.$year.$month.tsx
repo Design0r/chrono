@@ -143,8 +143,11 @@ function CalendarComponent() {
         />
       </div>
 
-      {/* Fixed bottom bar on mobile: event select + calendar navigation */}
-      <div className="fixed bottom-19 shadow-xl drop-shadow-xs border border-info/10 w-fit mx-auto bg-base-200/50 backdrop-blur-xl rounded-full left-0 right-0 flex justify-between items-center gap-2 px-2 py-1 lg:hidden">
+      {/* Fixed bottom bar on mobile: event select + calendar navigation.
+          Der Offset spiegelt die Höhe des Docks (4rem + Safe-Area, siehe
+          daisyUI .dock) plus 0.75rem Abstand. Ohne den Safe-Area-Anteil liegt
+          die Leiste als iOS-Homescreen-App hinter dem Dock. */}
+      <div className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] shadow-xl drop-shadow-xs border border-info/10 w-fit mx-auto bg-base-200/50 backdrop-blur-xl rounded-full left-0 right-0 flex justify-between items-center gap-2 px-2 py-1 lg:hidden">
         <select
           onChange={(e) => setSelectedEvent(e.target.value)}
           value={selectedEvent}

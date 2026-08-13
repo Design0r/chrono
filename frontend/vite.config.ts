@@ -8,6 +8,9 @@ import { defineConfig } from "vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    babel({
+      presets: [reactCompilerPreset()],
+    }),
     devtools(),
     tailwindcss(),
     tanstackRouter({
@@ -15,8 +18,5 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     react(),
-    babel({
-      presets: [reactCompilerPreset()],
-    }),
   ],
 });

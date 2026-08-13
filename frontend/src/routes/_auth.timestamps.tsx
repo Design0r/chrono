@@ -78,7 +78,7 @@ function RouteComponent() {
   const counter = secondsToCounter(durationFromTimestamps(timestamps));
 
   return (
-    <div className="flex flex-col container mx-auto justify-center align-middle gap-6 p-4">
+    <div className="flex flex-col container mx-auto justify-center align-middle gap-6">
       <div className="grid gap-4 grid-cols-1 lg:flex justify-between mb-6 items-center">
         <div className="flex gap-4">
           <label className="gap-1 flex flex-col ">

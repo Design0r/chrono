@@ -33,7 +33,7 @@ function SettingsComponent() {
   if (settingQ.isError) return <ErrorPage error={settingQ.error} />;
 
   return (
-    <div className="pt-2 m-2">
+    <div>
       <div className="space-y-2 bg-base-300 p-4 max-w-sm w-full rounded-xl grid grid-cols-2 justify-center mx-auto">
         <div className="col-start-1 mb-0 ">
           <p className="mb-0 text-lg">Signup enabled</p>

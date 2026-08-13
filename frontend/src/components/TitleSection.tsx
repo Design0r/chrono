@@ -7,7 +7,7 @@ type TitleSectionProps = {
 
 export function TitleSection({ children, title }: TitleSectionProps) {
   return (
-    <div className="overflow-hidden my-4 p-3 rounded-xl flex flex-col items-left justify-center">
+    <div className="overflow-hidden rounded-xl flex flex-col items-left justify-center">
       <h1 className="text-xl">{title}</h1>
       <div className="border-b border-primary/25 mt-2 mb-8"></div>
       {children &&

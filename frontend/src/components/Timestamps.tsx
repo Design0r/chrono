@@ -71,7 +71,6 @@ export function Timestamps({ user }: { user: User }) {
       startedTimerId.current = data.id;
       queryClient.setQueryData(["timestamps", "latest"], data);
       queryClient.invalidateQueries({ queryKey: ["timestamps"] });
-      addToast("Started Timer", "success");
     },
     retry: false,
   });
@@ -83,7 +82,6 @@ export function Timestamps({ user }: { user: User }) {
     onSuccess: (data) => {
       queryClient.setQueryData(["timestamps", "latest"], data);
       queryClient.invalidateQueries({ queryKey: ["timestamps"] });
-      addToast("Stopped Timer", "success");
     },
     retry: false,
   });
@@ -94,9 +92,7 @@ export function Timestamps({ user }: { user: User }) {
       return;
     }
     if (announcedTimerId.current === currTimer.id) return;
-    const isOwnStart = startedTimerId.current === currTimer.id;
     announcedTimerId.current = currTimer.id;
-    if (!isOwnStart) addToast("Resuming latest unfinished Timer", "info");
   }, [currTimer, addToast]);
 
   useEffect(() => {

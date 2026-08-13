@@ -21,7 +21,7 @@ function RouteComponent() {
   if (isPending) return <LoadingSpinnerPage />;
 
   return (
-    <div className="p-2 my-2">
+    <div>
       <div className="overflow-x-auto bg-info/3">
         <table className="table table-zebra table-md ">
           <thead>

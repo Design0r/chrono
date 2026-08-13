@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"compress/gzip"
 	"context"
 	"database/sql"
 	"log/slog"
@@ -110,6 +111,11 @@ func (s *Server) InitMiddleware() {
 	s.Router.Use(middleware.Secure())
 	s.Router.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(20))))
 	s.Router.Use(middleware.Recover())
+
+	s.Router.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Level:     gzip.DefaultCompression,
+		MinLength: 1024,
+	}))
 	s.Router.Use(
 		middleware.CORSWithConfig(
 			middleware.CORSConfig{

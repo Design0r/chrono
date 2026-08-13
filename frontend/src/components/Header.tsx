@@ -99,7 +99,16 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
       <div className="navbar flex justify-between">
         <div className="flex items-center">
           <div className="pr-14">
-            <img className="w-40" alt="chrono logo" src="/chrono.svg" />
+            {/* width/height entsprechen der viewBox von chrono.svg (639x103).
+                Ohne die Attribute kennt der Browser das Seitenverhältnis erst
+                nach dem Laden und die Navbar springt beim Rendern. */}
+            <img
+              className="w-40"
+              alt="chrono logo"
+              src="/chrono.svg"
+              width={639}
+              height={103}
+            />
           </div>
 
           {auth.isAuthenticated && (

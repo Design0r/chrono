@@ -138,7 +138,11 @@ export function VacationGraph({
 
 	return (
 		<>
-			<div className='grid grid-cols-[2.5rem_repeat(11,minmax(0,1fr))] p-5 bg-base-300/50 rounded-2xl xl:overflow-x-hidden overflow-x-auto mb-12'>
+			{/* Auf Touch-Geräten würde ein Drag über die Zellen Wochen- und
+			    Monatszahlen markieren statt zu scrollen; select-none unterbindet
+			    das, touch-callout das iOS-Menü beim langen Drücken. Mit Maus
+			    bleibt der Text markierbar. */}
+			<div className='grid grid-cols-[2.5rem_repeat(11,minmax(0,1fr))] p-5 bg-base-300/50 rounded-2xl xl:overflow-x-hidden overflow-x-auto mb-12 pointer-coarse:select-none pointer-coarse:[-webkit-touch-callout:none]'>
 				<div className='col-span-1' />
 				<div className='col-span-11 grid grid-rows-1 grid-flow-col h-7 gap-1 text-accent/80'>
 					{gaps.map((g, i) => (

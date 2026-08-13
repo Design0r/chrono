@@ -47,7 +47,7 @@ function TeamComponent() {
   const currUser = currUserQ.data! as UserWithVacation;
 
   return (
-    <div>
+    <div className="pb-8">
       <TeamTable users={users.filter((u) => u.enabled)} currUser={currUser} />
       {currUser.is_superuser && (
         <div className="flex flex-col gap-8 pt-20">

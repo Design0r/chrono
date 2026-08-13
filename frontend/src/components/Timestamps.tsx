@@ -136,7 +136,7 @@ export function Timestamps({ user }: { user: User }) {
           </div>
           <div className="flex whitespace-nowrap items-center gap-2 mt-0 text-base-content/70">
             <span
-              className={`font-mono font-semibold ${paused ? "text-success" : "text-accent/80"}`}
+              className={`font-semibold ${paused ? "text-success" : "text-accent/80"}`}
             >
               {(() => {
                 const f = formatCounter(totalTime);

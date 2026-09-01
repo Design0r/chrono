@@ -79,11 +79,14 @@ func (h *APIRequestsHandler) PatchRequests(c echo.Context) error {
 	}
 
 	if form.State == "accepted" {
+		evt := domain.Event{Name: eventName}
 		days := (form.StartDate.Sub(form.EndDate).Hours() / 24) - 1.0
-		if eventName == "urlaub halbtags" {
-			days /= 2
-		}
-		h.token.CreateVacationToken(ctx, days, form.StartDate.Year(), form.UserID)
+		h.token.CreateVacationToken(
+			ctx,
+			days*evt.VacationDays(),
+			form.StartDate.Year(),
+			form.UserID,
+		)
 	}
 
 	return NewJsonResponse(c, nil)

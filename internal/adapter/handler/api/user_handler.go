@@ -166,18 +166,19 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 	}
 
 	vacDays := userToEdit.VacationDays
-	if currUser.IsAdmin() && patchedData.VacationDays != nil {
+	if currUser.IsAdmin() && patchedData.VacationDays != nil &&
+		*patchedData.VacationDays != vacDays {
 		vacDays = *patchedData.VacationDays
-	}
 
-	h.user.SetVacation(ctx, userToEdit.ID, int(vacDays), domain.CurrentYear())
-	if err := c.Bind(&patchedData); err != nil {
-		return NewErrorResponse(c, http.StatusInternalServerError, "Failed updating vacation")
+		err = h.user.SetVacation(ctx, userToEdit.ID, int(vacDays), domain.CurrentYear())
+		if err != nil {
+			return NewErrorResponse(c, http.StatusInternalServerError, "Failed updating vacation")
+		}
 	}
 
 	role := userToEdit.Role
 	if currUser.IsAdmin() && patchedData.Role != "" {
-		if !domain.IsValidRole((domain.Role)(patchedData.Role)) {
+		if !domain.IsValidRole(domain.Role(patchedData.Role)) {
 			return NewErrorResponse(c, http.StatusUnprocessableEntity, "Invalid user role")
 		}
 		role = patchedData.Role

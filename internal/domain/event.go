@@ -7,7 +7,11 @@ import (
 	"time"
 )
 
-var vacationNames = []string{"urlaub", "urlaub halbtags"}
+var vacationDayValues = map[string]float64{
+	"urlaub":          1.0,
+	"urlaub halbtags": 0.5,
+}
+
 var sickdayNames = []string{"krank", "krank halbtags"}
 
 type Event struct {
@@ -21,7 +25,14 @@ type Event struct {
 }
 
 func (e *Event) IsVacation() bool {
-	return slices.Contains(vacationNames, e.Name)
+	_, ok := vacationDayValues[e.Name]
+	return ok
+}
+
+// VacationDays is the share of the yearly allowance the event consumes. An
+// event that is not vacation consumes nothing.
+func (e *Event) VacationDays() float64 {
+	return vacationDayValues[e.Name]
 }
 
 func (e *Event) IsSickday() bool {

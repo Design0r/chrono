@@ -39,7 +39,7 @@ func (svc *EventService) Create(
 	evt := domain.Event{Name: eventType}
 
 	if evt.IsVacation() && user.IsSuperuser {
-		_, err := svc.token.CreateVacationToken(ctx, -1, data.Year, user.ID)
+		_, err := svc.token.CreateVacationToken(ctx, -evt.VacationDays(), data.Year, user.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +91,12 @@ func (svc *EventService) Delete(
 	}
 
 	if event.IsVacation() && event.IsAccepted() {
-		_, err := svc.token.CreateVacationToken(ctx, 1.0, event.ScheduledAt.Year(), event.UserID)
+		_, err := svc.token.CreateVacationToken(
+			ctx,
+			event.VacationDays(),
+			event.ScheduledAt.Year(),
+			event.UserID,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -141,7 +146,8 @@ func (svc *EventService) GetHistogramForYear(
 		days := domain.GetNumDaysOfMonth(date.Month(), date.Year())
 		eventList[i].FirstDayOfMonth = date.Day() == 1
 		eventList[i].LastDayOfMonth = date.Day() == days
-		eventList[i].IsCurrentDay = date.Year() == now.Year() && date.Month() == now.Month() && date.Day() == now.Day()
+		eventList[i].IsCurrentDay = date.Year() == now.Year() && date.Month() == now.Month() &&
+			date.Day() == now.Day()
 
 		s := strings.Split(date.Format(time.DateOnly), "-")
 		slices.Reverse(s)
@@ -224,8 +230,8 @@ func (svc *EventService) GetAllUsersWithVacation(
 		return nil, err
 	}
 
-	allUsersWithVac := make([]domain.UserWithVacation, len(allUsers))
-	for i, user := range allUsers {
+	allUsersWithVac := []domain.UserWithVacation{}
+	for _, user := range allUsers {
 		u, err := svc.GetUserWithVacation(ctx, user.ID, year, 1)
 		if err != nil {
 			svc.log.Error(
@@ -235,7 +241,7 @@ func (svc *EventService) GetAllUsersWithVacation(
 			)
 			continue
 		}
-		allUsersWithVac[i] = u
+		allUsersWithVac = append(allUsersWithVac, u)
 	}
 
 	return allUsersWithVac, nil

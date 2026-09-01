@@ -97,23 +97,35 @@ func (svc *UserService) SetUserRole(
 }
 
 func (svc *UserService) SetVacation(ctx context.Context, userId int64, vacation, year int) error {
+	if vacation < 0 {
+		svc.log.Error("negative vacation value is not supported", "value", vacation)
+		return fmt.Errorf("negative vacation value is not supported %v", vacation)
+	}
+
 	user, err := svc.GetById(ctx, userId)
 	if err != nil {
 		return err
 	}
 	oldVacation := int(user.VacationDays)
 
-	if vacation < 0 {
-		svc.log.Error("negative vacation value is not supported", "value", vacation)
-		return fmt.Errorf("negative vacation value is not supported %v", vacation)
+	if oldVacation == vacation {
+		return nil
 	}
+
+	// Book the delta against the untouched user, so that a year which has not
+	// been granted yet is first granted at the old allowance.
+	err = svc.token.UpdateYearlyTokens(ctx, user, vacation-oldVacation, year)
+	if err != nil {
+		return err
+	}
+
 	user.VacationDays = int64(vacation)
 	_, err = svc.Update(ctx, user)
 	if err != nil {
 		return err
 	}
 
-	return svc.token.UpdateYearlyTokens(ctx, userId, vacation-oldVacation, year)
+	return nil
 }
 
 func (svc *UserService) GetConflicting(

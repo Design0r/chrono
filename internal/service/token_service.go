@@ -22,37 +22,57 @@ func NewTokenService(
 	return &TokenService{refresh: r, vac: v, log: log}
 }
 
+// InitYearlyTokens grants a user their yearly allowance, once per year. The
+// refresh token is what records that the year has been dealt with, so it is
+// written only after the grant succeeded: marking the year first would swallow
+// the allowance for good if the grant then failed.
 func (svc *TokenService) InitYearlyTokens(ctx context.Context, user *domain.User, year int) error {
-	exists, err := svc.CreateRefreshTokenIfNotExists(ctx, user.ID, year)
+	exists, err := svc.RefreshTokenExistsForUser(ctx, user.ID, year)
 	if err != nil {
 		svc.log.Error("failed to get refresh token")
 		return err
 	}
 
-	if exists || user.VacationDays <= 0 {
+	if exists {
 		return nil
 	}
 
-	_, err = svc.CreateVacationToken(ctx, float64(user.VacationDays), year, user.ID)
+	if user.VacationDays > 0 {
+		_, err = svc.CreateVacationToken(ctx, float64(user.VacationDays), year, user.ID)
+		if err != nil {
+			svc.log.Error("failed to create vac tokens")
+			return err
+		}
+	}
+
+	_, err = svc.CreateRefreshToken(ctx, year, user.ID)
 	if err != nil {
-		svc.log.Error("failed to create vac tokens")
+		svc.log.Error("failed to create refresh token")
 		return err
 	}
 
 	return nil
 }
 
+// UpdateYearlyTokens books a change of a user's yearly allowance as a delta.
+// The user passed in must be the state *before* the change, because the year's
+// base grant is materialised first: without that the delta would be booked on
+// top of nothing, and InitYearlyTokens would never run for that year again.
 func (svc *TokenService) UpdateYearlyTokens(
 	ctx context.Context,
-	userId int64,
-	vacation, year int,
+	user *domain.User,
+	delta, year int,
 ) error {
-	_, err := svc.CreateRefreshTokenIfNotExists(ctx, userId, year)
+	err := svc.InitYearlyTokens(ctx, user, year)
 	if err != nil {
 		return err
 	}
 
-	_, err = svc.CreateVacationToken(ctx, float64(vacation), year, userId)
+	if delta == 0 {
+		return nil
+	}
+
+	_, err = svc.CreateVacationToken(ctx, float64(delta), year, user.ID)
 	if err != nil {
 		return err
 	}
@@ -92,28 +112,6 @@ func (svc *TokenService) RefreshTokenExistsForUser(
 	year int,
 ) (bool, error) {
 	return svc.refresh.ExistsForUser(ctx, userId, year)
-}
-
-func (svc *TokenService) CreateRefreshTokenIfNotExists(
-	ctx context.Context,
-	userId int64,
-	year int,
-) (bool, error) {
-	exists, err := svc.refresh.ExistsForUser(ctx, userId, year)
-	if err != nil {
-		return false, err
-	}
-
-	if exists {
-		return true, nil
-	}
-
-	_, err = svc.CreateRefreshToken(ctx, year, userId)
-	if err != nil {
-		return false, err
-	}
-
-	return false, nil
 }
 
 func (svc *TokenService) CreateVacationToken(

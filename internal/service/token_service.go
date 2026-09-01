@@ -127,7 +127,7 @@ func (svc *TokenService) CreateVacationToken(
 		0,
 		time.UTC,
 	)
-	end := start.AddDate(1, 2, 0)
+	end := start.AddDate(1, 3, 0)
 	return svc.vac.Create(
 		ctx,
 		domain.CreateVacationToken{StartDate: start, EndDate: end, UserID: userId, Value: value},

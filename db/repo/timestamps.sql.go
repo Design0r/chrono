@@ -225,10 +225,19 @@ func (q *Queries) GetTotalSecondsInRange(ctx context.Context, arg GetTotalSecond
 
 const StartTimestamp = `-- name: StartTimestamp :one
 INSERT INTO timestamps (user_id)
-VALUES (?)
+SELECT u.id FROM users u
+WHERE u.id = ?1
+AND NOT EXISTS (
+  SELECT 1 FROM timestamps t
+  WHERE t.end_time IS NULL
+  AND t.id = (SELECT MAX(id) FROM timestamps WHERE user_id = ?1)
+)
 RETURNING id, start_time, end_time, user_id
 `
 
+// Only inserts if the user's latest timestamp is not still running, so a
+// device with outdated state cannot start a second timer next to it.
+// Returns no row when a running timestamp already exists.
 func (q *Queries) StartTimestamp(ctx context.Context, userID int64) (Timestamp, error) {
 	row := q.db.QueryRowContext(ctx, StartTimestamp, userID)
 	var i Timestamp

@@ -2,6 +2,8 @@ package db
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"log/slog"
 	"time"
 
@@ -30,6 +32,11 @@ func (r *SQLTimestampsRepo) GetById(ctx context.Context, id int64) (domain.Times
 
 func (r *SQLTimestampsRepo) Start(ctx context.Context, userId int64) (domain.Timestamp, error) {
 	t, err := r.q.StartTimestamp(ctx, userId)
+	if errors.Is(err, sql.ErrNoRows) {
+		// nothing was inserted because a timer is already running (e.g. started
+		// on another device), continue with that one instead
+		return r.GetLatest(ctx, userId)
+	}
 	if err != nil {
 		r.log.Error("repo.StartTimestamp failed:", slog.String("error", err.Error()))
 		return domain.Timestamp{}, err

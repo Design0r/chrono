@@ -3,9 +3,18 @@ INSERT INTO timestamps (user_id, start_time, end_time)
 VALUES (?,?,?)
 RETURNING *;
 
+-- Only inserts if the user's latest timestamp is not still running, so a
+-- device with outdated state cannot start a second timer next to it.
+-- Returns no row when a running timestamp already exists.
 -- name: StartTimestamp :one
 INSERT INTO timestamps (user_id)
-VALUES (?)
+SELECT u.id FROM users u
+WHERE u.id = @user_id
+AND NOT EXISTS (
+  SELECT 1 FROM timestamps t
+  WHERE t.end_time IS NULL
+  AND t.id = (SELECT MAX(id) FROM timestamps WHERE user_id = @user_id)
+)
 RETURNING *;
 
 -- name: UpdateTimestamp :one

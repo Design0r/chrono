@@ -64,6 +64,9 @@ type Querier interface {
 	GetUserFromSession(ctx context.Context, id string) (User, error)
 	GetUserNotifications(ctx context.Context, userID int64) ([]Notification, error)
 	GetVacationCountForUser(ctx context.Context, arg GetVacationCountForUserParams) (*float64, error)
+	// Only inserts if the user's latest timestamp is not still running, so a
+	// device with outdated state cannot start a second timer next to it.
+	// Returns no row when a running timestamp already exists.
 	StartTimestamp(ctx context.Context, userID int64) (Timestamp, error)
 	StopTimestamp(ctx context.Context, id int64) (Timestamp, error)
 	UpdateEventState(ctx context.Context, arg UpdateEventStateParams) (Event, error)

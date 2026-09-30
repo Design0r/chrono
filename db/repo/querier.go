@@ -47,6 +47,8 @@ type Querier interface {
 	GetEventsForDay(ctx context.Context, scheduledAt time.Time) ([]Event, error)
 	GetEventsForMonth(ctx context.Context, arg GetEventsForMonthParams) ([]GetEventsForMonthRow, error)
 	GetEventsForYear(ctx context.Context, arg GetEventsForYearParams) ([]GetEventsForYearRow, error)
+	// The running timestamp wins over newer finished ones, e.g. entries an admin
+	// created for the user while the timer was running.
 	GetLatestTimestamp(ctx context.Context, userID int64) (Timestamp, error)
 	GetPendingEventsForYear(ctx context.Context, arg GetPendingEventsForYearParams) (int64, error)
 	GetPendingRequests(ctx context.Context) ([]GetPendingRequestsRow, error)
@@ -64,8 +66,8 @@ type Querier interface {
 	GetUserFromSession(ctx context.Context, id string) (User, error)
 	GetUserNotifications(ctx context.Context, userID int64) ([]Notification, error)
 	GetVacationCountForUser(ctx context.Context, arg GetVacationCountForUserParams) (*float64, error)
-	// Only inserts if the user's latest timestamp is not still running, so a
-	// device with outdated state cannot start a second timer next to it.
+	// Only inserts if the user has no running timestamp, so a device with
+	// outdated state cannot start a second timer next to it.
 	// Returns no row when a running timestamp already exists.
 	StartTimestamp(ctx context.Context, userID int64) (Timestamp, error)
 	StopTimestamp(ctx context.Context, id int64) (Timestamp, error)

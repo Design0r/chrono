@@ -120,9 +120,12 @@ func (q *Queries) GetAllTimestampsInRange(ctx context.Context, arg GetAllTimesta
 const GetLatestTimestamp = `-- name: GetLatestTimestamp :one
 SELECT id, start_time, end_time, user_id FROM timestamps
 WHERE user_id = ?
-ORDER BY id DESC
+ORDER BY (end_time IS NULL) DESC, id DESC
+LIMIT 1
 `
 
+// The running timestamp wins over newer finished ones, e.g. entries an admin
+// created for the user while the timer was running.
 func (q *Queries) GetLatestTimestamp(ctx context.Context, userID int64) (Timestamp, error) {
 	row := q.db.QueryRowContext(ctx, GetLatestTimestamp, userID)
 	var i Timestamp
@@ -229,14 +232,14 @@ SELECT u.id FROM users u
 WHERE u.id = ?1
 AND NOT EXISTS (
   SELECT 1 FROM timestamps t
-  WHERE t.end_time IS NULL
-  AND t.id = (SELECT MAX(id) FROM timestamps WHERE user_id = ?1)
+  WHERE t.user_id = u.id
+  AND t.end_time IS NULL
 )
 RETURNING id, start_time, end_time, user_id
 `
 
-// Only inserts if the user's latest timestamp is not still running, so a
-// device with outdated state cannot start a second timer next to it.
+// Only inserts if the user has no running timestamp, so a device with
+// outdated state cannot start a second timer next to it.
 // Returns no row when a running timestamp already exists.
 func (q *Queries) StartTimestamp(ctx context.Context, userID int64) (Timestamp, error) {
 	row := q.db.QueryRowContext(ctx, StartTimestamp, userID)

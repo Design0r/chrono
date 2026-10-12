@@ -48,11 +48,18 @@ func (h *APITimestampsHandler) Start(c echo.Context) error {
 }
 
 func (h *APITimestampsHandler) Stop(c echo.Context) error {
+	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 	idParam := c.Param("id")
 	id, err := strconv.ParseInt(idParam, 10, 64)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid id")
+	}
+
+	// same response for foreign and missing ids, so ids of others can't be probed
+	ts, err := h.timestamps.GetById(ctx, id)
+	if err != nil || (ts.UserID != currUser.ID && !currUser.IsAdmin()) {
+		return NewErrorResponse(c, http.StatusNotFound, "timestamp not found")
 	}
 
 	t, err := h.timestamps.Stop(ctx, id)

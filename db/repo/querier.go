@@ -28,7 +28,11 @@ type Querier interface {
 	DeleteAllSessions(ctx context.Context) error
 	DeleteAllVacationTokens(ctx context.Context) error
 	DeleteEvent(ctx context.Context, id int64) error
+	// datetime() normalizes the stored timezone offsets to UTC before comparing.
+	DeleteExpiredSessions(ctx context.Context) (int64, error)
+	DeleteOtherSessionsForUser(ctx context.Context, arg DeleteOtherSessionsForUserParams) error
 	DeleteSession(ctx context.Context, id string) error
+	DeleteSessionsForUser(ctx context.Context, userID int64) error
 	DeleteSettings(ctx context.Context, id int64) error
 	DeleteTimestamp(ctx context.Context, id int64) error
 	DeleteUser(ctx context.Context, id int64) error

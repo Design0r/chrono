@@ -11,6 +11,8 @@ import (
 	"chrono/internal/service/auth"
 )
 
+var ErrUserDisabled = errors.New("user is disabled")
+
 type AuthService struct {
 	user            domain.UserRepository
 	session         domain.SessionRepository
@@ -78,6 +80,11 @@ func (svc *AuthService) Login(ctx context.Context, email, pw string) (*http.Cook
 	if !ok {
 		svc.log.Error("Login failed, incorrect password or email", slog.String("email", email))
 		return nil, errors.New("passwords do not match")
+	}
+
+	if !user.Enabled {
+		svc.log.Warn("Login failed, user is disabled", slog.String("email", email))
+		return nil, ErrUserDisabled
 	}
 
 	session, err := svc.CreateSession(ctx, user.ID, svc.Pw.SecureRandom64(), svc.SessionDuration)
@@ -170,6 +177,55 @@ func (svc *AuthService) DeleteSession(ctx context.Context, cookie string) error 
 
 func (svc *AuthService) DeleteAllSessions(ctx context.Context) error {
 	return svc.session.DeleteAll(ctx)
+}
+
+// DeleteExpiredSessions removes all sessions that are no longer valid.
+func (svc *AuthService) DeleteExpiredSessions(ctx context.Context) (int64, error) {
+	return svc.session.DeleteExpired(ctx)
+}
+
+// StartSessionCleanup deletes expired sessions right away and then once per
+// interval until ctx is done.
+func (svc *AuthService) StartSessionCleanup(ctx context.Context, interval time.Duration) {
+	cleanup := func() {
+		deleted, err := svc.DeleteExpiredSessions(ctx)
+		if err != nil {
+			return
+		}
+		if deleted > 0 {
+			svc.log.Info("Deleted expired sessions", slog.Int64("count", deleted))
+		}
+	}
+
+	go func() {
+		cleanup()
+
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				cleanup()
+			}
+		}
+	}()
+}
+
+// DeleteUserSessions logs the user out everywhere.
+func (svc *AuthService) DeleteUserSessions(ctx context.Context, userId int64) error {
+	return svc.session.DeleteForUser(ctx, userId)
+}
+
+// DeleteOtherUserSessions logs the user out everywhere except for the given session.
+func (svc *AuthService) DeleteOtherUserSessions(
+	ctx context.Context,
+	userId int64,
+	keepCookie string,
+) error {
+	return svc.session.DeleteOthersForUser(ctx, userId, keepCookie)
 }
 
 func (svc *AuthService) IsValidSession(

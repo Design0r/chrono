@@ -155,9 +155,33 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		email = patchedData.Email
 	}
 
-	aworkId := patchedData.AworkID
-	if patchedData.AworkID == nil || *patchedData.AworkID == "" {
-		aworkId = nil
+	// only admins may link awork accounts, otherwise users could read the awork
+	// hours of colleagues. not sending the field keeps the current link.
+	aworkId := userToEdit.AworkID
+	if patchedData.AworkID != nil {
+		newAworkId := *patchedData.AworkID
+		currAworkId := ""
+		if userToEdit.AworkID != nil {
+			currAworkId = *userToEdit.AworkID
+		}
+
+		if newAworkId != currAworkId {
+			if !currUser.IsAdmin() {
+				return NewErrorResponse(
+					c,
+					http.StatusForbidden,
+					"only admins are allowed to change the awork id",
+				)
+			}
+			if newAworkId != "" && !domain.IsValidAworkID(newAworkId) {
+				return NewErrorResponse(c, http.StatusUnprocessableEntity, "Invalid awork id")
+			}
+		}
+
+		aworkId = &newAworkId
+		if newAworkId == "" {
+			aworkId = nil
+		}
 	}
 
 	color := userToEdit.Color
@@ -252,5 +276,40 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 		)
 	}
 
+	if err := h.revokeSessions(c, &currUser, userToEdit, u); err != nil {
+		return NewErrorResponse(
+			c,
+			http.StatusInternalServerError,
+			"Updated user, but failed to end existing sessions.",
+		)
+	}
+
 	return NewJsonResponse(c, updatedUser)
+}
+
+// revokeSessions ends existing sessions after a password change or when the
+// user got disabled. Someone changing their own password stays logged in on
+// the current device only.
+func (h *APIUserHandler) revokeSessions(
+	c echo.Context,
+	currUser *domain.User,
+	before *domain.User,
+	after *domain.User,
+) error {
+	ctx := c.Request().Context()
+	passwordChanged := after.Password != before.Password
+	disabled := before.Enabled && !after.Enabled
+
+	if !passwordChanged && !disabled {
+		return nil
+	}
+
+	if passwordChanged && !disabled && after.ID == currUser.ID {
+		cookie, err := c.Cookie("session")
+		if err == nil {
+			return h.auth.DeleteOtherUserSessions(ctx, after.ID, cookie.Value)
+		}
+	}
+
+	return h.auth.DeleteUserSessions(ctx, after.ID)
 }

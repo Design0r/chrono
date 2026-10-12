@@ -18,3 +18,17 @@ WHERE id = ?;
 
 -- name: DeleteAllSessions :exec
 DELETE from sessions;
+
+-- name: DeleteSessionsForUser :exec
+DELETE FROM sessions
+WHERE user_id = ?;
+
+-- name: DeleteOtherSessionsForUser :exec
+DELETE FROM sessions
+WHERE user_id = @user_id
+AND id != @keep_id;
+
+-- datetime() normalizes the stored timezone offsets to UTC before comparing.
+-- name: DeleteExpiredSessions :execrows
+DELETE FROM sessions
+WHERE datetime(valid_until) < datetime('now');

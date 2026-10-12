@@ -1,6 +1,18 @@
 package domain
 
-import "time"
+import (
+	"regexp"
+	"time"
+)
+
+var aworkIDPattern = regexp.MustCompile(
+	`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`,
+)
+
+// IsValidAworkID reports whether id is a GUID as used by awork for user ids.
+func IsValidAworkID(id string) bool {
+	return aworkIDPattern.MatchString(id)
+}
 
 type AworkUser struct {
 	Id        string `json:"id"`

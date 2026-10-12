@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -41,6 +42,9 @@ func (h *APIAuthHandler) Login(c echo.Context) error {
 	}
 
 	cookie, err := h.auth.Login(ctx, loginData.Email, loginData.Password)
+	if errors.Is(err, service.ErrUserDisabled) {
+		return NewErrorResponse(c, http.StatusForbidden, "This account is disabled")
+	}
 	if err != nil {
 		return NewErrorResponse(c, http.StatusNotFound, "Incorrect email or password")
 	}

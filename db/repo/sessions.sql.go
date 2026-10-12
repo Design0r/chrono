@@ -44,6 +44,36 @@ func (q *Queries) DeleteAllSessions(ctx context.Context) error {
 	return err
 }
 
+const DeleteExpiredSessions = `-- name: DeleteExpiredSessions :execrows
+DELETE FROM sessions
+WHERE datetime(valid_until) < datetime('now')
+`
+
+// datetime() normalizes the stored timezone offsets to UTC before comparing.
+func (q *Queries) DeleteExpiredSessions(ctx context.Context) (int64, error) {
+	result, err := q.db.ExecContext(ctx, DeleteExpiredSessions)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const DeleteOtherSessionsForUser = `-- name: DeleteOtherSessionsForUser :exec
+DELETE FROM sessions
+WHERE user_id = ?1
+AND id != ?2
+`
+
+type DeleteOtherSessionsForUserParams struct {
+	UserID int64  `json:"user_id"`
+	KeepID string `json:"keep_id"`
+}
+
+func (q *Queries) DeleteOtherSessionsForUser(ctx context.Context, arg DeleteOtherSessionsForUserParams) error {
+	_, err := q.db.ExecContext(ctx, DeleteOtherSessionsForUser, arg.UserID, arg.KeepID)
+	return err
+}
+
 const DeleteSession = `-- name: DeleteSession :exec
 DELETE from sessions 
 WHERE id = ?
@@ -51,6 +81,16 @@ WHERE id = ?
 
 func (q *Queries) DeleteSession(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, DeleteSession, id)
+	return err
+}
+
+const DeleteSessionsForUser = `-- name: DeleteSessionsForUser :exec
+DELETE FROM sessions
+WHERE user_id = ?
+`
+
+func (q *Queries) DeleteSessionsForUser(ctx context.Context, userID int64) error {
+	_, err := q.db.ExecContext(ctx, DeleteSessionsForUser, userID)
 	return err
 }
 

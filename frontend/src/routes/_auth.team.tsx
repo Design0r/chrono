@@ -6,6 +6,7 @@ import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { useToast } from "../components/Toast";
 import type { User, UserWithVacation } from "../types/auth";
 import type { TeamEditForm } from "../types/forms";
+import type { AworkUser } from "../types/response";
 import { hexToHSL, hsla } from "../utils/colors";
 import { capitalize } from "../utils/string";
 
@@ -36,6 +37,16 @@ function TeamComponent() {
     retry: false,
   });
 
+  // Das awork-Verzeichnis gibt es nur für Admins.
+  const aworkUsersQ = useQuery({
+    queryKey: ["aworkUsers"],
+    queryFn: () => chrono.awork.getUsers(),
+    enabled: !!currUserQ.data?.is_superuser,
+    staleTime: 1000 * 60 * 60 * 6, // 6h
+    gcTime: 1000 * 60 * 60 * 7, // 7h
+    retry: false,
+  });
+
   const queries = [usersQ, currUserQ];
   const anyPending = queries.some((q) => q.isPending);
   const firstError = queries.find((q) => q.isError)?.error;
@@ -45,10 +56,15 @@ function TeamComponent() {
 
   const users = usersQ.data! as UserWithVacation[];
   const currUser = currUserQ.data! as UserWithVacation;
+  const aworkUsers = aworkUsersQ.data ?? [];
 
   return (
     <div className="pb-8">
-      <TeamTable users={users.filter((u) => u.enabled)} currUser={currUser} />
+      <TeamTable
+        users={users.filter((u) => u.enabled)}
+        currUser={currUser}
+        aworkUsers={aworkUsers}
+      />
       {currUser.is_superuser && (
         <div className="flex flex-col gap-8 pt-20">
           <hr />
@@ -56,6 +72,7 @@ function TeamComponent() {
           <TeamTable
             users={users.filter((u) => !u.enabled)}
             currUser={currUser}
+            aworkUsers={aworkUsers}
           />
         </div>
       )}
@@ -66,9 +83,11 @@ function TeamComponent() {
 function TeamTable({
   users,
   currUser,
+  aworkUsers,
 }: {
   users: UserWithVacation[];
   currUser: User;
+  aworkUsers: AworkUser[];
 }) {
   return (
     <div className="overflow-x-auto bg-info/3">
@@ -85,6 +104,7 @@ function TeamTable({
             <th>Enabled</th>
             {currUser.is_superuser && (
               <>
+                <th>Awork</th>
                 <th></th>
               </>
             )}
@@ -92,7 +112,12 @@ function TeamTable({
         </thead>
         <tbody>
           {users.map((u) => (
-            <TableRow key={u.id} user={u} currUser={currUser} />
+            <TableRow
+              key={u.id}
+              user={u}
+              currUser={currUser}
+              aworkUsers={aworkUsers}
+            />
           ))}
         </tbody>
       </table>
@@ -103,9 +128,11 @@ function TeamTable({
 function TableRow({
   user,
   currUser,
+  aworkUsers,
 }: {
   user: UserWithVacation;
   currUser: User;
+  aworkUsers: AworkUser[];
 }) {
   const [edit, setEdit] = useState(false);
   const { chrono, queryClient } = Route.useRouteContext();
@@ -113,6 +140,7 @@ function TableRow({
   const [vacDays, setVacDays] = useState(user.vacation_days);
   const [role, setRole] = useState(user.role);
   const [enabled, setEnabled] = useState(user.enabled);
+  const [aworkId, setAworkId] = useState(user.awork_id || "");
 
   const mutation = useMutation({
     mutationKey: ["user", "update", user.id],
@@ -209,12 +237,37 @@ function TableRow({
       {currUser.is_superuser && (
         <td>
           {edit ? (
+            <select
+              className="w-full col-span-1 cursor-pointer bg-base-300 select hover:text-white focus-within:text-white text-center focus-within:outline-0 h-full pl-4 text-base border-0 rounded-md animate-all"
+              defaultValue={aworkId}
+              onChange={(e) => setAworkId(e.target.value)}
+            >
+              <option value="">-</option>
+              {aworkUsers.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.firstName} {a.lastName}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <>{aworkName(aworkUsers, user.awork_id)}</>
+          )}
+        </td>
+      )}
+      {currUser.is_superuser && (
+        <td>
+          {edit ? (
             <>
               <button
                 onClick={() => {
                   mutation.mutate({
                     userId: user.id,
-                    data: { vacation_days: vacDays, enabled, role },
+                    data: {
+                      vacation_days: vacDays,
+                      enabled,
+                      role,
+                      awork_id: aworkId,
+                    },
                   });
                   setEdit(false);
                 }}
@@ -228,6 +281,7 @@ function TableRow({
                   setRole(user.role);
                   setVacDays(user.vacation_days);
                   setEnabled(user.enabled);
+                  setAworkId(user.awork_id || "");
                 }}
                 className="btn btn-soft btn-error animate-color icon-outlined"
               >
@@ -246,4 +300,10 @@ function TableRow({
       )}
     </tr>
   );
+}
+
+function aworkName(aworkUsers: AworkUser[], aworkId: string | null) {
+  if (!aworkId) return "-";
+  const a = aworkUsers.find((a) => a.id === aworkId);
+  return a ? `${a.firstName} ${a.lastName}` : aworkId;
 }

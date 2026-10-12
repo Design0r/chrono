@@ -51,6 +51,37 @@ func (r *SQLSessionRepo) DeleteAll(ctx context.Context) error {
 	return nil
 }
 
+func (r *SQLSessionRepo) DeleteExpired(ctx context.Context) (int64, error) {
+	deleted, err := r.q.DeleteExpiredSessions(ctx)
+	if err != nil {
+		r.log.Error("DeleteExpiredSessions failed", slog.String("error", err.Error()))
+		return 0, err
+	}
+
+	return deleted, nil
+}
+
+func (r *SQLSessionRepo) DeleteForUser(ctx context.Context, userId int64) error {
+	err := r.q.DeleteSessionsForUser(ctx, userId)
+	if err != nil {
+		r.log.Error("DeleteSessionsForUser failed", slog.String("error", err.Error()))
+		return err
+	}
+
+	return nil
+}
+
+func (r *SQLSessionRepo) DeleteOthersForUser(ctx context.Context, userId int64, keepCookie string) error {
+	params := repo.DeleteOtherSessionsForUserParams{UserID: userId, KeepID: keepCookie}
+	err := r.q.DeleteOtherSessionsForUser(ctx, params)
+	if err != nil {
+		r.log.Error("DeleteOtherSessionsForUser failed", slog.String("error", err.Error()))
+		return err
+	}
+
+	return nil
+}
+
 func (r *SQLSessionRepo) GetById(ctx context.Context, cookie string) (*domain.Session, error) {
 	session, err := r.q.GetSessionById(ctx, cookie)
 	if err != nil {

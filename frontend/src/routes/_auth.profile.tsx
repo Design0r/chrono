@@ -28,9 +28,11 @@ function ProfileComponent() {
     retry: false,
   });
 
+  // Das awork-Verzeichnis gibt es nur für Admins.
   const aworkUserQ = useQuery({
     queryKey: ["aworkUsers"],
     queryFn: () => chrono.awork.getUsers(),
+    enabled: !!userQ.data?.is_superuser,
     staleTime: 1000 * 60 * 60 * 6, // 6h
     gcTime: 1000 * 60 * 60 * 7, // 7h
     retry: false,
@@ -96,18 +98,22 @@ function ProfileComponent() {
                     {...register("email")}
                   />
                   <label htmlFor="awork_id">Awork ID</label>
-                  <select
-                    defaultValue={user.awork_id || ""}
-                    className="w-full col-span-1 cursor-pointer bg-base-300 select hover:text-white focus-within:text-white text-center focus-within:outline-0 h-full pl-4 text-base border-0 rounded-md animate-all"
-                    {...register("awork_id")}
-                  >
-                    <option value="">-</option>
-                    {aworkUserQ.data?.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.firstName} {a.lastName}
-                      </option>
-                    ))}
-                  </select>
+                  {user.is_superuser ? (
+                    <select
+                      defaultValue={user.awork_id || ""}
+                      className="w-full col-span-1 cursor-pointer bg-base-300 select hover:text-white focus-within:text-white text-center focus-within:outline-0 h-full pl-4 text-base border-0 rounded-md animate-all"
+                      {...register("awork_id")}
+                    >
+                      <option value="">-</option>
+                      {aworkUserQ.data?.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.firstName} {a.lastName}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p>{user.awork_id || "-"}</p>
+                  )}
 
                   <label htmlFor="workday_hours">Workday Hours</label>
                   <input

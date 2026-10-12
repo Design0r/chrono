@@ -27,9 +27,10 @@ func NewAPIAworkHandler(
 	return APIAworkHandler{user: u, event: e, awork: aw, log: log}
 }
 
-func (h *APIAworkHandler) RegisterRoutes(group *echo.Group) {
-	group.GET("/awork/:year", h.GetWorkHoursForYear)
-	group.GET("/awork/users", h.GetAworkUsers)
+func (h *APIAworkHandler) RegisterRoutes(auth *echo.Group, admin *echo.Group) {
+	auth.GET("/awork/:year", h.GetWorkHoursForYear)
+	// the awork directory is fetched with the company api key, keep it to admins
+	admin.GET("/awork/users", h.GetAworkUsers)
 }
 
 func (h *APIAworkHandler) GetWorkHoursForYear(c echo.Context) error {
@@ -55,7 +56,7 @@ func (h *APIAworkHandler) GetWorkHoursForYear(c echo.Context) error {
 }
 
 func (h *APIAworkHandler) GetAworkUsers(c echo.Context) error {
-	users, err := h.awork.GetUsers()
+	users, err := h.awork.GetUsers(c.Request().Context())
 	if err != nil {
 		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}

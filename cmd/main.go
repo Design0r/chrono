@@ -38,8 +38,18 @@ func main() {
 		Debug:            cfg.Debug,
 		AttachStacktrace: true,
 		EnableTracing:    true,
-		TracesSampleRate: 1.0,
-		SendDefaultPII:   true,
+		TracesSampleRate: 0.1,
+		// no cookies (session), request bodies (passwords) or user info like ip addresses
+		DataCollection: &sentry.DataCollection{
+			UserInfo:   sentry.Set(false),
+			Cookies:    &sentry.KeyValueCollectionBehavior{Mode: sentry.CollectionOff},
+			HTTPBodies: []sentry.BodyType{},
+			HTTPHeaders: &sentry.HeaderCollectionConfig{
+				Request: &sentry.KeyValueCollectionBehavior{
+					Terms: []string{"forwarded", "-ip", "remote-", "via", "-user"},
+				},
+			},
+		},
 	}); err != nil {
 		log.Error("Sentry initialization failed", "error", err)
 	}

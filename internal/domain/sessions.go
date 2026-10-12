@@ -17,6 +17,9 @@ type SessionRepository interface {
 	Create(ctx context.Context, userId int64, secureRand string, duration time.Duration) (*Session, error)
 	Delete(ctx context.Context, cookie string) error
 	DeleteAll(ctx context.Context) error
+	DeleteForUser(ctx context.Context, userId int64) error
+	DeleteExpired(ctx context.Context) (int64, error)
+	DeleteOthersForUser(ctx context.Context, userId int64, keepCookie string) error
 	GetSessionUser(ctx context.Context, cookie string) (*User, error)
 	GetById(ctx context.Context, cookie string) (*Session, error)
 }

@@ -48,9 +48,16 @@ func AuthenticationMiddleware(svc *service.AuthService) MiddlewareFunc {
 					"invalid authentification credentials",
 				)
 			}
-			user, err := svc.GetCurrentUser(c.Request().Context(), cookie.Value)
+			ctx := c.Request().Context()
+			user, err := svc.GetCurrentUser(ctx, cookie.Value)
 			if err != nil {
 				return api.NewErrorResponse(c, http.StatusUnauthorized, "invalid session cookie")
+			}
+			// disabled users lose access immediately, even with a still valid session
+			if !user.Enabled {
+				svc.DeleteSession(ctx, cookie.Value)
+				c.SetCookie(svc.DeleteSessionCookie())
+				return api.NewErrorResponse(c, http.StatusUnauthorized, "user is disabled")
 			}
 			c.Set("user", *user)
 

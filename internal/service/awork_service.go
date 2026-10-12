@@ -18,6 +18,11 @@ import (
 
 const AWORK_API_URL = "https://api.awork.com/api/v1"
 
+// upper bound for a single awork request, so a hanging awork api cannot block our requests
+const aworkRequestTimeout = 15 * time.Second
+
+var ErrInvalidAworkID = errors.New("invalid awork id")
+
 type AworkService struct {
 	client http.Client
 	log    *slog.Logger
@@ -26,14 +31,24 @@ type AworkService struct {
 }
 
 func NewAworkService(e *EventService, u *UserService, s *slog.Logger) *AworkService {
-	return &AworkService{client: http.Client{}, event: e, user: u, log: s}
+	return &AworkService{
+		client: http.Client{Timeout: aworkRequestTimeout},
+		event:  e,
+		user:   u,
+		log:    s,
+	}
 }
 
-func (a *AworkService) GetUsers() ([]domain.AworkUser, error) {
+func (a *AworkService) GetUsers(ctx context.Context) ([]domain.AworkUser, error) {
 	cfg := config.GetConfig()
 	data := []domain.AworkUser{}
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%v/users", AWORK_API_URL), nil)
+	req, err := http.NewRequestWithContext(
+		ctx,
+		"GET",
+		fmt.Sprintf("%v/users", AWORK_API_URL),
+		nil,
+	)
 	if err != nil {
 		a.log.Error("Failed to create request", slog.String("error", err.Error()))
 		return data, err
@@ -45,6 +60,11 @@ func (a *AworkService) GetUsers() ([]domain.AworkUser, error) {
 	if err != nil {
 		a.log.Error("Failed to send request", slog.String("error", err.Error()))
 		return data, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return data, errors.New(res.Status)
 	}
 
 	body, err := io.ReadAll(res.Body)
@@ -63,11 +83,17 @@ func (a *AworkService) GetUsers() ([]domain.AworkUser, error) {
 }
 
 func (a *AworkService) GetTimeEntries(
+	ctx context.Context,
 	userId string,
 	start time.Time,
 	end time.Time,
 ) ([]domain.TimeEntry, error) {
 	data := []domain.TimeEntry{}
+
+	// the id ends up in an OData filter, never pass anything but a plain GUID
+	if !domain.IsValidAworkID(userId) {
+		return data, ErrInvalidAworkID
+	}
 
 	cfg := config.GetConfig()
 	startDate := fmt.Sprintf(
@@ -95,7 +121,8 @@ func (a *AworkService) GetTimeEntries(
 	q.Set("orderby", "startDateLocal asc")
 	u.RawQuery = q.Encode()
 
-	req, err := http.NewRequest(
+	req, err := http.NewRequestWithContext(
+		ctx,
 		"GET",
 		u.String(),
 		nil,
@@ -193,7 +220,7 @@ func (a *AworkService) GetWorkHoursForYear(
 
 	// ---- TIME ENTRIES (with basic pagination) ----
 
-	entries, err := a.GetTimeEntries(*user.AworkID, yearStart, periodEnd)
+	entries, err := a.GetTimeEntries(ctx, *user.AworkID, yearStart, periodEnd)
 	if err != nil {
 		return domain.WorkHours{}, err
 	}
@@ -216,7 +243,7 @@ func (a *AworkService) GetWorkHoursForYear(
 			return domain.WorkHours{}, err
 		}
 
-		page, err := a.GetTimeEntries(*user.AworkID, newStartDate, periodEnd)
+		page, err := a.GetTimeEntries(ctx, *user.AworkID, newStartDate, periodEnd)
 		if err != nil {
 			return domain.WorkHours{}, err
 		}

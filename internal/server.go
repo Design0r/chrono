@@ -275,7 +275,7 @@ func (s *Server) InitAPIRoutes() {
 
 	userHandler.RegisterRoutes(authGrp)
 	eventHandler.RegisterRoutes(authGrp)
-	aworkHandler.RegisterRoutes(authGrp)
+	aworkHandler.RegisterRoutes(authGrp, adminGrp)
 	notificationHandler.RegisterRoutes(authGrp)
 	timestampsHandler.RegisterRoutes(authGrp, adminGrp)
 
@@ -313,6 +313,8 @@ func (s *Server) PreStart() error {
 		s.log.Error("Failed to init settings.")
 		return err
 	}
+
+	s.services.auth.StartSessionCleanup(context.Background(), time.Hour)
 
 	bot := service.NewAPIBotFromEnv(s.log)
 	bot.Register(context.Background(), s.services.user, s.services.pwHasher)

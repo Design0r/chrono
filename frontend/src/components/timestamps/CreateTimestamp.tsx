@@ -1,10 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ChronoClient } from "../../api/chrono/client";
-import {
-  datetimeLocalToIso,
-  isoToDatetimeLocal,
-} from "../../lib/timestamp-utils";
+import { datetimeLocalToIso, isoToDatetimeLocal } from "../../lib/timestamp-utils";
 import type { User } from "../../types/auth";
 import { ErrorPage } from "../ErrorPage";
 import { LoadingSpinnerPage } from "../LoadingSpinner";
@@ -12,12 +9,9 @@ import { useToast } from "../Toast";
 
 export function CreateTimestampModal({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient();
-  const [startDate, setStartDate] = useState(
-    isoToDatetimeLocal(new Date().toISOString()),
-  );
-  const [endDate, setEndDate] = useState<string>(
-    isoToDatetimeLocal(new Date().toISOString()),
-  );
+  const [isoDate] = useState(() => new Date().toISOString());
+  const [startDate, setStartDate] = useState(isoToDatetimeLocal(isoDate));
+  const [endDate, setEndDate] = useState<string>(isoToDatetimeLocal(isoDate));
 
   const [selectedUserId, setSelectedUserId] = useState<number>(0);
 
@@ -34,15 +28,7 @@ export function CreateTimestampModal({ onClose }: { onClose: () => void }) {
 
   const mutation = useMutation({
     mutationKey: ["timestamps", startDate, endDate, selectedUserId],
-    mutationFn: ({
-      userId,
-      start,
-      end,
-    }: {
-      userId: number;
-      start: string;
-      end: string;
-    }) => {
+    mutationFn: ({ userId, start, end }: { userId: number; start: string; end: string }) => {
       return chrono.timestamps.create({
         id: userId,
         user_id: userId,
@@ -51,9 +37,9 @@ export function CreateTimestampModal({ onClose }: { onClose: () => void }) {
       });
     },
     onError: (e) => addErrorToast(e),
-    onSuccess: () => {
+    onSuccess: async () => {
       addToast("Created Timestamp", "success");
-      queryClient.invalidateQueries({ queryKey: ["timestamps"] });
+      await queryClient.invalidateQueries({ queryKey: ["timestamps"] });
       onClose();
     },
     retry: false,
@@ -89,9 +75,7 @@ export function CreateTimestampModal({ onClose }: { onClose: () => void }) {
             onClick={onClose}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
           >
-            <span className="icon-outlined text-[20px] leading-none">
-              close
-            </span>
+            <span className="icon-outlined text-[20px] leading-none">close</span>
           </button>
         </div>
 
@@ -136,11 +120,7 @@ export function CreateTimestampModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-black/10">
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn btn-soft btn-error"
-          >
+          <button type="button" onClick={onClose} className="btn btn-soft btn-error">
             Cancel
           </button>
           <button

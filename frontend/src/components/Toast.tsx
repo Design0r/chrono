@@ -91,19 +91,13 @@ export const useToast = (): ToastContextType => {
   return context;
 };
 
-export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // Stabile Referenzen: sonst ist jeder Effect, der auf addToast lauscht,
   // bei jedem Render neu und der Context erzwingt Re-Renders aller Konsumenten.
   const addToast = useCallback(
-    (
-      message: string,
-      type: "info" | "success" | "warning" | "error" = "info",
-      timer?: number,
-    ) => {
+    (message: string, type: "info" | "success" | "warning" | "error" = "info", timer?: number) => {
       const id = Date.now() + Math.random();
       setToasts((prevToasts) => [...prevToasts, { id, message, type, timer }]);
     },
@@ -121,10 +115,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
     [addToast],
   );
 
-  const value = useMemo(
-    () => ({ addToast, addErrorToast }),
-    [addToast, addErrorToast],
-  );
+  const value = useMemo(() => ({ addToast, addErrorToast }), [addToast, addErrorToast]);
 
   return (
     <ToastContext.Provider value={value}>

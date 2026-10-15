@@ -17,11 +17,7 @@ export function Avatar({ user }: { user?: User | null }) {
 
   return (
     <div className="dropdown dropdown-end pr-2">
-      <div
-        tabIndex={0}
-        role="button"
-        className="avatar avatar-placeholder cursor-pointer"
-      >
+      <div tabIndex={0} role="button" className="avatar avatar-placeholder cursor-pointer">
         <div
           className="w-10 border rounded-full text-neutral-content"
           style={{ backgroundColor: bgColor, borderColor: borderColor }}

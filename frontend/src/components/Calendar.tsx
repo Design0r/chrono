@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { useState } from "react";
 import { ChronoClient } from "../api/chrono/client";
 import { getEventId, type EventType } from "../lib/events";
 import type { User } from "../types/auth";
@@ -88,11 +89,10 @@ export function UserFilter({
   return (
     <select
       defaultValue={userFilter}
-      onChange={(e) => {
-        const filtered =
-          e.target.value === "allUsers" ? undefined : e.target.value;
+      onChange={async (e) => {
+        const filtered = e.target.value === "allUsers" ? undefined : e.target.value;
         setUserFilter(filtered);
-        navigate({
+        await navigate({
           to: "/calendar/$year/$month",
           search: (prev) => ({ ...prev, user: filtered }),
           params: params,
@@ -126,11 +126,10 @@ export function EventFilter({
     <select
       className="w-full col-span-1 cursor-pointer bg-base-300 select hover:text-white focus-within:text-white text-center focus-within:outline-0 h-full pl-4 text-base border-0 rounded-lg animate-all"
       defaultValue={eventFilter}
-      onChange={(e) => {
-        const filtered =
-          e.target.value === "allEvents" ? undefined : e.target.value;
+      onChange={async (e) => {
+        const filtered = e.target.value === "allEvents" ? undefined : e.target.value;
         setEventFilter(filtered);
-        navigate({
+        await navigate({
           to: "/calendar/$year/$month",
           search: (prev) => ({ ...prev, event: filtered }),
           params: params,
@@ -158,10 +157,7 @@ export function VacationCounter({
 }) {
   return (
     <div className="flex px-3 w-full justify-center text-base bg-base-300 items-center rounded-lg align-middle h-12 lg:h-full text-center">
-      <div
-        className="w-1/3 truncate! tooltip text-accent/90"
-        data-tip="remaining"
-      >
+      <div className="w-1/3 truncate! tooltip text-accent/90" data-tip="remaining">
         {remaining} remaining
       </div>
       <div
@@ -196,8 +192,8 @@ export function Event({
   const bgColor = hsla(...hsl, 0.2);
   const borderColor = hsla(...hsl, 0.3);
 
-  const currDate = new Date();
-  const eventDate = new Date(event.event.scheduled_at);
+  const [currDate] = useState(() => new Date());
+  const [eventDate] = useState(new Date(event.event.scheduled_at));
   const isInFuture = eventDate >= currDate;
   const isFromCurrUser = event.event.user_id === currUser.id;
   const isAdmin = currUser.is_superuser;
@@ -218,20 +214,17 @@ export function Event({
         : index === totalCount - 1
           ? "hover:rounded-b-xl hover:rounded-t-none rounded-xl"
           : "hover:rounded-none rounded-xl";
-  const shortName = isHoliday
-    ? event.event.name
-    : getEventId(event.event.name as EventType);
+  const shortName = isHoliday ? event.event.name : getEventId(event.event.name as EventType);
 
   const isDeletable =
-    isAdmin ||
-    (isFromCurrUser && (isInFuture || event.event.state !== "accepted"));
+    isAdmin || (isFromCurrUser && (isInFuture || event.event.state !== "accepted"));
 
   const mutation = useMutation({
     mutationKey: ["deleteEvent", event.event.id],
     mutationFn: () => chrono.events.deleteEvent(event.event.id),
     onSuccess: () => {
       addToast(`Successfully deleted event ${event.event.name}`, "success");
-      queryClient.invalidateQueries({ queryKey: ["month"] });
+      return queryClient.invalidateQueries({ queryKey: ["month"] });
     },
     onError: (error) => addErrorToast(error),
     retry: false,
@@ -305,11 +298,9 @@ export function Day({
   selectedEvent: string;
   currUser: User;
 }) {
-  const now = new Date();
+  const [now] = useState(() => new Date());
   const isToday =
-    now.getDate() === date &&
-    now.getMonth() + 1 === month &&
-    now.getFullYear() === year;
+    now.getDate() === date && now.getMonth() + 1 === month && now.getFullYear() === year;
 
   const chrono = new ChronoClient();
   const queryClient = useQueryClient();
@@ -327,7 +318,7 @@ export function Day({
       }),
     onSuccess: () => {
       addToast(`Successfully created event ${selectedEvent}`, "success");
-      queryClient.invalidateQueries({ queryKey: ["month"] });
+      return queryClient.invalidateQueries({ queryKey: ["month"] });
     },
     onError: (error) => addErrorToast(error),
   });
@@ -345,9 +336,7 @@ export function Day({
           <div className="text-base-content/85 text-md w-9.5 h-7 flex items-center justify-center rounded-xl bg-base-200/50 font-medium">
             {date}
           </div>
-          <span className="lg:hidden pl-1.75 text-info/70 tracking-wide">
-            {day}
-          </span>
+          <span className="lg:hidden pl-1.75 text-info/70 tracking-wide">{day}</span>
           <span className="hidden lg:inline pl-1.75 text-info/70 text-sm">
             {day.substring(0, 3)}
           </span>
@@ -356,13 +345,7 @@ export function Day({
       <div className="flex items-end flex-col px-2 h-full bg-base-200/70 rounded-t-none">
         <div className="flex flex-col gap-0.5 flex-1 mt-4 w-full">
           {events.map((e, i) => (
-            <Event
-              key={i}
-              event={e}
-              currUser={currUser}
-              index={i}
-              totalCount={events.length}
-            />
+            <Event key={i} event={e} currUser={currUser} index={i} totalCount={events.length} />
           ))}
         </div>
         <button
@@ -374,9 +357,7 @@ export function Day({
               <LoadingSpinner />
             </div>
           ) : (
-            <span className="icon-outlined hover:icon-outlined leading-5">
-              add
-            </span>
+            <span className="icon-outlined hover:icon-outlined leading-5">add</span>
           )}
         </button>
       </div>

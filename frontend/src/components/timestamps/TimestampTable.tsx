@@ -81,9 +81,7 @@ export function TimestampTable({
   };
 
   const footerCounter =
-    footerTotalSeconds !== undefined
-      ? secondsToCounter(footerTotalSeconds)
-      : null;
+    footerTotalSeconds !== undefined ? secondsToCounter(footerTotalSeconds) : null;
 
   return (
     <>
@@ -119,9 +117,7 @@ export function TimestampTable({
                       <span
                         className="icon-outlined -ml-1 text-lg transition-transform"
                         style={{
-                          transform: isExpanded
-                            ? "rotate(90deg)"
-                            : "rotate(0deg)",
+                          transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
                         }}
                       >
                         chevron_right
@@ -133,9 +129,7 @@ export function TimestampTable({
                         year: "numeric",
                       })}
                       {(() => {
-                        const eventNames = calendarEventsByDay.get(
-                          group.dateKey,
-                        );
+                        const eventNames = calendarEventsByDay.get(group.dateKey);
                         if (!eventNames?.length) return null;
                         const label = eventNames.join(", ");
                         return (
@@ -158,26 +152,17 @@ export function TimestampTable({
                     </span>
                   </td>
                   <td className="py-1.5">
-                    <DayBar
-                      totalSeconds={group.totalSeconds}
-                      dayDate={group.dayDate}
-                    />
+                    <DayBar totalSeconds={group.totalSeconds} dayDate={group.dayDate} />
                   </td>
                   <td className="text-info/90">
                     <span>{dayFmt.hours}</span>
                     <span>:</span>
-                    <span>{dayFmt.minutes}</span>{" "}
-                    <span className="text-info/70">h</span>
+                    <span>{dayFmt.minutes}</span> <span className="text-info/70">h</span>
                   </td>
                 </tr>
                 {isExpanded &&
                   group.timestamps.map((t) => (
-                    <TimestampRow
-                      key={t.id}
-                      t={t}
-                      user={user}
-                      onRowClick={() => setModal(t)}
-                    />
+                    <TimestampRow key={t.id} t={t} user={user} onRowClick={() => setModal(t)} />
                   ))}
               </Fragment>
             );
@@ -195,8 +180,7 @@ export function TimestampTable({
                     <>
                       <span>{f.hours}</span>
                       <span>:</span>
-                      <span>{f.minutes}</span>{" "}
-                      <span className="text-primary/80">h</span>
+                      <span>{f.minutes}</span> <span className="text-primary/80">h</span>
                     </>
                   );
                 })()}
@@ -206,11 +190,7 @@ export function TimestampTable({
         )}
       </table>
       {modal && (
-        <EditTimestampModal
-          key={modal.id}
-          timestamp={modal}
-          onClose={() => setModal(null)}
-        />
+        <EditTimestampModal key={modal.id} timestamp={modal} onClose={() => setModal(null)} />
       )}
     </>
   );

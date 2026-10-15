@@ -71,13 +71,10 @@ export class ApiTimestamps {
   }
 
   async getForMonth(year: number, month: number): Promise<Timestamp[]> {
-    const response = await fetch(
-      CHRONO_URL + `/timestamps/year/${year}/month/${month}`,
-      {
-        method: "GET",
-        credentials: "include",
-      },
-    );
+    const response = await fetch(CHRONO_URL + `/timestamps/year/${year}/month/${month}`, {
+      method: "GET",
+      credentials: "include",
+    });
 
     const r = await returnOrError(response);
     return r.data as Timestamp[];
@@ -140,16 +137,11 @@ export class ApiTimestamps {
     return r.data as WorkTime;
   }
 
-  async getWorkHoursForAllUsers(
-    year: number,
-  ): Promise<Record<number, WorkTime>> {
-    const response = await fetch(
-      CHRONO_URL + `/timestamps/worked/${year}/all`,
-      {
-        method: "GET",
-        credentials: "include",
-      },
-    );
+  async getWorkHoursForAllUsers(year: number): Promise<Record<number, WorkTime>> {
+    const response = await fetch(CHRONO_URL + `/timestamps/worked/${year}/all`, {
+      method: "GET",
+      credentials: "include",
+    });
 
     const r = await returnOrError(response);
     return r.data as Record<number, WorkTime>;

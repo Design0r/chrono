@@ -2,7 +2,7 @@ import type { User } from "./auth";
 
 export type ChronoResponse = {
   message: string;
-  data: unknown | null;
+  data: unknown;
 };
 
 export type State = "accepted" | "declined" | "pending";

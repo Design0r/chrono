@@ -36,12 +36,8 @@ function CalendarComponent() {
   const month = Number(params.month);
 
   const [userFilter, setUserFilter] = useState<string | undefined>(search.user);
-  const [eventFilter, setEventFilter] = useState<string | undefined>(
-    search.event,
-  );
-  const [selectedEvent, setSelectedEvent] = useState<string>(
-    getEventLabel("urlaub"),
-  );
+  const [eventFilter, setEventFilter] = useState<string | undefined>(search.event);
+  const [selectedEvent, setSelectedEvent] = useState<string>(getEventLabel("urlaub"));
 
   const usersQ = useQuery({
     queryKey: ["users", "vacation", year],
@@ -98,21 +94,13 @@ function CalendarComponent() {
             </>
           </select>
           <div className="hidden lg:block col-span-2">
-            <CalendarNavigation
-              year={year}
-              month={month}
-              monthName={monthData.name}
-            />
+            <CalendarNavigation year={year} month={month} monthName={monthData.name} />
           </div>
           <div className="row-span-2 col-span-2 lg:row-span-1 lg:col-span-4 h-full text-lg">
             <div className="h-full items-center rounded-xl bg-base-200">
               <div className="grid grid-cols-2 lg:grid-cols-4 w-full h-full gap-x-2 gap-y-2 lg:gap-y-0">
                 <div className="col-span-1 w-full justify-center ">
-                  <UserFilter
-                    users={users}
-                    userFilter={userFilter}
-                    setUserFilter={setUserFilter}
-                  />
+                  <UserFilter users={users} userFilter={userFilter} setUserFilter={setUserFilter} />
                 </div>
                 <div className="col-span-1 w-full justify-center ">
                   <EventFilter
@@ -163,12 +151,7 @@ function CalendarComponent() {
             ))}
           </>
         </select>
-        <CalendarNavigation
-          year={year}
-          month={month}
-          monthName={monthData.name}
-          compact
-        />
+        <CalendarNavigation year={year} month={month} monthName={monthData.name} compact />
       </div>
     </div>
   );

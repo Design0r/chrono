@@ -23,9 +23,7 @@ export function RouteComponent() {
     <div className="max-w-xl space-y-4 justify-center items m-auto flex flex-col">
       <div className="flex flex-col gap-2">
         <button className="btn btn-error">Clear token table</button>
-        <button className="btn btn-error">
-          Create tokens for accepted events
-        </button>
+        <button className="btn btn-error">Create tokens for accepted events</button>
         <button className="btn btn-error">Generate default user color</button>
         <button className="btn btn-error">Clear sessions table</button>
       </div>
@@ -35,14 +33,12 @@ export function RouteComponent() {
           <p>Change Password</p>
           <select className="w-full col-span-1 cursor-pointer bg-base-300 select hover:text-white focus-within:text-white text-center focus-within:outline-0 h-10 pl-4 text-base border-0 rounded-lg animate-all">
             {usersQ.data?.map((u) => (
-              <option value={u.id}>{u.username}</option>
+              <option key={u.id} value={u.id}>
+                {u.username}
+              </option>
             ))}
           </select>
-          <input
-            className="input max-w-xl w-full"
-            type="password"
-            name="password"
-          />
+          <input className="input max-w-xl w-full" type="password" name="password" />
           <button className="btn btn-error" type="submit">
             Submit
           </button>

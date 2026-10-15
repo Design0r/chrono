@@ -35,9 +35,7 @@ function LoginComponent() {
           <br />
           <form
             className="w-xs md:w-max"
-            onSubmit={handleSubmit((data: LoginRequest) =>
-              mutation.mutate(data),
-            )}
+            onSubmit={handleSubmit((data: LoginRequest) => mutation.mutate(data))}
           >
             <div className="w-xs md:w-lg">
               <label htmlFor="email">Email</label>

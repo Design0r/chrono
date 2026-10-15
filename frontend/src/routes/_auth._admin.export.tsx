@@ -9,8 +9,7 @@ export const Route = createFileRoute("/_auth/_admin/export")({
 
 function RouteComponent() {
   const { chrono } = Route.useRouteContext();
-  const currYear = new Date().getFullYear();
-  const [year, setYear] = useState(currYear);
+  const [year, setYear] = useState(() => new Date().getFullYear());
   const toast = useToast();
 
   const mutation = useMutation({
@@ -31,7 +30,7 @@ function RouteComponent() {
               name="year"
               type="number"
               step="1"
-              defaultValue={currYear}
+              defaultValue={year}
               onChange={(e) => setYear(Number(e.target.value))}
             />
           </label>

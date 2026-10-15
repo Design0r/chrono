@@ -28,10 +28,7 @@ function RouteComponent() {
   const mutation = useMutation({
     mutationKey: ["tokens"],
     mutationFn: (token: number) =>
-      chrono.tokens.createTokens(
-        Number.parseInt(selectRef.current.value),
-        token,
-      ),
+      chrono.tokens.createTokens(Number.parseInt(selectRef.current.value), token),
     onSuccess: (_, variables) => {
       addToast(`Added ${variables} tokens`, "success");
       return queryClient.invalidateQueries({ queryKey: ["users"] });

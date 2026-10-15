@@ -102,9 +102,7 @@ function RouteComponent() {
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="text-md text-left pl-0.5 text-base-content/90">
-            Total Time
-          </span>
+          <span className="text-md text-left pl-0.5 text-base-content/90">Total Time</span>
           <h2 className="w-fit text-lg text-primary bg-base-200 px-4 py-1.5 rounded-lg border ">
             {(() => {
               const f = formatCounter(counter);

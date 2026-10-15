@@ -4,20 +4,14 @@ import { returnOrError } from "../error";
 import { CHRONO_URL } from "./chrono";
 
 export class ApiUsers {
-  async getUserById(
-    id: number,
-    vacation: { year: number } | null = null,
-  ): Promise<User> {
+  async getUserById(id: number, vacation: { year: number } | null = null): Promise<User> {
     const params = new URLSearchParams(
       vacation ? { vacation: "true", year: String(vacation.year) } : {},
     ).toString();
-    const response = await fetch(
-      CHRONO_URL + `/users/${id}` + (params ? "?" + params : ""),
-      {
-        method: "GET",
-        credentials: "include",
-      },
-    );
+    const response = await fetch(CHRONO_URL + `/users/${id}` + (params ? "?" + params : ""), {
+      method: "GET",
+      credentials: "include",
+    });
 
     const r = await returnOrError(response);
     return r.data as User | UserWithVacation;
@@ -40,22 +34,16 @@ export class ApiUsers {
         : { includeInactive: String(includeInactiveUsers) },
     ).toString();
 
-    const response = await fetch(
-      CHRONO_URL + "/users" + (params ? "?" + params : ""),
-      {
-        method: "GET",
-        credentials: "include",
-      },
-    );
+    const response = await fetch(CHRONO_URL + "/users" + (params ? "?" + params : ""), {
+      method: "GET",
+      credentials: "include",
+    });
 
     const r = await returnOrError(response);
     return r.data as User[] | UserWithVacation[];
   }
 
-  async updateUser(
-    userId: number,
-    data: ProfileEditForm | TeamEditForm,
-  ): Promise<User> {
+  async updateUser(userId: number, data: ProfileEditForm | TeamEditForm): Promise<User> {
     const form = new FormData();
     Object.entries(data).map(([k, v]) => form.append(k, v.toString()));
 

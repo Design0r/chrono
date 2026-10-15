@@ -1,12 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { ChronoClient } from "./api/chrono/client";
 import { registerLogout } from "./lib/logout";
 import type { LoginRequest, SignupRequest, User } from "./types/auth";
@@ -20,16 +13,14 @@ export interface AuthContext {
   getUser: () => Promise<User | null>;
 }
 
-const AuthContext = createContext<AuthContext | null>(null);
+const authContext = createContext<AuthContext | null>(null);
 
 // Zustandslos, daher eine Instanz für die ganze App statt einer pro Render.
 const chrono = new ChronoClient();
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const uid = localStorage.getItem("user");
-  const [userId, setUserId] = useState<number | null>(
-    uid ? Number.parseInt(uid) : null,
-  );
+  const [userId, setUserId] = useState<number | null>(uid ? Number.parseInt(uid) : null);
 
   const queryClient = useQueryClient();
 
@@ -37,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const getUser = useCallback(async () => {
     if (!isAuthenticated || !userId) return null;
-    const u = await queryClient.ensureQueryData({
+    const u = await queryClient.query({
       queryKey: ["user", userId],
       queryFn: () => chrono.users.getUserById(userId),
       staleTime: 1000 * 60 * 60 * 6, // 6h
@@ -78,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [logout]);
 
   return (
-    <AuthContext.Provider
+    <authContext.Provider
       value={{
         isAuthenticated,
         userId,
@@ -89,12 +80,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-    </AuthContext.Provider>
+    </authContext.Provider>
   );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = useContext(authContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }

@@ -26,9 +26,7 @@ export function TimestampRow({
       <td>
         <div className="flex gap-1.5 items-center pl-6 text-info/60">
           <span className="w-6">
-            {start
-              .toLocaleDateString("de-DE", { weekday: "short" })
-              .slice(0, 2)}
+            {start.toLocaleDateString("de-DE", { weekday: "short" }).slice(0, 2)}
             .,
           </span>
           <span className="block">
@@ -43,9 +41,7 @@ export function TimestampRow({
         {end ? (
           <div className="flex gap-1.5 items-center text-info/60">
             <span className="w-6">
-              {end
-                .toLocaleDateString("de-DE", { weekday: "short" })
-                .slice(0, 2)}
+              {end.toLocaleDateString("de-DE", { weekday: "short" }).slice(0, 2)}
               .,
             </span>
             <span className="block">

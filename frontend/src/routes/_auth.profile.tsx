@@ -69,9 +69,7 @@ function ProfileComponent() {
                 userId: user.id,
                 data: {
                   ...data,
-                  start_date: dateLocalToIso(
-                    data.start_date || isoToDateLocal(user.start_date),
-                  ),
+                  start_date: dateLocalToIso(data.start_date || isoToDateLocal(user.start_date)),
                 },
               });
             })}
@@ -168,10 +166,7 @@ function ProfileComponent() {
             </div>
 
             <div className="mx-auto max-w-lg px-6 mt-4">
-              <button
-                type="submit"
-                className="btn btn-soft btn-primary animate-color"
-              >
+              <button type="submit" className="btn btn-soft btn-primary animate-color">
                 <span className="icon-outlined pr-2">save</span>
                 Save
               </button>
@@ -200,10 +195,7 @@ function ProfileComponent() {
                 <p>Yearly Vacation</p>
                 <p>{user.vacation_days}</p>
                 <p>Color</p>
-                <p
-                  className="max-w-40 rounded-full "
-                  style={{ backgroundColor: user.color }}
-                ></p>
+                <p className="max-w-40 rounded-full " style={{ backgroundColor: user.color }}></p>
                 <p>Start Date</p>
                 <p>{startDate}</p>
                 <p>Joined</p>
@@ -222,9 +214,7 @@ function ProfileComponent() {
               type="submit"
               className="btn btn-soft btn-primary animate-color"
             >
-              <span className="icon-outlined pr-2">
-                {edit ? "save" : "edit"}
-              </span>
+              <span className="icon-outlined pr-2">{edit ? "save" : "edit"}</span>
               {edit ? "Save" : "Edit"}
             </button>
           </div>

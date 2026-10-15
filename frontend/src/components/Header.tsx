@@ -6,7 +6,7 @@ import {
   type LinkProps,
   type RegisteredRouter,
 } from "@tanstack/react-router";
-import type { CSSProperties, ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import type { ChronoClient } from "../api/chrono/client";
 import { useAuth } from "../auth";
 import { isoToDateLocal } from "../lib/timestamp-utils";
@@ -33,9 +33,7 @@ function AdminMenu() {
         popoverTarget={ADMIN_MENU_ID}
         style={{ anchorName: "--admin-anchor" } as CSSProperties}
       >
-        <span className="font-normal text-base tracking-wide opacity-90">
-          Admin
-        </span>
+        <span className="font-normal text-base tracking-wide opacity-90">Admin</span>
         <span className="icon-outlined pr-0.5">arrow_drop_down</span>
       </button>
       {/* Unter lg sitzt der Anchor im Dock am unteren Rand: dort muss das Menü
@@ -90,9 +88,9 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
     retry: false,
   });
 
-  const date = new Date();
-  const startDate = new Date(Date.UTC(date.getFullYear(), 0, 1, 0, 0, 0, 0));
-  const endDate = new Date(Date.UTC(date.getFullYear() + 1, 0, 1, 0, 0, 0, 0));
+  const [date] = useState(() => new Date());
+  const [startDate] = useState(new Date(Date.UTC(date.getFullYear(), 0, 1, 0, 0, 0, 0)));
+  const [endDate] = useState(new Date(Date.UTC(date.getFullYear() + 1, 0, 1, 0, 0, 0, 0)));
 
   return (
     <div className="mb-4 mx-auto p-4 lg:px-4">
@@ -102,13 +100,7 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
             {/* width/height entsprechen der viewBox von chrono.svg (639x103).
                 Ohne die Attribute kennt der Browser das Seitenverhältnis erst
                 nach dem Laden und die Navbar springt beim Rendern. */}
-            <img
-              className="w-40"
-              alt="chrono logo"
-              src="/chrono.svg"
-              width={639}
-              height={103}
-            />
+            <img className="w-40" alt="chrono logo" src="/chrono.svg" width={639} height={103} />
           </div>
 
           {auth.isAuthenticated && (
@@ -118,9 +110,7 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
             >
               <MenuButton to="/">
                 <span className="icon-outlined pr-0.25">home</span>
-                <span className="font-normal text-base tracking-wide opacity-90">
-                  Home
-                </span>
+                <span className="font-normal text-base tracking-wide opacity-90">Home</span>
               </MenuButton>
               <MenuButton
                 to="/calendar/$year/$month"
@@ -130,9 +120,7 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
                 }}
               >
                 <span className="icon-outlined pr-0.25">calendar_today</span>
-                <span className="font-normal text-base tracking-wide opacity-90">
-                  Calendar
-                </span>
+                <span className="font-normal text-base tracking-wide opacity-90">Calendar</span>
               </MenuButton>
               <MenuButton
                 to="/timestamps"
@@ -142,15 +130,11 @@ export function Header({ chrono }: { chrono: ChronoClient }) {
                 }}
               >
                 <span className="icon-outlined pr-0.25">timer</span>
-                <span className="font-normal text-base tracking-wide opacity-90">
-                  Timestamps
-                </span>
+                <span className="font-normal text-base tracking-wide opacity-90">Timestamps</span>
               </MenuButton>
               <MenuButton to="/team">
                 <span className="icon-outlined pr-0.25">group</span>
-                <span className="font-normal text-base tracking-wide opacity-90">
-                  Team
-                </span>
+                <span className="font-normal text-base tracking-wide opacity-90">Team</span>
               </MenuButton>
               <span className="text-sm px-4 tracking-wide opacity-60">|</span>
               {userQ.data?.is_superuser && <AdminMenu />}
@@ -198,12 +182,7 @@ function staticPrefix(to: string): string {
   return staticSegments.length === 0 ? "/" : `/${staticSegments.join("/")}`;
 }
 
-export function MenuButton({
-  children,
-  to,
-  activePath,
-  ...props
-}: MenuButtonProps) {
+export function MenuButton({ children, to, activePath, ...props }: MenuButtonProps) {
   const pathname = useLocation({
     select: (location) => location.pathname,
   });
@@ -213,9 +192,7 @@ export function MenuButton({
   // Kalender) und unabhängig von den Search-Params des Links.
   const base = activePath ?? staticPrefix(String(to ?? "/"));
   const isActive =
-    base === "/"
-      ? pathname === "/"
-      : pathname === base || pathname.startsWith(`${base}/`);
+    base === "/" ? pathname === "/" : pathname === base || pathname.startsWith(`${base}/`);
 
   return (
     <Link

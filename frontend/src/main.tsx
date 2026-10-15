@@ -1,5 +1,4 @@
 import { QueryClient } from "@tanstack/react-query";
-import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -7,6 +6,7 @@ import { ChronoClient } from "./api/chrono/client";
 import { AuthProvider, useAuth, type AuthContext } from "./auth";
 import { ErrorPage } from "./components/ErrorPage";
 import "./css/index.css";
+import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
 import { routeTree } from "./routeTree.gen";
 
 const chrono = new ChronoClient();
@@ -31,9 +31,7 @@ const router = createRouter({
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
 
-  defaultNotFoundComponent: () => (
-    <ErrorPage error={{ name: "404", message: "Not Found" }} />
-  ),
+  defaultNotFoundComponent: () => <ErrorPage error={{ name: "404", message: "Not Found" }} />,
 
   defaultErrorComponent: () => (
     <ErrorPage

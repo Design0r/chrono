@@ -112,12 +112,7 @@ function TeamTable({
         </thead>
         <tbody>
           {users.map((u) => (
-            <TableRow
-              key={u.id}
-              user={u}
-              currUser={currUser}
-              aworkUsers={aworkUsers}
-            />
+            <TableRow key={u.id} user={u} currUser={currUser} aworkUsers={aworkUsers} />
           ))}
         </tbody>
       </table>

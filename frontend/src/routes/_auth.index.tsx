@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { ErrorPage } from "../components/ErrorPage";
-import {
-  LoadingSpinner,
-  LoadingSpinnerPage,
-} from "../components/LoadingSpinner";
+import { LoadingSpinner, LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { StatCard, StatCardElement } from "../components/StatCard";
 import { Timestamps } from "../components/Timestamps";
 import { TitleSection } from "../components/TitleSection";
@@ -19,7 +17,7 @@ export const Route = createFileRoute("/_auth/")({
 
 function Home() {
   const { chrono, auth } = Route.useRouteContext();
-  const year = new Date().getFullYear();
+  const [year] = useState(() => new Date().getFullYear());
 
   const userQ = useQuery({
     queryKey: ["user", auth.userId, "vacation", year],
@@ -72,13 +70,11 @@ function Home() {
 
   const daysYear = daysInYear(year);
   const currDay = dayOfYear();
-  const vacRemainingPercent =
-    (user.vacation_remaining / user.vacation_days) * 100;
+  const vacRemainingPercent = (user.vacation_remaining / user.vacation_days) * 100;
   const yearRemainingPercent = (currDay / daysYear) * 100;
   const vacTakenPercent =
     user.vacation_remaining > user.vacation_days
-      ? (user.vacation_used / (user.vacation_used + user.vacation_remaining)) *
-        100
+      ? (user.vacation_used / (user.vacation_used + user.vacation_remaining)) * 100
       : 100 - vacRemainingPercent;
 
   const aworkWorkRemaining = awork ? awork.expected - awork.worked : 0;
@@ -101,35 +97,22 @@ function Home() {
             subtitle={`${overtimeDiff >= 0 ? "" : ""}${overtimeDiff.toFixed(2)} hours`}
           >
             <span className="pt-1.5 stat-value max-sm:text-2xl text-primary/85">
-              {(Math.abs(overtimeDiff) / 8).toFixed(1)}{" "}
-              <span className="text-accent/15">d</span>
+              {(Math.abs(overtimeDiff) / 8).toFixed(1)} <span className="text-accent/15">d</span>
             </span>
           </StatCardElement>
-          <StatCardElement
-            title="Expected work"
-            subtitle={`${worktimes.expected} hours`}
-          >
+          <StatCardElement title="Expected work" subtitle={`${worktimes.expected} hours`}>
             <span className=" pt-1.5 stat-value max-sm:text-2xl">
-              {(worktimes.expected / 8).toFixed(1)}{" "}
-              <span className="text-accent/15">d</span>
+              {(worktimes.expected / 8).toFixed(1)} <span className="text-accent/15">d</span>
             </span>
           </StatCardElement>
-          <StatCardElement
-            title="Vacation taken"
-            subtitle={`${worktimes.vacation} hours`}
-          >
+          <StatCardElement title="Vacation taken" subtitle={`${worktimes.vacation} hours`}>
             <span className="pt-1.5 stat-value max-sm:text-2xl">
-              {(worktimes.vacation / 8).toFixed(1)}{" "}
-              <span className="text-accent/15">d</span>
+              {(worktimes.vacation / 8).toFixed(1)} <span className="text-accent/15">d</span>
             </span>
           </StatCardElement>
-          <StatCardElement
-            title="Holidays"
-            subtitle={`${worktimes.holidays} hours`}
-          >
+          <StatCardElement title="Holidays" subtitle={`${worktimes.holidays} hours`}>
             <span className="pt-1.5 stat-value max-sm:text-2xl">
-              {(worktimes.holidays / 8).toFixed(1)}{" "}
-              <span className="text-accent/15">d</span>
+              {(worktimes.holidays / 8).toFixed(1)} <span className="text-accent/15">d</span>
             </span>
           </StatCardElement>
         </StatCard>
@@ -149,8 +132,7 @@ function Home() {
                   subtitle={`${aworkWorkRemaining.toFixed(2)} h ${aworkWorkRemaining > 0 ? "remaining" : "over"}`}
                 >
                   <span className="pt-1.5 stat-value max-sm:text-2xl">
-                    {awork.worked.toFixed(2)}{" "}
-                    <span className="text-accent/15">h</span>
+                    {awork.worked.toFixed(2)} <span className="text-accent/15">h</span>
                   </span>
                 </StatCardElement>
                 <StatCardElement
@@ -197,22 +179,15 @@ function Home() {
             subtitle={`${vacRemainingPercent.toFixed(2)}% remaining`}
           >
             <span className="pt-1.5 stat-value max-sm:text-2xl">
-              {user.vacation_remaining}{" "}
-              <span className="text-accent/15">d</span>
+              {user.vacation_remaining} <span className="text-accent/15">d</span>
             </span>
           </StatCardElement>
-          <StatCardElement
-            title="Vacation taken"
-            subtitle={`${vacTakenPercent.toFixed(2)}% taken`}
-          >
+          <StatCardElement title="Vacation taken" subtitle={`${vacTakenPercent.toFixed(2)}% taken`}>
             <span className="pt-1.5 stat-value max-sm:text-2xl">
               {user.vacation_used} <span className="text-accent/15">d</span>
             </span>
           </StatCardElement>
-          <StatCardElement
-            title="Vacation total"
-            subtitle={`${user.vacation_days} days total`}
-          >
+          <StatCardElement title="Vacation total" subtitle={`${user.vacation_days} days total`}>
             <span className="pt-1.5 stat-value max-sm:text-2xl">
               {user.vacation_days} <span className="text-accent/15">d</span>
             </span>
@@ -222,9 +197,7 @@ function Home() {
             subtitle={`${user.pending_events} event${user.pending_events > 1 ? "s" : ""} pending`}
           >
             <span className="pt-1.5 stat-value max-sm:text-2xl">
-              <span className="animate-pulse text-primary">
-                {user.pending_events}
-              </span>{" "}
+              <span className="animate-pulse text-primary">{user.pending_events}</span>{" "}
               <span className="text-accent/15">d</span>
             </span>
           </StatCardElement>
@@ -233,18 +206,12 @@ function Home() {
 
       <TitleSection title="Year progession">
         <StatCard>
-          <StatCardElement
-            title="Days this year"
-            subtitle={`${daysYear} days total`}
-          >
+          <StatCardElement title="Days this year" subtitle={`${daysYear} days total`}>
             <span className="pt-1.5 stat-value max-sm:text-2xl">
               {daysYear} <span className="text-accent/15">d</span>
             </span>
           </StatCardElement>
-          <StatCardElement
-            title="Days passed"
-            subtitle={`${currDay} days passed`}
-          >
+          <StatCardElement title="Days passed" subtitle={`${currDay} days passed`}>
             <span className="pt-1.5 stat-value max-sm:text-2xl">
               {currDay} <span className="text-accent/15">d</span>
             </span>
@@ -254,8 +221,7 @@ function Home() {
             subtitle={`${(100 - yearRemainingPercent).toFixed(2)}% remaining`}
           >
             <span className="pt-1.5 stat-value max-sm:text-2xl">
-              {yearRemainingPercent.toFixed(2)}{" "}
-              <span className="text-accent/15">%</span>
+              {yearRemainingPercent.toFixed(2)} <span className="text-accent/15">%</span>
             </span>
           </StatCardElement>
           <StatCardElement

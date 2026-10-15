@@ -16,29 +16,29 @@
    Tailwinds Preflight setzt font-family:inherit auf button/input/select/
    textarea, Formularelemente erben damit ebenfalls korrekt. */
 :root {
-	font-family: 'Google Sans', sans-serif;
+  font-family: "Google Sans", sans-serif;
 }
 
 /* Ohne das globale !important gewinnen diese Klassen jetzt schon über die
    normale Spezifität – kein !important mehr nötig. */
 .icon-filled {
-	font-family: 'Material Symbols Outlined';
-	font-size: 1.25rem;
+  font-family: "Material Symbols Outlined";
+  font-size: 1.25rem;
 
-	font-variation-settings:
-		'FILL' 1,
-		'wght' 400,
-		'GRAD' 0,
-		'opsz' 24;
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
 }
 
 .icon-outlined {
-	font-family: 'Material Symbols Outlined';
-	font-size: 1.25rem;
+  font-family: "Material Symbols Outlined";
+  font-size: 1.25rem;
 
-	font-variation-settings:
-		'FILL' 0,
-		'wght' 400,
-		'GRAD' 0,
-		'opsz' 24;
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
 }

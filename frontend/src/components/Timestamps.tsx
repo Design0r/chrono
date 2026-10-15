@@ -1,11 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChronoClient } from "../api/chrono/client";
-import {
-  durationFromTimestamps,
-  formatCounter,
-  secondsToCounter,
-} from "../lib/timestamp-utils";
+import { durationFromTimestamps, formatCounter, secondsToCounter } from "../lib/timestamp-utils";
 import type { User } from "../types/auth";
 import type { Timestamp } from "../types/response";
 import { CreateTimestampModal } from "./timestamps/CreateTimestamp";
@@ -67,10 +63,10 @@ export function Timestamps({ user }: { user: User }) {
     mutationKey: ["timestamps", "start"],
     mutationFn: () => chrono.timestamps.start(),
     onError: (e) => addErrorToast(e),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       startedTimerId.current = data.id;
       queryClient.setQueryData(["timestamps", "latest"], data);
-      queryClient.invalidateQueries({ queryKey: ["timestamps"] });
+      await queryClient.invalidateQueries({ queryKey: ["timestamps"] });
     },
     retry: false,
   });
@@ -79,9 +75,9 @@ export function Timestamps({ user }: { user: User }) {
     mutationKey: ["timestamps", "stop"],
     mutationFn: (id: number) => chrono.timestamps.stop(id),
     onError: (e) => addErrorToast(e),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.setQueryData(["timestamps", "latest"], data);
-      queryClient.invalidateQueries({ queryKey: ["timestamps"] });
+      await queryClient.invalidateQueries({ queryKey: ["timestamps"] });
     },
     retry: false,
   });
@@ -112,9 +108,7 @@ export function Timestamps({ user }: { user: User }) {
           <Timer
             paused={paused}
             startUnix={startTime}
-            onUpdate={(seconds: number) =>
-              setRunningTimer(paused ? 0 : seconds)
-            }
+            onUpdate={(seconds: number) => setRunningTimer(paused ? 0 : seconds)}
           />
           <div className="flex mt-1 gap-3 justify-center items-center">
             <button
@@ -135,9 +129,7 @@ export function Timestamps({ user }: { user: User }) {
             </button>
           </div>
           <div className="flex whitespace-nowrap items-center gap-2 mt-0 text-base-content/70">
-            <span
-              className={`font-semibold ${paused ? "text-success" : "text-accent/80"}`}
-            >
+            <span className={`font-semibold ${paused ? "text-success" : "text-accent/80"}`}>
               {(() => {
                 const f = formatCounter(totalTime);
                 return (
@@ -145,9 +137,7 @@ export function Timestamps({ user }: { user: User }) {
                     <span>{f.hours}</span>
                     <span
                       className={
-                        paused
-                          ? "text-success/90 animate-pulse"
-                          : "text-accent/80 animate-pulse"
+                        paused ? "text-success/90 animate-pulse" : "text-accent/80 animate-pulse"
                       }
                     >
                       :
@@ -156,9 +146,7 @@ export function Timestamps({ user }: { user: User }) {
                   </>
                 );
               })()}
-              <span
-                className={`pl-2.5 ${paused ? "text-success/50" : "text-accent/60"}`}
-              >
+              <span className={`pl-2.5 ${paused ? "text-success/50" : "text-accent/60"}`}>
                 Today
               </span>
             </span>
@@ -181,9 +169,9 @@ export function TeamTimestamps({
   user: User;
 }) {
   const chrono = useMemo(() => new ChronoClient(), []);
-  const currYear = startDate
-    ? new Date(startDate).getFullYear()
-    : new Date().getFullYear();
+  const [currYear] = useState(() =>
+    startDate ? new Date(startDate).getFullYear() : new Date().getFullYear(),
+  );
 
   const [createTimestampModal, setCreateTimestampModal] = useState(false);
 
@@ -253,9 +241,7 @@ export function TeamTimestamps({
           add
         </button>
         {createTimestampModal && (
-          <CreateTimestampModal
-            onClose={() => setCreateTimestampModal(false)}
-          />
+          <CreateTimestampModal onClose={() => setCreateTimestampModal(false)} />
         )}
       </div>
       <div className="w-full">
@@ -284,9 +270,7 @@ export function TeamTimestamps({
                   {user.username}
                 </summary>
                 <div className="collapse-content px-0 pt-6 pb-0 bg-black/20 flex flex-col text-sm">
-                  <h3 className="text-base font-semibold mb-3.5 px-4">
-                    Overview
-                  </h3>
+                  <h3 className="text-base font-semibold mb-3.5 px-4">Overview</h3>
                   <table className="bg-base-300/50 rounded-none table mb-12">
                     <thead>
                       <tr className="text-accent/80 *:w-1/3 *:font-normal">

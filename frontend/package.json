@@ -1,46 +1,44 @@
 {
   "name": "chrono-frontend",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
-    "build": "tsc -b && vite build --mode production",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "vp dev --host",
+    "build": "tsc -b && vp build --mode production",
+    "lint": "vp lint .",
+    "preview": "vp preview"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.104.0",
-    "@tanstack/react-router": "^1.170.40",
+    "@tanstack/react-query": "^5.104.2",
+    "@tanstack/react-router": "^1.170.44",
     "dayjs": "^1.11.23",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "react-hook-form": "^7.89.0"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-hook-form": "^7.90.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@rolldown/plugin-babel": "^0.2.4",
-    "@tailwindcss/cli": "^4.3.3",
+    "@tailwindcss/cli": "^4.3.0",
     "@tailwindcss/vite": "4.3.3",
     "@tanstack/devtools-vite": "^0.8.5",
-    "@tanstack/eslint-plugin-query": "^5.104.0",
     "@tanstack/react-devtools": "^0.10.13",
-    "@tanstack/react-query-devtools": "^5.104.0",
+    "@tanstack/react-query-devtools": "^5.104.2",
     "@tanstack/react-router-devtools": "^1.167.2",
-    "@tanstack/router-plugin": "^1.168.41",
-    "@types/node": "^26.6.3",
+    "@tanstack/router-plugin": "^1.168.46",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-react": "^6.1.2",
     "babel-plugin-react-compiler": "^1.0.0",
-    "daisyui": "^5.7.47",
-    "eslint": "^10.11.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.7",
-    "globals": "^17.12.0",
+    "daisyui": "^5.7.50",
+    "globals": "^17.13.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "~6.0.3",
-    "typescript-eslint": "^8.71.0",
-    "vite": "^8.3.1"
+    "typescript": "~7.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.2.0",
+    "vite-plus": "1.2.0"
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.2.0"
   }
 }

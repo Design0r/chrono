@@ -3,6 +3,7 @@ package api_test
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -22,6 +23,7 @@ import (
 	"chrono/internal/adapter/db"
 	"chrono/internal/adapter/handler/api"
 	mw "chrono/internal/adapter/middleware"
+	"chrono/internal/domain"
 	"chrono/internal/service"
 	"chrono/internal/service/auth"
 )
@@ -428,4 +430,89 @@ func TestAworkTimeEntriesRejectInvalidID(t *testing.T) {
 	if err != service.ErrInvalidAworkID {
 		t.Fatalf("expected ErrInvalidAworkID, got %v", err)
 	}
+}
+
+func TestTimestampSummaryIsAdminOnly(t *testing.T) {
+	app := newTestApp(t)
+	app.seedUser(t, "admin@example.com", true)
+	app.seedUser(t, "user@example.com", false)
+	user := app.mustLogin(t, "user@example.com")
+
+	expectStatus(
+		t,
+		app.do(t, http.MethodGet, "/api/v1/timestamps/all/summary", user, nil),
+		http.StatusForbidden,
+	)
+	expectStatus(
+		t,
+		app.do(t, http.MethodGet, "/api/v1/timestamps/all?userId=1", user, nil),
+		http.StatusForbidden,
+	)
+}
+
+func TestAdminTimestampsCanBeFilteredByUser(t *testing.T) {
+	app := newTestApp(t)
+	app.seedUser(t, "admin@example.com", true)
+	a := app.seedUser(t, "a@example.com", false)
+	b := app.seedUser(t, "b@example.com", false)
+	admin := app.mustLogin(t, "admin@example.com")
+
+	createTimestamp := func(userId int64, start string, end string) {
+		form := url.Values{
+			"user_id":    {fmt.Sprint(userId)},
+			"start_time": {start},
+			"end_time":   {end},
+		}
+		expectStatus(
+			t,
+			app.do(t, http.MethodPost, "/api/v1/timestamps/new", admin, form),
+			http.StatusOK,
+		)
+	}
+	createTimestamp(a, "2026-03-02T08:00:00Z", "2026-03-02T10:00:00Z")
+	createTimestamp(a, "2026-03-03T08:00:00Z", "2026-03-03T09:30:00Z")
+	createTimestamp(b, "2026-03-02T08:00:00Z", "2026-03-02T09:00:00Z")
+
+	const query = "startDate=2026-01-01&endDate=2027-01-01"
+
+	rec := app.do(t, http.MethodGet, fmt.Sprintf("/api/v1/timestamps/all?%s&userId=%d", query, a), admin, nil)
+	expectStatus(t, rec, http.StatusOK)
+	var filtered struct {
+		Data []domain.Timestamp `json:"data"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &filtered); err != nil {
+		t.Fatalf("failed to decode timestamps: %v", err)
+	}
+	if len(filtered.Data) != 2 {
+		t.Fatalf("expected 2 timestamps for user a, got %d", len(filtered.Data))
+	}
+	for _, ts := range filtered.Data {
+		if ts.UserID != a {
+			t.Fatalf("expected only timestamps of user %d, got one of user %d", a, ts.UserID)
+		}
+	}
+
+	rec = app.do(t, http.MethodGet, "/api/v1/timestamps/all/summary?"+query, admin, nil)
+	expectStatus(t, rec, http.StatusOK)
+	var summary struct {
+		Data map[string]float64 `json:"data"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &summary); err != nil {
+		t.Fatalf("failed to decode summary: %v", err)
+	}
+	want := map[string]float64{fmt.Sprint(a): 3.5 * 3600, fmt.Sprint(b): 3600}
+	for id, seconds := range want {
+		if summary.Data[id] != seconds {
+			t.Fatalf("expected %v worked seconds for user %s, got %v", seconds, id, summary.Data[id])
+		}
+	}
+	if len(summary.Data) != len(want) {
+		t.Fatalf("expected summary for %d users, got %v", len(want), summary.Data)
+	}
+
+	expectStatus(
+		t,
+		app.do(t, http.MethodGet, "/api/v1/timestamps/all?userId=abc", admin, nil),
+		http.StatusUnprocessableEntity,
+	)
 }

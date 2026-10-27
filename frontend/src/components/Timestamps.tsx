@@ -9,11 +9,13 @@ import {
   yearOfRange,
 } from "../lib/timestamp-utils";
 import type { User } from "../types/auth";
-import type { Timestamp } from "../types/response";
+import type { WorkTime } from "../types/response";
 import { CreateTimestampModal } from "./timestamps/CreateTimestamp";
 import { Timer } from "./timestamps/Timer";
 import { TimestampTable } from "./timestamps/TimestampTable";
 import { TimestampTableByWeek } from "./timestamps/TimestampTableByWeek";
+import { useCalendarEventsByDay } from "../lib/useCalendarEventsByDay";
+import { LoadingSpinner } from "./LoadingSpinner";
 import { useToast } from "./Toast";
 
 export function Timestamps({ user }: { user: User }) {
@@ -28,6 +30,7 @@ export function Timestamps({ user }: { user: User }) {
     () => (timestampsQ.isError ? [] : (timestampsQ.data ?? [])),
     [timestampsQ.data, timestampsQ.isError],
   );
+  const eventsByDay = useCalendarEventsByDay(timestamps, user.id);
 
   // Single source of truth: der neueste Timestamp ohne end_time läuft.
   // Direkt aus den Query-Daten abgeleitet, damit ein Refetch den
@@ -140,7 +143,7 @@ export function Timestamps({ user }: { user: User }) {
         </div>
       </div>
       <div className="rounded-xl overflow-hidden w-full h-full">
-        <TimestampTable timestamps={timestamps} user={user} />
+        <TimestampTable timestamps={timestamps} user={user} eventsByDay={eventsByDay} />
       </div>
     </div>
   );
@@ -156,39 +159,19 @@ export function TeamTimestamps({
 }) {
   const [createTimestampModal, setCreateTimestampModal] = useState(false);
 
-  const allTimestampsQ = useQuery(timestampQueries.forAllUsers({ startDate, endDate }));
+  const workedQ = useQuery(timestampQueries.workedSecondsPerUser({ startDate, endDate }));
   const usersQ = useQuery(userQueries.list());
   const allWorktimesQ = useQuery(timestampQueries.workHoursForAllUsers(yearOfRange(startDate)));
 
-  const queries = [allTimestampsQ, usersQ, allWorktimesQ];
+  const queries = [workedQ, usersQ, allWorktimesQ];
   const anyPending = queries.some((q) => q.isPending);
   const firstError = queries.find((q) => q.isError)?.error;
 
-  const usersMap = useMemo(() => {
-    const users = usersQ.data ?? [];
-    return users.reduce(
-      (map, u) => {
-        map[u.id] = u;
-        return map;
-      },
-      {} as Record<number, User>,
-    );
-  }, [usersQ.data]);
-
-  const timestampsMap = useMemo(() => {
-    const timestamps = allTimestampsQ.data ?? [];
-    return timestamps.reduce(
-      (map, ts) => {
-        (map[ts.user_id] ??= []).push(ts);
-        return map;
-      },
-      {} as Record<number, Timestamp[]>,
-    );
-  }, [allTimestampsQ.data]);
-
   if (anyPending || firstError) return <></>;
 
+  const worked = workedQ.data!;
   const worktimes = allWorktimesQ.data!;
+  const members = usersQ.data!.filter((u) => u.id in worked);
 
   return (
     <>
@@ -206,67 +189,87 @@ export function TeamTimestamps({
         )}
       </div>
       <div className="w-full">
-        {Object.entries(timestampsMap).map(([k, v]) => {
-          const user = usersMap[Number(k)];
-          if (!user) return <div key={0} />;
-
-          const counter = secondsToCounter(durationFromTimestamps(v));
-          const worktime = worktimes[user.id];
-          const expectedCounter = secondsToCounter(worktime.expected * 3600);
-          let overtime = (worktime.worked - worktime.expected) * 3600;
-          let overtimeLabel = "Overtime";
-          if (overtime < 0) {
-            overtime *= -1;
-            overtimeLabel = "Missing Time";
-          }
-          const overtimeCounter = secondsToCounter(overtime);
-          const fCounter = formatCounter(counter);
-          const fExpected = formatCounter(expectedCounter);
-          const fOvertime = formatCounter(overtimeCounter);
-
-          return (
-            <div key={user.id} className="my-4">
-              <details className="collapse border-base-300 border collapse-arrow">
-                <summary className="collapse-title bg-base-300/50 focus-within:bg-info/25 focus:text-white hover:bg-info/25 font-semibold">
-                  {user.username}
-                </summary>
-                <div className="collapse-content px-0 pt-6 pb-0 bg-black/20 flex flex-col text-sm">
-                  <h3 className="text-base font-semibold mb-3.5 px-4">Overview</h3>
-                  <table className="bg-base-300/50 rounded-none table mb-12">
-                    <thead>
-                      <tr className="text-accent/80 *:w-1/3 *:font-normal">
-                        <th>Worked</th>
-                        <th>Expected</th>
-                        <th>{overtimeLabel}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="hover:bg-base-300 text-info/70 bg-base-200/40">
-                        <td className="*:text-info">
-                          <span>{fCounter.hours}</span>
-                          <span>:</span>
-                          <span>{fCounter.minutes}</span> h
-                        </td>
-                        <td className="*:text-info/90">
-                          <span>{fExpected.hours}</span>
-                          <span>:</span>
-                          <span>{fExpected.minutes}</span> h
-                        </td>
-                        <td className="*:text-info/90">
-                          <span>{fOvertime.hours}</span>
-                          <span>:</span>
-                          <span>{fOvertime.minutes}</span> h
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <TimestampTableByWeek timestamps={v} user={user} />
-                </div>
-              </details>
-            </div>
-          );
-        })}
+        {members.map((user) => (
+          <TeamMemberTimestamps
+            key={user.id}
+            user={user}
+            range={{ startDate, endDate }}
+            workedSeconds={worked[user.id]}
+            worktime={worktimes[user.id]}
+          />
+        ))}
       </div>
     </>
+  );
+}
+
+function TeamMemberTimestamps({
+  user,
+  range,
+  workedSeconds,
+  worktime,
+}: {
+  user: User;
+  range: { startDate?: string; endDate?: string };
+  workedSeconds: number;
+  worktime: WorkTime;
+}) {
+  const [open, setOpen] = useState(false);
+  const timestampsQ = useQuery({ ...timestampQueries.forUser(user.id, range), enabled: open });
+
+  const fWorked = formatCounter(secondsToCounter(workedSeconds));
+  const fExpected = formatCounter(secondsToCounter(worktime.expected * 3600));
+  const overtime = (worktime.worked - worktime.expected) * 3600;
+  const overtimeLabel = overtime < 0 ? "Missing Time" : "Overtime";
+  const fOvertime = formatCounter(secondsToCounter(Math.abs(overtime)));
+
+  return (
+    <div className="my-4">
+      <details
+        className="collapse border-base-300 border collapse-arrow"
+        onToggle={(e) => setOpen(e.currentTarget.open)}
+      >
+        <summary className="collapse-title bg-base-300/50 focus-within:bg-info/25 focus:text-white hover:bg-info/25 flex flex-wrap items-center gap-x-8 gap-y-1">
+          <span className="font-semibold min-w-32">{user.username}</span>
+          <span className="flex flex-wrap gap-x-6 gap-y-1 text-sm font-normal">
+            <SummaryValue label="Worked" value={fWorked} highlight />
+            <SummaryValue label="Expected" value={fExpected} />
+            <SummaryValue label={overtimeLabel} value={fOvertime} />
+          </span>
+        </summary>
+        {open && (
+          <div className="collapse-content px-0 pt-6 pb-0 bg-black/20 flex flex-col text-sm">
+            {timestampsQ.isPending ? (
+              <div className="flex justify-center py-8">
+                <LoadingSpinner size="md" />
+              </div>
+            ) : timestampsQ.isError ? (
+              <p className="px-4 pb-6 text-error">{timestampsQ.error.message}</p>
+            ) : (
+              <TimestampTableByWeek timestamps={timestampsQ.data} user={user} />
+            )}
+          </div>
+        )}
+      </details>
+    </div>
+  );
+}
+
+function SummaryValue({
+  label,
+  value,
+  highlight = false,
+}: {
+  label: string;
+  value: { hours: string; minutes: string };
+  highlight?: boolean;
+}) {
+  return (
+    <span className="whitespace-nowrap">
+      <span className="text-accent/70 pr-1.5">{label}</span>
+      <span className={highlight ? "text-info" : "text-info/90"}>
+        {value.hours}:{value.minutes} h
+      </span>
+    </span>
   );
 }

@@ -66,6 +66,27 @@ func (r *TimestampsService) GetAllInRange(
 	return r.timestamps.GetAllInRange(ctx, start, stop)
 }
 
+func (r *TimestampsService) GetWorkedSecondsPerUserInRange(
+	ctx context.Context,
+	start time.Time,
+	stop time.Time,
+) (map[int64]float64, error) {
+	timestamps, err := r.timestamps.GetAllInRange(ctx, start, stop)
+	if err != nil {
+		return nil, err
+	}
+
+	worked := map[int64]float64{}
+	for _, t := range timestamps {
+		if t.EndTime == nil {
+			continue
+		}
+		worked[t.UserID] += t.EndTime.Sub(t.StartTime).Seconds()
+	}
+
+	return worked, nil
+}
+
 func (r *TimestampsService) GetForToday(
 	ctx context.Context,
 	userId int64,

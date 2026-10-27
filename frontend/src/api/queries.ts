@@ -87,10 +87,15 @@ export const timestampQueries = {
       queryKey: [...timestampQueries.all(), "currentUser", range] as const,
       queryFn: () => chrono.timestamps.getAllForUser(range.startDate, range.endDate),
     }),
-  forAllUsers: (range: { startDate?: string; endDate?: string }) =>
+  forUser: (userId: number, range: { startDate?: string; endDate?: string }) =>
     queryOptions({
-      queryKey: [...timestampQueries.all(), "allUsers", range] as const,
-      queryFn: () => chrono.timestamps.getAll(range.startDate, range.endDate),
+      queryKey: [...timestampQueries.all(), "user", userId, range] as const,
+      queryFn: () => chrono.timestamps.getForUser(userId, range.startDate, range.endDate),
+    }),
+  workedSecondsPerUser: (range: { startDate?: string; endDate?: string }) =>
+    queryOptions({
+      queryKey: [...timestampQueries.all(), "workedSecondsPerUser", range] as const,
+      queryFn: () => chrono.timestamps.getWorkedSecondsPerUser(range.startDate, range.endDate),
     }),
   workHours: () => [...timestampQueries.all(), "workHours"] as const,
   workHoursForCurrentUser: (year: number) =>

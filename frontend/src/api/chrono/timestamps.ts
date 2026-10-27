@@ -45,19 +45,30 @@ export class ApiTimestamps {
     return r.data as Timestamp[];
   }
 
-  async getAll(start?: string, end?: string): Promise<Timestamp[]> {
-    let url = "";
-    if (start && end) url = `?startDate=${start}&endDate=${end}`;
-    else if (start) url = `?startDate=${start}`;
-    else if (end) url = `?endDate=${end}`;
+  async getForUser(userId: number, start?: string, end?: string): Promise<Timestamp[]> {
+    const params = rangeParams(start, end);
+    params.set("userId", String(userId));
 
-    const response = await fetch(CHRONO_URL + `/timestamps/all${url}`, {
+    const response = await fetch(CHRONO_URL + `/timestamps/all?${params}`, {
       method: "GET",
       credentials: "include",
     });
 
     const r = await returnOrError(response);
     return r.data as Timestamp[];
+  }
+
+  async getWorkedSecondsPerUser(start?: string, end?: string): Promise<Record<number, number>> {
+    const response = await fetch(
+      CHRONO_URL + `/timestamps/all/summary?${rangeParams(start, end)}`,
+      {
+        method: "GET",
+        credentials: "include",
+      },
+    );
+
+    const r = await returnOrError(response);
+    return r.data as Record<number, number>;
   }
 
   async getForYear(year: number): Promise<Timestamp[]> {
@@ -146,4 +157,11 @@ export class ApiTimestamps {
     const r = await returnOrError(response);
     return r.data as Record<number, WorkTime>;
   }
+}
+
+function rangeParams(start?: string, end?: string): URLSearchParams {
+  const params = new URLSearchParams();
+  if (start) params.set("startDate", start);
+  if (end) params.set("endDate", end);
+  return params;
 }

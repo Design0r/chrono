@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -33,6 +34,7 @@ func (s *APITimestampsHandler) RegisterRoutes(auth *echo.Group, admin *echo.Grou
 	g.GET("/worked/:year/all", s.GetWorkHoursForYearForAllUsers)
 
 	admin.GET("/timestamps/all", s.GetAllTimestamps)
+	admin.GET("/timestamps/all/summary", s.GetWorkedSecondsPerUser)
 }
 
 func (h *APITimestampsHandler) Start(c echo.Context) error {
@@ -144,26 +146,9 @@ func (h *APITimestampsHandler) GetTimestamps(c echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
-	startParam := c.QueryParam("startDate")
-	endParam := c.QueryParam("endDate")
-
-	startDate := time.UnixMilli(0)
-	endDate := time.Now()
-
-	if startParam != "" {
-		s, err := time.Parse(time.DateOnly, startParam)
-		if err != nil {
-			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid startDate")
-		}
-		startDate = s
-	}
-
-	if endParam != "" {
-		e, err := time.Parse(time.DateOnly, endParam)
-		if err != nil {
-			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid startDate")
-		}
-		endDate = e
+	startDate, endDate, err := parseDateRange(c)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, err.Error())
 	}
 
 	t, err := h.timestamps.GetInRange(ctx, currUser.ID, startDate, endDate)
@@ -226,32 +211,68 @@ func (h *APITimestampsHandler) GetWorkHoursForYearForAllUsers(c echo.Context) er
 func (h *APITimestampsHandler) GetAllTimestamps(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	startParam := c.QueryParam("startDate")
-	endParam := c.QueryParam("endDate")
-
-	startDate := time.UnixMilli(0)
-	endDate := time.Now()
-
-	if startParam != "" {
-		s, err := time.Parse(time.DateOnly, startParam)
-		if err != nil {
-			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid startDate")
-		}
-		startDate = s
+	startDate, endDate, err := parseDateRange(c)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, err.Error())
 	}
 
-	if endParam != "" {
-		e, err := time.Parse(time.DateOnly, endParam)
+	userParam := c.QueryParam("userId")
+	if userParam == "" {
+		t, err := h.timestamps.GetAllInRange(ctx, startDate, endDate)
 		if err != nil {
-			return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid startDate")
+			return NewErrorResponse(c, http.StatusNotFound, err.Error())
 		}
-		endDate = e
+		return NewJsonResponse(c, t)
 	}
 
-	t, err := h.timestamps.GetAllInRange(ctx, startDate, endDate)
+	userId, err := strconv.ParseInt(userParam, 10, 64)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid userId")
+	}
+
+	t, err := h.timestamps.GetInRange(ctx, userId, startDate, endDate)
 	if err != nil {
 		return NewErrorResponse(c, http.StatusNotFound, err.Error())
 	}
 
 	return NewJsonResponse(c, t)
+}
+
+func (h *APITimestampsHandler) GetWorkedSecondsPerUser(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	startDate, endDate, err := parseDateRange(c)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusUnprocessableEntity, err.Error())
+	}
+
+	worked, err := h.timestamps.GetWorkedSecondsPerUserInRange(ctx, startDate, endDate)
+	if err != nil {
+		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return NewJsonResponse(c, worked)
+}
+
+func parseDateRange(c echo.Context) (time.Time, time.Time, error) {
+	startDate := time.UnixMilli(0)
+	endDate := time.Now()
+
+	if startParam := c.QueryParam("startDate"); startParam != "" {
+		s, err := time.Parse(time.DateOnly, startParam)
+		if err != nil {
+			return startDate, endDate, errors.New("invalid startDate")
+		}
+		startDate = s
+	}
+
+	if endParam := c.QueryParam("endDate"); endParam != "" {
+		e, err := time.Parse(time.DateOnly, endParam)
+		if err != nil {
+			return startDate, endDate, errors.New("invalid endDate")
+		}
+		endDate = e
+	}
+
+	return startDate, endDate, nil
 }

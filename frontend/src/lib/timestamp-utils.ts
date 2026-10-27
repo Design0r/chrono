@@ -20,6 +20,32 @@ export type DayGroup = {
   totalSeconds: number;
 };
 
+const weekdayFormat = new Intl.DateTimeFormat("de-DE", { weekday: "short" });
+const timeFormat = new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit" });
+const dateFormat = new Intl.DateTimeFormat("de-DE", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+const dayLabelFormat = new Intl.DateTimeFormat("de-DE", {
+  weekday: "short",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
+export function formatWeekdayShort(date: Date): string {
+  return weekdayFormat.format(date).slice(0, 2);
+}
+
+export function formatTime(date: Date): string {
+  return timeFormat.format(date);
+}
+
+export function formatDayLabel(date: Date): string {
+  return dayLabelFormat.format(date);
+}
+
 export function durationFromTimestamps(timestamps: Timestamp[]): number {
   return timestamps
     .map((t) => {
@@ -51,9 +77,7 @@ export function getWeekMonday(date: Date): Date {
 }
 
 export function formatWeekRange(monday: Date, sunday: Date): string {
-  const fmt = (d: Date) =>
-    d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
-  return `${fmt(monday)} – ${fmt(sunday)}`;
+  return `${dateFormat.format(monday)} – ${dateFormat.format(sunday)}`;
 }
 
 export function isWeekend(date: Date): boolean {
@@ -83,27 +107,19 @@ export function groupTimestampsByDay(
   durationFn: (ts: Timestamp[]) => number,
 ): DayGroup[] {
   const byDay = new Map<string, Timestamp[]>();
-  for (const t of timestamps) {
-    const start = new Date(t.start_time);
-    const key =
-      start.getFullYear() +
-      "-" +
-      String(start.getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(start.getDate()).padStart(2, "0");
-    if (!byDay.has(key)) byDay.set(key, []);
-    byDay.get(key)!.push(t);
+  for (const t of sortByStart(timestamps)) {
+    const key = dateKeyFromDate(new Date(t.start_time));
+    const day = byDay.get(key);
+    if (day) day.push(t);
+    else byDay.set(key, [t]);
   }
   const groups: DayGroup[] = [];
   byDay.forEach((ts, key) => {
     const [y, m, d] = key.split("-").map(Number);
-    const dayDate = new Date(y, m - 1, d);
     groups.push({
-      dayDate,
+      dayDate: new Date(y, m - 1, d),
       dateKey: key,
-      timestamps: ts.sort(
-        (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
-      ),
+      timestamps: ts,
       totalSeconds: durationFn(ts),
     });
   });
@@ -117,12 +133,11 @@ export function groupTimestampsByWeek(
   durationFn: (ts: Timestamp[]) => number,
 ): WeekGroup[] {
   const byWeek = new Map<number, Timestamp[]>();
-  for (const t of timestamps) {
-    const start = new Date(t.start_time);
-    const weekMonday = getWeekMonday(start);
-    const key = weekMonday.getTime();
-    if (!byWeek.has(key)) byWeek.set(key, []);
-    byWeek.get(key)!.push(t);
+  for (const t of sortByStart(timestamps)) {
+    const key = getWeekMonday(new Date(t.start_time)).getTime();
+    const week = byWeek.get(key);
+    if (week) week.push(t);
+    else byWeek.set(key, [t]);
   }
   const weekSunday = (m: Date) => {
     const s = new Date(m);
@@ -135,14 +150,19 @@ export function groupTimestampsByWeek(
     groups.push({
       weekMonday,
       weekSunday: weekSunday(weekMonday),
-      timestamps: ts.sort(
-        (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
-      ),
+      timestamps: ts,
       totalSeconds: durationFn(ts),
     });
   });
   groups.sort((a, b) => b.weekMonday.getTime() - a.weekMonday.getTime());
   return groups;
+}
+
+function sortByStart(timestamps: Timestamp[]): Timestamp[] {
+  return timestamps
+    .map((t) => ({ t, start: Date.parse(t.start_time) }))
+    .sort((a, b) => a.start - b.start)
+    .map(({ t }) => t);
 }
 
 export function dateKeyFromDate(d: Date): string {

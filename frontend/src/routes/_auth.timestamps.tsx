@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_auth/timestamps")({
       queryClient.ensureQueryData(timestampQueries.forCurrentUser(deps)),
     ]);
     if (user.is_superuser) {
-      void queryClient.prefetchQuery(timestampQueries.forAllUsers(deps));
+      void queryClient.prefetchQuery(timestampQueries.workedSecondsPerUser(deps));
       void queryClient.prefetchQuery(userQueries.list());
       void queryClient.prefetchQuery(
         timestampQueries.workHoursForAllUsers(yearOfRange(deps.startDate)),

@@ -155,7 +155,7 @@ func (r *SQLTimestampsRepo) Create(
 	ctx context.Context,
 	ts *domain.Timestamp,
 ) (domain.Timestamp, error) {
-	params := repo.CreateTimestampParams{UserID: ts.ID, StartTime: ts.StartTime, EndTime: ts.EndTime}
+	params := repo.CreateTimestampParams{UserID: ts.UserID, StartTime: ts.StartTime, EndTime: ts.EndTime}
 	t, err := r.q.CreateTimestamp(ctx, params)
 	if err != nil {
 		r.log.Error("repo.CreateTimestamp failed:", slog.String("error", err.Error()))

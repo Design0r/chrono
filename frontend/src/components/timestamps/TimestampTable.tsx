@@ -1,13 +1,12 @@
-import { useQueries } from "@tanstack/react-query";
 import { Fragment, useMemo, useState } from "react";
-import { eventQueries } from "../../api/queries";
 import {
-  dateKeyFromDate,
   durationFromTimestamps,
   formatCounter,
+  formatDayLabel,
   groupTimestampsByDay,
   secondsToCounter,
 } from "../../lib/timestamp-utils";
+import type { EventsByDay } from "../../lib/useCalendarEventsByDay";
 import type { User } from "../../types/auth";
 import type { Timestamp } from "../../types/response";
 import { DayBar } from "./DayBar";
@@ -17,10 +16,12 @@ import { TimestampRow } from "./TimestampRow";
 export function TimestampTable({
   timestamps,
   user,
+  eventsByDay,
   footerTotalSeconds,
 }: {
   timestamps: Timestamp[];
   user: User;
+  eventsByDay: EventsByDay;
   footerTotalSeconds?: number;
 }) {
   const [modal, setModal] = useState<Timestamp | null>(null);
@@ -30,41 +31,6 @@ export function TimestampTable({
     () => groupTimestampsByDay(timestamps, durationFromTimestamps),
     [timestamps],
   );
-
-  const monthKeys = useMemo(() => {
-    const set = new Set<string>();
-    for (const g of dayGroups) {
-      const y = g.dayDate.getFullYear();
-      const m = g.dayDate.getMonth() + 1;
-      set.add(`${y}-${m}`);
-    }
-    return Array.from(set);
-  }, [dayGroups]);
-
-  const monthQueries = useQueries({
-    queries: monthKeys.map((key) => {
-      const [y, m] = key.split("-").map(Number);
-      return eventQueries.month(y, m);
-    }),
-  });
-
-  const calendarEventsByDay = useMemo(() => {
-    const map = new Map<string, string[]>();
-    for (const result of monthQueries) {
-      const month = result.data;
-      if (!month?.days) continue;
-      for (const day of month.days) {
-        if (!day.events?.length) continue;
-        const myEvents = day.events.filter((e) => e.event.user_id === user.id);
-        if (!myEvents.length) continue;
-        const d = new Date(day.date);
-        const key = dateKeyFromDate(d);
-        const names = [...new Set(myEvents.map((e) => e.event.name))];
-        map.set(key, names);
-      }
-    }
-    return map;
-  }, [monthQueries, user.id]);
 
   const toggleDay = (dateKey: string) => {
     setExpandedDays((prev) => {
@@ -117,14 +83,9 @@ export function TimestampTable({
                       >
                         chevron_right
                       </span>
-                      {group.dayDate.toLocaleDateString("de-DE", {
-                        weekday: "short",
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })}
+                      {formatDayLabel(group.dayDate)}
                       {(() => {
-                        const eventNames = calendarEventsByDay.get(group.dateKey);
+                        const eventNames = eventsByDay.get(group.dateKey);
                         if (!eventNames?.length) return null;
                         const label = eventNames.join(", ");
                         return (

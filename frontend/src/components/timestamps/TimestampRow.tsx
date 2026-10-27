@@ -1,4 +1,9 @@
-import { formatCounter, secondsToCounter } from "../../lib/timestamp-utils";
+import {
+  formatCounter,
+  formatTime,
+  formatWeekdayShort,
+  secondsToCounter,
+} from "../../lib/timestamp-utils";
 import type { User } from "../../types/auth";
 import type { Timestamp } from "../../types/response";
 
@@ -26,30 +31,20 @@ export function TimestampRow({
       <td>
         <div className="flex gap-1.5 items-center pl-6 text-info/60">
           <span className="w-6">
-            {start.toLocaleDateString("de-DE", { weekday: "short" }).slice(0, 2)}
+            {formatWeekdayShort(start)}
             .,
           </span>
-          <span className="block">
-            {start.toLocaleTimeString("de-DE", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </span>
+          <span className="block">{formatTime(start)}</span>
         </div>
       </td>
       <td>
         {end ? (
           <div className="flex gap-1.5 items-center text-info/60">
             <span className="w-6">
-              {end.toLocaleDateString("de-DE", { weekday: "short" }).slice(0, 2)}
+              {formatWeekdayShort(end)}
               .,
             </span>
-            <span className="block">
-              {end.toLocaleTimeString("de-DE", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
+            <span className="block">{formatTime(end)}</span>
           </div>
         ) : (
           "–"

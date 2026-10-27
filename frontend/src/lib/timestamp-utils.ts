@@ -211,6 +211,11 @@ export function datetimeLocalToIso(value: string): string {
   return `${iso.split(".")[0]}Z`;
 }
 
+export function rangeError(start: string, end: string): string | undefined {
+  if (!start || !end) return undefined;
+  return new Date(end) < new Date(start) ? "End can't be before start." : undefined;
+}
+
 export function yearOfRange(startDate?: string): number {
   return startDate ? new Date(startDate).getFullYear() : new Date().getFullYear();
 }

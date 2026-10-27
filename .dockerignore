@@ -13,3 +13,6 @@ build
 !/package-lock.json
 frontend/.tanstack
 frontend/node_modules
+frontend
+logs
+docs

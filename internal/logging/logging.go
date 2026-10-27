@@ -1,28 +1,13 @@
 package logging
 
 import (
-	"io"
 	"log/slog"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
-func NewTextMultiLogger(path, level string, addSource bool) (*slog.Logger, *os.File, error) {
-	if dir := filepath.Dir(path); dir != "" && dir != "." {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return nil, nil, err
-		}
-	}
-
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	mw := io.MultiWriter(os.Stdout, f)
-
-	h := slog.NewTextHandler(mw, &slog.HandlerOptions{
+func NewTextLogger(level string, addSource bool) *slog.Logger {
+	h := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level:     parseLevel(level),
 		AddSource: addSource,
 		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
@@ -34,7 +19,7 @@ func NewTextMultiLogger(path, level string, addSource bool) (*slog.Logger, *os.F
 		},
 	})
 
-	return slog.New(h), f, nil
+	return slog.New(h)
 }
 
 func parseLevel(s string) slog.Leveler {

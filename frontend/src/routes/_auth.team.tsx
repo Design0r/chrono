@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  FlexRender,
   columnVisibilityFeature,
   createColumnHelper,
   createSortedRowModel,
@@ -10,11 +11,13 @@ import {
   sortFn_text,
   tableFeatures,
   useTable,
+  type Row,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import { chrono } from "../api/chrono/client";
 import { aworkQueries, currentUserId, userQueries } from "../api/queries";
 import { useToast } from "../components/Toast";
+import { useAppForm } from "../lib/form";
 import type { User, UserWithVacation } from "../types/auth";
 import type { TeamEditForm } from "../types/forms";
 import type { AworkUser } from "../types/response";
@@ -71,17 +74,11 @@ function TeamComponent() {
 
 type TeamRow = UserWithVacation & {
   awork_name: string;
-  draft: TeamEditForm | null;
 };
 
 type TeamTableMeta = {
   roles: readonly string[];
   aworkUsers: AworkUser[];
-  savingUserId: number | null;
-  startEdit: (user: TeamRow) => void;
-  updateDraft: (userId: number, patch: Partial<TeamEditForm>) => void;
-  cancelEdit: (userId: number) => void;
-  save: (userId: number, draft: TeamEditForm) => void;
 };
 
 type TeamColumnMeta = {
@@ -117,22 +114,7 @@ const columns = column.columns([
   column.accessor("vacation_days", {
     header: "Vacation Days",
     meta: { className: "text-center" },
-    cell: ({ row, getValue, table }) => {
-      const { draft, id } = row.original;
-      if (!draft) return getValue();
-      return (
-        <input
-          className="input input-bordered"
-          type="number"
-          step={0.5}
-          required
-          defaultValue={draft.vacation_days}
-          onChange={(e) =>
-            table.options.meta!.updateDraft(id, { vacation_days: Number(e.target.value) })
-          }
-        />
-      );
-    },
+    cell: ({ getValue }) => <VacationDaysCell value={getValue()} />,
   }),
   column.accessor("vacation_used", {
     header: "Used",
@@ -147,76 +129,26 @@ const columns = column.columns([
   }),
   column.accessor("role", {
     header: "Role",
-    cell: ({ row, getValue, table }) => {
-      const { draft, id } = row.original;
-      if (!draft) return getValue();
-      return (
-        <select
-          className={selectClassName}
-          required
-          value={draft.role}
-          onChange={(e) => table.options.meta!.updateDraft(id, { role: e.target.value })}
-        >
-          {table.options.meta!.roles.map((r) => (
-            <option key={r} value={r}>
-              {capitalize(r)}
-            </option>
-          ))}
-        </select>
-      );
-    },
+    cell: ({ getValue, table }) => (
+      <RoleCell value={getValue()} roles={table.options.meta!.roles} />
+    ),
   }),
   column.accessor("enabled", {
     header: "Enabled",
     meta: { cellClassName: "icon-outlined" },
-    cell: ({ row, getValue, table }) => {
-      const { draft, id } = row.original;
-      if (!draft) {
-        return (
-          <input
-            type="checkbox"
-            className="checkbox cursor-not-allowed"
-            checked={getValue()}
-            readOnly
-          />
-        );
-      }
-      return (
-        <input
-          type="checkbox"
-          className="checkbox"
-          checked={draft.enabled}
-          onChange={(e) => table.options.meta!.updateDraft(id, { enabled: e.target.checked })}
-        />
-      );
-    },
+    cell: ({ getValue }) => <EnabledCell value={getValue()} />,
   }),
   column.accessor("awork_name", {
     id: "awork",
     header: "Awork",
-    cell: ({ row, getValue, table }) => {
-      const { draft, id } = row.original;
-      if (!draft) return getValue();
-      return (
-        <select
-          className={selectClassName}
-          value={draft.awork_id}
-          onChange={(e) => table.options.meta!.updateDraft(id, { awork_id: e.target.value })}
-        >
-          <option value="">-</option>
-          {table.options.meta!.aworkUsers.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.firstName} {a.lastName}
-            </option>
-          ))}
-        </select>
-      );
-    },
+    cell: ({ getValue, table }) => (
+      <AworkCell value={getValue()} aworkUsers={table.options.meta!.aworkUsers} />
+    ),
   }),
   column.display({
     id: "actions",
     header: "",
-    cell: ({ row, table }) => <RowActions user={row.original} meta={table.options.meta!} />,
+    cell: () => <RowActions />,
   }),
 ]);
 
@@ -229,35 +161,9 @@ function TeamTable({
   currUser: User;
   aworkUsers: AworkUser[];
 }) {
-  const queryClient = useQueryClient();
-  const { addToast, addErrorToast } = useToast();
-  const [drafts, setDrafts] = useState<Record<number, TeamEditForm>>({});
-
-  const cancelEdit = (userId: number) =>
-    setDrafts((d) => Object.fromEntries(Object.entries(d).filter(([id]) => Number(id) !== userId)));
-
-  const mutation = useMutation({
-    mutationFn: ({ userId, data }: { userId: number; data: TeamEditForm }) =>
-      chrono.users.updateUser(userId, data),
-    onSuccess: async (_, { userId }) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: userQueries.all() }),
-        queryClient.invalidateQueries({ queryKey: aworkQueries.workTimes() }),
-      ]);
-      cancelEdit(userId);
-      addToast("Successfully updated profile settings", "success");
-    },
-    onError: (error) => addErrorToast(error),
-  });
-
   const data = useMemo(
-    () =>
-      users.map((u) => ({
-        ...u,
-        awork_name: aworkName(aworkUsers, u.awork_id),
-        draft: drafts[u.id] ?? null,
-      })),
-    [users, aworkUsers, drafts],
+    () => users.map((u) => ({ ...u, awork_name: aworkName(aworkUsers, u.awork_id) })),
+    [users, aworkUsers],
   );
 
   const table = useTable({
@@ -274,21 +180,6 @@ function TeamTable({
     meta: {
       roles: chrono.users.getRoles(),
       aworkUsers,
-      savingUserId: mutation.isPending ? (mutation.variables?.userId ?? null) : null,
-      startEdit: (u) =>
-        setDrafts((d) => ({
-          ...d,
-          [u.id]: {
-            vacation_days: u.vacation_days,
-            role: u.role,
-            enabled: u.enabled,
-            awork_id: u.awork_id || "",
-          },
-        })),
-      updateDraft: (userId, patch) =>
-        setDrafts((d) => (d[userId] ? { ...d, [userId]: { ...d[userId], ...patch } } : d)),
-      cancelEdit,
-      save: (userId, draft) => mutation.mutate({ userId, data: draft }),
     },
   });
 
@@ -333,31 +224,196 @@ function TeamTable({
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              className={
-                row.original.vacation_days > 0
-                  ? "hover:bg-primary/10 pt-8 border-b border-primary/25 text-base-content/80 hover:text-primary animate-color"
-                  : "bg-error/35 hover:bg-error/50 pt-8 border-2 border-error/70 text-base-content/80 animate-color"
-              }
-            >
-              {row.getVisibleCells().map((cell) => {
-                const { className, cellClassName, rowHeader } = cell.column.columnDef.meta ?? {};
-                const Cell = rowHeader ? "th" : "td";
-                return (
-                  <Cell
-                    key={cell.id}
-                    className={[className, cellClassName].filter(Boolean).join(" ") || undefined}
-                  >
-                    <table.FlexRender cell={cell} />
-                  </Cell>
-                );
-              })}
-            </tr>
+            <TeamTableRow key={row.id} row={row} />
           ))}
         </tbody>
       </table>
     </div>
+  );
+}
+
+function rowFormValues(user: User): TeamEditForm {
+  return {
+    vacation_days: user.vacation_days,
+    role: user.role,
+    enabled: user.enabled,
+    awork_id: user.awork_id || "",
+  };
+}
+
+function useTeamRowForm(user: User, onSave: (data: TeamEditForm) => Promise<unknown>) {
+  return useAppForm({
+    defaultValues: rowFormValues(user),
+    onSubmit: ({ value }) => onSave(value),
+  });
+}
+
+type RowEdit = {
+  user: User;
+  editing: boolean;
+  formId: string;
+  form: ReturnType<typeof useTeamRowForm>;
+  startEdit: () => void;
+  cancelEdit: () => void;
+};
+
+const RowEditContext = createContext<RowEdit | null>(null);
+
+function useRowEdit() {
+  const rowEdit = useContext(RowEditContext);
+  if (!rowEdit) throw new Error("useRowEdit must be used inside a team table row");
+  return rowEdit;
+}
+
+function TeamTableRow({ row }: { row: Row<typeof features, TeamRow> }) {
+  const user = row.original;
+  const queryClient = useQueryClient();
+  const { addToast, addErrorToast } = useToast();
+  const [editing, setEditing] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: (data: TeamEditForm) => chrono.users.updateUser(user.id, data),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: userQueries.all() }),
+        queryClient.invalidateQueries({ queryKey: aworkQueries.workTimes() }),
+      ]);
+      addToast("Successfully updated profile settings", "success");
+    },
+    onError: (error) => addErrorToast(error),
+  });
+
+  const form = useTeamRowForm(user, (data) =>
+    mutation.mutateAsync(data).then(
+      () => setEditing(false),
+      () => {},
+    ),
+  );
+
+  const rowEdit: RowEdit = {
+    user,
+    editing,
+    formId: `team-row-${user.id}`,
+    form,
+    startEdit: () => {
+      form.reset(rowFormValues(user));
+      setEditing(true);
+    },
+    cancelEdit: () => setEditing(false),
+  };
+
+  return (
+    <RowEditContext value={rowEdit}>
+      <tr
+        className={
+          user.vacation_days > 0
+            ? "hover:bg-primary/10 pt-8 border-b border-primary/25 text-base-content/80 hover:text-primary animate-color"
+            : "bg-error/35 hover:bg-error/50 pt-8 border-2 border-error/70 text-base-content/80 animate-color"
+        }
+      >
+        {row.getVisibleCells().map((cell) => {
+          const { className, cellClassName, rowHeader } = cell.column.columnDef.meta ?? {};
+          const Cell = rowHeader ? "th" : "td";
+          return (
+            <Cell
+              key={cell.id}
+              className={[className, cellClassName].filter(Boolean).join(" ") || undefined}
+            >
+              <FlexRender cell={cell} />
+            </Cell>
+          );
+        })}
+      </tr>
+    </RowEditContext>
+  );
+}
+
+function VacationDaysCell({ value }: { value: number }) {
+  const { user, editing, form, formId } = useRowEdit();
+  if (!editing) return value;
+  return (
+    <form.AppField name="vacation_days">
+      {(field) => (
+        <field.NumberInput
+          form={formId}
+          id={`vacation_days-${user.id}`}
+          aria-label={`Vacation days of ${user.username}`}
+          className="input input-bordered"
+          step={0.5}
+          min={0}
+          required
+        />
+      )}
+    </form.AppField>
+  );
+}
+
+function RoleCell({ value, roles }: { value: string; roles: readonly string[] }) {
+  const { user, editing, form, formId } = useRowEdit();
+  if (!editing) return value;
+  return (
+    <form.AppField name="role">
+      {(field) => (
+        <field.Select
+          form={formId}
+          id={`role-${user.id}`}
+          aria-label={`Role of ${user.username}`}
+          className={selectClassName}
+          required
+        >
+          {roles.map((r) => (
+            <option key={r} value={r}>
+              {capitalize(r)}
+            </option>
+          ))}
+        </field.Select>
+      )}
+    </form.AppField>
+  );
+}
+
+function EnabledCell({ value }: { value: boolean }) {
+  const { user, editing, form, formId } = useRowEdit();
+  if (!editing) {
+    return (
+      <input type="checkbox" className="checkbox cursor-not-allowed" checked={value} readOnly />
+    );
+  }
+  return (
+    <form.AppField name="enabled">
+      {(field) => (
+        <field.Checkbox
+          form={formId}
+          id={`enabled-${user.id}`}
+          aria-label={`${user.username} enabled`}
+          className="checkbox"
+        />
+      )}
+    </form.AppField>
+  );
+}
+
+function AworkCell({ value, aworkUsers }: { value: string; aworkUsers: AworkUser[] }) {
+  const { user, editing, form, formId } = useRowEdit();
+  if (!editing) return value;
+  return (
+    <form.AppField name="awork_id">
+      {(field) => (
+        <field.Select
+          form={formId}
+          id={`awork_id-${user.id}`}
+          aria-label={`Awork user of ${user.username}`}
+          className={selectClassName}
+        >
+          <option value="">-</option>
+          {aworkUsers.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.firstName} {a.lastName}
+            </option>
+          ))}
+        </field.Select>
+      )}
+    </form.AppField>
   );
 }
 
@@ -377,34 +433,34 @@ function UserIdAvatar({ user }: { user: User }) {
   );
 }
 
-function RowActions({ user, meta }: { user: TeamRow; meta: TeamTableMeta }) {
-  if (!user.draft) {
+function RowActions() {
+  const { editing, form, formId, startEdit, cancelEdit } = useRowEdit();
+  if (!editing) {
     return (
       <button
-        onClick={() => meta.startEdit(user)}
+        type="button"
+        onClick={startEdit}
         className="btn btn-soft btn-ghost animate-color icon-outlined"
       >
         edit
       </button>
     );
   }
-  const draft = user.draft;
   return (
-    <>
-      <button
-        onClick={() => meta.save(user.id, draft)}
-        disabled={meta.savingUserId === user.id}
-        className="btn btn-soft btn-success animate-color icon-outlined"
-      >
-        check
-      </button>
-      <button
-        onClick={() => meta.cancelEdit(user.id)}
-        className="btn btn-soft btn-error animate-color icon-outlined"
-      >
-        close
-      </button>
-    </>
+    <form.AppForm>
+      <form.Form id={formId} className="flex gap-1">
+        <form.SubmitButton className="btn btn-soft btn-success animate-color icon-outlined">
+          check
+        </form.SubmitButton>
+        <button
+          type="button"
+          onClick={cancelEdit}
+          className="btn btn-soft btn-error animate-color icon-outlined"
+        >
+          close
+        </button>
+      </form.Form>
+    </form.AppForm>
   );
 }
 

@@ -23,11 +23,7 @@ import (
 
 func main() {
 	fmt.Println(banner)
-	log, logFile, err := logging.NewTextMultiLogger("logs/chrono.log", "debug", true)
-	if err != nil {
-		panic(err)
-	}
-	defer logFile.Close()
+	log := logging.NewTextLogger("debug", true)
 	slog.SetDefault(log)
 
 	log.Info("Initializing chrono...")

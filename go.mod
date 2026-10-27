@@ -1,6 +1,6 @@
 module chrono
 
-go 1.27.1
+go 1.27.3
 
 require (
 	github.com/getsentry/sentry-go v0.50.0

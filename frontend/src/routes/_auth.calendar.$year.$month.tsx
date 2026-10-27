@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { currentUserId, eventQueries, userQueries } from "../api/queries";
 import {
   Calendar,
   CalendarNavigation,
@@ -8,10 +9,7 @@ import {
   UserFilter,
   VacationCounter,
 } from "../components/Calendar";
-import { ErrorPage } from "../components/ErrorPage";
-import { LoadingSpinnerPage } from "../components/LoadingSpinner";
 import { getEventLabel, getEventMap } from "../lib/events";
-import type { UserWithVacation } from "../types/auth";
 
 type TeamSearchParams = {
   user?: string;
@@ -26,10 +24,21 @@ export const Route = createFileRoute("/_auth/calendar/$year/$month")({
       event: search.event as string,
     };
   },
+  loader: async ({ context: { auth, queryClient }, params }) => {
+    const year = Number(params.year);
+    const month = Number(params.month);
+    const userId = currentUserId(auth.userId);
+    await Promise.all([
+      queryClient.ensureQueryData(userQueries.listWithVacation(year)),
+      queryClient.ensureQueryData(userQueries.detailWithVacation(userId, year)),
+      queryClient.ensureQueryData(eventQueries.month(year, month)),
+    ]);
+    return { userId };
+  },
 });
 
 function CalendarComponent() {
-  const { chrono, auth } = Route.useRouteContext();
+  const { userId } = Route.useLoaderData();
   const params = Route.useParams();
   const search = Route.useSearch();
   const year = Number(params.year);
@@ -39,40 +48,9 @@ function CalendarComponent() {
   const [eventFilter, setEventFilter] = useState<string | undefined>(search.event);
   const [selectedEvent, setSelectedEvent] = useState<string>(getEventLabel("urlaub"));
 
-  const usersQ = useQuery({
-    queryKey: ["users", "vacation", year],
-    queryFn: () => chrono.users.getUsers({ vacation: { year: year } }),
-    staleTime: 1000 * 60 * 30, // 30min
-    gcTime: 1000 * 60 * 60 * 1, // 1h
-    retry: false,
-  });
-
-  const currUserQ = useQuery({
-    queryKey: ["user", auth.userId, "vacation", year],
-    queryFn: () => chrono.users.getUserById(auth.userId!, { year: year }),
-    staleTime: 1000 * 60 * 60 * 6, // 6h
-    gcTime: 1000 * 60 * 60 * 7, // 7h
-    retry: false,
-  });
-
-  const monthQ = useQuery({
-    queryKey: ["month", params.year, params.month],
-    queryFn: () => chrono.events.getEventsForMonth(year, month),
-    staleTime: 1000 * 60 * 1, // 1min
-    gcTime: 1000 * 60 * 30, // 30min
-    retry: false,
-  });
-
-  const queries = [usersQ, currUserQ, monthQ];
-  const anyPending = queries.some((q) => q.isPending);
-  const firstError = queries.find((q) => q.isError)?.error;
-
-  if (anyPending) return <LoadingSpinnerPage />;
-  if (firstError) return <ErrorPage error={firstError} />;
-
-  const users = usersQ.data!;
-  const currUser = currUserQ.data! as UserWithVacation;
-  const monthData = monthQ.data!;
+  const { data: users } = useSuspenseQuery(userQueries.listWithVacation(year));
+  const { data: currUser } = useSuspenseQuery(userQueries.detailWithVacation(userId, year));
+  const { data: monthData } = useSuspenseQuery(eventQueries.month(year, month));
   const eventMap = getEventMap();
 
   return (

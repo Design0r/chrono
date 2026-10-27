@@ -1,30 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
-import { ChronoClient } from "../api/chrono/client";
+import { useEffect } from "react";
+import { chrono } from "../api/chrono/client";
+import { notificationQueries } from "../api/queries";
 import type { Notification } from "../types/response";
 import { useToast } from "./Toast";
 
-const NOTIFICATIONS_KEY = ["notifcations"];
-
 export function Notifications() {
-  const chrono = useMemo(() => new ChronoClient(), []);
   const { addErrorToast } = useToast();
   const queryClient = useQueryClient();
 
-  const notifs = useQuery({
-    queryKey: NOTIFICATIONS_KEY,
-    queryFn: () => chrono.notifications.get(),
-    staleTime: 1000 * 60 * 10, // 10min
-    gcTime: 1000 * 60 * 20, // 20min
-    retry: false,
-  });
+  const notifs = useQuery(notificationQueries.list());
 
   const mutation = useMutation({
-    mutationKey: ["notifications", "clear"],
     mutationFn: () => chrono.notifications.clearAll(),
     onError: (e) => addErrorToast(e),
-    onSuccess: () => queryClient.setQueryData(NOTIFICATIONS_KEY, []),
-    retry: false,
+    onSuccess: () => queryClient.setQueryData(notificationQueries.list().queryKey, []),
   });
 
   const notifications: Notification[] = notifs.isError ? [] : (notifs.data ?? []);
@@ -58,7 +48,7 @@ export function Notifications() {
             <NotificationElement
               key={i}
               onClear={(id: number) =>
-                queryClient.setQueryData(NOTIFICATIONS_KEY, (prev: Notification[] | undefined) =>
+                queryClient.setQueryData(notificationQueries.list().queryKey, (prev) =>
                   (prev ?? []).filter((n) => n.id !== id),
                 )
               }
@@ -86,12 +76,9 @@ export function NotificationElement({
   onClear: (id: number) => void;
 }) {
   const { addErrorToast } = useToast();
-  const chrono = new ChronoClient();
   const mutation = useMutation({
-    mutationKey: ["notification", notification.id],
     mutationFn: () => chrono.notifications.clear(notification.id),
     onError: (e) => addErrorToast(e),
-    retry: false,
   });
 
   return (

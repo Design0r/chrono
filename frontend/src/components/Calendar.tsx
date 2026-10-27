@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChronoClient } from "../api/chrono/client";
+import { chrono } from "../api/chrono/client";
+import { invalidateEventData } from "../lib/invalidate";
 import { getEventId, type EventType } from "../lib/events";
 import type { User } from "../types/auth";
 import type { EventUser, Month } from "../types/response";
@@ -184,7 +185,6 @@ export function Event({
   index: number;
   totalCount: number;
 }) {
-  const chrono = new ChronoClient();
   const { addToast, addErrorToast } = useToast();
   const queryClient = useQueryClient();
 
@@ -220,14 +220,12 @@ export function Event({
     isAdmin || (isFromCurrUser && (isInFuture || event.event.state !== "accepted"));
 
   const mutation = useMutation({
-    mutationKey: ["deleteEvent", event.event.id],
     mutationFn: () => chrono.events.deleteEvent(event.event.id),
     onSuccess: () => {
       addToast(`Successfully deleted event ${event.event.name}`, "success");
-      return queryClient.invalidateQueries({ queryKey: ["month"] });
+      return invalidateEventData(queryClient);
     },
     onError: (error) => addErrorToast(error),
-    retry: false,
   });
 
   return (
@@ -302,13 +300,10 @@ export function Day({
   const isToday =
     now.getDate() === date && now.getMonth() + 1 === month && now.getFullYear() === year;
 
-  const chrono = new ChronoClient();
   const queryClient = useQueryClient();
   const { addToast, addErrorToast } = useToast();
 
   const mutation = useMutation({
-    mutationKey: ["createEvent", year, month, date, selectedEvent],
-    retry: false,
     mutationFn: () =>
       chrono.events.createEvent({
         year: year,
@@ -318,7 +313,7 @@ export function Day({
       }),
     onSuccess: () => {
       addToast(`Successfully created event ${selectedEvent}`, "success");
-      return queryClient.invalidateQueries({ queryKey: ["month"] });
+      return invalidateEventData(queryClient);
     },
     onError: (error) => addErrorToast(error),
   });

@@ -7,7 +7,7 @@ import {
   type RegisteredRouter,
 } from "@tanstack/react-router";
 import { useState, type CSSProperties, type ReactNode } from "react";
-import type { ChronoClient } from "../api/chrono/client";
+import { userQueries } from "../api/queries";
 import { useAuth } from "../auth";
 import { isoToDateLocal } from "../lib/timestamp-utils";
 import { Avatar } from "./Avatar";
@@ -74,18 +74,12 @@ function AdminMenu() {
   );
 }
 
-export function Header({ chrono }: { chrono: ChronoClient }) {
+export function Header() {
   const auth = useAuth();
 
   const userQ = useQuery({
-    queryKey: ["user", auth.userId],
-    queryFn: () => {
-      if (!auth.userId) throw new Error("no user id found");
-      return chrono.users.getUserById(auth.userId);
-    },
-    staleTime: 1000 * 60 * 60 * 6, // 6h
-    gcTime: 1000 * 60 * 60 * 7, // 7h
-    retry: false,
+    ...userQueries.detail(auth.userId ?? 0),
+    enabled: auth.userId !== null,
   });
 
   const [date] = useState(() => new Date());

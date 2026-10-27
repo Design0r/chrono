@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   columnVisibilityFeature,
@@ -12,8 +12,8 @@ import {
   useTable,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { ErrorPage } from "../components/ErrorPage";
-import { LoadingSpinnerPage } from "../components/LoadingSpinner";
+import { chrono } from "../api/chrono/client";
+import { aworkQueries, currentUserId, userQueries } from "../api/queries";
 import { useToast } from "../components/Toast";
 import type { User, UserWithVacation } from "../types/auth";
 import type { TeamEditForm } from "../types/forms";
@@ -22,53 +22,29 @@ import { hexToHSL, hsla } from "../utils/colors";
 import { capitalize } from "../utils/string";
 
 export const Route = createFileRoute("/_auth/team")({
+  loader: async ({ context: { auth, queryClient } }) => {
+    const userId = currentUserId(auth.userId);
+    const year = new Date().getFullYear();
+    const [currUser] = await Promise.all([
+      queryClient.ensureQueryData(userQueries.detail(userId)),
+      queryClient.ensureQueryData(userQueries.listWithVacation(year, { includeInactive: true })),
+    ]);
+    if (currUser.is_superuser) void queryClient.prefetchQuery(aworkQueries.users());
+    return { userId, year };
+  },
   component: TeamComponent,
 });
 
 const noAworkUsers: AworkUser[] = [];
 
 function TeamComponent() {
-  const { chrono, auth } = Route.useRouteContext();
+  const { userId, year } = Route.useLoaderData();
 
-  const usersQ = useQuery({
-    queryKey: ["users", "vacation"],
-    queryFn: () =>
-      chrono.users.getUsers({
-        vacation: { year: new Date().getFullYear() },
-        includeInactiveUsers: true,
-      }),
-    staleTime: 1000 * 60 * 30, // 30min
-    gcTime: 1000 * 60 * 60 * 1, // 1h
-    retry: false,
-  });
-
-  const currUserQ = useQuery({
-    queryKey: ["user", auth.userId],
-    queryFn: () => chrono.users.getUserById(auth.userId!),
-    staleTime: 1000 * 60 * 60 * 6, // 6h
-    gcTime: 1000 * 60 * 60 * 7, // 7h
-    retry: false,
-  });
-
-  // Das awork-Verzeichnis gibt es nur für Admins.
-  const aworkUsersQ = useQuery({
-    queryKey: ["aworkUsers"],
-    queryFn: () => chrono.awork.getUsers(),
-    enabled: !!currUserQ.data?.is_superuser,
-    staleTime: 1000 * 60 * 60 * 6, // 6h
-    gcTime: 1000 * 60 * 60 * 7, // 7h
-    retry: false,
-  });
-
-  const queries = [usersQ, currUserQ];
-  const anyPending = queries.some((q) => q.isPending);
-  const firstError = queries.find((q) => q.isError)?.error;
-
-  if (anyPending) return <LoadingSpinnerPage />;
-  if (firstError) return <ErrorPage error={firstError} />;
-
-  const users = usersQ.data! as UserWithVacation[];
-  const currUser = currUserQ.data! as UserWithVacation;
+  const { data: users } = useSuspenseQuery(
+    userQueries.listWithVacation(year, { includeInactive: true }),
+  );
+  const { data: currUser } = useSuspenseQuery(userQueries.detail(userId));
+  const aworkUsersQ = useQuery({ ...aworkQueries.users(), enabled: currUser.is_superuser });
   const aworkUsers = aworkUsersQ.data ?? noAworkUsers;
 
   return (
@@ -253,7 +229,7 @@ function TeamTable({
   currUser: User;
   aworkUsers: AworkUser[];
 }) {
-  const { chrono, queryClient } = Route.useRouteContext();
+  const queryClient = useQueryClient();
   const { addToast, addErrorToast } = useToast();
   const [drafts, setDrafts] = useState<Record<number, TeamEditForm>>({});
 
@@ -261,16 +237,17 @@ function TeamTable({
     setDrafts((d) => Object.fromEntries(Object.entries(d).filter(([id]) => Number(id) !== userId)));
 
   const mutation = useMutation({
-    mutationKey: ["user", "update"],
     mutationFn: ({ userId, data }: { userId: number; data: TeamEditForm }) =>
       chrono.users.updateUser(userId, data),
     onSuccess: async (_, { userId }) => {
-      await queryClient.invalidateQueries({ queryKey: ["users"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: userQueries.all() }),
+        queryClient.invalidateQueries({ queryKey: aworkQueries.workTimes() }),
+      ]);
       cancelEdit(userId);
       addToast("Successfully updated profile settings", "success");
     },
     onError: (error) => addErrorToast(error),
-    retry: false,
   });
 
   const data = useMemo(

@@ -1,60 +1,50 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { ErrorPage } from "../components/ErrorPage";
-import { LoadingSpinnerPage } from "../components/LoadingSpinner";
+import { chrono } from "../api/chrono/client";
+import { aworkQueries, currentUserId, userQueries } from "../api/queries";
 import { useToast } from "../components/Toast";
 import { dateLocalToIso, isoToDateLocal } from "../lib/timestamp-utils";
 import type { ProfileEditForm } from "../types/forms";
 
 export const Route = createFileRoute("/_auth/profile")({
+  loader: async ({ context: { auth, queryClient } }) => {
+    const userId = currentUserId(auth.userId);
+    const user = await queryClient.ensureQueryData(userQueries.detail(userId));
+    if (user.is_superuser) void queryClient.prefetchQuery(aworkQueries.users());
+    return { userId };
+  },
   component: ProfileComponent,
 });
 
 function ProfileComponent() {
-  const { auth, chrono } = Route.useRouteContext();
+  const { userId } = Route.useLoaderData();
   const [edit, setEdit] = useState(false);
   const { register, handleSubmit } = useForm<ProfileEditForm>();
   const { addToast, addErrorToast } = useToast();
   const queryClient = useQueryClient();
 
-  const userQ = useQuery({
-    queryKey: ["user", auth.userId],
-    queryFn: () => chrono.users.getUserById(auth.userId!),
-    staleTime: 1000 * 60 * 60 * 6, // 6h
-    gcTime: 1000 * 60 * 60 * 7, // 7h
-    retry: false,
-  });
+  const { data: user } = useSuspenseQuery(userQueries.detail(userId));
 
   // Das awork-Verzeichnis gibt es nur für Admins.
-  const aworkUserQ = useQuery({
-    queryKey: ["aworkUsers"],
-    queryFn: () => chrono.awork.getUsers(),
-    enabled: !!userQ.data?.is_superuser,
-    staleTime: 1000 * 60 * 60 * 6, // 6h
-    gcTime: 1000 * 60 * 60 * 7, // 7h
-    retry: false,
-  });
+  const aworkUserQ = useQuery({ ...aworkQueries.users(), enabled: user.is_superuser });
 
   const mutation = useMutation({
-    mutationKey: ["profile", userQ.data?.id],
     mutationFn: ({ userId, data }: { userId: number; data: ProfileEditForm }) =>
       chrono.users.updateUser(userId, data),
-    onSuccess: () => {
+    onSuccess: async () => {
       addToast("Successfully updated profile settings", "success");
       setEdit(false);
-      return queryClient.invalidateQueries({ queryKey: ["user"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: userQueries.all() }),
+        queryClient.invalidateQueries({ queryKey: aworkQueries.workTimes() }),
+      ]);
     },
     onError: (error) => addErrorToast(error),
-    retry: false,
   });
 
-  if (userQ.isPending) return <LoadingSpinnerPage />;
-  if (userQ.isError) return <ErrorPage error={userQ.error} />;
-
-  const user = userQ.data!;
   const createdAt = dayjs(user.created_at).toString();
   const editedAt = dayjs(user.edited_at).toString();
   const startDate = dayjs(user.start_date).format("DD.MM.YYYY");

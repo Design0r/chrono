@@ -24,7 +24,6 @@ function RouteComponent() {
       await router.navigate({ to: "/" });
     },
     onError: (error) => addErrorToast(error),
-    retry: false,
   });
 
   return (

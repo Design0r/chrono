@@ -1,6 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { ChronoClient } from "../api/chrono/client";
+import { chrono } from "../api/chrono/client";
+import { requestQueries } from "../api/queries";
+import { invalidateEventData } from "../lib/invalidate";
 import type { BatchRequest, State } from "../types/response";
 import { capitalize } from "../utils/string";
 import { useToast } from "./Toast";
@@ -10,13 +12,11 @@ export function RequestRow({ request }: { request: BatchRequest }) {
   const reqEndDate = new Date(request.end_date);
   const { addToast, addErrorToast } = useToast();
 
-  const chrono = new ChronoClient();
+  const queryClient = useQueryClient();
 
-  const [visible, setVisible] = useState(true);
   const [dialog, setDialog] = useState(false);
 
   const mutation = useMutation({
-    mutationKey: ["requests", request.request.request_id],
     mutationFn: ({ state, reason }: { state: State; reason: string }) =>
       chrono.requests.patchRequest({
         userId: request.request.user_id,
@@ -30,13 +30,14 @@ export function RequestRow({ request }: { request: BatchRequest }) {
         `${capitalize(vars.state)} request ${request.request.name} from ${request.request.username}`,
         "success",
       );
-      setVisible(false);
+      queryClient.setQueryData(requestQueries.list().queryKey, (prev) =>
+        prev?.filter((r) => r.request.request_id !== request.request.request_id),
+      );
+      return invalidateEventData(queryClient);
     },
     onError: (error) => addErrorToast(error),
-    retry: false,
   });
 
-  if (!visible) return <></>;
   return (
     <>
       {dialog && (

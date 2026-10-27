@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { ChronoClient } from "../../api/chrono/client";
+import { chrono } from "../../api/chrono/client";
+import { timestampQueries } from "../../api/queries";
 import { datetimeLocalToIso, isoToDatetimeLocal } from "../../lib/timestamp-utils";
 import type { Timestamp } from "../../types/response";
 import { useToast } from "../Toast";
@@ -21,11 +22,9 @@ export function EditTimestampModal({
   // Kein Sync-Effect nötig: der Aufrufer rendert den Modal mit key={id},
   // der Formularzustand startet also pro Timestamp frisch.
 
-  const chrono = new ChronoClient();
   const { addToast, addErrorToast } = useToast();
 
   const mutation = useMutation({
-    mutationKey: ["timestamps", timestamp.id],
     mutationFn: ({ start, end }: { start: string; end: string | null }) =>
       chrono.timestamps.update({
         id: timestamp.id,
@@ -36,10 +35,9 @@ export function EditTimestampModal({
     onError: (e) => addErrorToast(e),
     onSuccess: async () => {
       addToast("Updated Timestamp", "success");
-      await queryClient.invalidateQueries({ queryKey: ["timestamps"] });
+      await queryClient.invalidateQueries({ queryKey: timestampQueries.all() });
       onClose();
     },
-    retry: false,
   });
 
   return (

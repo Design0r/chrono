@@ -159,11 +159,17 @@ func (svc *EventService) GetHistogramForYear(
 		date := event.Event.ScheduledAt
 
 		eventList[i].Count += 1
-		eventList[i].IsHoliday = event.User.ID == 1
 		_, dateWeek := date.ISOWeek()
 		_, currWeek := time.Now().ISOWeek()
 		eventList[i].IsCurrentWeek = dateWeek == currWeek
-		eventList[i].Usernames = append(eventList[i].Usernames, event.User.Username)
+
+		if event.User.ID == 1 {
+			eventList[i].IsHoliday = true
+			eventList[i].HolidayName = event.Event.Name
+			eventList[i].Usernames = append(eventList[i].Usernames, event.Event.Name)
+		} else {
+			eventList[i].Usernames = append(eventList[i].Usernames, event.User.Username)
+		}
 	}
 
 	return eventList, err

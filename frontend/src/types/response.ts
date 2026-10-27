@@ -43,6 +43,7 @@ export type EventUser = { event: Event; user: User };
 
 export type VacationGraphMonth = {
   is_holiday: boolean;
+  holiday_name: string;
   count: number;
   first_day_of_month: boolean;
   last_day_of_month: number;

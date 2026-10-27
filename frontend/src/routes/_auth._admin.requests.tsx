@@ -1,24 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ErrorPage } from "../components/ErrorPage";
-import { LoadingSpinnerPage } from "../components/LoadingSpinner";
+import { requestQueries } from "../api/queries";
 import { RequestRow } from "../components/Requests";
 
 export const Route = createFileRoute("/_auth/_admin/requests")({
+  loader: ({ context: { queryClient } }) => queryClient.ensureQueryData(requestQueries.list()),
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { chrono } = Route.useRouteContext();
-
-  const { isPending, data, error, isError } = useQuery({
-    queryKey: ["requests"],
-    queryFn: () => chrono.requests.getRequests(),
-    retry: false,
-  });
-
-  if (isError) return <ErrorPage error={error} />;
-  if (isPending) return <LoadingSpinnerPage />;
+  const { data } = useSuspenseQuery(requestQueries.list());
 
   return (
     <div>
@@ -37,7 +28,7 @@ function RouteComponent() {
             </tr>
           </thead>
           <tbody>
-            {data!.map((r) => (
+            {data.map((r) => (
               <RequestRow key={r.request.request_id} request={r} />
             ))}
           </tbody>

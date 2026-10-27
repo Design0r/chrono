@@ -59,13 +59,14 @@ type YearProgress struct {
 
 type YearHistogram struct {
 	IsHoliday       bool     `json:"is_holiday"`
+	HolidayName     string   `json:"holiday_name"`
 	Count           int      `json:"count"`
 	FirstDayOfMonth bool     `json:"first_day_of_month"`
 	LastDayOfMonth  bool     `json:"last_day_of_month"`
 	IsCurrentWeek   bool     `json:"is_current_week"`
-	IsCurrentDay   bool     `json:"is_current_day"`
-	Usernames      []string `json:"usernames"`
-	Date           string   `json:"date"`
+	IsCurrentDay    bool     `json:"is_current_day"`
+	Usernames       []string `json:"usernames"`
+	Date            string   `json:"date"`
 }
 
 func GetNumDaysOfMonth(month time.Month, year int) int {

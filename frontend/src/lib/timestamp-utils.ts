@@ -190,3 +190,7 @@ export function datetimeLocalToIso(value: string): string {
   const iso = d.toISOString();
   return `${iso.split(".")[0]}Z`;
 }
+
+export function yearOfRange(startDate?: string): number {
+  return startDate ? new Date(startDate).getFullYear() : new Date().getFullYear();
+}

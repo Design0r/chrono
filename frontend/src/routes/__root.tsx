@@ -11,11 +11,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 function RootComponent() {
-  const { chrono } = Route.useRouteContext();
   return (
     <div>
       <ToastProvider>
-        <Header chrono={chrono} />
+        <Header />
         <div className="container h-full justify-center mx-auto px-4">
           <Outlet />
           <div className="h-20 md:h-0"></div>

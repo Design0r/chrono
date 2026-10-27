@@ -1,7 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChronoClient } from "../api/chrono/client";
-import { durationFromTimestamps, formatCounter, secondsToCounter } from "../lib/timestamp-utils";
+import { chrono } from "../api/chrono/client";
+import { timestampQueries, userQueries } from "../api/queries";
+import {
+  durationFromTimestamps,
+  formatCounter,
+  secondsToCounter,
+  yearOfRange,
+} from "../lib/timestamp-utils";
 import type { User } from "../types/auth";
 import type { Timestamp } from "../types/response";
 import { CreateTimestampModal } from "./timestamps/CreateTimestamp";
@@ -11,28 +17,12 @@ import { TimestampTableByWeek } from "./timestamps/TimestampTableByWeek";
 import { useToast } from "./Toast";
 
 export function Timestamps({ user }: { user: User }) {
-  const chrono = useMemo(() => new ChronoClient(), []);
   const { addToast, addErrorToast } = useToast();
   const [runningTimer, setRunningTimer] = useState<number>(0);
   const queryClient = useQueryClient();
 
-  const latestTimestampQ = useQuery({
-    queryKey: ["timestamps", "latest"],
-    queryFn: () => chrono.timestamps.getLatest(),
-    staleTime: 1000 * 30,
-    gcTime: 1000 * 60 * 20,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
-    retry: false,
-  });
-
-  const timestampsQ = useQuery({
-    queryKey: ["timestamps"],
-    queryFn: () => chrono.timestamps.getForToday(),
-    staleTime: 1000 * 60 * 10,
-    gcTime: 1000 * 60 * 20,
-    retry: false,
-  });
+  const latestTimestampQ = useQuery(timestampQueries.latest());
+  const timestampsQ = useQuery(timestampQueries.today());
 
   const timestamps = useMemo(
     () => (timestampsQ.isError ? [] : (timestampsQ.data ?? [])),
@@ -60,26 +50,22 @@ export function Timestamps({ user }: { user: User }) {
   const announcedTimerId = useRef<number | null>(null);
 
   const startMut = useMutation({
-    mutationKey: ["timestamps", "start"],
     mutationFn: () => chrono.timestamps.start(),
     onError: (e) => addErrorToast(e),
     onSuccess: async (data) => {
       startedTimerId.current = data.id;
-      queryClient.setQueryData(["timestamps", "latest"], data);
-      await queryClient.invalidateQueries({ queryKey: ["timestamps"] });
+      queryClient.setQueryData(timestampQueries.latest().queryKey, data);
+      await queryClient.invalidateQueries({ queryKey: timestampQueries.all() });
     },
-    retry: false,
   });
 
   const stopMut = useMutation({
-    mutationKey: ["timestamps", "stop"],
     mutationFn: (id: number) => chrono.timestamps.stop(id),
     onError: (e) => addErrorToast(e),
     onSuccess: async (data) => {
-      queryClient.setQueryData(["timestamps", "latest"], data);
-      await queryClient.invalidateQueries({ queryKey: ["timestamps"] });
+      queryClient.setQueryData(timestampQueries.latest().queryKey, data);
+      await queryClient.invalidateQueries({ queryKey: timestampQueries.all() });
     },
-    retry: false,
   });
 
   useEffect(() => {
@@ -168,43 +154,18 @@ export function TeamTimestamps({
   endDate?: string;
   user: User;
 }) {
-  const chrono = useMemo(() => new ChronoClient(), []);
-  const [currYear] = useState(() =>
-    startDate ? new Date(startDate).getFullYear() : new Date().getFullYear(),
-  );
-
   const [createTimestampModal, setCreateTimestampModal] = useState(false);
 
-  const allTimestampsQ = useQuery({
-    queryKey: ["timestamps", "all", startDate, endDate],
-    queryFn: () => chrono.timestamps.getAll(startDate, endDate),
-    staleTime: 1000 * 60 * 1,
-    gcTime: 1000 * 60 * 30,
-    retry: false,
-  });
-
-  const usersQ = useQuery({
-    queryKey: ["users"],
-    queryFn: () => chrono.users.getUsers({ includeInactiveUsers: false }),
-    staleTime: 1000 * 60 * 1,
-    gcTime: 1000 * 60 * 30,
-    retry: false,
-  });
-
-  const allWorktimesQ = useQuery({
-    queryKey: ["worktimes", "all", startDate, endDate],
-    queryFn: () => chrono.timestamps.getWorkHoursForAllUsers(currYear),
-    staleTime: 1000 * 60 * 1,
-    gcTime: 1000 * 60 * 30,
-    retry: false,
-  });
+  const allTimestampsQ = useQuery(timestampQueries.forAllUsers({ startDate, endDate }));
+  const usersQ = useQuery(userQueries.list());
+  const allWorktimesQ = useQuery(timestampQueries.workHoursForAllUsers(yearOfRange(startDate)));
 
   const queries = [allTimestampsQ, usersQ, allWorktimesQ];
   const anyPending = queries.some((q) => q.isPending);
   const firstError = queries.find((q) => q.isError)?.error;
 
   const usersMap = useMemo(() => {
-    const users = (usersQ.data ?? []) as User[];
+    const users = usersQ.data ?? [];
     return users.reduce(
       (map, u) => {
         map[u.id] = u;
@@ -215,7 +176,7 @@ export function TeamTimestamps({
   }, [usersQ.data]);
 
   const timestampsMap = useMemo(() => {
-    const timestamps = (allTimestampsQ.data ?? []) as Timestamp[];
+    const timestamps = allTimestampsQ.data ?? [];
     return timestamps.reduce(
       (map, ts) => {
         (map[ts.user_id] ??= []).push(ts);

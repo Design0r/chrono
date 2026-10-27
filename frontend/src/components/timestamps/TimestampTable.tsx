@@ -1,6 +1,6 @@
 import { useQueries } from "@tanstack/react-query";
 import { Fragment, useMemo, useState } from "react";
-import { ChronoClient } from "../../api/chrono/client";
+import { eventQueries } from "../../api/queries";
 import {
   dateKeyFromDate,
   durationFromTimestamps,
@@ -23,7 +23,6 @@ export function TimestampTable({
   user: User;
   footerTotalSeconds?: number;
 }) {
-  const chrono = useMemo(() => new ChronoClient(), []);
   const [modal, setModal] = useState<Timestamp | null>(null);
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
 
@@ -45,11 +44,7 @@ export function TimestampTable({
   const monthQueries = useQueries({
     queries: monthKeys.map((key) => {
       const [y, m] = key.split("-").map(Number);
-      return {
-        queryKey: ["events", "month", y, m],
-        queryFn: () => chrono.events.getEventsForMonth(y, m),
-        staleTime: 1000 * 60 * 5,
-      };
+      return eventQueries.month(y, m);
     }),
   });
 

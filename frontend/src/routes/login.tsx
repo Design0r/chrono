@@ -16,7 +16,6 @@ function LoginComponent() {
   const { register, handleSubmit } = useForm<LoginRequest>();
   const { addToast, addErrorToast } = useToast();
   const mutation = useMutation({
-    mutationKey: ["login"],
     mutationFn: async (data: LoginRequest) => await auth.login(data),
     onSuccess: async () => {
       addToast("Successfully logged in", "success");
@@ -24,7 +23,6 @@ function LoginComponent() {
       await router.navigate({ to: "/" });
     },
     onError: (error) => addErrorToast(error),
-    retry: false,
   });
 
   return (

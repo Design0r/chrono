@@ -1,20 +1,17 @@
-import { QueryClient } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ChronoClient } from "./api/chrono/client";
 import { AuthProvider, useAuth, type AuthContext } from "./auth";
 import { ErrorPage } from "./components/ErrorPage";
+import { LoadingSpinnerPage } from "./components/LoadingSpinner";
 import "./css/index.css";
 import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
 import { routeTree } from "./routeTree.gen";
 
-const chrono = new ChronoClient();
-
 export type RouterContext = {
   auth: ReturnType<typeof useAuth>;
   queryClient: QueryClient;
-  chrono: ChronoClient;
 };
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
@@ -25,7 +22,6 @@ const router = createRouter({
   scrollRestoration: true,
   context: {
     auth: undefined! as unknown as AuthContext,
-    chrono: chrono,
     ...TanStackQueryProviderContext,
   },
   defaultStructuralSharing: true,
@@ -33,12 +29,14 @@ const router = createRouter({
 
   defaultNotFoundComponent: () => <ErrorPage error={{ name: "404", message: "Not Found" }} />,
 
-  defaultErrorComponent: () => (
+  defaultPendingComponent: () => <LoadingSpinnerPage />,
+  defaultErrorComponent: ({ error }) => (
     <ErrorPage
-      error={{
-        name: "",
-        message: "I dont know what you did, but it wasn't good",
-      }}
+      error={
+        error instanceof Error
+          ? error
+          : { name: "", message: "I dont know what you did, but it wasn't good" }
+      }
     />
   ),
 });

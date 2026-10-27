@@ -22,6 +22,54 @@ type TooltipState = {
 
 type ShowTooltip = (day: VacationGraphMonth, rect: DOMRect) => void;
 
+const COUNT_COLORS = [
+  "oklch(0.273 0.028 265)",
+  "oklch(0.40 0.035 230)",
+  "oklch(0.50 0.07 185)",
+  "oklch(0.70 0.09 150)",
+  "oklch(0.85 0.15 122)",
+  "oklch(0.87 0.19 100)",
+  "oklch(0.90 0.29 55)",
+  "oklch(0.75 0.23 40)",
+  "oklch(0.60 0.22 0)",
+];
+const HOLIDAY_COLOR = "oklch(0.74 0.22 260)";
+const MAX_COUNT = COUNT_COLORS.length - 1;
+
+function dayColor(day: VacationGraphMonth) {
+  return day.is_holiday ? HOLIDAY_COLOR : COUNT_COLORS[clamp(day.count, 0, MAX_COUNT)];
+}
+
+function GraphLegend() {
+  return (
+    <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-2 px-5 mb-12 text-xs text-accent/60">
+      <div className="flex items-center gap-1.5">
+        <span>0</span>
+        {COUNT_COLORS.map((color, count) => (
+          <span
+            key={color}
+            title={`${count}${count === MAX_COUNT ? "+" : ""} on vacation`}
+            className="w-3.5 h-3.5 rounded-sm"
+            style={{ backgroundColor: color }}
+          />
+        ))}
+        <span>{MAX_COUNT}+ on vacation</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-3.5 h-3.5 rounded-sm" style={{ backgroundColor: HOLIDAY_COLOR }} />
+        <span>Holiday</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span
+          className="w-3.5 h-3.5 rounded-sm ring-2 ring-primary ring-offset-0.5 ring-offset-base-300"
+          style={{ backgroundColor: COUNT_COLORS[0] }}
+        />
+        <span>Today</span>
+      </div>
+    </div>
+  );
+}
+
 export function OverviewDay({
   day,
   onShow,
@@ -32,21 +80,7 @@ export function OverviewDay({
   onHide?: () => void;
 }) {
   const cellRef = useRef<HTMLDivElement>(null);
-
-  // Grün → Gelb → Rot (OKLCH, 8 Stufen)
-  const greens = [
-    "oklch(0.273 0.028 265)", // Grün
-    "oklch(0.40 0.035 230)",
-    "oklch(0.50 0.07 185)", // Gelbgrün
-    "oklch(0.70 0.09 150)", // Gelb
-    "oklch(0.85 0.15 122)", // Orange-Gelb
-    "oklch(0.87 0.19 100)", // Orange-Gelb
-    "oklch(0.90 0.29 55)", // Orange-Gelb
-    "oklch(0.75 0.23 40)", // Orange-Gelb
-    "oklch(0.60 0.22 0)", // Orange-Gelb
-  ];
-  const holidayColor = "oklch(0.74 0.22 260)";
-  const color = day.is_holiday ? holidayColor : greens[clamp(day.count, 0, greens.length - 1)];
+  const color = dayColor(day);
 
   // Der Tooltip wird nicht hier gerendert: Graph-Container und TitleSection
   // kappen beide den Overflow, ein absolut positionierter Tooltip würde also
@@ -142,7 +176,7 @@ export function VacationGraph({
 			    Monatszahlen markieren statt zu scrollen; select-none unterbindet
 			    das, touch-callout das iOS-Menü beim langen Drücken. Mit Maus
 			    bleibt der Text markierbar. */}
-      <div className="grid grid-cols-[2.5rem_repeat(11,minmax(0,1fr))] p-5 bg-base-300/50 rounded-2xl xl:overflow-x-hidden overflow-x-auto mb-12 pointer-coarse:select-none pointer-coarse:[-webkit-touch-callout:none]">
+      <div className="grid grid-cols-[2.5rem_repeat(11,minmax(0,1fr))] p-5 bg-base-300/50 rounded-2xl xl:overflow-x-hidden overflow-x-auto mb-3 pointer-coarse:select-none pointer-coarse:[-webkit-touch-callout:none]">
         <div className="col-span-1" />
         <div className="col-span-11 grid grid-rows-1 grid-flow-col h-7 gap-1 text-accent/80">
           {gaps.map((g, i) => (
@@ -192,6 +226,7 @@ export function VacationGraph({
           </div>
         </div>
       </div>
+      <GraphLegend />
 
       {tooltip && (
         <div

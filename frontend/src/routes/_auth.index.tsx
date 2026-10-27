@@ -1,72 +1,46 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { ErrorPage } from "../components/ErrorPage";
-import { LoadingSpinner, LoadingSpinnerPage } from "../components/LoadingSpinner";
+import {
+  aworkQueries,
+  currentUserId,
+  eventQueries,
+  timestampQueries,
+  userQueries,
+} from "../api/queries";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 import { StatCard, StatCardElement } from "../components/StatCard";
 import { Timestamps } from "../components/Timestamps";
 import { TitleSection } from "../components/TitleSection";
 import { VacationGraph } from "../components/VacationGraph";
-import type { UserWithVacation } from "../types/auth";
 import type { WorkTime } from "../types/response";
 import { dayOfYear, daysInYear } from "../utils/calendar";
 
 export const Route = createFileRoute("/_auth/")({
+  loader: async ({ context: { auth, queryClient } }) => {
+    const year = new Date().getFullYear();
+    const userId = currentUserId(auth.userId);
+    void queryClient.prefetchQuery(timestampQueries.today());
+    void queryClient.prefetchQuery(timestampQueries.latest());
+    await Promise.all([
+      queryClient.ensureQueryData(userQueries.detailWithVacation(userId, year)),
+      queryClient.ensureQueryData(eventQueries.vacationGraph(year)),
+      queryClient.ensureQueryData(timestampQueries.workHoursForCurrentUser(year)),
+    ]);
+    return { year, userId };
+  },
   component: Home,
 });
 
 function Home() {
-  const { chrono, auth } = Route.useRouteContext();
-  const [year] = useState(() => new Date().getFullYear());
+  const { year, userId } = Route.useLoaderData();
 
-  const userQ = useQuery({
-    queryKey: ["user", auth.userId, "vacation", year],
-    queryFn: () =>
-      chrono.users.getUserById(auth.userId!, {
-        year: year,
-      }),
-    staleTime: 1000 * 60 * 60 * 6, // 6h
-    gcTime: 1000 * 60 * 60 * 7, // 7h
-    retry: false,
-  });
-
-  const vacationQ = useQuery({
-    queryKey: ["vacationGraph"],
-    queryFn: () => chrono.events.getVacationGraph(year),
-    staleTime: 1000 * 60 * 1, // 1min
-    gcTime: 1000 * 60 * 30, // 30min
-    retry: false,
-  });
-
-  const aworkQ = useQuery({
-    queryKey: ["awork", year],
-    queryFn: () => chrono.awork.getWorkTimesforYear(year),
-    staleTime: 1000 * 60 * 60, // 1h
-    gcTime: 1000 * 60 * 60 * 2, // 2h
-    retry: false,
-  });
-
-  const worktimeQ = useQuery({
-    queryKey: ["timestamps", "worked", year],
-    queryFn: () => chrono.timestamps.getWorkHours(year),
-    staleTime: 1000 * 60 * 60, // 1h
-    gcTime: 1000 * 60 * 60 * 2, // 2h
-    retry: false,
-  });
+  const { data: user } = useSuspenseQuery(userQueries.detailWithVacation(userId, year));
+  const { data: vacation } = useSuspenseQuery(eventQueries.vacationGraph(year));
+  const { data: worktimes } = useSuspenseQuery(timestampQueries.workHoursForCurrentUser(year));
+  const aworkQ = useQuery(aworkQueries.workTimesForYear(year));
 
   // awork ist optional: ohne verknüpfte awork-ID antwortet der Server mit 422.
   const awork: WorkTime | undefined = aworkQ.isError ? undefined : aworkQ.data;
-
-  const queries = [userQ, vacationQ, worktimeQ];
-  const anyPending = queries.some((q) => q.isPending);
-  const firstError = queries.find((q) => q.isError)?.error;
-
-  if (anyPending) return <LoadingSpinnerPage />;
-  if (firstError) return <ErrorPage error={firstError} />;
-
-  const user = userQ.data! as UserWithVacation;
-  const vacation = vacationQ.data!;
-  const worktimes = worktimeQ.data! as WorkTime;
 
   const daysYear = daysInYear(year);
   const currDay = dayOfYear();

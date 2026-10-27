@@ -1,7 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ErrorPage } from "../components/ErrorPage";
-import { LoadingSpinnerPage } from "../components/LoadingSpinner";
+import { currentUserId, timestampQueries, userQueries } from "../api/queries";
 import { TeamTimestamps } from "../components/Timestamps";
 import { TimestampTableByWeek } from "../components/timestamps/TimestampTableByWeek";
 import {
@@ -9,9 +8,8 @@ import {
   formatCounter,
   isoToDateLocal,
   secondsToCounter,
+  yearOfRange,
 } from "../lib/timestamp-utils";
-import type { User } from "../types/auth";
-import type { Timestamp } from "../types/response";
 
 type TimestampsSearchParams = {
   startDate?: string;
@@ -26,10 +24,26 @@ export const Route = createFileRoute("/_auth/timestamps")({
       endDate: search.endDate as string,
     };
   },
+  loaderDeps: ({ search: { startDate, endDate } }) => ({ startDate, endDate }),
+  loader: async ({ context: { auth, queryClient }, deps }) => {
+    const userId = currentUserId(auth.userId);
+    const [user] = await Promise.all([
+      queryClient.ensureQueryData(userQueries.detail(userId)),
+      queryClient.ensureQueryData(timestampQueries.forCurrentUser(deps)),
+    ]);
+    if (user.is_superuser) {
+      void queryClient.prefetchQuery(timestampQueries.forAllUsers(deps));
+      void queryClient.prefetchQuery(userQueries.list());
+      void queryClient.prefetchQuery(
+        timestampQueries.workHoursForAllUsers(yearOfRange(deps.startDate)),
+      );
+    }
+    return { userId };
+  },
 });
 
 function RouteComponent() {
-  const { auth, chrono } = Route.useRouteContext();
+  const { userId } = Route.useLoaderData();
   const navigate = useNavigate();
 
   const params = Route.useSearch();
@@ -49,31 +63,10 @@ function RouteComponent() {
       },
     });
 
-  const timestampQ = useQuery({
-    queryKey: ["timestamps", startDate, endDate],
-    queryFn: () => chrono.timestamps.getAllForUser(startDate, endDate),
-    staleTime: 1000 * 60 * 1, // 1min
-    gcTime: 1000 * 60 * 30, // 30min
-    retry: false,
-  });
-
-  const userQ = useQuery({
-    queryKey: ["user", auth.userId],
-    queryFn: () => chrono.users.getUserById(auth.userId!),
-    staleTime: 1000 * 60 * 60 * 6, // 6h
-    gcTime: 1000 * 60 * 60 * 7, // 7h
-    retry: false,
-  });
-
-  const queries = [timestampQ, userQ];
-  const anyPending = queries.some((q) => q.isPending);
-  const firstError = queries.find((q) => q.isError)?.error;
-
-  if (anyPending) return <LoadingSpinnerPage />;
-  if (firstError) return <ErrorPage error={firstError} />;
-
-  const timestamps = timestampQ.data! as Timestamp[];
-  const user = userQ.data! as User;
+  const { data: timestamps } = useSuspenseQuery(
+    timestampQueries.forCurrentUser({ startDate, endDate }),
+  );
+  const { data: user } = useSuspenseQuery(userQueries.detail(userId));
 
   const counter = secondsToCounter(durationFromTimestamps(timestamps));
 
@@ -119,7 +112,7 @@ function RouteComponent() {
       </div>
 
       <TimestampTableByWeek timestamps={timestamps} user={user} />
-      <TeamTimestamps startDate={startDate} endDate={endDate} user={user} />
+      {user.is_superuser && <TeamTimestamps startDate={startDate} endDate={endDate} user={user} />}
     </div>
   );
 }

@@ -1,10 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ChronoClient } from "../../api/chrono/client";
+import { chrono } from "../../api/chrono/client";
+import { timestampQueries, userQueries } from "../../api/queries";
 import { datetimeLocalToIso, isoToDatetimeLocal } from "../../lib/timestamp-utils";
-import type { User } from "../../types/auth";
-import { ErrorPage } from "../ErrorPage";
-import { LoadingSpinnerPage } from "../LoadingSpinner";
 import { useToast } from "../Toast";
 
 export function CreateTimestampModal({ onClose }: { onClose: () => void }) {
@@ -15,19 +13,11 @@ export function CreateTimestampModal({ onClose }: { onClose: () => void }) {
 
   const [selectedUserId, setSelectedUserId] = useState<number>(0);
 
-  const chrono = new ChronoClient();
   const { addToast, addErrorToast } = useToast();
 
-  const usersQ = useQuery({
-    queryKey: ["users"],
-    queryFn: () => chrono.users.getUsers({ includeInactiveUsers: false }),
-    staleTime: 1000 * 60 * 30, // 30min
-    gcTime: 1000 * 60 * 60 * 1, // 1h
-    retry: false,
-  });
+  const { data: users } = useSuspenseQuery(userQueries.list());
 
   const mutation = useMutation({
-    mutationKey: ["timestamps", startDate, endDate, selectedUserId],
     mutationFn: ({ userId, start, end }: { userId: number; start: string; end: string }) => {
       return chrono.timestamps.create({
         id: userId,
@@ -39,20 +29,10 @@ export function CreateTimestampModal({ onClose }: { onClose: () => void }) {
     onError: (e) => addErrorToast(e),
     onSuccess: async () => {
       addToast("Created Timestamp", "success");
-      await queryClient.invalidateQueries({ queryKey: ["timestamps"] });
+      await queryClient.invalidateQueries({ queryKey: timestampQueries.all() });
       onClose();
     },
-    retry: false,
   });
-
-  const queries = [usersQ];
-  const anyPending = queries.some((q) => q.isPending);
-  const firstError = queries.find((q) => q.isError)?.error;
-
-  if (anyPending) return <LoadingSpinnerPage />;
-  if (firstError) return <ErrorPage error={firstError} />;
-
-  const users = usersQ.data! as User[];
 
   return (
     <div className="fixed inset-0 z-50 flex text-white items-center justify-center p-4">

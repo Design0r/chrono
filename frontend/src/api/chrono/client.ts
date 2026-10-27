@@ -21,3 +21,5 @@ export class ChronoClient {
   notifications = new ApiNotifications();
   timestamps = new ApiTimestamps();
 }
+
+export const chrono = new ChronoClient();

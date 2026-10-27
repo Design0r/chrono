@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
-import { ChronoClient } from "./api/chrono/client";
+import { chrono } from "./api/chrono/client";
 import { registerLogout } from "./lib/logout";
 import type { LoginRequest, SignupRequest, User } from "./types/auth";
 
@@ -10,13 +10,9 @@ export interface AuthContext {
   signup: (data: SignupRequest) => Promise<void>;
   logout: () => Promise<void>;
   userId: number | null;
-  getUser: () => Promise<User | null>;
 }
 
 const authContext = createContext<AuthContext | null>(null);
-
-// Zustandslos, daher eine Instanz für die ganze App statt einer pro Render.
-const chrono = new ChronoClient();
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const uid = localStorage.getItem("user");
@@ -25,18 +21,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
   const [isAuthenticated, setIsAuthenticated] = useState(!!uid);
-
-  const getUser = useCallback(async () => {
-    if (!isAuthenticated || !userId) return null;
-    const u = await queryClient.query({
-      queryKey: ["user", userId],
-      queryFn: () => chrono.users.getUserById(userId),
-      staleTime: 1000 * 60 * 60 * 6, // 6h
-      gcTime: 1000 * 60 * 60 * 7, // 7h
-      retry: false,
-    });
-    return u;
-  }, [isAuthenticated, userId, queryClient]);
 
   const logout = useCallback(async () => {
     try {
@@ -75,7 +59,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userId,
         login,
         logout,
-        getUser,
         signup,
       }}
     >

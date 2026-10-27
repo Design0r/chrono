@@ -11,13 +11,14 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	_ "github.com/mattn/go-sqlite3"
 
 	"chrono/config"
 	"chrono/db"
 	"chrono/internal"
 	"chrono/internal/logging"
+	"chrono/internal/telemetry"
 )
 
 func main() {
@@ -36,6 +37,7 @@ func main() {
 	if err := sentry.Init(sentry.ClientOptions{
 		Dsn:              cfg.SentryUrl,
 		Debug:            cfg.Debug,
+		Environment:      environment(cfg.Debug),
 		AttachStacktrace: true,
 		EnableTracing:    true,
 		TracesSampleRate: 0.1,
@@ -53,27 +55,33 @@ func main() {
 	}); err != nil {
 		log.Error("Sentry initialization failed", "error", err)
 	}
+	defer sentry.Flush(5 * time.Second)
+
+	telemetry.Init()
+	log = telemetry.WithSentryLogs(log)
+	slog.SetDefault(log)
 
 	dbConn := db.NewDB(cfg.DbName)
 	defer db.CloseDB(dbConn)
 
-	e := echo.New()
-	e.HideBanner = true
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
+	e := echo.NewWithConfig(echo.Config{Logger: log})
 	server := internal.NewServer(e, dbConn, cfg, log)
-	go server.Start(fmt.Sprintf(":%v", cfg.Port))
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-	<-quit
-	log.Info("Received shutdown signal, shutting down…")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	if err := e.Shutdown(ctx); err != nil {
-		log.Error("Server forced to shutdown:", "error", err)
+	if err := server.Start(ctx, fmt.Sprintf(":%v", cfg.Port)); err != nil {
+		log.Error("Server stopped with an error", "error", err)
+		sentry.Flush(5 * time.Second)
 		os.Exit(1)
 	}
+	log.Info("Server shut down")
+}
+
+func environment(debug bool) string {
+	if debug {
+		return "development"
+	}
+	return "production"
 }
 
 const banner string = `

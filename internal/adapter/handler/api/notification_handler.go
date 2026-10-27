@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"chrono/internal/domain"
 	"chrono/internal/service"
@@ -29,7 +29,7 @@ func (h *APINotificationHandler) RegisterRoutes(group *echo.Group) {
 	group.PATCH("/notifications", h.ClearAllNotifications)
 }
 
-func (h *APINotificationHandler) Notifications(c echo.Context) error {
+func (h *APINotificationHandler) Notifications(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 
 	notifications, err := h.notif.GetByUserId(c.Request().Context(), currUser.ID)
@@ -44,7 +44,7 @@ func (h *APINotificationHandler) Notifications(c echo.Context) error {
 	return NewJsonResponse(c, notifications)
 }
 
-func (h *APINotificationHandler) ClearNotification(c echo.Context) error {
+func (h *APINotificationHandler) ClearNotification(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	param := c.Param("id")
@@ -61,7 +61,7 @@ func (h *APINotificationHandler) ClearNotification(c echo.Context) error {
 	return NewJsonResponse(c, nil)
 }
 
-func (h *APINotificationHandler) ClearAllNotifications(c echo.Context) error {
+func (h *APINotificationHandler) ClearAllNotifications(c *echo.Context) error {
 	ctx := c.Request().Context()
 	currUser := c.Get("user").(domain.User)
 

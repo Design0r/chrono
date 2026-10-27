@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"chrono/internal/domain"
 	"chrono/internal/service"
@@ -35,7 +35,7 @@ func (h *APIUserHandler) RegisterRoutes(group *echo.Group) {
 	group.GET("/users", h.GetUsers)
 }
 
-func (h *APIUserHandler) GetUserById(c echo.Context) error {
+func (h *APIUserHandler) GetUserById(c *echo.Context) error {
 	ctx := c.Request().Context()
 	currUser := c.Get("user").(domain.User)
 
@@ -84,7 +84,7 @@ func (h *APIUserHandler) GetUserById(c echo.Context) error {
 	return NewJsonResponse(c, user)
 }
 
-func (h *APIUserHandler) GetUsers(c echo.Context) error {
+func (h *APIUserHandler) GetUsers(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	yearParam := c.QueryParam("year")
@@ -121,7 +121,7 @@ func (h *APIUserHandler) GetUsers(c echo.Context) error {
 	return NewJsonResponse(c, users)
 }
 
-func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
+func (h *APIUserHandler) ProfileEdit(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
@@ -291,7 +291,7 @@ func (h *APIUserHandler) ProfileEdit(c echo.Context) error {
 // user got disabled. Someone changing their own password stays logged in on
 // the current device only.
 func (h *APIUserHandler) revokeSessions(
-	c echo.Context,
+	c *echo.Context,
 	currUser *domain.User,
 	before *domain.User,
 	after *domain.User,

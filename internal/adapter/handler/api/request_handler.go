@@ -4,10 +4,12 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/getsentry/sentry-go/attribute"
+	"github.com/labstack/echo/v5"
 
 	"chrono/internal/domain"
 	"chrono/internal/service"
+	"chrono/internal/telemetry"
 )
 
 type APIRequestsHandler struct {
@@ -31,7 +33,7 @@ func (h *APIRequestsHandler) RegisterRoutes(group *echo.Group) {
 	group.PATCH("/requests", h.PatchRequests)
 }
 
-func (h *APIRequestsHandler) Requests(c echo.Context) error {
+func (h *APIRequestsHandler) Requests(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	requests, err := h.request.GetPending(ctx)
@@ -46,7 +48,7 @@ func (h *APIRequestsHandler) Requests(c echo.Context) error {
 	return NewJsonResponse(c, requests)
 }
 
-func (h *APIRequestsHandler) PatchRequests(c echo.Context) error {
+func (h *APIRequestsHandler) PatchRequests(c *echo.Context) error {
 	ctx := c.Request().Context()
 	currUser := c.Get("user").(domain.User)
 
@@ -77,6 +79,13 @@ func (h *APIRequestsHandler) PatchRequests(c echo.Context) error {
 	if err != nil {
 		return NewErrorResponse(c, http.StatusBadRequest, "Failed getting event name")
 	}
+
+	telemetry.Count(
+		ctx,
+		"requests.reviewed",
+		attribute.String("request.state", string(form.State)),
+		attribute.String("event.name", eventName),
+	)
 
 	if form.State == "accepted" {
 		evt := domain.Event{Name: eventName}

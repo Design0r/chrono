@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"chrono/internal/domain"
 	"chrono/internal/service"
@@ -33,10 +33,10 @@ func (h *APITokenHandler) RegisterRoutes(group *echo.Group) {
 	group.POST("/tokens", h.CreateTokens)
 }
 
-func (h *APITokenHandler) CreateTokens(c echo.Context) error {
+func (h *APITokenHandler) CreateTokens(c *echo.Context) error {
 	ctx := c.Request().Context()
 	currUser := c.Get("user").(domain.User)
-	params, err := c.FormParams()
+	params, err := c.FormValues()
 	if err != nil {
 		return NewErrorResponse(c, http.StatusBadRequest, err.Error())
 	}

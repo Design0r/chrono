@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"chrono/internal/domain"
 	"chrono/internal/service"
@@ -24,7 +24,7 @@ func (s *APISettingsHandler) RegisterRoutes(group *echo.Group) {
 	g.PATCH("", s.PatchSettings)
 }
 
-func (h *APISettingsHandler) Settings(c echo.Context) error {
+func (h *APISettingsHandler) Settings(c *echo.Context) error {
 	s, err := h.settings.GetFirst(c.Request().Context())
 	if err != nil {
 		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -33,7 +33,7 @@ func (h *APISettingsHandler) Settings(c echo.Context) error {
 	return NewJsonResponse(c, s)
 }
 
-func (h *APISettingsHandler) PatchSettings(c echo.Context) error {
+func (h *APISettingsHandler) PatchSettings(c *echo.Context) error {
 	signupEnabled, err := strconv.ParseBool(c.FormValue("signup_enabled"))
 	if err != nil {
 		return NewErrorResponse(c, http.StatusUnprocessableEntity, "invalid parameters")

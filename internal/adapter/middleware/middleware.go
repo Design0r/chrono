@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"chrono/internal/adapter/handler/api"
 	"chrono/internal/domain"
@@ -15,7 +15,7 @@ type MiddlewareFunc = func(echo.HandlerFunc) echo.HandlerFunc
 
 func SessionMiddleware(a *service.AuthService) MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			cookie, err := c.Cookie("session")
 			if err != nil {
 				return api.NewErrorResponse(
@@ -39,7 +39,7 @@ func SessionMiddleware(a *service.AuthService) MiddlewareFunc {
 
 func AuthenticationMiddleware(svc *service.AuthService) MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			cookie, err := c.Cookie("session")
 			if err != nil {
 				return api.NewErrorResponse(
@@ -68,7 +68,7 @@ func AuthenticationMiddleware(svc *service.AuthService) MiddlewareFunc {
 
 func AdminMiddleware() MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			user := c.Get("user").(domain.User)
 			if !user.IsSuperuser {
 				return api.NewErrorResponse(

@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/getsentry/sentry-go/attribute"
 	sentryecho "github.com/getsentry/sentry-go/echo"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"golang.org/x/time/rate"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 
 	"chrono/config"
 	"chrono/db/repo"
@@ -21,6 +21,7 @@ import (
 	"chrono/internal/domain"
 	"chrono/internal/service"
 	"chrono/internal/service/auth"
+	"chrono/internal/telemetry"
 )
 
 type repos struct {
@@ -81,12 +82,13 @@ func (s *Server) InitMiddleware() {
 				LogURI:       true,
 				LogMethod:    true,
 				LogLatency:   true,
-				LogError:     true,
 				LogStatus:    true,
 				LogRequestID: true,
-				LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+				LogValuesFunc: func(c *echo.Context, v middleware.RequestLoggerValues) error {
+					ctx := c.Request().Context()
+					recordRequestMetrics(ctx, c, v)
 					if v.Error == nil {
-						slog.LogAttrs(context.Background(), slog.LevelInfo, "REQUEST",
+						slog.LogAttrs(ctx, slog.LevelInfo, "REQUEST",
 							slog.String("method", v.Method),
 							slog.String("uri", v.URI),
 							slog.Int("status", v.Status),
@@ -94,7 +96,7 @@ func (s *Server) InitMiddleware() {
 							slog.String("request_id", v.RequestID),
 						)
 					} else {
-						slog.LogAttrs(context.Background(), slog.LevelError, "REQUEST_ERROR",
+						slog.LogAttrs(ctx, slog.LevelError, "REQUEST_ERROR",
 							slog.String("method", v.Method),
 							slog.String("uri", v.URI),
 							slog.Int("status", v.Status),
@@ -109,7 +111,7 @@ func (s *Server) InitMiddleware() {
 		),
 	)
 	s.Router.Use(middleware.Secure())
-	s.Router.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(20))))
+	s.Router.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 	s.Router.Use(middleware.Recover())
 
 	s.Router.Use(middleware.GzipWithConfig(middleware.GzipConfig{
@@ -286,19 +288,24 @@ func (s *Server) InitAPIRoutes() {
 
 	apiGrp.GET(
 		"/health",
-		func(c echo.Context) error { return c.NoContent(http.StatusOK) },
+		func(c *echo.Context) error { return c.NoContent(http.StatusOK) },
 	)
 
 	s.log.Info("Initialized api routes.")
 }
 
-func (s *Server) Start(address string) error {
+func (s *Server) Start(ctx context.Context, address string) error {
 	err := s.PreStart()
 	if err != nil {
 		s.log.Error("Failed to run PreStart.", "error", err.Error())
 		return err
 	}
-	return s.Router.Start(address)
+	startConfig := echo.StartConfig{
+		Address:         address,
+		HideBanner:      true,
+		GracefulTimeout: 10 * time.Second,
+	}
+	return startConfig.Start(ctx, s.Router)
 }
 
 func (s *Server) PreStart() error {
@@ -320,4 +327,18 @@ func (s *Server) PreStart() error {
 	bot.Register(context.Background(), s.services.user, s.services.pwHasher)
 
 	return nil
+}
+
+func recordRequestMetrics(ctx context.Context, c *echo.Context, v middleware.RequestLoggerValues) {
+	route := c.Path()
+	if route == "" {
+		route = "unmatched"
+	}
+	attrs := []attribute.Builder{
+		attribute.String("http.request.method", v.Method),
+		attribute.String("http.route", route),
+		attribute.Int("http.response.status_code", v.Status),
+	}
+	telemetry.Count(ctx, "http.server.requests", attrs...)
+	telemetry.Duration(ctx, "http.server.request.duration", v.Latency, attrs...)
 }

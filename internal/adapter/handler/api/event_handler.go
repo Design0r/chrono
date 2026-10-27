@@ -6,10 +6,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/getsentry/sentry-go/attribute"
+	"github.com/labstack/echo/v5"
 
 	"chrono/internal/domain"
 	"chrono/internal/service"
+	"chrono/internal/telemetry"
 )
 
 type APIEventHandler struct {
@@ -35,7 +37,7 @@ func (h *APIEventHandler) RegisterRoutes(group *echo.Group) {
 	group.DELETE("/events/:id", h.DeleteEvent)
 }
 
-func (h *APIEventHandler) GetEventsForMonth(c echo.Context) error {
+func (h *APIEventHandler) GetEventsForMonth(c *echo.Context) error {
 	ctx := c.Request().Context()
 	currUser := c.Get("user").(domain.User)
 
@@ -65,7 +67,7 @@ func (h *APIEventHandler) GetEventsForMonth(c echo.Context) error {
 	return NewJsonResponse(c, month)
 }
 
-func (h *APIEventHandler) GetVacationGraph(c echo.Context) error {
+func (h *APIEventHandler) GetVacationGraph(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	yearParam := c.Param("year")
@@ -95,7 +97,7 @@ func (h *APIEventHandler) GetVacationGraph(c echo.Context) error {
 	return NewJsonResponse(c, response)
 }
 
-func (h *APIEventHandler) CreateEvent(c echo.Context) error {
+func (h *APIEventHandler) CreateEvent(c *echo.Context) error {
 	ctx := c.Request().Context()
 	currUser := c.Get("user").(domain.User)
 
@@ -114,12 +116,14 @@ func (h *APIEventHandler) CreateEvent(c echo.Context) error {
 		return NewErrorResponse(c, http.StatusInternalServerError, "Failed to create event.")
 	}
 
+	telemetry.Count(ctx, "events.created", attribute.String("event.name", event.Name))
+
 	eventUser := domain.EventUser{User: currUser, Event: *event}
 
 	return NewJsonResponse(c, eventUser)
 }
 
-func (h *APIEventHandler) DeleteEvent(c echo.Context) error {
+func (h *APIEventHandler) DeleteEvent(c *echo.Context) error {
 	ctx := c.Request().Context()
 	currUser := c.Get("user").(domain.User)
 
@@ -133,6 +137,8 @@ func (h *APIEventHandler) DeleteEvent(c echo.Context) error {
 	if err != nil {
 		return NewErrorResponse(c, http.StatusInternalServerError, "Failed to delete event.")
 	}
+
+	telemetry.Count(ctx, "events.deleted")
 
 	return NewJsonResponse(c, nil)
 }

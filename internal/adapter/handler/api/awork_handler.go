@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"chrono/internal/domain"
 	"chrono/internal/service"
@@ -33,7 +33,7 @@ func (h *APIAworkHandler) RegisterRoutes(auth *echo.Group, admin *echo.Group) {
 	admin.GET("/awork/users", h.GetAworkUsers)
 }
 
-func (h *APIAworkHandler) GetWorkHoursForYear(c echo.Context) error {
+func (h *APIAworkHandler) GetWorkHoursForYear(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
@@ -55,7 +55,7 @@ func (h *APIAworkHandler) GetWorkHoursForYear(c echo.Context) error {
 	return NewJsonResponse(c, work)
 }
 
-func (h *APIAworkHandler) GetAworkUsers(c echo.Context) error {
+func (h *APIAworkHandler) GetAworkUsers(c *echo.Context) error {
 	users, err := h.awork.GetUsers(c.Request().Context())
 	if err != nil {
 		return NewErrorResponse(c, http.StatusInternalServerError, err.Error())

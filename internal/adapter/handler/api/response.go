@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type ApiResponse struct {
@@ -11,7 +11,7 @@ type ApiResponse struct {
 	Data    any    `json:"data"`
 }
 
-func NewErrorResponse(c echo.Context, statusCode int, message string) error {
+func NewErrorResponse(c *echo.Context, statusCode int, message string) error {
 	r := ApiResponse{
 		Message: message,
 		Data:    nil,
@@ -20,7 +20,7 @@ func NewErrorResponse(c echo.Context, statusCode int, message string) error {
 	return c.JSON(statusCode, &r)
 }
 
-func NewJsonResponse(c echo.Context, data any) error {
+func NewJsonResponse(c *echo.Context, data any) error {
 	r := ApiResponse{
 		Message: "success",
 		Data:    data,

@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	_ "github.com/mattn/go-sqlite3"
 
 	chronodb "chrono/db"

@@ -5,10 +5,12 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/getsentry/sentry-go/attribute"
+	"github.com/labstack/echo/v5"
 
 	"chrono/internal/domain"
 	"chrono/internal/service"
+	"chrono/internal/telemetry"
 )
 
 type APIAuthHandler struct {
@@ -33,7 +35,7 @@ func (h *APIAuthHandler) RegisterRoutes(group *echo.Group) {
 	group.POST("/logout", h.Logout)
 }
 
-func (h *APIAuthHandler) Login(c echo.Context) error {
+func (h *APIAuthHandler) Login(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	var loginData domain.APILogin
@@ -43,11 +45,14 @@ func (h *APIAuthHandler) Login(c echo.Context) error {
 
 	cookie, err := h.auth.Login(ctx, loginData.Email, loginData.Password)
 	if errors.Is(err, service.ErrUserDisabled) {
+		telemetry.Count(ctx, "auth.login", attribute.String("outcome", "disabled"))
 		return NewErrorResponse(c, http.StatusForbidden, "This account is disabled")
 	}
 	if err != nil {
+		telemetry.Count(ctx, "auth.login", attribute.String("outcome", "invalid_credentials"))
 		return NewErrorResponse(c, http.StatusNotFound, "Incorrect email or password")
 	}
+	telemetry.Count(ctx, "auth.login", attribute.String("outcome", "success"))
 
 	user, err := h.user.GetByEmail(ctx, loginData.Email)
 	if err != nil {
@@ -59,7 +64,7 @@ func (h *APIAuthHandler) Login(c echo.Context) error {
 	return NewJsonResponse(c, user)
 }
 
-func (h *APIAuthHandler) Signup(c echo.Context) error {
+func (h *APIAuthHandler) Signup(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	settings, err := h.settings.GetFirst(ctx)
@@ -96,7 +101,7 @@ func (h *APIAuthHandler) Signup(c echo.Context) error {
 	return NewJsonResponse(c, user)
 }
 
-func (h *APIAuthHandler) Logout(c echo.Context) error {
+func (h *APIAuthHandler) Logout(c *echo.Context) error {
 	session, err := c.Cookie("session")
 	if err != nil {
 		return NewErrorResponse(

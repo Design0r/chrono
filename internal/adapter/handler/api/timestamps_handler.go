@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"chrono/internal/domain"
 	"chrono/internal/service"
@@ -37,7 +37,7 @@ func (s *APITimestampsHandler) RegisterRoutes(auth *echo.Group, admin *echo.Grou
 	admin.GET("/timestamps/all/summary", s.GetWorkedSecondsPerUser)
 }
 
-func (h *APITimestampsHandler) Start(c echo.Context) error {
+func (h *APITimestampsHandler) Start(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
@@ -49,7 +49,7 @@ func (h *APITimestampsHandler) Start(c echo.Context) error {
 	return NewJsonResponse(c, t)
 }
 
-func (h *APITimestampsHandler) Stop(c echo.Context) error {
+func (h *APITimestampsHandler) Stop(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 	idParam := c.Param("id")
@@ -72,7 +72,7 @@ func (h *APITimestampsHandler) Stop(c echo.Context) error {
 	return NewJsonResponse(c, t)
 }
 
-func (h *APITimestampsHandler) GetTimestampsForToday(c echo.Context) error {
+func (h *APITimestampsHandler) GetTimestampsForToday(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
@@ -84,7 +84,7 @@ func (h *APITimestampsHandler) GetTimestampsForToday(c echo.Context) error {
 	return NewJsonResponse(c, t)
 }
 
-func (h *APITimestampsHandler) GetLatestTimestamp(c echo.Context) error {
+func (h *APITimestampsHandler) GetLatestTimestamp(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
@@ -96,7 +96,7 @@ func (h *APITimestampsHandler) GetLatestTimestamp(c echo.Context) error {
 	return NewJsonResponse(c, t)
 }
 
-func (h *APITimestampsHandler) Create(c echo.Context) error {
+func (h *APITimestampsHandler) Create(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
@@ -121,7 +121,7 @@ func (h *APITimestampsHandler) Create(c echo.Context) error {
 	return NewJsonResponse(c, t)
 }
 
-func (h *APITimestampsHandler) Update(c echo.Context) error {
+func (h *APITimestampsHandler) Update(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
@@ -142,7 +142,7 @@ func (h *APITimestampsHandler) Update(c echo.Context) error {
 	return NewJsonResponse(c, t)
 }
 
-func (h *APITimestampsHandler) GetTimestamps(c echo.Context) error {
+func (h *APITimestampsHandler) GetTimestamps(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
@@ -159,7 +159,7 @@ func (h *APITimestampsHandler) GetTimestamps(c echo.Context) error {
 	return NewJsonResponse(c, t)
 }
 
-func (h *APITimestampsHandler) GetWorkHoursForYear(c echo.Context) error {
+func (h *APITimestampsHandler) GetWorkHoursForYear(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 	ctx := c.Request().Context()
 
@@ -177,7 +177,7 @@ func (h *APITimestampsHandler) GetWorkHoursForYear(c echo.Context) error {
 	return NewJsonResponse(c, work)
 }
 
-func (h *APITimestampsHandler) GetWorkHoursForYearForAllUsers(c echo.Context) error {
+func (h *APITimestampsHandler) GetWorkHoursForYearForAllUsers(c *echo.Context) error {
 	currUser := c.Get("user").(domain.User)
 
 	if !currUser.IsAdmin() {
@@ -208,7 +208,7 @@ func (h *APITimestampsHandler) GetWorkHoursForYearForAllUsers(c echo.Context) er
 	return NewJsonResponse(c, work)
 }
 
-func (h *APITimestampsHandler) GetAllTimestamps(c echo.Context) error {
+func (h *APITimestampsHandler) GetAllTimestamps(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	startDate, endDate, err := parseDateRange(c)
@@ -238,7 +238,7 @@ func (h *APITimestampsHandler) GetAllTimestamps(c echo.Context) error {
 	return NewJsonResponse(c, t)
 }
 
-func (h *APITimestampsHandler) GetWorkedSecondsPerUser(c echo.Context) error {
+func (h *APITimestampsHandler) GetWorkedSecondsPerUser(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	startDate, endDate, err := parseDateRange(c)
@@ -254,7 +254,7 @@ func (h *APITimestampsHandler) GetWorkedSecondsPerUser(c echo.Context) error {
 	return NewJsonResponse(c, worked)
 }
 
-func parseDateRange(c echo.Context) (time.Time, time.Time, error) {
+func parseDateRange(c *echo.Context) (time.Time, time.Time, error) {
 	startDate := time.UnixMilli(0)
 	endDate := time.Now()
 

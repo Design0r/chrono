@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"chrono/internal/service"
 )
@@ -23,7 +23,7 @@ func (s *APIExportHandler) RegisterRoutes(group *echo.Group) {
 	g.GET("/:year", s.ExportYear)
 }
 
-func (h *APIExportHandler) ExportYear(c echo.Context) error {
+func (h *APIExportHandler) ExportYear(c *echo.Context) error {
 	yearParam := c.Param("year")
 	year, err := strconv.Atoi(yearParam)
 	if err != nil {
